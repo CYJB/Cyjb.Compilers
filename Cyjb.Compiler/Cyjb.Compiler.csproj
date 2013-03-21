@@ -38,19 +38,24 @@
     <AssemblyOriginatorKeyFile>CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Cyjb, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40880b37bef542a8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Cyjb\bin\Cyjb.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompilerExceptionHelper.cs" />
+    <Compile Include="ExceptionResources.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegularExpressions\RegexCharClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CYJB_Code_Key.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ExceptionResource.resx" />
+    <EmbeddedResource Include="ExceptionResource.zh-CN.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
