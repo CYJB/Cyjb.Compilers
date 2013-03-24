@@ -47,8 +47,19 @@
   <ItemGroup>
     <Compile Include="CompilerExceptionHelper.cs" />
     <Compile Include="ExceptionResources.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="RegularExpressions\AlternationExp.cs" />
+    <Compile Include="RegularExpressions\AnchorExp.cs" />
+    <Compile Include="RegularExpressions\CharClassExp.cs" />
+    <Compile Include="RegularExpressions\ConcatenationExp.cs" />
+    <Compile Include="RegularExpressions\EndOfFileExp.cs" />
+    <Compile Include="RegularExpressions\LiteralExp.cs" />
+    <Compile Include="RegularExpressions\Regex.cs" />
     <Compile Include="RegularExpressions\RegexCharClass.cs" />
+    <Compile Include="RegularExpressions\RegexOptions.cs" />
+    <Compile Include="RegularExpressions\RegexParser.cs" />
+    <Compile Include="RegularExpressions\RepeatExp.cs" />
+    <Compile Include="RegularExpressions\SymbolExp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CYJB_Code_Key.snk" />
@@ -56,6 +67,10 @@
   <ItemGroup>
     <EmbeddedResource Include="ExceptionResource.resx" />
     <EmbeddedResource Include="ExceptionResource.zh-CN.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Lexer\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

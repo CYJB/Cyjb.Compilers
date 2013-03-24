@@ -476,8 +476,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns><see cref="RegexCharClass"/> 对象。</returns>
 		public static RegexCharClass ParsePattern(string pattern)
 		{
-			return null;
-			// return RegexParser.ParseCharClass(pattern, RegexOptions.None);
+			return RegexParser.ParseCharClass(pattern, RegexOptions.None, false);
 		}
 		/// <summary>
 		/// 从正则表达式的字符类模式获取 <see cref="RegexCharClass"/> 对象。
@@ -485,10 +484,10 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="pattern">字符类模式。</param>
 		/// <param name="option">正则表达式的选项。</param>
 		/// <returns><see cref="RegexCharClass"/> 对象。</returns>
-		//public static RegexCharClass ParsePattern(string pattern, RegexOptions option)
-		//{
-		//	// return RegexParser.ParseCharClass(pattern, option);
-		//}
+		public static RegexCharClass ParsePattern(string pattern, RegexOptions option)
+		{
+			return RegexParser.ParseCharClass(pattern, option, false);
+		}
 
 		#region 字符类描述
 
@@ -692,8 +691,18 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="categoryName">通用 Unicode 类别的名称。</param>
 		/// <param name="invert">是否对通用 Unicode 类别取否定。</param>
 		/// <param name="caseInsensitive">是否不区分字母大小写。</param>
+		public void AddCategoryFromName(string categoryName, bool invert, bool caseInsensitive)
+		{
+			RccAddCategoryFromName.Value(charClass, categoryName, invert, caseInsensitive, categoryName);
+		}
+		/// <summary>
+		/// 根据名称添加通用 Unicode 类别。
+		/// </summary>
+		/// <param name="categoryName">通用 Unicode 类别的名称。</param>
+		/// <param name="invert">是否对通用 Unicode 类别取否定。</param>
+		/// <param name="caseInsensitive">是否不区分字母大小写。</param>
 		/// <param name="pattern">字符类的模式串。</param>
-		public void AddCategoryFromName(string categoryName, bool invert, bool caseInsensitive, string pattern)
+		internal void AddCategoryFromName(string categoryName, bool invert, bool caseInsensitive, string pattern)
 		{
 			RccAddCategoryFromName.Value(charClass, categoryName, invert, caseInsensitive, pattern);
 		}
@@ -708,35 +717,44 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 添加指定字符类。
 		/// </summary>
-		/// <param name="charClass">要添加的字符类。</param>
-		public void AddCharClass(RegexCharClass charClass)
+		/// <param name="cc">要添加的字符类。</param>
+		public void AddCharClass(RegexCharClass cc)
 		{
 			// 这个方法的原版实现会直接将 cc 中的字符范围添加到当前类中，
 			// 而不是复制副本，有时会导致出错。
-			if (!(charClass.CanMerge && this.CanMerge))
+			if (!(cc.CanMerge && this.CanMerge))
 			{
 				CompilerExceptionHelper.RegexCharClassCannotMerge("charClass");
 			}
-			int ccRangeCount = RccRangeCount.Value(charClass.charClass);
-			if (!RccGetCanonical.Value(charClass.charClass))
+			int ccRangeCount = RccRangeCount.Value(cc.charClass);
+			if (!RccGetCanonical.Value(cc.charClass))
 			{
 				// 如果要合并的字符类并不规范，则自己也不规范。
-				RccSetCanonical.Value(charClass, false);
+				RccSetCanonical.Value(cc, false);
 			}
-			else if (RccGetCanonical.Value(charClass) && RccRangeCount.Value(charClass) > 0 && ccRangeCount > 0 &&
-				RccSRGetFirst.Value(RccGetRangeAt.Value(charClass.charClass, 0)) <=
-					RccSRGetLast.Value(RccGetRangeAt.Value(this, RccRangeCount.Value(charClass) - 1)))
+			else if (RccGetCanonical.Value(cc) && RccRangeCount.Value(cc) > 0 && ccRangeCount > 0 &&
+				RccSRGetFirst.Value(RccGetRangeAt.Value(cc.charClass, 0)) <=
+					RccSRGetLast.Value(RccGetRangeAt.Value(this, RccRangeCount.Value(cc) - 1)))
 			{
-				RccSetCanonical.Value(charClass, false);
+				RccSetCanonical.Value(cc, false);
 			}
-			object list = RccGetRangelist.Value(charClass);
+			object list = RccGetRangelist.Value(cc);
 			for (int i = 0; i < ccRangeCount; i += 1)
 			{
-				object range = RccGetRangeAt.Value(charClass.charClass, i);
+				object range = RccGetRangeAt.Value(cc.charClass, i);
 				// 这里创建一个新的字符范围。
 				RccSRListAdd.Value(list, RccSRConstructor.Value(RccSRGetFirst.Value(range), RccSRGetLast.Value(range)));
 			}
-			RccGetCategories.Value(charClass).Append(RccGetCategories.Value(charClass.charClass).ToString());
+			RccGetCategories.Value(cc).Append(RccGetCategories.Value(cc.charClass).ToString());
+		}
+		/// <summary>
+		/// 添加数字字符。
+		/// </summary>
+		/// <param name="ecma">是否使用 ECMAScript 行为。</param>
+		/// <param name="negate">是否对数字字符取否定。</param>
+		public void AddDigit(bool ecma, bool negate)
+		{
+			RccAddDigit.Value(charClass, ecma, negate, null);
 		}
 		/// <summary>
 		/// 添加数字字符。
@@ -744,7 +762,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="ecma">是否使用 ECMAScript 行为。</param>
 		/// <param name="negate">是否对数字字符取否定。</param>
 		/// <param name="pattern">字符类的模式串。</param>
-		public void AddDigit(bool ecma, bool negate, string pattern)
+		internal void AddDigit(bool ecma, bool negate, string pattern)
 		{
 			RccAddDigit.Value(charClass, ecma, negate, pattern);
 		}

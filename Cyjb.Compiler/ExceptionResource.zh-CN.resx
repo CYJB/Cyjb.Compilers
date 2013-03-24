@@ -117,4 +117,84 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BadClassInCharRange" xml:space="preserve">
+    <value>不能在字符范围中包括类 \{0}。</value>
+    <comment>不能在字符范围中包括类。</comment>
+  </data>
+  <data name="IllegalEndEscape" xml:space="preserve">
+    <value>\ 在模式末尾非法。</value>
+    <comment>\ 在模式末尾非法。</comment>
+  </data>
+  <data name="IncompleteSlashP" xml:space="preserve">
+    <value>不完整的 \p{X} 字符转义。</value>
+    <comment>不完整的 \p{X} 字符转义。</comment>
+  </data>
+  <data name="MalformedSlashP" xml:space="preserve">
+    <value>格式不正确的 \p{X} 字符转义。</value>
+    <comment>格式不正确的 \p{X} 字符转义。</comment>
+  </data>
+  <data name="MissingControl" xml:space="preserve">
+    <value>缺少控制字符。</value>
+    <comment>缺少控制字符。</comment>
+  </data>
+  <data name="NestedQuantify" xml:space="preserve">
+    <value>嵌套限定符 {0}。</value>
+    <comment>嵌套限定符。</comment>
+  </data>
+  <data name="NestedTrailing" xml:space="preserve">
+    <value>嵌套向前看正则表达式。</value>
+    <comment>嵌套向前看正则表达式。</comment>
+  </data>
+  <data name="NotEnoughParens" xml:space="preserve">
+    <value>) 不足。</value>
+    <comment>) 不足。</comment>
+  </data>
+  <data name="ParsingException" xml:space="preserve">
+    <value>正在分析“{0}”－ {1}</value>
+    <comment>分析异常。</comment>
+  </data>
+  <data name="QuantifyAfterNothing" xml:space="preserve">
+    <value>限定符 {x,y} 前没有任何内容。</value>
+    <comment>限定符前没有任何内容。</comment>
+  </data>
+  <data name="ReversedCharRange" xml:space="preserve">
+    <value>[x-y] 范围的顺序颠倒。</value>
+    <comment>[x-y] 范围的顺序颠倒。</comment>
+  </data>
+  <data name="SubtractionMustBeLast" xml:space="preserve">
+    <value>减去的字符类必须是字符类中的最后一个元素。</value>
+    <comment>减去的字符类必须是字符类中的最后一个元素。</comment>
+  </data>
+  <data name="TooFewHex" xml:space="preserve">
+    <value>十六进制位数不足。</value>
+    <comment>十六进制位数不足。</comment>
+  </data>
+  <data name="TooManyParens" xml:space="preserve">
+    <value>) 过多。</value>
+    <comment>) 过多。</comment>
+  </data>
+  <data name="UndefinedRegex" xml:space="preserve">
+    <value>未定义的正则表达式 '{0}'。</value>
+    <comment>未定义的正则表达式。</comment>
+  </data>
+  <data name="UnrecognizedControl" xml:space="preserve">
+    <value>无法识别的控制字符。</value>
+    <comment>无法识别的控制字符。</comment>
+  </data>
+  <data name="UnrecognizedEscape" xml:space="preserve">
+    <value>无法识别的转义序列 \{0}。</value>
+    <comment>无法识别的转义序列。</comment>
+  </data>
+  <data name="UnrecognizedGrouping" xml:space="preserve">
+    <value>无法识别的分组构造。</value>
+    <comment>无法识别的分组构造。</comment>
+  </data>
+  <data name="UnterminatedBracket" xml:space="preserve">
+    <value>未终止的 [] 集。</value>
+    <comment>未终止的 [] 集。</comment>
+  </data>
+  <data name="UnterminatedComment" xml:space="preserve">
+    <value>未终止的(?#...)注释。</value>
+    <comment>未终止的注释。</comment>
+  </data>
 </root>
