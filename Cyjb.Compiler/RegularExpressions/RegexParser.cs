@@ -304,16 +304,10 @@ namespace Cyjb.Compiler.RegularExpressions
 						goto BreakOuterScan;
 					case '$':
 						// $ 仅在结尾表示行结尾，否则表示普通的符号。
-						if (EndOfPattern)
+						// 在 Trailing 中，最后的 $ 不再认为是行结束符。
+						if (EndOfPattern && !inTrailing)
 						{
-							if (inTrailing)
-							{
-								AddRegex(AnchorExp.EndOfLine);
-							}
-							else
-							{
-								trailing = AnchorExp.EndOfLine;
-							}
+							trailing = AnchorExp.EndOfLine;
 							goto BreakOuterScan;
 						}
 						else
