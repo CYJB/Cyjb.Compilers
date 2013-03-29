@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -454,11 +455,20 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 返回只含有单个字符的字符类对应的字符。
 		/// </summary>
-		/// <param name="set">要获取字符的字符类。</param>
+		/// <param name="charClass">要获取字符的字符类。</param>
 		/// <returns>字符类对应的字符。</returns>
-		public static char SingletonChar(string set)
+		public static char SingletonChar(string charClass)
 		{
-			return RccSingletonChar.Value(set);
+			return RccSingletonChar.Value(charClass);
+		}
+		/// <summary>
+		/// 返回字符类中时候包含 Unicode 字符分类的定义。
+		/// </summary>
+		/// <param name="charClass">要判断是否包含 Unicode 字符分类的字符类。</param>
+		/// <returns>如果包含，则为 <c>true</c>；否则为 <c>false</c>。</returns>
+		public static bool ContainsCategory(string charClass)
+		{
+			return charClass[CategoryLengthIndex] > 0;
 		}
 		/// <summary>
 		/// 从字符串形式的字符范围获取 <see cref="RegexCharClass"/> 对象。
@@ -488,17 +498,27 @@ namespace Cyjb.Compiler.RegularExpressions
 		{
 			return RegexParser.ParseCharClass(pattern, option, false);
 		}
+		/// <summary>
+		/// 返回正则表达式的字符类中定义的字符范围集合。
+		/// </summary>
+		/// <param name="charClass">要获取字符范围的字符类。</param>
+		/// <returns>字符类中定义的字符范围集合。</returns>
+		internal static string GetCharClassRanges(string charClass)
+		{
+			Debug.Assert(!IsSubtraction(charClass));
+			return charClass.Substring(SetStart, charClass[SetLengthIndex]);
+		}
 
 		#region 字符类描述
 
 		/// <summary>
 		/// 表示字符类长度的索引。
 		/// </summary>
-		private const int SetLength = 1;
+		private const int SetLengthIndex = 1;
 		/// <summary>
 		/// 表示字符类通用 Unicode 类别的长度的索引。
 		/// </summary>
-		private const int CategoryLength = 2;
+		private const int CategoryLengthIndex = 2;
 		/// <summary>
 		/// 表示字符类的起始索引。
 		/// </summary>
@@ -508,19 +528,30 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="charClass">要获取可读描述的字符类。</param>
 		/// <returns>字符类的可读描述。</returns>
-		public static string CharClassDescription(string charClass)
+		public static string GetDescription(string charClass)
 		{
-			int setLen = charClass[SetLength];
-			int categoryLen = charClass[CategoryLength];
-			int endPos = SetStart + setLen + categoryLen;
-			StringBuilder builder = new StringBuilder("[");
-			int index = SetStart;
-			char ch1, ch2;
+			StringBuilder builder = new StringBuilder();
+			GetDescription(charClass, builder);
+			return builder.ToString();
+		}
+		/// <summary>
+		/// 返回字符类的可读描述。
+		/// </summary>
+		/// <param name="charClass">要获取可读描述的字符类。</param>
+		/// <param name="builder">保存字符类的可读描述的可变字符串。</param>
+		private static void GetDescription(string charClass, StringBuilder builder)
+		{
+			int setLen = charClass[SetLengthIndex];
+			int categoryLen = charClass[CategoryLengthIndex];
+			builder.Append('[');
 			if (IsNegated(charClass))
 			{
 				builder.Append('^');
 			}
-			while (index < SetStart + charClass[SetLength])
+			int index = SetStart;
+			int endPos = SetStart + setLen;
+			char ch1, ch2;
+			while (index < endPos)
 			{
 				ch1 = charClass[index];
 				if (index + 1 < charClass.Length)
@@ -543,14 +574,15 @@ namespace Cyjb.Compiler.RegularExpressions
 				}
 				index += 2;
 			}
-			while (index < SetStart + charClass[SetLength] + charClass[CategoryLength])
+			endPos += categoryLen;
+			while (index < endPos)
 			{
 				ch1 = charClass[index];
-				if (ch1 == 0)
+				if (ch1 == '\0')
 				{
 					bool found = false;
-					int lastindex = charClass.IndexOf('\0', index + 1);
-					string group = charClass.Substring(index, lastindex - index + 1);
+					int endIndex = charClass.IndexOf('\0', index + 1);
+					string group = charClass.Substring(index, endIndex - index + 1);
 					foreach (KeyValuePair<string, string> pair in RccGetDefinedCategories.Value())
 					{
 						if (group.Equals(pair.Value))
@@ -583,7 +615,7 @@ namespace Cyjb.Compiler.RegularExpressions
 							}
 						}
 					}
-					index = lastindex;
+					index = endIndex;
 				}
 				else
 				{
@@ -595,10 +627,9 @@ namespace Cyjb.Compiler.RegularExpressions
 			{
 				// 减去范围。
 				builder.Append('-');
-				builder.Append(CharClassDescription(charClass.Substring(endPos)));
+				GetDescription(charClass.Substring(endPos), builder);
 			}
 			builder.Append(']');
-			return builder.ToString();
 		}
 		/// <summary>
 		/// 返回字符的可读描述。
@@ -631,23 +662,24 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>类别字符的可读描述。</returns>
 		private static String CategoryDescription(char ch)
 		{
-			if (ch == 100)
+			short sch = (short)ch;
+			if (sch == 100)
 			{
 				// SpaceConst = 100。
 				return "\\s";
 			}
-			else if ((short)ch == -100)
+			else if (sch == -100)
 			{
 				// NotSpaceConst = -100。
 				return "\\S";
 			}
-			else if ((short)ch < 0)
+			else if (sch < 0)
 			{
-				return String.Format(CultureInfo.InvariantCulture, "\\P{{{0}}}", Categories[-((short)ch) - 1]);
+				return string.Format(CultureInfo.InvariantCulture, "\\P{{{0}}}", Categories[-sch - 1]);
 			}
 			else
 			{
-				return String.Format(CultureInfo.InvariantCulture, "\\p{{{0}}}", Categories[ch - 1]);
+				return string.Format(CultureInfo.InvariantCulture, "\\p{{{0}}}", Categories[ch - 1]);
 			}
 		}
 
@@ -680,7 +712,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>当前对象的字符串形式。</returns>
 		public override string ToString()
 		{
-			return CharClassDescription(this.ToStringClass());
+			return GetDescription(this.ToStringClass());
 		}
 
 		#region 方法和属性

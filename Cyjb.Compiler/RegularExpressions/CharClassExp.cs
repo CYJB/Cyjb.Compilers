@@ -50,7 +50,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>当前对象的字符串表示形式。</returns>
 		public override string ToString()
 		{
-			return RegexCharClass.CharClassDescription(charClass);
+			return RegexCharClass.GetDescription(charClass);
 		}
 	}
 }
