@@ -516,6 +516,7 @@ namespace Cyjb.Compiler.RegularExpressions
 			if (UseOptionIgnoreCase)
 			{
 				rcc.AddLowercase(culture);
+				rcc.AddUppercase(culture);
 			}
 			return rcc;
 		}

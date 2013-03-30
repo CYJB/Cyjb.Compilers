@@ -59,7 +59,6 @@
     <Compile Include="RegularExpressions\RegexOptions.cs" />
     <Compile Include="RegularExpressions\RegexParser.cs" />
     <Compile Include="RegularExpressions\RepeatExp.cs" />
-    <Compile Include="RegularExpressions\SymbolExp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CYJB_Code_Key.snk" />

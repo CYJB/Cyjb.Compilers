@@ -137,6 +137,18 @@
     <value>缺少控制字符。</value>
     <comment>缺少控制字符。</comment>
   </data>
+  <data name="NestedBeginningOfLine" xml:space="preserve">
+    <value>嵌套行起始定位点。</value>
+    <comment>嵌套行起始定位点。</comment>
+  </data>
+  <data name="NestedEndOfFile" xml:space="preserve">
+    <value>嵌套文件结束。</value>
+    <comment>嵌套文件结束。</comment>
+  </data>
+  <data name="NestedEndOfLine" xml:space="preserve">
+    <value>嵌套行结束定位点。</value>
+    <comment>嵌套行结束定位点。</comment>
+  </data>
   <data name="NestedQuantify" xml:space="preserve">
     <value>嵌套限定符 {0}。</value>
     <comment>嵌套限定符。</comment>

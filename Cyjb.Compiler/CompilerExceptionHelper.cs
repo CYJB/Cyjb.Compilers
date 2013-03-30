@@ -48,6 +48,15 @@ namespace Cyjb.Compiler
 			throw GetArgumentException(paramName, "NestedBeginningOfLine");
 		}
 		/// <summary>
+		/// 返回嵌套的文件结束的异常。
+		/// </summary>
+		/// <param name="paramName">产生异常的参数名称。</param>
+		/// <returns><see cref="System.ArgumentException"/> 对象。</returns>
+		internal static ArgumentException NestedEndOfFile(string paramName)
+		{
+			throw GetArgumentException(paramName, "NestedEndOfFile");
+		}
+		/// <summary>
 		/// 返回嵌套的行结束的异常。
 		/// </summary>
 		/// <param name="paramName">产生异常的参数名称。</param>

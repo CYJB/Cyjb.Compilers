@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -159,8 +160,8 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// RegexCharClass 实例的获取 _rangelist 字段。
 		/// </summary>
-		private static readonly Lazy<Func<object, object>> RccGetRangelist =
-			RccType.CreateDelegateLazy<Func<object, object>>("_rangelist");
+		private static readonly Lazy<Func<object, IList>> RccGetRangelist =
+			RccType.CreateDelegateLazy<Func<object, IList>>("_rangelist");
 		/// <summary>
 		/// RegexCharClass 实例的获取 _categories 字段。
 		/// </summary>
@@ -182,7 +183,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		private static readonly Lazy<Func<object, int>> RccRangeCount =
 			RccType.CreateDelegateLazy<Func<object, int>>("RangeCount");
 		/// <summary>
-		/// RegexCharClass 实例的 RangeCount 方法。
+		/// RegexCharClass 实例的 GetRangeAt 方法。
 		/// </summary>
 		private static readonly Lazy<Func<object, int, object>> RccGetRangeAt =
 			RccType.CreateDelegateLazy<Func<object, int, object>>("GetRangeAt");
@@ -202,10 +203,10 @@ namespace Cyjb.Compiler.RegularExpressions
 		private static readonly Lazy<Action<object, bool, bool, string>> RccAddDigit =
 			RccType.CreateDelegateLazy<Action<object, bool, bool, string>>("AddDigit");
 		/// <summary>
-		/// RegexCharClass 实例的 AddLowercase 方法。
+		/// RegexCharClass 实例的 AddLowercaseRange 方法。
 		/// </summary>
-		private static readonly Lazy<Action<object, CultureInfo>> RccAddLowercase =
-			RccType.CreateDelegateLazy<Action<object, CultureInfo>>("AddLowercase");
+		private static readonly Lazy<Action<object, char, char, CultureInfo>> RccAddLowercaseRange =
+			RccType.CreateDelegateLazy<Action<object, char, char, CultureInfo>>("AddLowercaseRange");
 		/// <summary>
 		/// RegexCharClass 实例的 AddRange 方法。
 		/// </summary>
@@ -256,15 +257,6 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		private static readonly Type RccSingleRangeType =
 			RccType.GetNestedType("SingleRange", BindingFlags.NonPublic);
-		/// <summary>
-		/// List&lt;RegexCharClass.SingleRange&gt; 类的类型。
-		/// </summary>
-		private static readonly Type RccSingleRangeListType = typeof(List<>).MakeGenericType(RccSingleRangeType);
-		/// <summary>
-		/// List&lt;RegexCharClass.SingleRange&gt; 类的 Add 方法。
-		/// </summary>
-		private static readonly Lazy<Action<object, object>> RccSRListAdd =
-			RccSingleRangeListType.CreateDelegateLazy<Action<object, object>>("Add");
 		/// <summary>
 		/// RegexCharClass.SingleRange 类的构造函数。
 		/// </summary>
@@ -759,25 +751,27 @@ namespace Cyjb.Compiler.RegularExpressions
 				CompilerExceptionHelper.RegexCharClassCannotMerge("charClass");
 			}
 			int ccRangeCount = RccRangeCount.Value(cc.charClass);
+			int thisRangeCount = RccRangeCount.Value(this.charClass);
 			if (!RccGetCanonical.Value(cc.charClass))
 			{
 				// 如果要合并的字符类并不规范，则自己也不规范。
-				RccSetCanonical.Value(cc, false);
+				RccSetCanonical.Value(this.charClass, false);
 			}
-			else if (RccGetCanonical.Value(cc) && RccRangeCount.Value(cc) > 0 && ccRangeCount > 0 &&
+			else if (RccGetCanonical.Value(this.charClass) && thisRangeCount > 0 && ccRangeCount > 0 &&
 				RccSRGetFirst.Value(RccGetRangeAt.Value(cc.charClass, 0)) <=
-					RccSRGetLast.Value(RccGetRangeAt.Value(this, RccRangeCount.Value(cc) - 1)))
+					RccSRGetLast.Value(RccGetRangeAt.Value(this, thisRangeCount - 1)))
 			{
-				RccSetCanonical.Value(cc, false);
+				// Range 不能恰好接起来，那么也会导致不规范。
+				RccSetCanonical.Value(this.charClass, false);
 			}
-			object list = RccGetRangelist.Value(cc);
+			IList list = RccGetRangelist.Value(this.charClass);
 			for (int i = 0; i < ccRangeCount; i += 1)
 			{
 				object range = RccGetRangeAt.Value(cc.charClass, i);
 				// 这里创建一个新的字符范围。
-				RccSRListAdd.Value(list, RccSRConstructor.Value(RccSRGetFirst.Value(range), RccSRGetLast.Value(range)));
+				list.Add(RccSRConstructor.Value(RccSRGetFirst.Value(range), RccSRGetLast.Value(range)));
 			}
-			RccGetCategories.Value(cc).Append(RccGetCategories.Value(cc.charClass).ToString());
+			RccGetCategories.Value(this.charClass).Append(RccGetCategories.Value(cc.charClass).ToString());
 		}
 		/// <summary>
 		/// 添加数字字符。
@@ -799,12 +793,58 @@ namespace Cyjb.Compiler.RegularExpressions
 			RccAddDigit.Value(charClass, ecma, negate, pattern);
 		}
 		/// <summary>
-		/// 添加小写字母。
+		/// 将当前字符类所对应的小写字符添加到字符类中。
 		/// </summary>
-		/// <param name="culture">小写字母的区域信息。</param>
+		/// <param name="culture">获取小写字符使用的区域信息。</param>
 		public void AddLowercase(CultureInfo culture)
 		{
-			RccAddLowercase.Value(charClass, culture);
+			RccSetCanonical.Value(charClass, false);
+			int count = RccRangeCount.Value(this.charClass);
+			for (int i = 0; i < count; i++)
+			{
+				object range = RccGetRangeAt.Value(this.charClass, i);
+				char first = RccSRGetFirst.Value(range);
+				char last = RccSRGetLast.Value(range);
+				if (first == last)
+				{
+					char temp = char.ToLower(first, culture);
+					if (temp != first)
+					{
+						this.AddChar(temp);
+					}
+				}
+				else
+				{
+					RccAddLowercaseRange.Value(this.charClass, first, last, culture);
+				}
+			}
+		}
+		/// <summary>
+		/// 将当前字符类所对应的大写字符添加到字符类中。
+		/// </summary>
+		/// <param name="culture">获取大写字符使用的区域信息。</param>
+		public void AddUppercase(CultureInfo culture)
+		{
+			RccSetCanonical.Value(charClass, false);
+			int count = RccRangeCount.Value(this.charClass);
+			for (int i = 0; i < count; i++)
+			{
+				object range = RccGetRangeAt.Value(this.charClass, i);
+				char first = RccSRGetFirst.Value(range);
+				char last = RccSRGetLast.Value(range);
+				if (first == last)
+				{
+					char temp = char.ToUpper(first, culture);
+					if (temp != first)
+					{
+						this.AddChar(temp);
+					}
+				}
+				else
+				{
+					AddUppercaseRange(first, last);
+				}
+			}
 		}
 		/// <summary>
 		/// 添加特定范围的字符。
@@ -864,8 +904,213 @@ namespace Cyjb.Compiler.RegularExpressions
 			get { return RccGetNegate.Value(charClass); }
 			set { RccSetNegate.Value(charClass, value); }
 		}
+		/// <summary>
+		/// 添加指定字符范围对应的大写字符。
+		/// </summary>
+		/// <param name="chMin">字符范围的起始。</param>
+		/// <param name="chMax">字符范围的结束。</param>
+		private void AddUppercaseRange(char chMin, char chMax)
+		{
+			int i, iMax, iMid;
+			// 二分查找匹配的映射关系。
+			for (i = 0, iMax = ucTable.Length; i < iMax; )
+			{
+				iMid = (i + iMax) / 2;
+				if (ucTable[iMid].ChMax < chMin) { i = iMid + 1; }
+				else { iMax = iMid; }
+			}
+			if (i >= ucTable.Length) { return; }
+			char chMinT, chMaxT;
+			UpperCaseMapping uc;
+			// 将小写字符映射为大写字符。
+			for (; i < ucTable.Length && (uc = ucTable[i]).ChMin <= chMax; i++)
+			{
+				if ((chMinT = uc.ChMin) < chMin) { chMinT = chMin; }
+				if ((chMaxT = uc.ChMax) > chMax) { chMaxT = chMax; }
+				switch (uc.Operator)
+				{
+					case UppercaseSet:
+						chMinT = (char)uc.Data;
+						chMaxT = (char)uc.Data;
+						break;
+					case UppercaseAdd:
+						chMinT += (char)uc.Data;
+						chMaxT += (char)uc.Data;
+						break;
+					case UppercaseBor:
+						chMinT |= (char)1;
+						chMaxT |= (char)1;
+						break;
+					case UppercaseBad:
+						chMinT += (char)(chMinT & 1);
+						chMaxT += (char)(chMaxT & 1);
+						break;
+				}
+				if (chMinT < chMin || chMaxT > chMax)
+				{
+					AddRange(chMinT, chMaxT);
+				}
+			}
+		}
 
 		#endregion
+
+		#region 小写字符到相应的大写字符的映射
+
+		/// <summary>
+		/// 小写字符到相应的大写字符的映射关系。
+		/// </summary>
+		private struct UpperCaseMapping
+		{
+			/// <summary>
+			/// 初始化 <see cref="UpperCaseMapping"/> 结构。
+			/// </summary>
+			/// <param name="chMin">小写字符的最小值。</param>
+			/// <param name="chMax">小写字符的最大值。</param>
+			/// <param name="op">到相应大写字符的映射操作。</param>
+			/// <param name="data">映射中使用的数据。</param>
+			internal UpperCaseMapping(char chMin, char chMax, int op, int data)
+			{
+				this.ChMin = chMin;
+				this.ChMax = chMax;
+				this.Operator = op;
+				this.Data = data;
+			}
+			/// <summary>
+			/// 小写字符的最小值。
+			/// </summary>
+			internal char ChMin;
+			/// <summary>
+			/// 小写字符的最大值。
+			/// </summary>
+			internal char ChMax;
+			/// <summary>
+			/// 到相应大写字符的映射操作。
+			/// </summary>
+			internal int Operator;
+			/// <summary>
+			/// 映射中使用的数据。
+			/// </summary>
+			internal int Data;
+		}
+		/// <summary>
+		/// 直接设置相应的大写字符：U(ch) = constant。
+		/// </summary>
+		private const int UppercaseSet = 0;
+		/// <summary>
+		/// 加上一个参数：U(ch) = ch + offset。
+		/// </summary>
+		private const int UppercaseAdd = 1;
+		/// <summary>
+		/// 按位或 1：U(ch) = ch | 1。
+		/// </summary>
+		private const int UppercaseBor = 2;
+		/// <summary>
+		/// 按位与 1：U(ch) = ch + (ch &amp; 1)。
+		/// </summary>
+		private const int UppercaseBad = 3;
+		/// <summary>
+		/// 小写字符到相应的大写字符的映射关系。
+		/// </summary>
+		private static readonly UpperCaseMapping[] ucTable = new UpperCaseMapping[] 
+		{
+			new UpperCaseMapping('\u0061', '\u007A', UppercaseAdd, -32),
+			new UpperCaseMapping('\u00E0', '\u00FE', UppercaseAdd, -32),
+			new UpperCaseMapping('\u0101', '\u012F', UppercaseBad, 0),
+			new UpperCaseMapping('\u0069', '\u0069', UppercaseSet, 0x0130),
+			new UpperCaseMapping('\u0133', '\u0137', UppercaseBad, 0),
+			new UpperCaseMapping('\u013A', '\u0148', UppercaseBor, 0),
+			new UpperCaseMapping('\u014B', '\u0177', UppercaseBad, 0),
+			new UpperCaseMapping('\u00FF', '\u00FF', UppercaseSet, 0x0178),
+			new UpperCaseMapping('\u017A', '\u017E', UppercaseBor, 0),
+			new UpperCaseMapping('\u0253', '\u0253', UppercaseSet, 0x0181),
+			new UpperCaseMapping('\u0183', '\u0185', UppercaseBad, 0),
+			new UpperCaseMapping('\u0254', '\u0254', UppercaseSet, 0x0186),
+			new UpperCaseMapping('\u0188', '\u0188', UppercaseSet, 0x0187),
+			new UpperCaseMapping('\u0256', '\u0257', UppercaseAdd, -205),
+			new UpperCaseMapping('\u018C', '\u018C', UppercaseSet, 0x018B),
+			new UpperCaseMapping('\u01DD', '\u01DD', UppercaseSet, 0x018E),
+			new UpperCaseMapping('\u0259', '\u0259', UppercaseSet, 0x018F),
+			new UpperCaseMapping('\u025B', '\u025B', UppercaseSet, 0x0190),
+			new UpperCaseMapping('\u0192', '\u0192', UppercaseSet, 0x0191),
+			new UpperCaseMapping('\u0260', '\u0260', UppercaseSet, 0x0193),
+			new UpperCaseMapping('\u0263', '\u0263', UppercaseSet, 0x0194),
+			new UpperCaseMapping('\u0269', '\u0269', UppercaseSet, 0x0196),
+			new UpperCaseMapping('\u0268', '\u0268', UppercaseSet, 0x0197),
+			new UpperCaseMapping('\u0199', '\u0199', UppercaseSet, 0x0198),
+			new UpperCaseMapping('\u026F', '\u026F', UppercaseSet, 0x019C),
+			new UpperCaseMapping('\u0272', '\u0272', UppercaseSet, 0x019D),
+			new UpperCaseMapping('\u0275', '\u0275', UppercaseSet, 0x019F),
+			new UpperCaseMapping('\u01A1', '\u01A5', UppercaseBad, 0),
+			new UpperCaseMapping('\u01A8', '\u01A8', UppercaseSet, 0x01A7),
+			new UpperCaseMapping('\u0283', '\u0283', UppercaseSet, 0x01A9),
+			new UpperCaseMapping('\u01AD', '\u01AD', UppercaseSet, 0x01AC),
+			new UpperCaseMapping('\u0288', '\u0288', UppercaseSet, 0x01AE),
+			new UpperCaseMapping('\u01B0', '\u01B0', UppercaseSet, 0x01AF),
+			new UpperCaseMapping('\u028A', '\u028B', UppercaseAdd, -217),
+			new UpperCaseMapping('\u01B4', '\u01B6', UppercaseBor, 0),
+			new UpperCaseMapping('\u0292', '\u0292', UppercaseSet, 0x01B7),
+			new UpperCaseMapping('\u01B9', '\u01B9', UppercaseSet, 0x01B8),
+			new UpperCaseMapping('\u01BD', '\u01BD', UppercaseSet, 0x01BC),
+			new UpperCaseMapping('\u01C6', '\u01C6', UppercaseSet, 0x01C4),
+			new UpperCaseMapping('\u01C9', '\u01C9', UppercaseSet, 0x01C7),
+			new UpperCaseMapping('\u01CC', '\u01CC', UppercaseSet, 0x01CA),
+			new UpperCaseMapping('\u01CE', '\u01DC', UppercaseBor, 0),
+			new UpperCaseMapping('\u01DF', '\u01EF', UppercaseBad, 0),
+			new UpperCaseMapping('\u01F3', '\u01F3', UppercaseSet, 0x01F1),
+			new UpperCaseMapping('\u01F5', '\u01F5', UppercaseSet, 0x01F4),
+			new UpperCaseMapping('\u01FB', '\u0217', UppercaseBad, 0),
+			new UpperCaseMapping('\u03AC', '\u03AC', UppercaseSet, 0x0386),
+			new UpperCaseMapping('\u03AD', '\u03AF', UppercaseAdd, -37),
+			new UpperCaseMapping('\u03CC', '\u03CC', UppercaseSet, 0x038C),
+			new UpperCaseMapping('\u03CD', '\u03CE', UppercaseAdd, -63),
+			new UpperCaseMapping('\u03B1', '\u03CB', UppercaseAdd, -32),
+			new UpperCaseMapping('\u03E3', '\u03EF', UppercaseBad, 0),
+			new UpperCaseMapping('\u0451', '\u045F', UppercaseAdd, -80),
+			new UpperCaseMapping('\u0430', '\u044F', UppercaseAdd, -32),
+			new UpperCaseMapping('\u0461', '\u0481', UppercaseBad, 0),
+			new UpperCaseMapping('\u0491', '\u04BF', UppercaseBad, 0),
+			new UpperCaseMapping('\u04C2', '\u04C4', UppercaseBor, 0),
+			new UpperCaseMapping('\u04C8', '\u04C8', UppercaseSet, 0x04C7),
+			new UpperCaseMapping('\u04CC', '\u04CC', UppercaseSet, 0x04CB),
+			new UpperCaseMapping('\u04D1', '\u04EB', UppercaseBad, 0),
+			new UpperCaseMapping('\u04EF', '\u04F5', UppercaseBad, 0),
+			new UpperCaseMapping('\u04F9', '\u04F9', UppercaseSet, 0x04F8),
+			new UpperCaseMapping('\u0561', '\u0586', UppercaseAdd, -48),
+			new UpperCaseMapping('\u10D0', '\u10F5', UppercaseAdd, -48),
+			new UpperCaseMapping('\u1E01', '\u1EF9', UppercaseBad, 0),
+			new UpperCaseMapping('\u1F00', '\u1F07', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F10', '\u1F17', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F20', '\u1F27', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F30', '\u1F37', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F40', '\u1F45', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F51', '\u1F51', UppercaseSet, 0x1F59),
+			new UpperCaseMapping('\u1F53', '\u1F53', UppercaseSet, 0x1F5B),
+			new UpperCaseMapping('\u1F55', '\u1F55', UppercaseSet, 0x1F5D),
+			new UpperCaseMapping('\u1F57', '\u1F57', UppercaseSet, 0x1F5F),
+			new UpperCaseMapping('\u1F60', '\u1F67', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F80', '\u1F87', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F90', '\u1F97', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1FA0', '\u1FA7', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1FB0', '\u1FB1', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F70', '\u1F71', UppercaseAdd, 74),
+			new UpperCaseMapping('\u1FB3', '\u1FB3', UppercaseSet, 0x1FBC),
+			new UpperCaseMapping('\u1F72', '\u1F75', UppercaseAdd, 86),
+			new UpperCaseMapping('\u1FC3', '\u1FC3', UppercaseSet, 0x1FCC),
+			new UpperCaseMapping('\u1FD0', '\u1FD1', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F76', '\u1F77', UppercaseAdd, 100),
+			new UpperCaseMapping('\u1FE0', '\u1FE1', UppercaseAdd, 8),
+			new UpperCaseMapping('\u1F7A', '\u1F7B', UppercaseAdd, 112),
+			new UpperCaseMapping('\u1FE5', '\u1FE5', UppercaseSet, 0x1FEC),
+			new UpperCaseMapping('\u1F78', '\u1F79', UppercaseAdd, 128),
+			new UpperCaseMapping('\u1F7C', '\u1F7D', UppercaseAdd, 126),
+			new UpperCaseMapping('\u1FF3', '\u1FF3', UppercaseSet, 0x1FFC),
+			new UpperCaseMapping('\u2170', '\u217F', UppercaseAdd, -16),
+			new UpperCaseMapping('\u24D0', '\u24EA', UppercaseAdd, -26),
+			new UpperCaseMapping('\uFF41', '\uFF5A', UppercaseAdd, -32)
+		};
+
+		#endregion // 小写字符到相应的大写字符的映射
 
 	}
 }

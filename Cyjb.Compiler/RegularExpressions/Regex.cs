@@ -11,15 +11,13 @@ namespace Cyjb.Compiler.RegularExpressions
 	public abstract class Regex
 	{
 		/// <summary>
-		/// 所有字符。
+		/// 表示所有字符的字符类。
 		/// </summary>
-		private readonly static string AnyCharClass =
-			RegexCharClass.ParsePattern("^\n\r").ToStringClass();
+		private const string AnyCharClass = "\x01\x04\x00\x0A\x0B\x0D\x0E";
 		/// <summary>
-		/// 单行模式下的所有字符。
+		/// 表示单行模式下的所有字符的字符类。
 		/// </summary>
-		private readonly static string AnyCharSingleLineClass =
-			RegexCharClass.ParsePattern("\u0000-\uFFFF").ToStringClass();
+		private const string AnyCharSingleLineClass = "\x00\x01\x00\x00";
 		/// <summary>
 		/// 检查正则表达式是否可以被嵌套。
 		/// </summary>
@@ -38,6 +36,10 @@ namespace Cyjb.Compiler.RegularExpressions
 					throw CompilerExceptionHelper.NestedEndOfLine("regex");
 				}
 				throw CompilerExceptionHelper.NestedTrailing("regex");
+			}
+			if (regex is EndOfFileExp)
+			{
+				throw CompilerExceptionHelper.NestedEndOfFile("regex");
 			}
 		}
 
@@ -135,7 +137,9 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示单个字符的正则表达式。</returns>
 		public static Regex Symbol(char ch)
 		{
-			return new SymbolExp(ch);
+			RegexCharClass cc = new RegexCharClass();
+			cc.AddChar(ch);
+			return new CharClassExp(cc.ToStringClass());
 		}
 		/// <summary>
 		/// 返回表示单个不区分大小写的字符的正则表达式。
@@ -168,19 +172,19 @@ namespace Cyjb.Compiler.RegularExpressions
 		{
 			char upperCase = char.ToUpper(ch, culture);
 			char lowerCase = char.ToLower(ch, culture);
+			RegexCharClass cc = new RegexCharClass();
 			if (upperCase == lowerCase)
 			{
 				// 大小写相同。
-				return new SymbolExp(ch);
+				cc.AddChar(upperCase);
 			}
 			else
 			{
-				// 大小写不用，需要使用字符类。
-				RegexCharClass cc = new RegexCharClass();
+				// 大小写不用。
 				cc.AddChar(upperCase);
 				cc.AddChar(lowerCase);
-				return CharClass(cc.ToStringClass());
 			}
+			return new CharClassExp(cc.ToStringClass());
 		}
 		/// <summary>
 		/// 返回表示字符串的正则表达式。
@@ -229,7 +233,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示除换行以外任意字符的正则表达式。</returns>
 		public static Regex AnyChar()
 		{
-			return CharClass(AnyCharClass);
+			return new CharClassExp(AnyCharClass);
 		}
 		/// <summary>
 		/// 返回表示任意字符的正则表达式。
@@ -239,11 +243,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		{
 			if (singleLine)
 			{
-				return CharClass(AnyCharSingleLineClass);
+				return new CharClassExp(AnyCharSingleLineClass);
 			}
 			else
 			{
-				return CharClass(AnyCharClass);
+				return new CharClassExp(AnyCharClass);
 			}
 		}
 		/// <summary>
@@ -427,7 +431,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>两个正则表达式并联的结果。</returns>
 		public static Regex operator |(Regex left, Regex right)
 		{
-			return Union(left, right);
+			return new AlternationExp(left, right);
 		}
 
 		#endregion // 静态方法
@@ -525,15 +529,6 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="right">要连接的正则表达式。</param>
 		/// <returns>表示两个正则表达式连接的正则表达式。</returns>
-		public Regex Add(Regex right)
-		{
-			return Concat(this, right);
-		}
-		/// <summary>
-		/// 返回表示当前正则表达式与指定的正则表达式连接的正则表达式。
-		/// </summary>
-		/// <param name="right">要连接的正则表达式。</param>
-		/// <returns>表示两个正则表达式连接的正则表达式。</returns>
 		public Regex Concat(Regex right)
 		{
 			return Concat(this, right);
@@ -543,7 +538,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="right">要并联的个正则表达式。</param>
 		/// <returns>表示两个正则表达式并联的正则表达式。</returns>
-		public Regex BitwiseOr(Regex right)
+		public Regex Union(Regex right)
 		{
 			return Union(this, right);
 		}
@@ -552,7 +547,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="right">要并联的个正则表达式。</param>
 		/// <returns>表示两个正则表达式并联的正则表达式。</returns>
-		public Regex Union(Regex right)
+		public Regex BitwiseOr(Regex right)
 		{
 			return Union(this, right);
 		}

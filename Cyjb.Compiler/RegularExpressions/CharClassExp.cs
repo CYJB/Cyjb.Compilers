@@ -50,7 +50,32 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>当前对象的字符串表示形式。</returns>
 		public override string ToString()
 		{
-			return RegexCharClass.GetDescription(charClass);
+			if (RegexCharClass.IsSingleton(charClass))
+			{
+				// 只表示单一字符。
+				char symbol = RegexCharClass.SingletonChar(charClass);
+				// 转换字符转义。
+				switch (symbol)
+				{
+					// 转义特殊标志。
+					case '.': return "\\.";
+					case '[': return "\\[";
+					case ']': return "\\]";
+					case '(': return "\\(";
+					case ')': return "\\)";
+					case '{': return "\\{";
+					case '}': return "\\}";
+					case '?': return "\\?";
+					case '+': return "\\+";
+					case '*': return "\\*";
+					case '|': return "\\|";
+					default: return symbol.ToPrintableString();
+				}
+			}
+			else
+			{
+				return RegexCharClass.GetDescription(charClass);
+			}
 		}
 	}
 }
