@@ -19,4 +19,3 @@ My personal C# library of compiler.
 	- RegexOptions 类：提供用于设置正则表达式选项的枚举值。
 	- RegexParser 类：表示正则表达式的分析器。
 	- RepeatExp 类：表示重复多次的正则表达式。
-	- SymbolExp 类：表示单个字符的正则表达式。
