@@ -195,6 +195,11 @@ namespace Cyjb.Compiler.RegularExpressions
 			MessageId = "Cyjb.Compiler.RegularExpressions.LiteralExp.#ctor(System.String)")]
 		public static Regex Literal(string text)
 		{
+			ExceptionHelper.CheckArgumentNull(text, "text");
+			if (text.Length == 1)
+			{
+				return Symbol(text[0]);
+			}
 			return new LiteralExp(text);
 		}
 		/// <summary>
@@ -204,7 +209,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示字符串的正则表达式。</returns>
 		public static Regex LiteralIgnoreCase(string text)
 		{
-			return new LiteralExp(text, CultureInfo.CurrentCulture);
+			return LiteralIgnoreCase(text, CultureInfo.CurrentCulture);
 		}
 		/// <summary>
 		/// 返回表示不区分大小写的字符串的正则表达式。
@@ -214,7 +219,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示字符串的正则表达式。</returns>
 		public static Regex LiteralIgnoreCase(string text, bool invariantCulture)
 		{
-			return new LiteralExp(text,
+			return LiteralIgnoreCase(text,
 				invariantCulture ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture);
 		}
 		/// <summary>
@@ -225,6 +230,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示字符串的正则表达式。</returns>
 		public static Regex LiteralIgnoreCase(string text, CultureInfo culture)
 		{
+			ExceptionHelper.CheckArgumentNull(text, "text");
+			if (text.Length == 1)
+			{
+				return SymbolIgnoreCase(text[0], culture);
+			}
 			return new LiteralExp(text, culture);
 		}
 		/// <summary>
@@ -265,6 +275,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示字符类的正则表达式。</returns>
 		public static Regex CharClassPattern(string pattern)
 		{
+			ExceptionHelper.CheckArgumentNull(pattern, "pattern");
 			return new CharClassExp(RegexCharClass.ParsePattern(pattern).ToStringClass());
 		}
 		/// <summary>
@@ -275,6 +286,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示字符类的正则表达式。</returns>
 		public static Regex CharClassPattern(string pattern, RegexOptions options)
 		{
+			ExceptionHelper.CheckArgumentNull(pattern, "pattern");
 			return new CharClassExp(RegexCharClass.ParsePattern(pattern, options).ToStringClass());
 		}
 		/// <summary>
@@ -284,6 +296,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示字符类的正则表达式。</returns>
 		public static Regex CharClass(string cc)
 		{
+			ExceptionHelper.CheckArgumentNull(cc, "cc");
 			return new CharClassExp(cc);
 		}
 		/// <summary>
@@ -293,6 +306,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>表示字符类的正则表达式。</returns>
 		public static Regex CharClass(RegexCharClass cc)
 		{
+			ExceptionHelper.CheckArgumentNull(cc, "cc");
 			return new CharClassExp(cc.ToStringClass());
 		}
 		/// <summary>

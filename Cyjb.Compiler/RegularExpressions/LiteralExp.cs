@@ -114,6 +114,10 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <returns>当前对象的字符串表示形式。</returns>
 		public override string ToString()
 		{
+			if (ignoreCase)
+			{
+				return string.Concat("(?i:", literal, ")");
+			}
 			return string.Concat("\"", literal, "\"");
 		}
 	}

@@ -1178,27 +1178,13 @@ namespace Cyjb.Compiler.RegularExpressions
 		private void AddLiteral(string str)
 		{
 			Regex regex = null;
-			if (str.Length > 1)
+			if (UseOptionIgnoreCase)
 			{
-				if (UseOptionIgnoreCase)
-				{
-					regex = Regex.LiteralIgnoreCase(str, culture);
-				}
-				else
-				{
-					regex = Regex.Literal(str);
-				}
+				regex = Regex.LiteralIgnoreCase(str, culture);
 			}
 			else
 			{
-				if (UseOptionIgnoreCase)
-				{
-					regex = Regex.SymbolIgnoreCase(str[0], culture);
-				}
-				else
-				{
-					regex = Regex.Symbol(str[0]);
-				}
+				regex = Regex.Literal(str);
 			}
 			concatenate.Add(regex);
 		}
