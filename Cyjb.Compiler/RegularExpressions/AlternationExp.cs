@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Cyjb.Compiler.Lexers;
 
 namespace Cyjb.Compiler.RegularExpressions
 {
@@ -51,23 +52,23 @@ namespace Cyjb.Compiler.RegularExpressions
 		{
 			get { return right; }
 		}
-		///// <summary>
-		///// 根据当前的正则表达式构造 NFA。
-		///// </summary>
-		///// <param name="nfa">要构造的 NFA。</param>
-		//internal override void BuildNfa(Nfa nfa)
-		//{
-		//	NfaState head = nfa.CreateState();
-		//	NfaState tail = nfa.CreateState();
-		//	left.BuildNfa(nfa);
-		//	head.Add(nfa.HeadState);
-		//	nfa.TailState.Add(tail);
-		//	right.BuildNfa(nfa);
-		//	head.Add(nfa.HeadState);
-		//	nfa.TailState.Add(tail);
-		//	nfa.HeadState = head;
-		//	nfa.TailState = tail;
-		//}
+		/// <summary>
+		/// 根据当前的正则表达式构造 NFA。
+		/// </summary>
+		/// <param name="nfa">要构造的 NFA。</param>
+		internal override void BuildNfa(Nfa nfa)
+		{
+			NfaState head = nfa.NewState();
+			NfaState tail = nfa.NewState();
+			left.BuildNfa(nfa);
+			head.Add(nfa.HeadState);
+			nfa.TailState.Add(tail);
+			right.BuildNfa(nfa);
+			head.Add(nfa.HeadState);
+			nfa.TailState.Add(tail);
+			nfa.HeadState = head;
+			nfa.TailState = tail;
+		}
 		/// <summary>
 		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
 		/// </summary>

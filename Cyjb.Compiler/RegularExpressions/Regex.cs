@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Cyjb.Compiler.Lexers;
 using Cyjb.IO;
 
 namespace Cyjb.Compiler.RegularExpressions
@@ -568,11 +569,11 @@ namespace Cyjb.Compiler.RegularExpressions
 
 		#endregion // 快捷方法
 
-		///// <summary>
-		///// 根据当前的正则表达式构造 NFA。
-		///// </summary>
-		///// <param name="nfa">要构造的 NFA。</param>
-		//internal abstract void BuildNfa(Nfa nfa);
+		/// <summary>
+		/// 根据当前的正则表达式构造 NFA。
+		/// </summary>
+		/// <param name="nfa">要构造的 NFA。</param>
+		internal abstract void BuildNfa(Nfa nfa);
 		/// <summary>
 		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
 		/// </summary>

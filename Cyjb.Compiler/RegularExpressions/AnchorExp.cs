@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Cyjb.Compiler.Lexers;
 
 namespace Cyjb.Compiler.RegularExpressions
 {
@@ -41,26 +42,28 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// 获取或设置要向前看的正则表达式。
 		/// </summary>
 		public Regex TrailingExpression { get; set; }
-		///// <summary>
-		///// 获取向前看的正则表达式的 NFA 状态。
-		///// </summary>
-		//internal NfaState TrailingHeadState { get; private set; }
-		///// <summary>
-		///// 根据当前的正则表达式构造 NFA。
-		///// </summary>
-		///// <param name="nfa">要构造的 NFA。</param>
-		//internal override void BuildNfa(Nfa nfa)
-		//{
-		//	innerExp.BuildNfa(nfa);
-		//	if (TrailingExpression != null)
-		//	{
-		//		NfaState head = nfa.HeadState;
-		//		TrailingHeadState = nfa.TailState;
-		//		TrailingExpression.BuildNfa(nfa);
-		//		TrailingHeadState.Add(nfa.HeadState);
-		//		nfa.HeadState = head;
-		//	}
-		//}
+		/// <summary>
+		/// 获取向前看的正则表达式的 NFA 状态。
+		/// </summary>
+		internal NfaState TrailingHeadState { get; private set; }
+		/// <summary>
+		/// 根据当前的正则表达式构造 NFA。
+		/// </summary>
+		/// <param name="nfa">要构造的 NFA。</param>
+		internal override void BuildNfa(Nfa nfa)
+		{
+			innerExp.BuildNfa(nfa);
+			if (TrailingExpression != null)
+			{
+				NfaState head = nfa.HeadState;
+				TrailingHeadState = nfa.TailState;
+				TrailingExpression.BuildNfa(nfa);
+				TrailingHeadState.Add(nfa.HeadState);
+				nfa.HeadState = head;
+				TrailingHeadState.StateType = NfaStateType.TrailingHead;
+				nfa.TailState.StateType = NfaStateType.Trailing;
+			}
+		}
 		/// <summary>
 		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
 		/// </summary>

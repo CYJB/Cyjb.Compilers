@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using Cyjb.Compiler.Lexers;
 
 namespace Cyjb.Compiler.RegularExpressions
 {
@@ -64,43 +65,38 @@ namespace Cyjb.Compiler.RegularExpressions
 		{
 			get { return culture; }
 		}
-		///// <summary>
-		///// 根据当前的正则表达式构造 NFA。
-		///// </summary>
-		///// <param name="nfa">要构造的 NFA。</param>
-		//internal override void BuildNfa(Nfa nfa)
-		//{
-		//	string str = literal;
-		//	if (ignoreCase)
-		//	{
-		//		str = literal.ToUpper(culture);
-		//	}
-		//	nfa.HeadState = nfa.CreateState();
-		//	nfa.TailState = nfa.HeadState;
-		//	for (int i = 0; i < literal.Length; i++)
-		//	{
-		//		NfaState state = nfa.CreateState();
-		//		if (culture == null)
-		//		{
-		//			// 区分大小写。
-		//			nfa.TailState.Add(state, str[i]);
-		//		}
-		//		else
-		//		{
-		//			// 不区分大小写。
-		//			RegexCharClass cc = new RegexCharClass();
-		//			cc.AddChar(str[i]);
-		//			cc.AddLowercase(culture);
-		//			nfa.TailState.Add(state, cc.ToStringClass());
-		//		}
-		//		nfa.TailState = state;
-		//	}
-		//	if (nfa.HeadState == nfa.TailState)
-		//	{
-		//		nfa.TailState = nfa.CreateState();
-		//		nfa.HeadState.Add(nfa.TailState);
-		//	}
-		//}
+		/// <summary>
+		/// 根据当前的正则表达式构造 NFA。
+		/// </summary>
+		/// <param name="nfa">要构造的 NFA。</param>
+		internal override void BuildNfa(Nfa nfa)
+		{
+			string str = literal;
+			if (ignoreCase)
+			{
+				str = literal.ToUpper(culture);
+			}
+			nfa.HeadState = nfa.NewState();
+			nfa.TailState = nfa.HeadState;
+			for (int i = 0; i < literal.Length; i++)
+			{
+				NfaState state = nfa.NewState();
+				if (culture == null)
+				{
+					// 区分大小写。
+					nfa.TailState.Add(state, str[i]);
+				}
+				else
+				{
+					// 不区分大小写。
+					RegexCharClass cc = new RegexCharClass();
+					cc.AddChar(str[i]);
+					cc.AddChar(char.ToLower(str[i], culture));
+					nfa.TailState.Add(state, cc.ToStringClass());
+				}
+				nfa.TailState = state;
+			}
+		}
 		/// <summary>
 		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
 		/// </summary>

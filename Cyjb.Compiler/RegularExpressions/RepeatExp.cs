@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Cyjb.Compiler.Lexers;
 
 namespace Cyjb.Compiler.RegularExpressions
 {
@@ -84,43 +85,44 @@ namespace Cyjb.Compiler.RegularExpressions
 				return -1;
 			}
 		}
-		///// <summary>
-		///// 根据当前的正则表达式构造 NFA。
-		///// </summary>
-		///// <param name="nfa">要构造的 NFA。</param>
-		//internal override void BuildNfa(Nfa nfa)
-		//{
-		//	NfaState head = nfa.CreateState();
-		//	NfaState tail = nfa.CreateState();
-		//	NfaState cHead = head;
-		//	// 如果没有上限，则需要特殊处理。
-		//	int times = maxTimes == int.MaxValue ? minTimes : maxTimes;
-		//	if (times <= 0)
-		//	{
-		//		// 至少要构造一次。
-		//		times = 1;
-		//	}
-		//	for (int i = 0; i < times; i++)
-		//	{
-		//		innerExp.BuildNfa(nfa);
-		//		cHead.Add(nfa.HeadState);
-		//		if (i >= minTimes)
-		//		{
-		//			cHead.Add(tail);
-		//		}
-		//		cHead = nfa.TailState;
-		//	}
-		//	// 为最后一个节点添加转移。
-		//	cHead.Add(tail);
-		//	// 无上限的情况。
-		//	if (maxTimes == int.MaxValue)
-		//	{
-		//		// 在尾部添加一个无限循环。
-		//		nfa.TailState.Add(nfa.HeadState);
-		//	}
-		//	nfa.HeadState = head;
-		//	nfa.TailState = tail;
-		//}
+		/// <summary>
+		/// 根据当前的正则表达式构造 NFA。
+		/// </summary>
+		/// <param name="nfa">要构造的 NFA。</param>
+		internal override void BuildNfa(Nfa nfa)
+		{
+			NfaState head = nfa.NewState();
+			NfaState tail = nfa.NewState();
+			NfaState lastHead = head;
+			// 如果没有上限，则需要特殊处理。
+			int times = maxTimes == int.MaxValue ? minTimes : maxTimes;
+			if (times == 0)
+			{
+				// 至少要构造一次。
+				times = 1;
+			}
+			for (int i = 0; i < times; i++)
+			{
+				innerExp.BuildNfa(nfa);
+				lastHead.Add(nfa.HeadState);
+				if (i >= minTimes)
+				{
+					// 添加到最终的尾状态的转移。
+					lastHead.Add(tail);
+				}
+				lastHead = nfa.TailState;
+			}
+			// 为最后一个节点添加转移。
+			lastHead.Add(tail);
+			// 无上限的情况。
+			if (maxTimes == int.MaxValue)
+			{
+				// 在尾部添加一个无限循环。
+				nfa.TailState.Add(nfa.HeadState);
+			}
+			nfa.HeadState = head;
+			nfa.TailState = tail;
+		}
 		/// <summary>
 		/// 返回当前对象的字符串表示形式。
 		/// </summary>
