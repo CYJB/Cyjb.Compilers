@@ -13,7 +13,7 @@ namespace Cyjb.Compiler.Lexers
 		/// </summary>
 		private HashSet<int> charClassTransition;
 		/// <summary>
-		/// ε转移的集合。
+		/// ϵ 转移的集合。
 		/// </summary>
 		private List<NfaState> epsilonTransitions = new List<NfaState>();
 		/// <summary>
@@ -56,7 +56,7 @@ namespace Cyjb.Compiler.Lexers
 		/// </summary>
 		public NfaState CharClassTarget { get; private set; }
 		/// <summary>
-		/// 获取ε转移的集合。
+		/// 获取 ϵ 转移的集合。
 		/// </summary>
 		public IList<NfaState> EpsilonTransitions
 		{
@@ -86,7 +86,7 @@ namespace Cyjb.Compiler.Lexers
 			}
 		}
 		/// <summary>
-		/// 添加一个到特定状态的ε转移。
+		/// 添加一个到特定状态的 ϵ 转移。
 		/// </summary>
 		/// <param name="state">要转移到的状态。</param>
 		public void Add(NfaState state)
