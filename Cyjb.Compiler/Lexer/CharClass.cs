@@ -68,20 +68,19 @@ namespace Cyjb.Compiler.Lexers
 				// 不包含任何字符类。
 				return result;
 			}
-			CharSet setClone = new CharSet();
-			setClone.UnionWith(set);
-			for (int i = 0; i < cnt; i++)
+			CharSet setClone = new CharSet(set);
+			for (int i = 0; i < cnt && set.Count > 0; i++)
 			{
 				CharSet cc = charClassList[i];
-				setClone.ExceptWith(cc);
-				if (setClone.Count == set.Count)
+				set.ExceptWith(cc);
+				if (set.Count == setClone.Count)
 				{
 					// 当前字符类与 set 没有重叠。
 					continue;
 				}
 				// 得到当前字符类与 set 重叠的部分。
-				set.ExceptWith(setClone);
-				if (set.Count == cc.Count)
+				setClone.ExceptWith(set);
+				if (setClone.Count == cc.Count)
 				{
 					// 完全被当前字符类包含，直接添加。
 					result.Add(i);
@@ -94,11 +93,11 @@ namespace Cyjb.Compiler.Lexers
 				else
 				{
 					// 从当前的字符类中剔除被分割的部分。
-					cc.ExceptWith(set);
+					cc.ExceptWith(setClone);
 					// 更新字符类。
 					int newCC = charClassList.Count;
 					result.Add(newCC);
-					charClassList.Add(set);
+					charClassList.Add(setClone);
 					if (set.Count == 1)
 					{
 						charClassRecord.Add(null);
@@ -118,14 +117,8 @@ namespace Cyjb.Compiler.Lexers
 						charClassRecord[newCC].Add(tmpSet);
 					}
 				}
-				if (setClone.Count == 0)
-				{
-					break;
-				}
-				// 更新 set。
-				set = setClone;
-				setClone = new CharSet();
-				setClone.UnionWith(set);
+				// 重新复制 set。
+				setClone = new CharSet(set);
 			}
 			return result;
 		}
