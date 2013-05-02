@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 using Cyjb.Collections;
 using Cyjb.Compiler.RegularExpressions;
 
-namespace Cyjb.Compiler.Lexers
+namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示有穷自动机中使用的字符类。
 	/// </summary>
+	[DebuggerTypeProxy(typeof(CharClass.DebugView))]
 	internal sealed class CharClass
 	{
 		/// <summary>
-		/// NFA 的字符类列表。
+		/// 字符类列表。
 		/// </summary>
 		private List<CharSet> charClassList;
 		/// <summary>
@@ -20,7 +23,7 @@ namespace Cyjb.Compiler.Lexers
 			new List<HashSet<int>>()
 		};
 		/// <summary>
-		/// 初始化 <see cref="Cyjb.Compiler.Lexers.CharClass"/> 类的新实例。
+		/// 初始化 <see cref="Cyjb.Compiler.Lexer.CharClass"/> 类的新实例。
 		/// </summary>
 		public CharClass()
 		{
@@ -52,6 +55,37 @@ namespace Cyjb.Compiler.Lexers
 				}
 			}
 			return arr;
+		}
+		/// <summary>
+		/// 将给定的字符类合并，并返回更新的字符类的映射表。
+		/// </summary>
+		/// <param name="group">字符类的分组信息。</param>
+		public Dictionary<int, int> MergeCharClass(IEnumerable<IEnumerable<int>> group)
+		{
+			Dictionary<int, int> map = new Dictionary<int, int>();
+			List<CharSet> newList = new List<CharSet>();
+			foreach (IEnumerable<int> charClasses in group)
+			{
+				int idx = -1;
+				CharSet set = null;
+				foreach (int cc in charClasses)
+				{
+					if (idx == -1)
+					{
+						set = this.charClassList[cc];
+						idx = newList.Count;
+						map[cc] = idx;
+						newList.Add(set);
+					}
+					else
+					{
+						map[cc] = idx;
+						set.UnionWith(this.charClassList[cc]);
+					}
+				}
+			}
+			this.charClassList = newList;
+			return map;
 		}
 		/// <summary>
 		/// 返回指定的字符类对应的字符类索引。
@@ -218,5 +252,80 @@ namespace Cyjb.Compiler.Lexers
 			}
 			return set;
 		}
+
+		#region 调试视图
+
+		/// <summary>
+		/// 表示字符类的调试视图。
+		/// </summary>
+		private class DebugView
+		{
+			/// <summary>
+			/// 字符类。
+			/// </summary>
+			private readonly CharClass charClass;
+			/// <summary>
+			/// 使用指定的字符类初始化 <see cref="DebugView"/> 类的实例。
+			/// </summary>
+			/// <param name="cc">使用视图的字符类。</param>
+			public DebugView(CharClass cc)
+			{
+				this.charClass = cc;
+			}
+			/// <summary>
+			/// 获取字符类的列表。
+			/// </summary>
+			/// <value>包含了所有字符类的数组。</value>
+			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+			public string[] Items
+			{
+				get
+				{
+					string[] strs = new string[charClass.charClassList.Count];
+					StringBuilder text = new StringBuilder(100);
+					for (int i = 0; i < strs.Length; i++)
+					{
+						text.Clear();
+						text.Append(i);
+						CharSet set = charClass.charClassList[i];
+						if (set.Count > 0)
+						{
+							text.Append(' ');
+							using (IEnumerator<char> iter = set.GetEnumerator())
+							{
+								iter.MoveNext();
+								char first = iter.Current;
+								char last = first;
+								while (iter.MoveNext())
+								{
+									if (last + 1 != iter.Current)
+									{
+										text.Append(first.ToPrintableString());
+										if (first != last)
+										{
+											text.Append('-');
+											text.Append(last.ToPrintableString());
+										}
+										first = iter.Current;
+									}
+									last = iter.Current;
+								}
+								text.Append(first.ToPrintableString());
+								if (first != last)
+								{
+									text.Append('-');
+									text.Append(last.ToPrintableString());
+								}
+							}
+						}
+						strs[i] = text.ToString();
+					}
+					return strs;
+				}
+			}
+		}
+
+		#endregion // 调试视图
+
 	}
 }

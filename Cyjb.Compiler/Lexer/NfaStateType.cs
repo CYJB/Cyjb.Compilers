@@ -1,4 +1,4 @@
-﻿namespace Cyjb.Compiler.Lexers
+﻿namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示 NFA 状态的类型。

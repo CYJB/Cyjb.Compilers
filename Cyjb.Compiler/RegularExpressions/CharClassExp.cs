@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Cyjb.Compiler.Lexers;
+using Cyjb.Compiler.Lexer;
 
 namespace Cyjb.Compiler.RegularExpressions
 {

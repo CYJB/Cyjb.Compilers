@@ -48,10 +48,20 @@
     <Compile Include="CompilerExceptionHelper.cs" />
     <Compile Include="ExceptionResources.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Grammar.cs" />
     <Compile Include="Lexer\CharClass.cs" />
+    <Compile Include="Lexer\Dfa.cs" />
+    <Compile Include="Lexer\DfaState.cs" />
+    <Compile Include="Lexer\Lexer.cs" />
+    <Compile Include="Lexer\LexerContext.cs" />
+    <Compile Include="Lexer\LexerContextCollection.cs" />
+    <Compile Include="Lexer\LexerContextType.cs" />
     <Compile Include="Lexer\Nfa.cs" />
     <Compile Include="Lexer\NfaState.cs" />
     <Compile Include="Lexer\NfaStateType.cs" />
+    <Compile Include="Lexer\ReaderController.cs" />
+    <Compile Include="Lexer\TokenReader.cs" />
+    <Compile Include="Lexer\TrailingType.cs" />
     <Compile Include="RegularExpressions\AlternationExp.cs" />
     <Compile Include="RegularExpressions\AnchorExp.cs" />
     <Compile Include="RegularExpressions\CharClassExp.cs" />
@@ -64,6 +74,8 @@
     <Compile Include="RegularExpressions\RegexParser.cs" />
     <Compile Include="RegularExpressions\RepeatExp.cs" />
     <Compile Include="Symbol.cs" />
+    <Compile Include="SymbolCollection`1.cs" />
+    <Compile Include="TerminalSymbol.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CYJB_Code_Key.snk" />

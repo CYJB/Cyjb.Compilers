@@ -21,18 +21,18 @@ namespace Cyjb.Compiler
 		{
 			return new ArgumentException(ExceptionResources.GetString(resName), paramName);
 		}
-		///// <summary>
-		///// 返回参数异常。
-		///// </summary>
-		///// <param name="paramName">产生异常的参数名称。</param>
-		///// <param name="resName">异常信息的资源名称。</param>
-		///// <param name="args">格式化信息的参数。</param>
-		///// <returns><see cref="System.ArgumentException"/> 对象。</returns>
-		//private static ArgumentException GetArgumentException(string paramName, string resName, params object[] args)
-		//{
-		//	string message = ExceptionResources.GetString(resName, args);
-		//	return new ArgumentException(message, paramName);
-		//}
+		/// <summary>
+		/// 返回参数异常。
+		/// </summary>
+		/// <param name="paramName">产生异常的参数名称。</param>
+		/// <param name="resName">异常信息的资源名称。</param>
+		/// <param name="args">格式化信息的参数。</param>
+		/// <returns><see cref="System.ArgumentException"/> 对象。</returns>
+		private static ArgumentException GetArgumentException(string paramName, string resName, params object[] args)
+		{
+			string message = ExceptionResources.GetString(resName, args);
+			return new ArgumentException(message, paramName);
+		}
 
 		#endregion // ArgumentException
 
@@ -98,6 +98,40 @@ namespace Cyjb.Compiler
 		}
 
 		#endregion // 正则表达式异常
+
+		#region 词法分析异常
+
+		/// <summary>
+		/// 返回词法分析器的上下文无效的异常。
+		/// </summary>
+		/// <param name="paramName">产生异常的参数名称。</param>
+		/// <param name="context">发生异常的上下文。</param>
+		/// <returns><see cref="System.ArgumentException"/> 对象。</returns>
+		public static ArgumentException InvalidLexerContext(string paramName, string context)
+		{
+			throw GetArgumentException(paramName, "InvalidLexerContext", context);
+		}
+		///// <summary>
+		///// 返回词法规则的符号无效的异常。
+		///// </summary>
+		///// <param name="paramName">产生异常的参数名称。</param>
+		///// <param name="symbol">无效的符号。</param>
+		///// <returns><see cref="System.ArgumentException"/> 对象。</returns>
+		//public static ArgumentException InvalidSymbol(string paramName, Symbol symbol)
+		//{
+		//	throw GetArgumentException(paramName, "InvalidSymbol", symbol.Name);
+		//}
+		/// <summary>
+		/// 返回不完整正词法分析上下文的异常。
+		/// </summary>
+		/// <param name="paramName">产生异常的参数名称。</param>
+		/// <returns><see cref="System.ArgumentException"/> 对象。</returns>
+		public static ArgumentException IncompleteLexerContext(string paramName)
+		{
+			throw GetArgumentException(paramName, "IncompleteLexerContext");
+		}
+
+		#endregion // 词法分析异常
 
 	}
 }

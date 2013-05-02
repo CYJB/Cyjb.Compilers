@@ -1,20 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Cyjb.Compiler.RegularExpressions;
 
-namespace Cyjb.Compiler.Lexers
+namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示不确定有穷自动机（NFA）的状态。
 	/// </summary>
+	[DebuggerTypeProxy(typeof(NfaState.DebugView))]
 	internal sealed class NfaState
 	{
 		/// <summary>
 		/// 字符类的转移对应的字符类列表。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private HashSet<int> charClassTransition;
 		/// <summary>
 		/// ϵ 转移的集合。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private List<NfaState> epsilonTransitions = new List<NfaState>();
 		/// <summary>
 		/// 初始化 <see cref="NfaState"/> 类的新实例。
@@ -99,7 +103,66 @@ namespace Cyjb.Compiler.Lexers
 		/// <returns>当前对象的字符串表示形式。</returns>
 		public override string ToString()
 		{
-			return string.Concat("State #", Index, " [", SymbolIndex, "]");
+			if (SymbolIndex == Symbol.None)
+			{
+				return string.Concat("State #", Index);
+			}
+			else
+			{
+				return string.Concat("State #", Index, " [", SymbolIndex, "]");
+			}
 		}
+
+		#region 调试视图
+
+		/// <summary>
+		/// 调试视图。
+		/// </summary>
+		private sealed class DebugView
+		{
+			/// <summary>
+			/// 调试视图的源状态。
+			/// </summary>
+			private readonly NfaState source;
+			/// <summary>
+			/// 使用指定的源状态初始化 <see cref="NfaState.DebugView"/> 类的实例。
+			/// </summary>
+			/// <param name="sourceCollection">使用调试视图的源状态。</param>
+			public DebugView(NfaState sourceCollection)
+			{
+				this.source = sourceCollection;
+			}
+			/// <summary>
+			/// 获取源状态中的所有项。
+			/// </summary>
+			/// <value>包含了源状态中的所有项的数组。</value>
+			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+			public string[] Items
+			{
+				get
+				{
+					string[] items = null;
+					int cnt = this.source.epsilonTransitions.Count;
+					if (this.source.CharClassTarget != null)
+					{
+						items = new string[cnt + 1];
+						items[cnt] = string.Concat(string.Join(",", this.source.charClassTransition),
+							" -> ", this.source.CharClassTarget);
+					}
+					else
+					{
+						items = new string[cnt];
+					}
+					for (int i = 0; i < cnt; i++)
+					{
+						items[i] = string.Concat("ϵ -> ", this.source.epsilonTransitions[i]);
+					}
+					return items;
+				}
+			}
+		}
+
+		#endregion // 调试视图
+
 	}
 }

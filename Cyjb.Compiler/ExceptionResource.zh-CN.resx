@@ -125,9 +125,17 @@
     <value>\ 在模式末尾非法。</value>
     <comment>\ 在模式末尾非法。</comment>
   </data>
+  <data name="IncompleteLexerContext" xml:space="preserve">
+    <value>不完整的词法分析上下文。</value>
+    <comment>不完整的词法分析上下文。</comment>
+  </data>
   <data name="IncompleteSlashP" xml:space="preserve">
     <value>不完整的 \p{X} 字符转义。</value>
     <comment>不完整的 \p{X} 字符转义。</comment>
+  </data>
+  <data name="InvalidLexerContext" xml:space="preserve">
+    <value>无效的词法分析上下文 '{0}'。</value>
+    <comment>无效的词法分析上下文。</comment>
   </data>
   <data name="MalformedSlashP" xml:space="preserve">
     <value>格式不正确的 \p{X} 字符转义。</value>
