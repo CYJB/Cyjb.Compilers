@@ -388,6 +388,7 @@ namespace Cyjb.Compiler.RegularExpressions
 			}
 			AddGroup();
 			Regex tempRegex = current;
+			current = null;
 			if (readTrailing)
 			{
 				inTrailing = true;
