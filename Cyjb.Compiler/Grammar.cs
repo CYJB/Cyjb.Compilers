@@ -20,7 +20,7 @@ namespace Cyjb.Compiler
 		/// 默认的接受动作。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private static readonly Action<ReaderController> DefaultAccept = null;
+		private static readonly Action<ReaderController> DefaultAccept = controller => controller.Accept();
 		/// <summary>
 		/// 正则表达式列表。
 		/// </summary>
@@ -196,7 +196,7 @@ namespace Cyjb.Compiler
 		public TerminalSymbol DefineSymbol(Regex regex, Action<ReaderController> action)
 		{
 			TerminalSymbol symbol = InternalDefineSymbol(regex, action);
-			SetInitialContext(symbol);
+			SetInclusiveContext(symbol);
 			return symbol;
 		}
 		/// <summary>
@@ -212,11 +212,11 @@ namespace Cyjb.Compiler
 			TerminalSymbol symbol = InternalDefineSymbol(regex, action);
 			if (contexts == null || contexts.Length == 0)
 			{
-				SetInitialContext(symbol);
+				SetInclusiveContext(symbol);
 			}
 			else
 			{
-				SetContext(symbol, CheckContexts(contexts));
+				symbol.Context.UnionWith(CheckContexts(contexts));
 			}
 			return symbol;
 		}
@@ -233,11 +233,11 @@ namespace Cyjb.Compiler
 			TerminalSymbol symbol = InternalDefineSymbol(regex, action);
 			if (contexts == null || !contexts.Any())
 			{
-				SetInitialContext(symbol);
+				SetInclusiveContext(symbol);
 			}
 			else
 			{
-				SetContext(symbol, CheckContexts(contexts));
+				symbol.Context.UnionWith(CheckContexts(contexts));
 			}
 			return symbol;
 		}
@@ -254,11 +254,11 @@ namespace Cyjb.Compiler
 			TerminalSymbol symbol = InternalDefineSymbol(regex, action);
 			if (contexts == null || contexts.Length == 0)
 			{
-				SetInitialContext(symbol);
+				SetInclusiveContext(symbol);
 			}
 			else
 			{
-				SetContext(symbol, CheckContexts(contexts));
+				symbol.Context.UnionWith(CheckContexts(contexts));
 			}
 			return symbol;
 		}
@@ -275,11 +275,11 @@ namespace Cyjb.Compiler
 			TerminalSymbol symbol = InternalDefineSymbol(regex, action);
 			if (contexts == null || !contexts.Any())
 			{
-				SetInitialContext(symbol);
+				SetInclusiveContext(symbol);
 			}
 			else
 			{
-				SetContext(symbol, CheckContexts(contexts));
+				symbol.Context.UnionWith(CheckContexts(contexts));
 			}
 			return symbol;
 		}
@@ -300,11 +300,12 @@ namespace Cyjb.Compiler
 			return symbol;
 		}
 		/// <summary>
-		/// 设置指定终结符的上下文为默认上下文。
+		/// 设置指定终结符的上下文为任何包含型上下文。
 		/// </summary>
 		/// <param name="symbol">要设置的终结符。</param>
-		private void SetInitialContext(TerminalSymbol symbol)
+		private void SetInclusiveContext(TerminalSymbol symbol)
 		{
+			// 添加所有包含型上下文。
 			int cnt = lexerContexts.Count;
 			for (int i = 0; i < cnt; i++)
 			{
@@ -351,25 +352,6 @@ namespace Cyjb.Compiler
 						}
 						yield return context;
 					}
-				}
-			}
-		}
-		/// <summary>
-		/// 设置指定终结符的上下文为指定的上下文。
-		/// </summary>
-		/// <param name="symbol">要设置的终结符。</param>
-		/// <param name="contexts">要设置的上下文集合。</param>
-		private void SetContext(TerminalSymbol symbol, IEnumerable<LexerContext> contexts)
-		{
-			foreach (LexerContext context in contexts)
-			{
-				if (context == this.InitialContext)
-				{
-					this.SetInitialContext(symbol);
-				}
-				else
-				{
-					symbol.Context.Add(context);
 				}
 			}
 		}

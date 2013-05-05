@@ -7,6 +7,15 @@ My personal C# library of compiler.
 
 本项目包括一些与编译相关的类，包括：
 
+* Cyjb.Compiler 命名空间：包含定义词法和语法分析器的类。
+	- Grammar 类：表示词法分析或语法分析中使用的语法规则。
+	- Symbol 类：表示词法或语法分析中的终结符或非终结符。
+	- TerminalSymbol 类：表示词法分析或语法分析的终结符。
+* Cyjb.Compiler.Lexer 命名空间：包含定义词法分析器的类。
+	- LexerContext 类：表示词法分析器的上下文。
+	- LexerRule 类：表示词法分析器的规则。
+	- ReaderController 类：表示词法单元读取器的控制器。
+	- TokenReader 类：表示词法单元读取器的基类。
 * Cyjb.Compiler.RegularExpressions 命名空间：包含定义与解析正则表达式的类。
 	- AlternationExp 类：表示并联的正则表达式。
 	- AnchorExp 类：表示定位点的正则表达式。

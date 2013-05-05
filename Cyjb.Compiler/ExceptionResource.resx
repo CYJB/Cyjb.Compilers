@@ -121,6 +121,14 @@
     <value>Cannot include class \{0} in character range.</value>
     <comment>不能在字符范围中包括类。</comment>
   </data>
+  <data name="ConflictingAcceptAction" xml:space="preserve">
+    <value>Accept action is conflicted with Reject action.</value>
+    <comment>冲突的接受动作。</comment>
+  </data>
+  <data name="ConflictingRejectAction" xml:space="preserve">
+    <value>Reject action is conflicted with Accept action.</value>
+    <comment>冲突的拒绝动作。</comment>
+  </data>
   <data name="IllegalEndEscape" xml:space="preserve">
     <value>Illegal \ at end of pattern.</value>
     <comment>\ 在模式末尾非法。</comment>
@@ -169,6 +177,10 @@
     <value>Not enough )'s.</value>
     <comment>) 不足。</comment>
   </data>
+  <data name="NotRejectable" xml:space="preserve">
+    <value>Reject action is not supported by current TokenReader.</value>
+    <comment>不允许拒绝动作。</comment>
+  </data>
   <data name="ParsingException" xml:space="preserve">
     <value>parsing "{0}" - {1}</value>
     <comment>分析异常。</comment>
@@ -208,6 +220,10 @@
   <data name="UnrecognizedGrouping" xml:space="preserve">
     <value>Unrecognized grouping construct.</value>
     <comment>无法识别的分组构造。</comment>
+  </data>
+  <data name="UnrecognizedToken" xml:space="preserve">
+    <value>Unrecognized token "{0}".</value>
+    <comment>未识别的词法单元异常。</comment>
   </data>
   <data name="UnterminatedBracket" xml:space="preserve">
     <value>Unterminated [] set.</value>

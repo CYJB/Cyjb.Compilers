@@ -121,6 +121,14 @@
     <value>不能在字符范围中包括类 \{0}。</value>
     <comment>不能在字符范围中包括类。</comment>
   </data>
+  <data name="ConflictingAcceptAction" xml:space="preserve">
+    <value>接受动作与拒绝动作冲突。</value>
+    <comment>冲突的接受动作。</comment>
+  </data>
+  <data name="ConflictingRejectAction" xml:space="preserve">
+    <value>拒绝动作与接受动作冲突。</value>
+    <comment>冲突的拒绝动作。</comment>
+  </data>
   <data name="IllegalEndEscape" xml:space="preserve">
     <value>\ 在模式末尾非法。</value>
     <comment>\ 在模式末尾非法。</comment>
@@ -169,6 +177,10 @@
     <value>) 不足。</value>
     <comment>) 不足。</comment>
   </data>
+  <data name="NotRejectable" xml:space="preserve">
+    <value>当前的 TokenReader 不支持拒绝动作。</value>
+    <comment>不允许拒绝动作。</comment>
+  </data>
   <data name="ParsingException" xml:space="preserve">
     <value>正在分析“{0}”－ {1}</value>
     <comment>分析异常。</comment>
@@ -208,6 +220,10 @@
   <data name="UnrecognizedGrouping" xml:space="preserve">
     <value>无法识别的分组构造。</value>
     <comment>无法识别的分组构造。</comment>
+  </data>
+  <data name="UnrecognizedToken" xml:space="preserve">
+    <value>未识别的词法单元 "{0}"。</value>
+    <comment>未识别的词法单元异常。</comment>
   </data>
   <data name="UnterminatedBracket" xml:space="preserve">
     <value>未终止的 [] 集。</value>

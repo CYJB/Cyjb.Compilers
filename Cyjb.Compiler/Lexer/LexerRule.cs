@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using Cyjb.Compiler.RegularExpressions;
+using Cyjb.IO;
 
 namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
-	/// 表示一个词法分析器的规则。
+	/// 表示词法分析器的规则。
 	/// </summary>
 	[Serializable]
 	public sealed class LexerRule
@@ -127,6 +129,10 @@ namespace Cyjb.Compiler.Lexer
 		/// 获取 DFA 中的字符类数。
 		/// </summary>
 		public int CharClassCount { get { return this.transitions.GetLength(1); } }
+		/// <summary>
+		/// 获取定义的符号数。
+		/// </summary>
+		public int SymbolCount { get { return this.actions.Length; } }
 
 		#region 构造词法分析器
 
@@ -303,6 +309,66 @@ namespace Cyjb.Compiler.Lexer
 		}
 
 		#endregion // 构造词法分析器
+
+		#region 生成词法分析器
+
+		/// <summary>
+		/// 返回指定源文件的允许拒绝的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		public TokenReader GetRejectableReader(string source)
+		{
+			return GetRejectableReader(new SourceReader(new StringReader(source)));
+		}
+		/// <summary>
+		/// 返回指定源文件的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		public TokenReader GetReader(string source)
+		{
+			return GetReader(new SourceReader(new StringReader(source)));
+		}
+		/// <summary>
+		/// 返回指定源文件的允许拒绝的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		public TokenReader GetRejectableReader(SourceReader source)
+		{
+			ExceptionHelper.CheckArgumentNull(source, "source");
+			switch (this.trailingType)
+			{
+				case TrailingType.None:
+					return new RejectableReader(this, source);
+				case TrailingType.Fixed:
+				case TrailingType.Variable:
+					return new RejectableTrailingReader(this, source);
+			}
+			return null;
+		}
+		/// <summary>
+		/// 返回指定源文件的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		public TokenReader GetReader(SourceReader source)
+		{
+			ExceptionHelper.CheckArgumentNull(source, "source");
+			switch (this.trailingType)
+			{
+				case TrailingType.None:
+					return new SimpleReader(this, source);
+				case TrailingType.Fixed:
+					return new FixedTrailingReader(this, source);
+				case TrailingType.Variable:
+					return new VariableTrailingReader(this, source);
+			}
+			return null;
+		}
+
+		#endregion // 生成词法分析器
 
 	}
 }
