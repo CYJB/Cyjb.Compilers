@@ -132,13 +132,15 @@ namespace Cyjb.Compiler.Lexer
 					int newCC = charClassList.Count;
 					result.Add(newCC);
 					charClassList.Add(setClone);
+					List<HashSet<int>> newRecord = null;
 					if (set.Count == 1)
 					{
 						charClassRecord.Add(null);
 					}
 					else
 					{
-						charClassRecord.Add(new List<HashSet<int>>());
+						newRecord = new List<HashSet<int>>();
+						charClassRecord.Add(newRecord);
 						charClassRecord[newCC].Add(result);
 					}
 					// 更新旧的字符类。
@@ -148,7 +150,10 @@ namespace Cyjb.Compiler.Lexer
 					{
 						HashSet<int> tmpSet = record[j];
 						tmpSet.Add(newCC);
-						charClassRecord[newCC].Add(tmpSet);
+						if (newRecord != null)
+						{
+							newRecord.Add(tmpSet);
+						}
 					}
 				}
 				// 重新复制 set。

@@ -141,16 +141,16 @@ namespace Cyjb.Compiler.Lexer
 				}
 				if (InternalReadToken(state))
 				{
+					if (this.IsMore)
+					{
+						oldText = this.controller.Text;
+					}
+					else
+					{
+						oldText = null;
+					}
 					if (this.IsAccept)
 					{
-						if (this.IsMore)
-						{
-							oldText = this.controller.Text;
-						}
-						else
-						{
-							oldText = null;
-						}
 						return new Token(this.controller.Index, this.controller.Text,
 							this.Start, this.Source.BeforeStartLocation, this.controller.Value);
 					}
