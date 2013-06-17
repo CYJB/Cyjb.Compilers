@@ -132,28 +132,24 @@ namespace Cyjb.Compiler.Lexer
 					int newCC = charClassList.Count;
 					result.Add(newCC);
 					charClassList.Add(setClone);
+					List<HashSet<int>> ccRecord = charClassRecord[i];
+					int ccrCnt = ccRecord.Count;
+					// 更新旧的字符类集合。
+					for (int j = 0; j < ccrCnt; j++)
+					{
+						ccRecord[j].Add(newCC);
+					}
+					// 添加新的字符类集合。
 					List<HashSet<int>> newRecord = null;
-					if (set.Count == 1)
+					if (setClone.Count == 1)
 					{
 						charClassRecord.Add(null);
 					}
 					else
 					{
-						newRecord = new List<HashSet<int>>();
+						newRecord = new List<HashSet<int>>(ccRecord);
+						newRecord.Add(result);
 						charClassRecord.Add(newRecord);
-						charClassRecord[newCC].Add(result);
-					}
-					// 更新旧的字符类。
-					List<HashSet<int>> record = charClassRecord[i];
-					int rCnt = record.Count;
-					for (int j = 0; j < rCnt; j++)
-					{
-						HashSet<int> tmpSet = record[j];
-						tmpSet.Add(newCC);
-						if (newRecord != null)
-						{
-							newRecord.Add(tmpSet);
-						}
 					}
 				}
 				// 重新复制 set。
