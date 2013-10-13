@@ -1,16 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Cyjb.Compiler.RegularExpressions;
 using Cyjb.IO;
-using Cyjb.Text;
 
 namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示词法分析器的规则。
 	/// </summary>
+	/// <remarks><para><see cref="LexerRule"/> 类包含了用于构造词法分析器的全部信息，
+	/// 一般用于自己构造词法分析器。如果不希望手动构造词法分析器，请使用 
+	/// <see cref="Grammar.GetReader(SourceReader)"/> 或 
+	/// <see cref="Grammar.GetRejectableReader(SourceReader)"/> 方法，
+	/// 得到自动构造的词法分析器。</para>
+	/// <para>关于如何构造自己的词法分析器，可以参考我的博文
+	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
+	/// 《C# 词法分析器（六）构造词法分析器》</see>。</para></remarks>
+	/// <seealso cref="Grammar"/>
+	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
+	/// 《C# 词法分析器（六）构造词法分析器》</seealso>
 	[Serializable]
 	public sealed class LexerRule
 	{
@@ -337,76 +346,6 @@ namespace Cyjb.Compiler.Lexer
 		}
 
 		#endregion // 构造词法分析器
-
-		#region 生成词法分析器
-
-		/// <summary>
-		/// 返回指定源文件的允许拒绝的词法单元读取器。
-		/// </summary>
-		/// <param name="source">要读取的源文件。</param>
-		/// <returns>指定源文件的词法单元读取器。</returns>
-		/// <overloads>
-		/// <summary>
-		/// 返回指定源文件的允许拒绝的词法单元读取器。
-		/// </summary>
-		/// </overloads>
-		public TokenReader GetRejectableReader(string source)
-		{
-			return GetRejectableReader(new SourceReader(new StringReader(source)));
-		}
-		/// <summary>
-		/// 返回指定源文件的词法单元读取器。
-		/// </summary>
-		/// <param name="source">要读取的源文件。</param>
-		/// <returns>指定源文件的词法单元读取器。</returns>
-		/// <overloads>
-		/// <summary>
-		/// 返回指定源文件的词法单元读取器。
-		/// </summary>
-		/// </overloads>
-		public TokenReader GetReader(string source)
-		{
-			return GetReader(new SourceReader(new StringReader(source)));
-		}
-		/// <summary>
-		/// 返回指定源文件的允许拒绝的词法单元读取器。
-		/// </summary>
-		/// <param name="source">要读取的源文件。</param>
-		/// <returns>指定源文件的词法单元读取器。</returns>
-		public TokenReader GetRejectableReader(SourceReader source)
-		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			switch (this.trailingType)
-			{
-				case TrailingType.None:
-					return new RejectableReader(this, source);
-				case TrailingType.Fixed:
-				case TrailingType.Variable:
-					return new RejectableTrailingReader(this, source);
-			}
-			return null;
-		}
-		/// <summary>
-		/// 返回指定源文件的词法单元读取器。
-		/// </summary>
-		/// <param name="source">要读取的源文件。</param>
-		/// <returns>指定源文件的词法单元读取器。</returns>
-		public TokenReader GetReader(SourceReader source)
-		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			switch (this.trailingType)
-			{
-				case TrailingType.None:
-					return new SimpleReader(this, source);
-				case TrailingType.Fixed:
-					return new FixedTrailingReader(this, source);
-				case TrailingType.Variable:
-					return new VariableTrailingReader(this, source);
-			}
-			return null;
-		}
-
-		#endregion // 生成词法分析器
 
 	}
 }

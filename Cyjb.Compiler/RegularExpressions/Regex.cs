@@ -9,6 +9,13 @@ namespace Cyjb.Compiler.RegularExpressions
 	/// <summary>
 	/// 表示正则表达式。
 	/// </summary>
+	/// <remarks>这里的正则表达式，与 
+	/// <see href="http://msdn.microsoft.com/ZH-CN/library/vstudio/hs600312(v=vs.110).aspx">
+	/// .NET Framework 正则表达式</see>不同，它是专门用于定义词法的。更多信息请参考我的系列博文 
+	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerRegex.html">
+	/// 《C# 词法分析器（三）正则表达式》</see>。</remarks>
+	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerRegex.html">
+	/// 《C# 词法分析器（三）正则表达式》</seealso>
 	public abstract class Regex
 	{
 		/// <summary>
