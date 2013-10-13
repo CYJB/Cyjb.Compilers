@@ -6,7 +6,7 @@ namespace Cyjb.Compiler.Lexer
 	/// <summary>
 	/// 表示支持变长向前看符号的词法单元读取器。
 	/// </summary>
-	internal sealed class VariableTrailingReader : TokenReader
+	internal sealed class VariableTrailingReader : TokenReaderBase
 	{
 		/// <summary>
 		/// 接受状态的堆栈。
@@ -37,8 +37,8 @@ namespace Cyjb.Compiler.Lexer
 					// 没有合适的转移，退出。
 					break;
 				}
-				int[] symbolIndex = base.LexerRule.SymbolIndex[state];
-				if (symbolIndex.Length > 0)
+				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				if (symbolIndex.Count > 0)
 				{
 					// 将接受状态记录在堆栈中。
 					stateStack.Push(new AcceptState(symbolIndex, Source.Index));
@@ -97,10 +97,10 @@ namespace Cyjb.Compiler.Lexer
 		/// <param name="symbolIndex">接受状态的符号索引。</param>
 		/// <param name="target">目标向前看头状态。</param>
 		/// <returns>如果包含特定的目标，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-		private bool ContainsTrailingHead(int[] symbolIndex, int target)
+		private bool ContainsTrailingHead(IList<int> symbolIndex, int target)
 		{
 			// 在当前状态中查找，从后向前找。
-			for (int i = symbolIndex.Length - 1; i >= 0; i--)
+			for (int i = symbolIndex.Count - 1; i >= 0; i--)
 			{
 				int idx = symbolIndex[i];
 				if (idx < base.LexerRule.SymbolCount)

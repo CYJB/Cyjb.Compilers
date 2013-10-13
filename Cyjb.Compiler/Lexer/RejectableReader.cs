@@ -7,7 +7,7 @@ namespace Cyjb.Compiler.Lexer
 	/// <summary>
 	/// 表示支持 Reject 动作的词法单元读取器。
 	/// </summary>
-	internal sealed class RejectableReader : TokenReader
+	internal sealed class RejectableReader : TokenReaderBase
 	{
 		/// <summary>
 		/// 接受状态的堆栈。
@@ -44,8 +44,8 @@ namespace Cyjb.Compiler.Lexer
 					break;
 				}
 				text.Append((char)base.Source.Read());
-				int[] symbolIndex = base.LexerRule.SymbolIndex[state];
-				if (symbolIndex.Length > 0)
+				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				if (symbolIndex.Count > 0)
 				{
 					// 将接受状态记录在堆栈中。
 					stateStack.Push(new AcceptState(symbolIndex, Source.Index));
@@ -55,7 +55,7 @@ namespace Cyjb.Compiler.Lexer
 			while (stateStack.Count > 0)
 			{
 				AcceptState astate = stateStack.Pop();
-				for (int i = 0; i < astate.SymbolIndex.Length; i++)
+				for (int i = 0; i < astate.SymbolIndex.Count; i++)
 				{
 					int acceptState = astate.SymbolIndex[i];
 					int lastIndex = astate.Index;

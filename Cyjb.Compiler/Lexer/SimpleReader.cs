@@ -1,11 +1,12 @@
-﻿using Cyjb.IO;
+﻿using System.Collections.Generic;
+using Cyjb.IO;
 
 namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示基本的词法单元读取器。
 	/// </summary>
-	internal sealed class SimpleReader : TokenReader
+	internal sealed class SimpleReader : TokenReaderBase
 	{
 		/// <summary>
 		/// 使用给定的词法分析器信息初始化 <see cref="SimpleReader"/> 类的新实例。
@@ -32,8 +33,8 @@ namespace Cyjb.Compiler.Lexer
 					// 没有合适的转移，退出。
 					break;
 				}
-				int[] symbolIndex = base.LexerRule.SymbolIndex[state];
-				if (symbolIndex.Length > 0)
+				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				if (symbolIndex.Count > 0)
 				{
 					lastAccept = symbolIndex[0];
 					lastIndex = Source.Index;

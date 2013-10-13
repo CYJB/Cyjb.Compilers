@@ -23,7 +23,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// 当前正则表达式的长度。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private int length = -2;
+		private int length = NotInitialized;
 		/// <summary>
 		/// 使用要并联的正则表达式初始化 <see cref="AlternationExp"/> 类的新实例。
 		/// </summary>
@@ -41,6 +41,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取并联的第一个正则表达式。
 		/// </summary>
+		/// <value>并联的第一个正则表达式。</value>
 		public Regex Left
 		{
 			get { return left; }
@@ -48,6 +49,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取并联的第二个正则表达式。
 		/// </summary>
+		/// <value>并联的第二个正则表达式。</value>
 		public Regex Right
 		{
 			get { return right; }
@@ -70,22 +72,22 @@ namespace Cyjb.Compiler.RegularExpressions
 			nfa.TailState = tail;
 		}
 		/// <summary>
-		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
+		/// 获取当前正则表达式匹配的字符串长度。
 		/// </summary>
+		/// <value>当前正则表达式匹配的字符串长度。如果可以匹配不同长度的字符串，则为 <c>-1</c>。</value>
 		public override int Length
 		{
 			get
 			{
-				if (length == -2)
+				if (length == NotInitialized)
 				{
-					// -2 表示未初始化。
 					if (left.Length == right.Length)
 					{
 						length = left.Length;
 					}
 					else
 					{
-						length = -1;
+						length = VariableLength;
 					}
 				}
 				return length;

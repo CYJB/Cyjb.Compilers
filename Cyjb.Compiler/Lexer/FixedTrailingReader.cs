@@ -1,11 +1,12 @@
-﻿using Cyjb.IO;
+﻿using System.Collections.Generic;
+using Cyjb.IO;
 
 namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示支持定长向前看符号的词法单元读取器。
 	/// </summary>
-	internal sealed class FixedTrailingReader : TokenReader
+	internal sealed class FixedTrailingReader : TokenReaderBase
 	{
 		/// <summary>
 		/// 使用给定的词法分析器信息初始化 <see cref="FixedTrailingReader"/> 类的新实例。
@@ -32,8 +33,8 @@ namespace Cyjb.Compiler.Lexer
 					// 没有合适的转移，退出。
 					break;
 				}
-				int[] symbolIndex = base.LexerRule.SymbolIndex[state];
-				if (symbolIndex.Length > 0)
+				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				if (symbolIndex.Count > 0)
 				{
 					// 确定不是向前看的头状态。
 					int tmp = symbolIndex[0];

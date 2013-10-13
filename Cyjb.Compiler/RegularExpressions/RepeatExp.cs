@@ -53,6 +53,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取重复多次的内部正则表达式。
 		/// </summary>
+		/// <value>重复多次的内部正则表达式。</value>
 		public Regex InnerExpression
 		{
 			get { return innerExp; }
@@ -60,20 +61,24 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取内部正则表达式的最少重复次数。
 		/// </summary>
+		/// <value>内部正则表达式的最少重复次数，这个一个大于等于零的值。</value>
 		public int MinTimes
 		{
 			get { return minTimes; }
 		}
 		/// <summary>
-		/// 获取内部正则表达式的最多重复次数。<see cref="System.Int32.MaxValue"/> 表示不限制次数。
+		/// 获取内部正则表达式的最多重复次数。
 		/// </summary>
+		/// <value>内部正则表达式的最多重复次数，<see cref="System.Int32.MaxValue"/> 
+		/// 表示不限制重复次数。</value>
 		public int MaxTimes
 		{
 			get { return maxTimes; }
 		}
 		/// <summary>
-		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
+		/// 获取当前正则表达式匹配的字符串长度。
 		/// </summary>
+		/// <value>当前正则表达式匹配的字符串长度。如果可以匹配不同长度的字符串，则为 <c>-1</c>。</value>
 		public override int Length
 		{
 			get
@@ -82,7 +87,7 @@ namespace Cyjb.Compiler.RegularExpressions
 				{
 					return minTimes;
 				}
-				return -1;
+				return VariableLength;
 			}
 		}
 		/// <summary>

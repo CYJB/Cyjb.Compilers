@@ -10,47 +10,52 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// 当前的词法单元读取器。
 		/// </summary>
-		private TokenReader reader;
+		private TokenReaderBase reader;
+		/// <summary>
+		/// 是否允许 Reject 动作。
+		/// </summary>
+		private bool rejectable;
 		/// <summary>
 		/// 使用当前的词法单元信息初始化 <see cref="ReaderController"/> 类的新实例。
 		/// </summary>
 		/// <param name="reader">词法单元的读取器。</param>
 		/// <param name="rejectable">是否允许 Reject 动作。</param>
-		public ReaderController(TokenReader reader, bool rejectable)
+		internal ReaderController(TokenReaderBase reader, bool rejectable)
 		{
 			this.reader = reader;
-			this.Rejectable = rejectable;
+			this.rejectable = rejectable;
 		}
 		/// <summary>
-		/// 获取是否允许 Reject 动作。
+		/// 获取当前的上下文标签。
 		/// </summary>
-		public bool Rejectable { get; private set; }
-		/// <summary>
-		/// 获取当前的上下文信息。
-		/// </summary>
-		public LexerContext Context { get { return reader.Context; } }
+		/// <value>当前的上下文标签。</value>
+		public string Context { get { return reader.Context; } }
 		/// <summary>
 		/// 获取要扫描的源文件。
 		/// </summary>
+		/// <value>要扫描的源文件。</value>
 		public SourceReader Source { get { return reader.Source; } }
 		/// <summary>
-		/// 获取词法单元的符号索引。
+		/// 获取词法单元的标识符。
 		/// </summary>
-		public int Index { get; internal set; }
+		/// <value>词法单元的标识符。</value>
+		public string Id { get; internal set; }
 		/// <summary>
 		/// 获取词法单元的文本。
 		/// </summary>
+		/// <value>词法单元的文本。</value>
 		public string Text { get; internal set; }
 		/// <summary>
 		/// 获取词法单元的值。
 		/// </summary>
+		/// <value>词法单元的值。</value>
 		public object Value { get; internal set; }
 		/// <summary>
 		/// 拒绝当前的匹配，并尝试寻找下一个匹配。如果找不到下一个匹配，则会返回错误。
 		/// </summary>
 		public void Reject()
 		{
-			if (!this.Rejectable)
+			if (!this.rejectable)
 			{
 				throw CompilerExceptionHelper.NotRejectable();
 			}
@@ -73,6 +78,11 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// 接受当前的匹配。
 		/// </summary>
+		/// <overloads>
+		/// <summary>
+		/// 接受当前的匹配。
+		/// </summary>
+		/// </overloads>
 		public void Accept()
 		{
 			if (this.reader.IsReject)
@@ -97,17 +107,17 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// 接受给定的匹配。
 		/// </summary>
-		/// <param name="index">词法单元的标识符。</param>
+		/// <param name="id">词法单元的标识符。</param>
 		/// <param name="text">文本。</param>
 		/// <param name="value">用户数据。</param>
-		public void Accept(int index, string text, object value)
+		public void Accept(string id, string text, object value)
 		{
 			if (this.reader.IsReject)
 			{
 				throw CompilerExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
-			this.Index = index;
+			this.Id = id;
 			this.Text = text;
 			this.Value = value;
 		}
@@ -117,44 +127,12 @@ namespace Cyjb.Compiler.Lexer
 		#region 上下文切换
 
 		/// <summary>
-		/// 将指定上下文设置为当前的上下文。
-		/// </summary>
-		/// <param name="context">要设置的上下文。</param>
-		public void BeginContext(LexerContext context)
-		{
-			this.reader.BeginContext(context);
-		}
-		/// <summary>
-		/// 将指定索引的上下文设置为当前的上下文。
-		/// </summary>
-		/// <param name="index">要设置的上下文的索引。</param>
-		public void BeginContext(int index)
-		{
-			this.reader.BeginContext(index);
-		}
-		/// <summary>
 		/// 将指定标签的上下文设置为当前的上下文。
 		/// </summary>
 		/// <param name="label">要设置的上下文的标签。</param>
 		public void BeginContext(string label)
 		{
 			this.reader.BeginContext(label);
-		}
-		/// <summary>
-		/// 将当前上下文压入堆栈，并将上下文设置为指定的值。
-		/// </summary>
-		/// <param name="context">要设置的上下文。</param>
-		public void PushContext(LexerContext context)
-		{
-			this.reader.PushContext(context);
-		}
-		/// <summary>
-		/// 将当前上下文压入堆栈，并将上下文设置为指定的值。
-		/// </summary>
-		/// <param name="index">要设置的上下文的索引。</param>
-		public void PushContext(int index)
-		{
-			this.reader.PushContext(index);
 		}
 		/// <summary>
 		/// 将当前上下文压入堆栈，并将上下文设置为指定的值。

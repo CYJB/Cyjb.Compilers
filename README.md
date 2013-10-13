@@ -1,30 +1,19 @@
 Cyjb.Compiler
 ====
 
-My personal C# library of compiler.
+我开发的 C# 编译类库，以 BSD 协议发布。基于 .Net Framework 4.0，使用 Visual Studio 2012 作为开发工具。
 
-我的个人 C# 编译类库。欢迎访问我的[博客](http://www.cnblogs.com/cyjb/)。
+本项目包括一些与编译相关的类，目前仅包括词法分析器。
 
-本项目包括一些与编译相关的类，包括：
+详细的类库文档，请参见 [Wiki](https://github.com/CYJB/Cyjb.Compiler/wiki)。
 
-* Cyjb.Compiler 命名空间：包含定义词法和语法分析器的类。
-	- Grammar 类：表示词法分析或语法分析中使用的语法规则。
-	- Symbol 类：表示词法或语法分析中的终结符或非终结符。
-	- TerminalSymbol 类：表示词法分析或语法分析的终结符。
-* Cyjb.Compiler.Lexer 命名空间：包含定义词法分析器的类。
-	- LexerContext 类：表示词法分析器的上下文。
-	- LexerRule 类：表示词法分析器的规则。
-	- ReaderController 类：表示词法单元读取器的控制器。
-	- TokenReader 类：表示词法单元读取器的基类。
-* Cyjb.Compiler.RegularExpressions 命名空间：包含定义与解析正则表达式的类。
-	- AlternationExp 类：表示并联的正则表达式。
-	- AnchorExp 类：表示定位点的正则表达式。
-	- CharClassExp 类：表示字符类的正则表达式。
-	- ConcatenationExp 类：表示连接的正则表达式。
-	- EndOfFileExp 类：表示到达文件结尾的正则表达式。
-	- LiteralExp 类：表示逐字字符串的正则表达式。
-	- Regex 类：表示正则表达式。
-	- RegexCharClass 类：表示正则表达式的字符类。
-	- RegexOptions 类：提供用于设置正则表达式选项的枚举值。
-	- RegexParser 类：表示正则表达式的分析器。
-	- RepeatExp 类：表示重复多次的正则表达式。
+欢迎访问我的[博客](http://www.cnblogs.com/cyjb/)获取更多信息。
+
+C# 词法分析器系列博文
+
+ - [C# 词法分析器（一）词法分析介绍](http://www.cnblogs.com/cyjb/archive/p/LexerIntroduce.html)
+ - [C# 词法分析器（二）输入缓冲和代码定位](http://www.cnblogs.com/cyjb/archive/p/LexerInputBuffer.html)
+ - [C# 词法分析器（三）正则表达式](http://www.cnblogs.com/cyjb/archive/p/LexerRegex.html)
+ - [C# 词法分析器（四）构造 NFA](http://www.cnblogs.com/cyjb/archive/p/LexerNfa.html)
+ - [C# 词法分析器（五）转换 DFA](http://www.cnblogs.com/cyjb/archive/p/LexerDfa.html)
+ - [C# 词法分析器（六）构造词法分析器](http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html)

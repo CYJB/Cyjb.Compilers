@@ -47,6 +47,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取正则表达式表示的字符串。
 		/// </summary>
+		/// <value>正则表达式表示的字符串。</value>
 		public new string Literal
 		{
 			get { return literal; }
@@ -54,6 +55,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取是否忽略大小写。
 		/// </summary>
+		/// <value>如果忽略字符串大小写，则为 <c>true</c>；否则为 <c>false</c>。</value>
 		public bool IgnoreCase
 		{
 			get { return ignoreCase; }
@@ -61,6 +63,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取忽略大小写时使用的区域信息。
 		/// </summary>
+		/// <value>忽略大小写时使用的区域信息。</value>
 		public CultureInfo Culture
 		{
 			get { return culture; }
@@ -98,8 +101,9 @@ namespace Cyjb.Compiler.RegularExpressions
 			}
 		}
 		/// <summary>
-		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
+		/// 获取当前正则表达式匹配的字符串长度。
 		/// </summary>
+		/// <value>当前正则表达式匹配的字符串长度。如果可以匹配不同长度的字符串，则为 <c>-1</c>。</value>
 		public override int Length
 		{
 			get { return literal.Length; }

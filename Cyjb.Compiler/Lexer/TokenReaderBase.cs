@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Cyjb.IO;
 using Cyjb.Text;
 
@@ -9,8 +8,12 @@ namespace Cyjb.Compiler.Lexer
 	/// <summary>
 	/// 表示词法单元读取器的基类。
 	/// </summary>
-	public abstract class TokenReader
+	internal abstract class TokenReaderBase : TokenReader
 	{
+		/// <summary>
+		/// 表示文件结束的终结符索引。
+		/// </summary>
+		protected const int EndOfFileIndex = -1;
 		/// <summary>
 		/// 词法分析器的规则。
 		/// </summary>
@@ -22,36 +25,37 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// 上下文的堆栈。
 		/// </summary>
-		private readonly Stack<LexerContext> contextStack = new Stack<LexerContext>();
+		private readonly Stack<KeyValuePair<string, int>> contextStack = new Stack<KeyValuePair<string, int>>();
 		/// <summary>
-		/// 要读取的下一个词法单元。
+		/// 当前的上下文。
 		/// </summary>
-		private Token nextToken;
-		/// <summary>
-		/// 是否已读取下一个词法单元。
-		/// </summary>
-		private bool peekToken = false;
+		private KeyValuePair<string, int> context;
 		/// <summary>
 		/// 上一个词法单元匹配的文本。
 		/// </summary>
 		private string oldText;
 		/// <summary>
-		/// 使用给定的词法分析器信息初始化 <see cref="TokenReader"/> 类的新实例。
+		/// 使用给定的词法分析器信息初始化 <see cref="TokenReaderBase"/> 类的新实例。
 		/// </summary>
 		/// <param name="lexerRule">要使用的词法分析器的规则。</param>
 		/// <param name="rejectable">当前词法分析器是否允许 Reject 动作。</param>
 		/// <param name="reader">要使用的源文件读取器。</param>
-		protected TokenReader(LexerRule lexerRule, bool rejectable, SourceReader reader)
+		protected TokenReaderBase(LexerRule lexerRule, bool rejectable, SourceReader reader)
+			: base(reader)
 		{
 			this.lexerRule = lexerRule;
 			controller = new ReaderController(this, rejectable);
-			this.Source = reader;
-			this.BeginContext(this.lexerRule.Contexts[0]);
+			this.BeginContext(Grammar.InitialContext);
 		}
 		/// <summary>
 		/// 获取词法分析器的规则。
 		/// </summary>
 		protected LexerRule LexerRule { get { return this.lexerRule; } }
+		/// <summary>
+		/// 获取当前的上下文标签。
+		/// </summary>
+		/// <value>当前的上下文标签。</value>
+		internal string Context { get { return this.context.Key; } }
 		/// <summary>
 		/// 获取当前词法单元的起始位置。
 		/// </summary>
@@ -69,67 +73,30 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		internal bool IsMore { get; set; }
 		/// <summary>
-		/// 获取要扫描的源文件。
-		/// </summary>
-		public SourceReader Source { get; private set; }
-		/// <summary>
-		/// 获取当前的上下文信息。
-		/// </summary>
-		public LexerContext Context { get; private set; }
-		/// <summary>
 		/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
 		/// </summary>
 		/// <returns>输入流中的下一个词法单元。</returns>
-		public Token ReadToken()
-		{
-			if (this.peekToken)
-			{
-				this.peekToken = false;
-				return this.nextToken;
-			}
-			else
-			{
-				return InternalReadToken();
-			}
-		}
-		/// <summary>
-		/// 读取输入流中的下一个词法单元，但是并不更改读取器的状态。
-		/// </summary>
-		/// <returns>输入流中的下一个词法单元。</returns>
-		public Token PeekToken()
-		{
-			if (!this.peekToken)
-			{
-				this.peekToken = true;
-				this.nextToken = InternalReadToken();
-			}
-			return this.nextToken;
-		}
-		/// <summary>
-		/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
-		/// </summary>
-		/// <returns>输入流中的下一个词法单元。</returns>
-		private Token InternalReadToken()
+		protected override Token InternalReadToken()
 		{
 			while (true)
 			{
 				if (this.Source.Peek() == -1)
 				{
 					// 到达了流的结尾。
-					Action<ReaderController> action = this.LexerRule.EofActions[Context.Index];
+					Action<ReaderController> action = this.LexerRule.EofActions[context.Value];
 					if (action != null)
 					{
-						this.DoAction(action, Token.EndOfFileIndex, string.Empty);
+						this.DoAction(action, EndOfFileIndex, string.Empty);
 						if (this.IsAccept)
 						{
-							return new Token(this.controller.Index, this.controller.Text,
+							return new Token(this.controller.Id, this.controller.Text,
 								Source.StartLocation, SourceLocation.Invalid, this.controller.Value);
 						}
 					}
 					return Token.GetEndOfFile(Source.StartLocation);
 				}
 				// 起始状态与当前上下文相关。
-				int state = this.Context.Index * 2;
+				int state = this.context.Value * 2;
 				if (Source.StartLocation.Col == 1)
 				{
 					// 行首规则。
@@ -151,7 +118,7 @@ namespace Cyjb.Compiler.Lexer
 					}
 					if (this.IsAccept)
 					{
-						return new Token(this.controller.Index, this.controller.Text,
+						return new Token(this.controller.Id, this.controller.Text,
 							this.Start, this.Source.BeforeStartLocation, this.controller.Value);
 					}
 				}
@@ -185,7 +152,7 @@ namespace Cyjb.Compiler.Lexer
 		protected void DoAction(Action<ReaderController> action, int index, string text)
 		{
 			this.IsAccept = this.IsReject = this.IsMore = false;
-			this.controller.Index = index;
+			this.controller.Id = index == EndOfFileIndex ? Token.EndOfFile : lexerRule.TokenIds[index];
 			if (oldText == null)
 			{
 				this.controller.Text = text;
@@ -210,90 +177,40 @@ namespace Cyjb.Compiler.Lexer
 				// End Of File。
 				return LexerRule.DeadState;
 			}
-			return this.LexerRule.Transitions[state, this.LexerRule.CharClass[ch]];
+			return this.LexerRule.Transitions(state, this.LexerRule.CharClass[ch]);
 		}
 
 		#region 上下文切换
 
 		/// <summary>
-		/// 将指定上下文设置为当前的上下文。
-		/// </summary>
-		/// <param name="context">要设置的上下文。</param>
-		public void BeginContext(LexerContext context)
-		{
-			this.Context = this.GetContext(context);
-		}
-		/// <summary>
-		/// 将指定索引的上下文设置为当前的上下文。
-		/// </summary>
-		/// <param name="index">要设置的上下文的索引。</param>
-		public void BeginContext(int index)
-		{
-			this.Context = this.GetContext(index);
-		}
-		/// <summary>
 		/// 将指定标签的上下文设置为当前的上下文。
 		/// </summary>
 		/// <param name="label">要设置的上下文的标签。</param>
-		public void BeginContext(string label)
+		internal void BeginContext(string label)
 		{
-			this.Context = this.GetContext(label);
-		}
-		/// <summary>
-		/// 将当前上下文压入堆栈，并将上下文设置为指定的值。
-		/// </summary>
-		/// <param name="context">要设置的上下文。</param>
-		public void PushContext(LexerContext context)
-		{
-			this.contextStack.Push(this.Context);
-			this.Context = this.GetContext(context);
-		}
-		/// <summary>
-		/// 将当前上下文压入堆栈，并将上下文设置为指定的值。
-		/// </summary>
-		/// <param name="index">要设置的上下文的索引。</param>
-		public void PushContext(int index)
-		{
-			this.contextStack.Push(this.Context);
-			this.Context = this.GetContext(index);
+			this.context = this.GetContext(label);
 		}
 		/// <summary>
 		/// 将当前上下文压入堆栈，并将上下文设置为指定的值。
 		/// </summary>
 		/// <param name="label">要设置的上下文的标签。</param>
-		public void PushContext(string label)
+		internal void PushContext(string label)
 		{
-			this.contextStack.Push(this.Context);
-			this.Context = this.GetContext(label);
+			this.contextStack.Push(this.context);
+			this.context = this.GetContext(label);
 		}
 		/// <summary>
 		/// 弹出堆栈顶的上下文，并把它设置为当前的上下文。
 		/// </summary>
-		public void PopContext()
+		internal void PopContext()
 		{
 			if (this.contextStack.Count > 0)
 			{
-				this.Context = this.contextStack.Pop();
+				this.context = this.contextStack.Pop();
 			}
 			else
 			{
-				this.Context = this.lexerRule.Contexts[0];
-			}
-		}
-		/// <summary>
-		/// 返回指定的词法分析器上下文。
-		/// </summary>
-		/// <param name="context">要获取的词法分析器上下文。</param>
-		/// <returns>有效的词法分析器上下文。</returns>
-		private LexerContext GetContext(LexerContext context)
-		{
-			if (this.lexerRule.Contexts.Contains(context))
-			{
-				return context;
-			}
-			else
-			{
-				throw CompilerExceptionHelper.InvalidLexerContext("context", context.ToString());
+				this.context = new KeyValuePair<string, int>(Grammar.InitialContext, 0);
 			}
 		}
 		/// <summary>
@@ -301,33 +218,16 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="label">要获取的词法分析器上下文的标签。</param>
 		/// <returns>有效的词法分析器上下文。</returns>
-		private LexerContext GetContext(string label)
+		private KeyValuePair<string, int> GetContext(string label)
 		{
-			LexerContext context;
-			if (this.lexerRule.Contexts.TryGetItem(label, out context))
+			int index;
+			if (this.lexerRule.Contexts.TryGetValue(label, out index))
 			{
-				return context;
+				return new KeyValuePair<string, int>(label, index);
 			}
 			else
 			{
 				throw CompilerExceptionHelper.InvalidLexerContext("label", label);
-			}
-		}
-		/// <summary>
-		/// 返回指定索引的词法分析器上下文。
-		/// </summary>
-		/// <param name="index">要获取的词法分析器上下文的索引。</param>
-		/// <returns>有效的词法分析器上下文。</returns>
-		private LexerContext GetContext(int index)
-		{
-			if (index >= 0 && index < this.lexerRule.Contexts.Count)
-			{
-				return this.lexerRule.Contexts[index];
-			}
-			else
-			{
-				throw CompilerExceptionHelper.InvalidLexerContext("index",
-					index.ToString(CultureInfo.InvariantCulture));
 			}
 		}
 

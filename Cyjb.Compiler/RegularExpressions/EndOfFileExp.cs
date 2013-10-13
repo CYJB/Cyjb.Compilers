@@ -4,7 +4,7 @@ using Cyjb.Compiler.Lexer;
 namespace Cyjb.Compiler.RegularExpressions
 {
 	/// <summary>
-	/// 表示到达文件结尾的正则表达式。
+	/// 表示文件结尾的正则表达式。
 	/// </summary>
 	public sealed class EndOfFileExp : Regex
 	{
@@ -16,6 +16,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取默认的实例。
 		/// </summary>
+		/// <value>默认的 <see cref="EndOfFileExp"/> 实例。</value>
 		internal static EndOfFileExp Default
 		{
 			get { return defaultValue; }
@@ -32,8 +33,9 @@ namespace Cyjb.Compiler.RegularExpressions
 		internal override void BuildNfa(Nfa nfa)
 		{ }
 		/// <summary>
-		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
+		/// 获取当前正则表达式匹配的字符串长度。
 		/// </summary>
+		/// <value>当前正则表达式匹配的字符串长度。如果可以匹配不同长度的字符串，则为 <c>-1</c>。</value>
 		public override int Length
 		{
 			get { return 0; }

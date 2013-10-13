@@ -1,4 +1,6 @@
-﻿namespace Cyjb.Compiler.Lexer
+﻿using System.Collections.Generic;
+
+namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示一个接受状态。
@@ -8,7 +10,7 @@
 		/// <summary>
 		/// 被接受的符号标识符。
 		/// </summary>
-		public int[] SymbolIndex;
+		public IList<int> SymbolIndex;
 		/// <summary>
 		/// 当前的源文件索引。
 		/// </summary>
@@ -18,7 +20,7 @@
 		/// </summary>
 		/// <param name="symbolIndex">被接受的符号标识符。</param>
 		/// <param name="index">当前的源文件索引。</param>
-		internal AcceptState(int[] symbolIndex, int index)
+		internal AcceptState(IList<int> symbolIndex, int index)
 		{
 			this.SymbolIndex = symbolIndex;
 			this.Index = index;

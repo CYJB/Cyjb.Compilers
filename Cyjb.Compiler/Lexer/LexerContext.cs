@@ -32,14 +32,17 @@
 		/// <summary>
 		/// 获取当前上下文的索引。
 		/// </summary>
-		public int Index { get { return this.index; } }
+		/// <value>当前上下文的索引。</value>
+		internal int Index { get { return this.index; } }
 		/// <summary>
 		/// 获取当前上下文的标签。
 		/// </summary>
+		/// <value>当前上下文的标签。</value>
 		public string Label { get { return this.label; } }
 		/// <summary>
 		/// 获取当前上下文的类型。
 		/// </summary>
+		/// <value>当前上下文的类型。</value>
 		public LexerContextType ContextType { get { return this.contextType; } }
 
 		#region IEquatable<LexerContext> 成员
@@ -50,6 +53,11 @@
 		/// <param name="other">与此对象进行比较的对象。</param>
 		/// <returns>如果当前对象等于 <paramref name="other"/>，
 		/// 则为 <c>true</c>；否则为 <c>false</c>。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 指示当前对象是否等于另一个对象。
+		/// </summary>
+		/// </overloads>
 		public bool Equals(LexerContext other)
 		{
 			if (object.ReferenceEquals(other, this))

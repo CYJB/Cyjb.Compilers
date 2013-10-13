@@ -280,6 +280,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取与任何空白匹配的字符类。
 		/// </summary>
+		/// <value>任何空白匹配的字符类。</value>
 		public static string SpaceClass
 		{
 			get { return RccSpaceClass.Value(); }
@@ -287,6 +288,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取不与任何空白匹配的字符类。
 		/// </summary>
+		/// <value>不与任何空白匹配的字符类。</value>
 		public static string NotSpaceClass
 		{
 			get { return RccNotSpaceClass.Value(); }
@@ -294,6 +296,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取与任何单词字符匹配的字符类。
 		/// </summary>
+		/// <value>与任何单词字符匹配的字符类。</value>
 		public static string WordClass
 		{
 			get { return RccWordClass.Value(); }
@@ -301,6 +304,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取不与任何单词字符匹配的字符类。
 		/// </summary>
+		/// <value>不与任何单词字符匹配的字符类。</value>
 		public static string NotWordClass
 		{
 			get { return RccNotWordClass.Value(); }
@@ -308,6 +312,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取与任何十进制数字匹配的字符类。
 		/// </summary>
+		/// <value>与任何十进制数字匹配的字符类。</value>
 		public static string DigitClass
 		{
 			get { return RccDigitClass.Value(); }
@@ -315,6 +320,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取不与任何十进制数字匹配的字符类。
 		/// </summary>
+		/// <value>不与任何十进制数字匹配的字符类。</value>
 		public static string NotDigitClass
 		{
 			get { return RccNotDigitClass.Value(); }
@@ -322,6 +328,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取与任何符合 ECMAScript 行为的空白匹配的字符类。
 		/// </summary>
+		/// <value>与任何符合 ECMAScript 行为的空白匹配的字符类。</value>
 		public static string EcmaSpaceClass
 		{
 			get { return RccECMASpaceClass.Value(); }
@@ -329,6 +336,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取不与任何符合 ECMAScript 行为的空白匹配的字符类。
 		/// </summary>
+		/// <value>不与任何符合 ECMAScript 行为的空白匹配的字符类。</value>
 		public static string NotEcmaSpaceClass
 		{
 			get { return RccNotECMASpaceClass.Value(); }
@@ -336,6 +344,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取与任何符合 ECMAScript 行为的单词字符匹配的字符类。
 		/// </summary>
+		/// <value>与任何符合 ECMAScript 行为的单词字符匹配的字符类。</value>
 		public static string EcmaWordClass
 		{
 			get { return RccECMAWordClass.Value(); }
@@ -343,6 +352,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取不与任何符合 ECMAScript 行为的单词字符匹配的字符类。
 		/// </summary>
+		/// <value>不与任何符合 ECMAScript 行为的单词字符匹配的字符类。</value>
 		public static string NotEcmaWordClass
 		{
 			get { return RccNotECMAWordClass.Value(); }
@@ -350,6 +360,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取与任何符合 ECMAScript 行为的十进制数字匹配的字符类。
 		/// </summary>
+		/// <value>与任何符合 ECMAScript 行为的十进制数字匹配的字符类。</value>
 		public static string EcmaDigitClass
 		{
 			get { return RccECMADigitClass.Value(); }
@@ -357,6 +368,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取不与任何符合 ECMAScript 行为的十进制数字匹配的字符类。
 		/// </summary>
+		/// <value>不与任何符合 ECMAScript 行为的十进制数字匹配的字符类。</value>
 		public static string NotEcmaDigitClass
 		{
 			get { return RccNotECMADigitClass.Value(); }
@@ -476,6 +488,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="pattern">字符类模式。</param>
 		/// <returns><see cref="RegexCharClass"/> 对象。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 从正则表达式的字符类模式获取 <see cref="RegexCharClass"/> 对象。
+		/// </summary>
+		/// </overloads>
 		public static RegexCharClass ParsePattern(string pattern)
 		{
 			return RegexParser.ParseCharClass(pattern, RegexOptions.None, false);
@@ -686,6 +703,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 初始化 <see cref="RegexCharClass"/> 类的新实例。
 		/// </summary>
+		/// <overloads>
+		/// <summary>
+		/// 初始化 <see cref="RegexCharClass"/> 类的新实例。
+		/// </summary>
+		/// </overloads>
 		public RegexCharClass()
 		{
 			charClass = RccConstructor.Value();
@@ -892,6 +914,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取当前字符类是否可以与其他字符类合并。
 		/// </summary>
+		/// <value>如果当前字符类可以与其他字符类合并，则为 <c>true</c>；否则为 <c>false</c>。</value>
 		public bool CanMerge
 		{
 			get { return RccGetCanMerge.Value(charClass); }
@@ -899,6 +922,7 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取或设置当前字符类是否是否定。
 		/// </summary>
+		/// <value>如果当前字符类表示否定，则为 <c>true</c>；否则为 <c>false</c>。</value>
 		public bool Negate
 		{
 			get { return RccGetNegate.Value(charClass); }

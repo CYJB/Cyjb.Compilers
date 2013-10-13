@@ -20,6 +20,14 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		private const string AnyCharSingleLineClass = "\x00\x01\x00\x00";
 		/// <summary>
+		/// 表示正则表达式的长度未初始化。
+		/// </summary>
+		internal const int NotInitialized = -2;
+		/// <summary>
+		/// 表示正则表达式的长度是可变的。
+		/// </summary>
+		internal const int VariableLength = -1;
+		/// <summary>
 		/// 检查正则表达式是否可以被嵌套。
 		/// </summary>
 		/// <param name="regex">要检查的正则表达式。</param>
@@ -51,6 +59,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="pattern">正则表达式的模式字符串。</param>
 		/// <returns>解析得到的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 根据给定的字符串解析正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Parse(string pattern)
 		{
 			return RegexParser.ParseRegex(pattern, RegexOptions.None, null);
@@ -147,6 +160,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="ch">要表示的字符。</param>
 		/// <returns>表示单个字符的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示单个不区分大小写的字符的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex SymbolIgnoreCase(char ch)
 		{
 			return SymbolIgnoreCase(ch, false);
@@ -208,6 +226,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="text">要表示的字符串。</param>
 		/// <returns>表示字符串的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示不区分大小写的字符串的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex LiteralIgnoreCase(string text)
 		{
 			return LiteralIgnoreCase(text, CultureInfo.CurrentCulture);
@@ -242,6 +265,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// 返回表示处换行以外任意字符的正则表达式。
 		/// </summary>
 		/// <returns>表示除换行以外任意字符的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示处换行以外任意字符的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex AnyChar()
 		{
 			return new CharClassExp(AnyCharClass);
@@ -274,6 +302,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="pattern">正则表达式表示的字符类的模式。</param>
 		/// <returns>表示字符类的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示字符类的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex CharClassPattern(string pattern)
 		{
 			ExceptionHelper.CheckArgumentNull(pattern, "pattern");
@@ -295,6 +328,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="cc">正则表达式表示的字符类。</param>
 		/// <returns>表示字符类的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示字符类的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex CharClass(string cc)
 		{
 			ExceptionHelper.CheckArgumentNull(cc, "cc");
@@ -315,6 +353,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="innerExp">内部的正则表达式。</param>
 		/// <returns>表示行的起始位置的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示行的起始位置的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex BeginningOfLine(Regex innerExp)
 		{
 			AnchorExp anchorExp = innerExp as AnchorExp;
@@ -330,6 +373,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="innerExp">内部的正则表达式。</param>
 		/// <returns>表示行的结束位置的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示行的结束位置的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex EndOfLine(Regex innerExp)
 		{
 			return Trailing(innerExp, AnchorExp.EndOfLine);
@@ -340,6 +388,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="innerExp">内部的正则表达式。</param>
 		/// <param name="regex">要向前看的正则表达式。</param>
 		/// <returns>表示向前看的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示向前看的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Trailing(Regex innerExp, Regex regex)
 		{
 			AnchorExp anchorExp = innerExp as AnchorExp;
@@ -355,6 +408,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="innerExp">Kleene 闭包的内部正则表达式。</param>
 		/// <returns>表示 Kleene 闭包的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示 Kleene 闭包的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Star(Regex innerExp)
 		{
 			return new RepeatExp(innerExp, 0, int.MaxValue);
@@ -364,6 +422,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="innerExp">正闭包的内部正则表达式。</param>
 		/// <returns>表示正闭包的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示正闭包的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Positive(Regex innerExp)
 		{
 			return new RepeatExp(innerExp, 1, int.MaxValue);
@@ -373,6 +436,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// </summary>
 		/// <param name="innerExp">可选的内部正则表达式。</param>
 		/// <returns>表示可选的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示可选的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Optional(Regex innerExp)
 		{
 			return new RepeatExp(innerExp, 0, 1);
@@ -383,6 +451,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="innerExp">重复的的内部正则表达式。</param>
 		/// <param name="times">重复次数。</param>
 		/// <returns>表示重复多次的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示重复多次的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Repeat(Regex innerExp, int times)
 		{
 			return new RepeatExp(innerExp, times, times);
@@ -404,6 +477,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="innerExp">重复的的内部正则表达式。</param>
 		/// <param name="minTimes">最少的重复次数。</param>
 		/// <returns>表示至少重复 <paramref name="minTimes"/> 次的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示至少重复 <paramref name="minTimes"/> 次的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex RepeatMinTimes(Regex innerExp, int minTimes)
 		{
 			return new RepeatExp(innerExp, minTimes, int.MaxValue);
@@ -414,6 +492,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="innerExp">重复的的内部正则表达式。</param>
 		/// <param name="maxTimes">最多的重复次数。</param>
 		/// <returns>表示至多重复 <paramref name="maxTimes"/> 次的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示至多重复 <paramref name="maxTimes"/> 次的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex RepeatMaxTimes(Regex innerExp, int maxTimes)
 		{
 			return new RepeatExp(innerExp, 0, maxTimes);
@@ -424,6 +507,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="left">要连接的第一个正则表达式。</param>
 		/// <param name="right">要连接的第二个正则表达式。</param>
 		/// <returns>表示两个正则表达式连接的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示两个正则表达式连接的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Concat(Regex left, Regex right)
 		{
 			return new ConcatenationExp(left, right);
@@ -434,6 +522,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="left">要并联的第一个正则表达式。</param>
 		/// <param name="right">要并联的第二个正则表达式。</param>
 		/// <returns>表示两个正则表达式并联的正则表达式。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回表示两个正则表达式并联的正则表达式。
+		/// </summary>
+		/// </overloads>
 		public static Regex Union(Regex left, Regex right)
 		{
 			return new AlternationExp(left, right);
@@ -450,6 +543,11 @@ namespace Cyjb.Compiler.RegularExpressions
 		}
 
 		#endregion // 静态方法
+
+		/// <summary>
+		/// 初始化 <see cref="Regex"/> 类的新实例。
+		/// </summary>
+		protected Regex() { }
 
 		#region 快捷方法
 
@@ -575,8 +673,9 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <param name="nfa">要构造的 NFA。</param>
 		internal abstract void BuildNfa(Nfa nfa);
 		/// <summary>
-		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
+		/// 获取当前正则表达式匹配的字符串长度。
 		/// </summary>
+		/// <value>当前正则表达式匹配的字符串长度。如果可以匹配不同长度的字符串，则为 <c>-1</c>。</value>
 		public abstract int Length { get; }
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Cyjb.Collections;
 using Cyjb.Collections.ObjectModel;
 
 namespace Cyjb.Compiler.Lexer

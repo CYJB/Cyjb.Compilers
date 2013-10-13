@@ -6,6 +6,7 @@ namespace Cyjb.Compiler.RegularExpressions
 	/// <summary>
 	/// 表示字符类的正则表达式。
 	/// </summary>
+	/// <seealso cref="RegexCharClass"/>
 	public sealed class CharClassExp : Regex
 	{
 		/// <summary>
@@ -24,6 +25,8 @@ namespace Cyjb.Compiler.RegularExpressions
 		/// <summary>
 		/// 获取正则表达式表示的字符类。
 		/// </summary>
+		/// <value>正则表达式表示的字符类，该字符类是压缩后的结果，
+		/// 需要用 <see cref="RegexCharClass"/> 类的相关静态方法操作。</value>
 		public new string CharClass
 		{
 			get { return charClass; }
@@ -40,8 +43,9 @@ namespace Cyjb.Compiler.RegularExpressions
 			nfa.HeadState.Add(nfa.TailState, charClass);
 		}
 		/// <summary>
-		/// 获取当前正则表达式匹配的字符长度。变长度则为 <c>-1</c>。
+		/// 获取当前正则表达式匹配的字符串长度。
 		/// </summary>
+		/// <value>当前正则表达式匹配的字符串长度。如果可以匹配不同长度的字符串，则为 <c>-1</c>。</value>
 		public override int Length
 		{
 			get { return 1; }

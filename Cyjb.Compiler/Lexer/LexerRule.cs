@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Cyjb.Compiler.RegularExpressions;
 using Cyjb.IO;
+using Cyjb.Text;
 
 namespace Cyjb.Compiler.Lexer
 {
@@ -18,10 +19,15 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		public const int DeadState = -1;
 		/// <summary>
-		/// 上下文列表。
+		/// 上下文字典。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private LexerContextCollection contexts;
+		private Dictionary<string, int> contexts;
+		/// <summary>
+		/// 词法单元的标识符列表。
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private string[] tokenIds;
 		/// <summary>
 		/// 字符类的数据。
 		/// </summary>
@@ -40,7 +46,6 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// DFA 的转移。
 		/// </summary>
-		[SuppressMessage("Microsoft.Performance", "CA1814:PreferJaggedArraysOverMultidimensional", MessageId = "Member")]
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private int[,] transitions;
 		/// <summary>
@@ -60,13 +65,22 @@ namespace Cyjb.Compiler.Lexer
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private TrailingType trailingType;
 		/// <summary>
-		/// 使用指定的语法初始化 <see cref="Cyjb.Compiler.Lexer.LexerRule"/> 类的新实例。
+		/// 使用指定的语法规则初始化 <see cref="Cyjb.Compiler.Lexer.LexerRule"/> 类的新实例。
 		/// </summary>
-		/// <param name="grammar">词法分析器使用的语法。</param>
+		/// <param name="grammar">词法分析器使用的语法规则。</param>
 		internal LexerRule(Grammar grammar)
 		{
 			ExceptionHelper.CheckArgumentNull(grammar, "grammar");
-			this.contexts = grammar.Contexts;
+			this.contexts = new Dictionary<string, int>();
+			foreach (LexerContext context in grammar.Contexts)
+			{
+				this.contexts.Add(context.Label, context.Index);
+			}
+			this.tokenIds = new string[grammar.TerminalSymbols.Count];
+			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
+			{
+				tokenIds[sym.Index] = sym.Id;
+			}
 			FillActions(grammar);
 			bool useTrailing;
 			FillDfa(grammar, out useTrailing);
@@ -81,58 +95,74 @@ namespace Cyjb.Compiler.Lexer
 			}
 		}
 		/// <summary>
-		/// 获取词法分析的上下文。
+		/// 获取词法分析的上下文字典。
 		/// </summary>
-		public LexerContextCollection Contexts { get { return contexts; } }
+		/// <value>字典的键保存了所有的上下文标签，其值是对应的索引。</value>
+		public IDictionary<string, int> Contexts { get { return contexts; } }
+		/// <summary>
+		/// 获取词法单元的标识符列表。
+		/// </summary>
+		/// <value>词法单元的标识符列表，其长度与终结符的数量 <see cref="SymbolCount"/> 相同。</value>
+		public IList<string> TokenIds { get { return tokenIds; } }
 		/// <summary>
 		/// 获取字符类的数据。
 		/// </summary>
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-		public int[] CharClass { get { return charClass; } }
+		/// <value>字符类的数据，其长度为 <c>65536</c>，保存了每个字符所属的字符类。</value>
+		public IList<int> CharClass { get { return charClass; } }
 		/// <summary>
 		/// 获取终结符对应的动作。
 		/// </summary>
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-		public Action<ReaderController>[] Actions { get { return actions; } }
+		/// <value>终结符对应的动作，其长度与定义的终结符的数量 <see cref="SymbolCount"/> 相同。</value>
+		public IList<Action<ReaderController>> Actions { get { return actions; } }
 		/// <summary>
 		/// 获取 EOF 动作。
 		/// </summary>
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-		public Action<ReaderController>[] EofActions { get { return eofActions; } }
+		/// <value>与文件结束对应的动作，其长度与定义的上下文数量相同。</value>
+		public IList<Action<ReaderController>> EofActions { get { return eofActions; } }
 		/// <summary>
-		/// 获取 DFA 的转移表。
+		/// 获取 DFA 状态对应的终结符索引。
 		/// </summary>
-		[SuppressMessage("Microsoft.Performance", "CA1814:PreferJaggedArraysOverMultidimensional", MessageId = "Member")]
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-		public int[,] Transitions { get { return transitions; } }
+		/// <value>DFA 状态对应的终结符索引，其长度与 DFA 的状态数相同，即为 <see cref="Count"/>。
+		/// 使用大于零，小于终结符数量 <see cref="SymbolCount"/> 的数表示终结符索引，
+		/// 使用 <see cref="Int32.MaxValue"/> - index 表示向前看符号的头节点。</value>
+		public IList<IList<int>> SymbolIndex { get { return symbolIndex; } }
 		/// <summary>
-		/// 获取 DFA 状态对应的终结符索引，使用 
-		/// <see cref="Int32.MaxValue"/> - index 表示向前看符号的头节点。
+		/// 获取向前看符号的信息。
 		/// </summary>
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-		public int[][] SymbolIndex { get { return symbolIndex; } }
-		/// <summary>
-		/// 获取向前看符号的信息，<c>null</c> 表示不是向前看符号，正数表示前面长度固定，
-		/// 负数表示后面长度固定，<c>0</c> 表示长度不固定。
-		/// </summary>
-		[SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-		public int?[] Trailing { get { return this.trailing; } }
+		/// <value>终结符的向前看信息，其长度与定义的终结符的数量相同。
+		/// 其中 <c>null</c> 表示不是向前看符号，正数表示前面长度固定，
+		/// 负数表示后面长度固定，<c>0</c> 表示长度不固定。。</value>
+		public IList<int?> Trailing { get { return this.trailing; } }
 		/// <summary>
 		/// 获取向前看符号的类型。
 		/// </summary>
+		/// <value>指示正则表达式中是否使用了向前看符号，以及向前看符号的类型。</value>
 		public TrailingType TrailingType { get { return this.trailingType; } }
 		/// <summary>
 		/// 获取 DFA 中的状态数。
 		/// </summary>
-		public int Count { get { return this.transitions.GetLength(0); } }
+		/// <value>DFA 中的状态数。</value>
+		public int Count { get { return this.symbolIndex.Length; } }
 		/// <summary>
 		/// 获取 DFA 中的字符类数。
 		/// </summary>
+		/// <value>DFA 中的字符类数。</value>
 		public int CharClassCount { get { return this.transitions.GetLength(1); } }
 		/// <summary>
-		/// 获取定义的符号数。
+		/// 获取定义了的终结符的数量。
 		/// </summary>
+		/// <value>定义了的终结符的数量。</value>
 		public int SymbolCount { get { return this.actions.Length; } }
+		/// <summary>
+		/// 返回 DFA 中指定状态在指定字符类上的转移。
+		/// </summary>
+		/// <param name="state">当前状态。</param>
+		/// <param name="cc">当前字符类。</param>
+		/// <returns>目标状态。</returns>
+		public int Transitions(int state, int cc)
+		{
+			return transitions[state, cc];
+		}
 
 		#region 构造词法分析器
 
@@ -143,20 +173,19 @@ namespace Cyjb.Compiler.Lexer
 		private void FillActions(Grammar grammar)
 		{
 			int symCnt = grammar.TerminalSymbols.Count;
-			this.eofActions = new Action<ReaderController>[grammar.Contexts.Count];
+			this.eofActions = new Action<ReaderController>[this.contexts.Count];
 			this.actions = new Action<ReaderController>[symCnt];
-			for (int i = 0; i < symCnt; i++)
+			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
 			{
-				TerminalSymbol sym = grammar.TerminalSymbols[i];
-				this.actions[i] = sym.Action;
+				this.actions[sym.Index] = sym.Action;
 				if (sym.RegularExpression is EndOfFileExp)
 				{
 					// 填充相应上下文对应的结束动作。
-					foreach (LexerContext c in sym.Context)
+					foreach (LexerContext context in sym.Context)
 					{
-						if (this.eofActions[c.Index] == null)
+						if (this.eofActions[context.Index] == null)
 						{
-							this.eofActions[c.Index] = sym.Action;
+							this.eofActions[context.Index] = sym.Action;
 						}
 					}
 				}
@@ -167,7 +196,6 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法。</param>
 		/// <param name="useTrailing">是否用到了向前看。</param>
-		[SuppressMessage("Microsoft.Performance", "CA1814:PreferJaggedArraysOverMultidimensional", MessageId = "Body")]
 		private void FillDfa(Grammar grammar, out bool useTrailing)
 		{
 			// 构造 DFA。
@@ -190,11 +218,11 @@ namespace Cyjb.Compiler.Lexer
 					DfaState target = state[j];
 					if (target == null)
 					{
-						this.Transitions[i, j] = DeadState;
+						this.transitions[i, j] = DeadState;
 					}
 					else
 					{
-						this.Transitions[i, j] = target.Index;
+						this.transitions[i, j] = target.Index;
 					}
 				}
 			}
@@ -208,33 +236,33 @@ namespace Cyjb.Compiler.Lexer
 			int symCnt = grammar.TerminalSymbols.Count;
 			this.trailing = new int?[symCnt];
 			bool variableTrailing = false;
-			for (int i = 0; i < symCnt; i++)
+			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
 			{
-				AnchorExp exp = grammar.TerminalSymbols[i].RegularExpression as AnchorExp;
-				if (exp != null && exp.TrailingExpression != null)
+				AnchorExp exp = sym.RegularExpression as AnchorExp;
+				if (exp == null || exp.TrailingExpression == null)
+				{
+					trailing[sym.Index] = null;
+				}
+				else
 				{
 					int len = exp.TrailingExpression.Length;
 					if (len != -1)
 					{
-						trailing[i] = -len;
+						trailing[sym.Index] = -len;
 					}
 					else
 					{
 						len = exp.InnerExpression.Length;
 						if (len != -1)
 						{
-							trailing[i] = len;
+							trailing[sym.Index] = len;
 						}
 						else
 						{
-							trailing[i] = 0;
+							trailing[sym.Index] = 0;
 							variableTrailing = true;
 						}
 					}
-				}
-				else
-				{
-					trailing[i] = null;
 				}
 			}
 			if (variableTrailing)
@@ -266,42 +294,42 @@ namespace Cyjb.Compiler.Lexer
 				nfa.NewState();
 			}
 			useTrailing = false;
-			for (int i = 0; i < symCnt; i++)
+			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
 			{
-				TerminalSymbol sym = grammar.TerminalSymbols[i];
-				if (!(sym.RegularExpression is EndOfFileExp))
+				if (sym.RegularExpression is EndOfFileExp)
 				{
-					sym.RegularExpression.BuildNfa(nfa);
-					nfa.TailState.SymbolIndex = sym.Index;
-					// 是否是行首限定的。
-					bool isBeginningOfLine = false;
-					AnchorExp anchorExp = sym.RegularExpression as AnchorExp;
-					if (anchorExp != null)
+					continue;
+				}
+				sym.RegularExpression.BuildNfa(nfa);
+				nfa.TailState.SymbolIndex = sym.Index;
+				// 是否是行首限定的。
+				bool isBeginningOfLine = false;
+				AnchorExp anchorExp = sym.RegularExpression as AnchorExp;
+				if (anchorExp != null)
+				{
+					if (anchorExp.BeginningOfLine)
 					{
-						if (anchorExp.BeginningOfLine)
-						{
-							isBeginningOfLine = true;
-						}
-						if (anchorExp.TrailingHeadState != null)
-						{
-							// 设置向前看状态类型。
-							anchorExp.TrailingHeadState.SymbolIndex = sym.Index;
-							useTrailing = true;
-						}
+						isBeginningOfLine = true;
 					}
-					foreach (LexerContext context in sym.Context)
+					if (anchorExp.TrailingHeadState != null)
 					{
-						if (isBeginningOfLine)
-						{
-							// 行首限定规则。
-							nfa[context.Index * 2 + 1].Add(nfa.HeadState);
-						}
-						else
-						{
-							// 普通规则。
-							nfa[context.Index * 2].Add(nfa.HeadState);
-							nfa[context.Index * 2 + 1].Add(nfa.HeadState);
-						}
+						// 设置向前看状态类型。
+						anchorExp.TrailingHeadState.SymbolIndex = sym.Index;
+						useTrailing = true;
+					}
+				}
+				foreach (LexerContext context in sym.Context)
+				{
+					if (isBeginningOfLine)
+					{
+						// 行首限定规则。
+						nfa[context.Index * 2 + 1].Add(nfa.HeadState);
+					}
+					else
+					{
+						// 普通规则。
+						nfa[context.Index * 2].Add(nfa.HeadState);
+						nfa[context.Index * 2 + 1].Add(nfa.HeadState);
 					}
 				}
 			}
@@ -317,6 +345,11 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="source">要读取的源文件。</param>
 		/// <returns>指定源文件的词法单元读取器。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回指定源文件的允许拒绝的词法单元读取器。
+		/// </summary>
+		/// </overloads>
 		public TokenReader GetRejectableReader(string source)
 		{
 			return GetRejectableReader(new SourceReader(new StringReader(source)));
@@ -326,6 +359,11 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="source">要读取的源文件。</param>
 		/// <returns>指定源文件的词法单元读取器。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回指定源文件的词法单元读取器。
+		/// </summary>
+		/// </overloads>
 		public TokenReader GetReader(string source)
 		{
 			return GetReader(new SourceReader(new StringReader(source)));
