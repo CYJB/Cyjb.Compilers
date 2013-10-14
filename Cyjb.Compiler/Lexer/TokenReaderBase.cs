@@ -110,9 +110,12 @@ namespace Cyjb.Compiler.Lexer
 				if (InternalReadToken(state))
 				{
 					oldText = this.IsMore ? this.controller.Text : null;
-					if (this.IsAccept)
+					if (!this.IsMore && !this.IsReject)
 					{
 						this.Source.Drop();
+					}
+					if (this.IsAccept)
+					{
 						return new Token(this.controller.Id, this.controller.Text,
 							this.Start, this.Source.BeforeStartLocation, this.controller.Value);
 					}
@@ -147,7 +150,7 @@ namespace Cyjb.Compiler.Lexer
 		{
 			this.IsAccept = this.IsReject = this.IsMore = false;
 			this.controller.Id = index == EndOfFileIndex ? Token.EndOfFile : lexerRule.Symbols[index].Id;
-			this.controller.Text = string.Concat(this.oldText, this.Source.ReadBlock());
+			this.controller.Text = string.Concat(this.oldText, this.Source.ReadedBlock());
 			this.controller.Value = null;
 			action(controller);
 		}
