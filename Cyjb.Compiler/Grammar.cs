@@ -79,6 +79,7 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 词法分析器的规则。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private LexerRule lexerRule;
 
 		#endregion // 词法分析器定义
@@ -213,27 +214,20 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 定义使用默认接受动作的终结符。
 		/// </summary>
+		/// <param name="id">终结符的标识符，不能包含空白或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</param>
 		/// <param name="regex">终结符对应的正则表达式。</param>
 		/// <returns>定义的终结符。</returns>
+		/// <exception cref="System.ArgumentException">标识符包含空白，或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</exception>
 		/// <overloads>
 		/// <summary>
 		/// 定义终结符。
 		/// </summary>
 		/// </overloads>
-		public void DefineSymbol(string regex)
-		{
-			ExceptionHelper.CheckArgumentNull(regex, "regex");
-			InternalDefineSymbol(null, regex, DefaultAccept);
-		}
-		/// <summary>
-		/// 定义使用默认接受动作的终结符。
-		/// </summary>
-		/// <param name="id">终结符的标识符。</param>
-		/// <param name="regex">终结符对应的正则表达式。</param>
-		/// <returns>定义的终结符。</returns>
 		public void DefineSymbol(string id, string regex)
 		{
-			ExceptionHelper.CheckArgumentNull(id, "id");
+			CheckId(id);
 			ExceptionHelper.CheckArgumentNull(regex, "regex");
 			InternalDefineSymbol(id, regex, DefaultAccept);
 		}
@@ -250,12 +244,15 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 定义具有指定正则表达式和动作的终结符。
 		/// </summary>
-		/// <param name="id">终结符的标识符。</param>
+		/// <param name="id">终结符的标识符，不能包含空白或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</param>
 		/// <param name="regex">终结符对应的正则表达式。</param>
 		/// <param name="action">终结符的动作。</param>
+		/// <exception cref="System.ArgumentException">标识符包含空白，或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</exception>
 		public void DefineSymbol(string id, string regex, Action<ReaderController> action)
 		{
-			ExceptionHelper.CheckArgumentNull(id, "id");
+			CheckId(id);
 			ExceptionHelper.CheckArgumentNull(regex, "regex");
 			InternalDefineSymbol(id, regex, action);
 		}
@@ -267,16 +264,11 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 定义一个使用默认接受动作的终结符。
 		/// </summary>
+		/// <param name="id">终结符的标识符，不能包含空白或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</param>
 		/// <param name="regex">终结符对应的正则表达式。</param>
-		public void DefineSymbol(Regex regex)
-		{
-			InternalDefineSymbol(null, regex, DefaultAccept, null);
-		}
-		/// <summary>
-		/// 定义一个使用默认接受动作的终结符。
-		/// </summary>
-		/// <param name="id">终结符的标识符。</param>
-		/// <param name="regex">终结符对应的正则表达式。</param>
+		/// <exception cref="System.ArgumentException">标识符包含空白，或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</exception>
 		public void DefineSymbol(string id, Regex regex)
 		{
 			InternalDefineSymbol(id, regex, DefaultAccept, null);
@@ -284,18 +276,12 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 在指定上下文中定义使用默认接受动作的终结符。
 		/// </summary>
+		/// <param name="id">终结符的标识符，不能包含空白或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</param>
 		/// <param name="regex">终结符对应的正则表达式。</param>
 		/// <param name="contexts">定义终结符的上下文。</param>
-		public void DefineSymbol(Regex regex, IEnumerable<string> contexts)
-		{
-			InternalDefineSymbol(null, regex, DefaultAccept, contexts);
-		}
-		/// <summary>
-		/// 在指定上下文中定义使用默认接受动作的终结符。
-		/// </summary>
-		/// <param name="id">终结符的标识符。</param>
-		/// <param name="regex">终结符对应的正则表达式。</param>
-		/// <param name="contexts">定义终结符的上下文。</param>
+		/// <exception cref="System.ArgumentException">标识符包含空白，或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</exception>
 		public void DefineSymbol(string id, Regex regex, IEnumerable<string> contexts)
 		{
 			InternalDefineSymbol(id, regex, DefaultAccept, contexts);
@@ -318,13 +304,16 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 定义具有指定正则表达式和动作的终结符。
 		/// </summary>
-		/// <param name="id">终结符的标识符。</param>
+		/// <param name="id">终结符的标识符，不能包含空白或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</param>
 		/// <param name="regex">终结符对应的正则表达式。</param>
 		/// <param name="action">终结符的动作。</param>
 		/// <returns>定义的终结符。</returns>
+		/// <exception cref="System.ArgumentException">标识符包含空白，或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</exception>
 		public void DefineSymbol(string id, Regex regex, Action<ReaderController> action)
 		{
-			ExceptionHelper.CheckArgumentNull(id, "id");
+			CheckId(id);
 			InternalDefineSymbol(id, regex, action, null);
 		}
 		/// <summary>
@@ -341,14 +330,17 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 在指定上下文中定义具有指定正则表达式和动作的终结符。
 		/// </summary>
-		/// <param name="id">终结符的标识符。</param>
+		/// <param name="id">终结符的标识符，不能包含空白或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</param>
 		/// <param name="regex">终结符对应的正则表达式。</param>
 		/// <param name="action">终结符的动作。</param>
 		/// <param name="contexts">定义终结符的上下文。</param>
+		/// <exception cref="System.ArgumentException">标识符包含空白，或者与 <see cref="Token"/> 
+		/// 结构中定义的特殊标识符相同。</exception>
 		public void DefineSymbol(string id, Regex regex, Action<ReaderController> action,
 			IEnumerable<string> contexts)
 		{
-			ExceptionHelper.CheckArgumentNull(id, "id");
+			CheckId(id);
 			InternalDefineSymbol(id, regex, action, contexts);
 		}
 
@@ -391,15 +383,7 @@ namespace Cyjb.Compiler
 			IEnumerable<string> contexts)
 		{
 			ExceptionHelper.CheckArgumentNull(regex, "regex");
-			TerminalSymbol symbol;
-			if (id == null)
-			{
-				symbol = new TerminalSymbol(terminalSymbols.Count, regex, action);
-			}
-			else
-			{
-				symbol = new TerminalSymbol(id, terminalSymbols.Count, regex, action);
-			}
+			TerminalSymbol symbol = new TerminalSymbol(id, terminalSymbols.Count, regex, action);
 			if (contexts == null || !contexts.Any())
 			{
 				// 添加所有包含型上下文。
@@ -486,5 +470,24 @@ namespace Cyjb.Compiler
 
 		#endregion // 上下文
 
+		/// <summary>
+		/// 检查指定的符号标识符。
+		/// </summary>
+		/// <param name="id"></param>
+		private static void CheckId(string id)
+		{
+			ExceptionHelper.CheckArgumentNull(id, "id");
+			if (id == Token.EndOfFile)
+			{
+				CompilerExceptionHelper.InvalidSymbolId("id", id);
+			}
+			for (int i = 0; i < id.Length; i++)
+			{
+				if (char.IsWhiteSpace(id, i))
+				{
+					CompilerExceptionHelper.InvalidSymbolId("id", id);
+				}
+			}
+		}
 	}
 }

@@ -150,16 +150,6 @@ namespace Cyjb.Compiler
 		{
 			return GetArgumentException(paramName, "InvalidLexerContext", context);
 		}
-		///// <summary>
-		///// 返回词法规则的符号无效的异常。
-		///// </summary>
-		///// <param name="paramName">产生异常的参数名称。</param>
-		///// <param name="symbol">无效的符号。</param>
-		///// <returns><see cref="System.ArgumentException"/> 对象。</returns>
-		//public static ArgumentException InvalidSymbol(string paramName, Symbol symbol)
-		//{
-		//	return GetArgumentException(paramName, "InvalidSymbol", symbol.Name);
-		//}
 		/// <summary>
 		/// 返回不允许拒绝动作的异常。
 		/// </summary>
@@ -181,6 +171,17 @@ namespace Cyjb.Compiler
 		}
 
 		#endregion // 词法分析异常
+
+		/// <summary>
+		/// 返回无效的符号标识符的异常。
+		/// </summary>
+		/// <param name="paramName">产生异常的参数名称。</param>
+		/// <param name="id">无效的符号标识符。</param>
+		/// <returns><see cref="System.ArgumentException"/> 对象。</returns>
+		public static ArgumentException InvalidSymbolId(string paramName, string id)
+		{
+			return GetArgumentException(paramName, "InvalidSymbolId", id);
+		}
 
 	}
 }

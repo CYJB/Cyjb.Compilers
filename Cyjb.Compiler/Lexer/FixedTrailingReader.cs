@@ -33,12 +33,12 @@ namespace Cyjb.Compiler.Lexer
 					// 没有合适的转移，退出。
 					break;
 				}
-				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				IList<int> symbolIndex = base.LexerRule.States[state].SymbolIndex;
 				if (symbolIndex.Count > 0)
 				{
 					// 确定不是向前看的头状态。
 					int tmp = symbolIndex[0];
-					if (tmp < base.LexerRule.SymbolCount)
+					if (tmp < base.LexerRule.Symbols.Count)
 					{
 						lastAccept = tmp;
 						lastIndex = Source.Index;
@@ -47,10 +47,10 @@ namespace Cyjb.Compiler.Lexer
 			}
 			if (lastAccept >= 0)
 			{
-				if (base.LexerRule.Trailing[lastAccept].HasValue)
+				if (base.LexerRule.Symbols[lastAccept].Trailing.HasValue)
 				{
 					// 是向前看状态。
-					int index = base.LexerRule.Trailing[lastAccept].Value;
+					int index = base.LexerRule.Symbols[lastAccept].Trailing.Value;
 					// 将流调整到与接受状态匹配的状态。
 					if (index > 0)
 					{
@@ -65,7 +65,7 @@ namespace Cyjb.Compiler.Lexer
 				}
 				// 将流调整到与接受状态匹配的状态。
 				Source.Unget(Source.Index - lastIndex);
-				DoAction(base.LexerRule.Actions[lastAccept], lastAccept, base.Source.Accept());
+				DoAction(base.LexerRule.Symbols[lastAccept].Action, lastAccept, base.Source.Accept());
 				return true;
 			}
 			return false;

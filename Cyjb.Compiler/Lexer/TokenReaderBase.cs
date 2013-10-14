@@ -152,7 +152,7 @@ namespace Cyjb.Compiler.Lexer
 		protected void DoAction(Action<ReaderController> action, int index, string text)
 		{
 			this.IsAccept = this.IsReject = this.IsMore = false;
-			this.controller.Id = index == EndOfFileIndex ? Token.EndOfFile : lexerRule.TokenIds[index];
+			this.controller.Id = index == EndOfFileIndex ? Token.EndOfFile : lexerRule.Symbols[index].Id;
 			if (oldText == null)
 			{
 				this.controller.Text = text;
@@ -177,7 +177,7 @@ namespace Cyjb.Compiler.Lexer
 				// End Of File。
 				return LexerRule.DeadState;
 			}
-			return this.LexerRule.Transitions(state, this.LexerRule.CharClass[ch]);
+			return this.LexerRule.States[state].Transitions[this.LexerRule.CharClass[ch]];
 		}
 
 		#region 上下文切换

@@ -55,6 +55,7 @@
     <Compile Include="Lexer\AcceptState.cs" />
     <Compile Include="Lexer\CharClass.cs" />
     <Compile Include="Lexer\Dfa.cs" />
+    <Compile Include="Lexer\StateData.cs" />
     <Compile Include="Lexer\DfaState.cs" />
     <Compile Include="Lexer\FixedTrailingReader.cs">
       <SubType>Code</SubType>
@@ -67,6 +68,7 @@
     <Compile Include="Lexer\NfaState.cs" />
     <Compile Include="Lexer\NfaStateType.cs" />
     <Compile Include="Lexer\ReaderController.cs" />
+    <Compile Include="Lexer\SymbolData.cs" />
     <Compile Include="Lexer\TokenReaderBase.cs" />
     <Compile Include="Lexer\TrailingType.cs" />
     <Compile Include="Lexer\SimpleReader.cs" />

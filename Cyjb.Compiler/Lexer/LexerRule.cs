@@ -33,41 +33,45 @@ namespace Cyjb.Compiler.Lexer
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private Dictionary<string, int> contexts;
 		/// <summary>
-		/// 词法单元的标识符列表。
-		/// </summary>
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private string[] tokenIds;
-		/// <summary>
-		/// 字符类的数据。
-		/// </summary>
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private int[] charClass;
-		/// <summary>
-		/// 终结符对应的动作。
-		/// </summary>
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private Action<ReaderController>[] actions;
-		/// <summary>
 		/// EOF 动作。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private Action<ReaderController>[] eofActions;
 		/// <summary>
-		/// DFA 的转移。
+		/// 词法分析器中定义的上下文数量。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private int[,] transitions;
+		private int contextCount;
 		/// <summary>
-		/// DFA 状态对应的终结符索引，使用 
-		/// <see cref="Int32.MaxValue"/> - index 表示向前看符号的头节点。
+		/// 词法分析器的终结符列表。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private int[][] symbolIndex;
+		private SymbolData[] symbols;
 		/// <summary>
-		/// 向前看符号的信息。
+		/// 词法分析器中定义的终结符数量。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private int?[] trailing;
+		private int symbolCount;
+		/// <summary>
+		/// 词法分析器的 DFA 状态列表。
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private StateData[] states;
+		/// <summary>
+		/// 词法分析器的 DFA 状态数量。
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private int stateCount;
+		/// <summary>
+		/// 词法分析器使用的字符类数量。
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private int charClassCount;
+		/// <summary>
+		/// 字符类的数据。
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private int[] charClass;
 		/// <summary>
 		/// 向前看符号的类型。
 		/// </summary>
@@ -80,17 +84,19 @@ namespace Cyjb.Compiler.Lexer
 		internal LexerRule(Grammar grammar)
 		{
 			ExceptionHelper.CheckArgumentNull(grammar, "grammar");
-			this.contexts = new Dictionary<string, int>();
+			this.contextCount = grammar.Contexts.Count;
+			this.contexts = new Dictionary<string, int>(contextCount);
 			foreach (LexerContext context in grammar.Contexts)
 			{
 				this.contexts.Add(context.Label, context.Index);
 			}
-			this.tokenIds = new string[grammar.TerminalSymbols.Count];
+			this.symbolCount = grammar.TerminalSymbols.Count;
+			this.symbols = new SymbolData[this.symbolCount];
 			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
 			{
-				tokenIds[sym.Index] = sym.Id;
+				this.symbols[sym.Index] = new SymbolData(sym.Id, sym.Action);
 			}
-			FillActions(grammar);
+			FillEOFActions(grammar);
 			bool useTrailing;
 			FillDfa(grammar, out useTrailing);
 			if (useTrailing)
@@ -99,7 +105,6 @@ namespace Cyjb.Compiler.Lexer
 			}
 			else
 			{
-				this.trailing = null;
 				this.trailingType = TrailingType.None;
 			}
 		}
@@ -109,84 +114,64 @@ namespace Cyjb.Compiler.Lexer
 		/// <value>字典的键保存了所有的上下文标签，其值是对应的索引。</value>
 		public IDictionary<string, int> Contexts { get { return contexts; } }
 		/// <summary>
-		/// 获取词法单元的标识符列表。
+		/// 获取 EOF 动作。
 		/// </summary>
-		/// <value>词法单元的标识符列表，其长度与终结符的数量 <see cref="SymbolCount"/> 相同。</value>
-		public IList<string> TokenIds { get { return tokenIds; } }
+		/// <value>与文件结束对应的动作，其长度与定义的上下文数量 <see cref="ContextCount"/> 相同。</value>
+		public IList<Action<ReaderController>> EofActions { get { return eofActions; } }
+		/// <summary>
+		/// 获取词法分析器中定义的上下文数量。
+		/// </summary>
+		/// <value>词法分析器中定义的上下文数量。</value>
+		public int ContextCount { get { return contextCount; } }
+		/// <summary>
+		/// 获取词法分析器的终结符列表。
+		/// </summary>
+		/// <value>词法分析器的终结符列表，
+		/// 其长度与词法分析器中定义的终结符数量 <see cref="SymbolCount"/> 相同。</value>
+		public IList<SymbolData> Symbols { get { return symbols; } }
+		/// <summary>
+		/// 获取词法分析器中定义的终结符数量。
+		/// </summary>
+		/// <value>词法分析器中定义的终结符数量。</value>
+		public int SymbolCount { get { return symbolCount; } }
+		/// <summary>
+		/// 获取词法分析器的 DFA 状态列表。
+		/// </summary>
+		/// <value>词法分析器的 DFA 状态列表，
+		/// 其长度与词法分析器中定义的 DFA 状态数量 <see cref="StateCount"/> 相同。</value>
+		public IList<StateData> States { get { return states; } }
+		/// <summary>
+		/// 获取词法分析器的 DFA 状态数量。
+		/// </summary>
+		/// <value>词法分析器的 DFA 状态数量。</value>
+		public int StateCount { get { return stateCount; } }
+		/// <summary>
+		/// 获取词法分析器使用的字符类数量。
+		/// </summary>
+		/// <value>词法分析器使用的字符类数量。</value>
+		public int CharClassCount { get { return charClassCount; } }
 		/// <summary>
 		/// 获取字符类的数据。
 		/// </summary>
 		/// <value>字符类的数据，其长度为 <c>65536</c>，保存了每个字符所属的字符类。</value>
 		public IList<int> CharClass { get { return charClass; } }
 		/// <summary>
-		/// 获取终结符对应的动作。
-		/// </summary>
-		/// <value>终结符对应的动作，其长度与定义的终结符的数量 <see cref="SymbolCount"/> 相同。</value>
-		public IList<Action<ReaderController>> Actions { get { return actions; } }
-		/// <summary>
-		/// 获取 EOF 动作。
-		/// </summary>
-		/// <value>与文件结束对应的动作，其长度与定义的上下文数量相同。</value>
-		public IList<Action<ReaderController>> EofActions { get { return eofActions; } }
-		/// <summary>
-		/// 获取 DFA 状态对应的终结符索引。
-		/// </summary>
-		/// <value>DFA 状态对应的终结符索引，其长度与 DFA 的状态数相同，即为 <see cref="Count"/>。
-		/// 使用大于零，小于终结符数量 <see cref="SymbolCount"/> 的数表示终结符索引，
-		/// 使用 <see cref="Int32.MaxValue"/> - index 表示向前看符号的头节点。</value>
-		public IList<IList<int>> SymbolIndex { get { return symbolIndex; } }
-		/// <summary>
-		/// 获取向前看符号的信息。
-		/// </summary>
-		/// <value>终结符的向前看信息，其长度与定义的终结符的数量相同。
-		/// 其中 <c>null</c> 表示不是向前看符号，正数表示前面长度固定，
-		/// 负数表示后面长度固定，<c>0</c> 表示长度不固定。。</value>
-		public IList<int?> Trailing { get { return this.trailing; } }
-		/// <summary>
 		/// 获取向前看符号的类型。
 		/// </summary>
 		/// <value>指示正则表达式中是否使用了向前看符号，以及向前看符号的类型。</value>
 		public TrailingType TrailingType { get { return this.trailingType; } }
-		/// <summary>
-		/// 获取 DFA 中的状态数。
-		/// </summary>
-		/// <value>DFA 中的状态数。</value>
-		public int Count { get { return this.symbolIndex.Length; } }
-		/// <summary>
-		/// 获取 DFA 中的字符类数。
-		/// </summary>
-		/// <value>DFA 中的字符类数。</value>
-		public int CharClassCount { get { return this.transitions.GetLength(1); } }
-		/// <summary>
-		/// 获取定义了的终结符的数量。
-		/// </summary>
-		/// <value>定义了的终结符的数量。</value>
-		public int SymbolCount { get { return this.actions.Length; } }
-		/// <summary>
-		/// 返回 DFA 中指定状态在指定字符类上的转移。
-		/// </summary>
-		/// <param name="state">当前状态。</param>
-		/// <param name="cc">当前字符类。</param>
-		/// <returns>目标状态。</returns>
-		public int Transitions(int state, int cc)
-		{
-			return transitions[state, cc];
-		}
 
 		#region 构造词法分析器
 
 		/// <summary>
-		/// 填充符号对应的动作。
+		/// 填充 EOF 动作。
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法。</param>
-		private void FillActions(Grammar grammar)
+		private void FillEOFActions(Grammar grammar)
 		{
-			int symCnt = grammar.TerminalSymbols.Count;
-			this.eofActions = new Action<ReaderController>[this.contexts.Count];
-			this.actions = new Action<ReaderController>[symCnt];
+			this.eofActions = new Action<ReaderController>[this.contextCount];
 			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
 			{
-				this.actions[sym.Index] = sym.Action;
 				if (sym.RegularExpression is EndOfFileExp)
 				{
 					// 填充相应上下文对应的结束动作。
@@ -209,31 +194,31 @@ namespace Cyjb.Compiler.Lexer
 		{
 			// 构造 DFA。
 			Nfa nfa = BuildNfa(grammar, out useTrailing);
-			int headCnt = this.contexts.Count * 2;
+			int headCnt = this.contextCount * 2;
 			Dfa dfa = nfa.BuildDfa(headCnt);
 			dfa.Minimize(headCnt);
 			// 获取 DFA 的数据。
 			this.charClass = dfa.CharClass.GetCharClassMap();
-			int stateCnt = dfa.Count;
-			int ccCnt = dfa.CharClass.Count;
-			this.transitions = new int[stateCnt, ccCnt];
-			this.symbolIndex = new int[stateCnt][];
-			for (int i = 0; i < stateCnt; i++)
+			this.stateCount = dfa.Count;
+			this.states = new StateData[stateCount];
+			this.charClassCount = dfa.CharClass.Count;
+			for (int i = 0; i < this.stateCount; i++)
 			{
 				DfaState state = dfa[i];
-				this.symbolIndex[i] = state.SymbolIndex;
-				for (int j = 0; j < ccCnt; j++)
+				int[] transitions = new int[charClassCount];
+				for (int j = 0; j < charClassCount; j++)
 				{
 					DfaState target = state[j];
 					if (target == null)
 					{
-						this.transitions[i, j] = DeadState;
+						transitions[j] = DeadState;
 					}
 					else
 					{
-						this.transitions[i, j] = target.Index;
+						transitions[j] = target.Index;
 					}
 				}
+				states[i] = new StateData(transitions, state.SymbolIndex);
 			}
 		}
 		/// <summary>
@@ -242,33 +227,27 @@ namespace Cyjb.Compiler.Lexer
 		/// <param name="grammar">词法分析器使用的语法。</param>
 		private void FillTrailing(Grammar grammar)
 		{
-			int symCnt = grammar.TerminalSymbols.Count;
-			this.trailing = new int?[symCnt];
 			bool variableTrailing = false;
 			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
 			{
 				AnchorExp exp = sym.RegularExpression as AnchorExp;
-				if (exp == null || exp.TrailingExpression == null)
-				{
-					trailing[sym.Index] = null;
-				}
-				else
+				if (exp != null && exp.TrailingExpression != null)
 				{
 					int len = exp.TrailingExpression.Length;
 					if (len != -1)
 					{
-						trailing[sym.Index] = -len;
+						this.symbols[sym.Index].Trailing = -len;
 					}
 					else
 					{
 						len = exp.InnerExpression.Length;
 						if (len != -1)
 						{
-							trailing[sym.Index] = len;
+							this.symbols[sym.Index].Trailing = len;
 						}
 						else
 						{
-							trailing[sym.Index] = 0;
+							this.symbols[sym.Index].Trailing = 0;
 							variableTrailing = true;
 						}
 					}
@@ -292,7 +271,6 @@ namespace Cyjb.Compiler.Lexer
 		private static Nfa BuildNfa(Grammar grammar, out bool useTrailing)
 		{
 			int contextCnt = grammar.Contexts.Count;
-			int symCnt = grammar.TerminalSymbols.Count;
 			// 将多个上下文的规则放入一个 NFA 中，但起始状态不同。
 			Nfa nfa = new Nfa();
 			for (int i = 0; i < contextCnt; i++)

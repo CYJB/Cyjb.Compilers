@@ -37,7 +37,7 @@ namespace Cyjb.Compiler.Lexer
 					// 没有合适的转移，退出。
 					break;
 				}
-				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				IList<int> symbolIndex = base.LexerRule.States[state].SymbolIndex;
 				if (symbolIndex.Count > 0)
 				{
 					// 将接受状态记录在堆栈中。
@@ -53,7 +53,7 @@ namespace Cyjb.Compiler.Lexer
 				if (acceptState < base.LexerRule.SymbolCount)
 				{
 					int lastIndex = astate.Index;
-					int? trailing = base.LexerRule.Trailing[acceptState];
+					int? trailing = base.LexerRule.Symbols[acceptState].Trailing;
 					if (trailing.HasValue)
 					{
 						// 是向前看状态。
@@ -85,7 +85,7 @@ namespace Cyjb.Compiler.Lexer
 					}
 					// 将流调整到与接受状态匹配的状态。
 					Source.Unget(Source.Index - lastIndex);
-					DoAction(base.LexerRule.Actions[acceptState], acceptState, base.Source.Accept());
+					DoAction(base.LexerRule.Symbols[acceptState].Action, acceptState, base.Source.Accept());
 					return true;
 				}
 			}

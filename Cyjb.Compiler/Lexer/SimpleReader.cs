@@ -33,7 +33,7 @@ namespace Cyjb.Compiler.Lexer
 					// 没有合适的转移，退出。
 					break;
 				}
-				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				IList<int> symbolIndex = base.LexerRule.States[state].SymbolIndex;
 				if (symbolIndex.Count > 0)
 				{
 					lastAccept = symbolIndex[0];
@@ -44,7 +44,7 @@ namespace Cyjb.Compiler.Lexer
 			{
 				// 将流调整到与接受状态匹配的状态。
 				Source.Unget(Source.Index - lastIndex);
-				DoAction(base.LexerRule.Actions[lastAccept], lastAccept, Source.Accept());
+				DoAction(base.LexerRule.Symbols[lastAccept].Action, lastAccept, Source.Accept());
 				return true;
 			}
 			return false;

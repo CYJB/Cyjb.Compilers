@@ -44,7 +44,7 @@ namespace Cyjb.Compiler.Lexer
 					break;
 				}
 				text.Append((char)base.Source.Read());
-				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				IList<int> symbolIndex = base.LexerRule.States[state].SymbolIndex;
 				if (symbolIndex.Count > 0)
 				{
 					// 将接受状态记录在堆栈中。
@@ -61,7 +61,7 @@ namespace Cyjb.Compiler.Lexer
 					int lastIndex = astate.Index;
 					// 将文本和流调整到与接受状态匹配的状态。
 					text.Length = lastIndex - startIndex;
-					DoAction(base.LexerRule.Actions[acceptState], acceptState, text.ToString());
+					DoAction(base.LexerRule.Symbols[acceptState].Action, acceptState, text.ToString());
 					if (!base.IsReject)
 					{
 						Source.Unget(Source.Index - lastIndex);

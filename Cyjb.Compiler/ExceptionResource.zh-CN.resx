@@ -145,6 +145,10 @@
     <value>无效的词法分析上下文 '{0}'。</value>
     <comment>无效的词法分析上下文。</comment>
   </data>
+  <data name="InvalidSymbolId" xml:space="preserve">
+    <value>无效的符号标识符 '{0}'，不能包含空白。</value>
+    <comment>无效的符号标识符。</comment>
+  </data>
   <data name="MalformedSlashP" xml:space="preserve">
     <value>格式不正确的 \p{X} 字符转义。</value>
     <comment>格式不正确的 \p{X} 字符转义。</comment>

@@ -45,7 +45,7 @@ namespace Cyjb.Compiler.Lexer
 					// 没有合适的转移，退出。
 					break;
 				}
-				IList<int> symbolIndex = base.LexerRule.SymbolIndex[state];
+				IList<int> symbolIndex = base.LexerRule.States[state].SymbolIndex;
 				if (symbolIndex.Count > 0)
 				{
 					// 将接受状态记录在堆栈中。
@@ -59,7 +59,7 @@ namespace Cyjb.Compiler.Lexer
 				for (int i = 0; i < astate.SymbolIndex.Count; i++)
 				{
 					int acceptState = astate.SymbolIndex[i];
-					if (acceptState >= base.LexerRule.SymbolCount)
+					if (acceptState >= base.LexerRule.Symbols.Count)
 					{
 						// 跳过向前看的头状态。
 						break;
@@ -67,7 +67,7 @@ namespace Cyjb.Compiler.Lexer
 					int lastIndex = astate.Index;
 					// 保存向前看跳过的文本。
 					string savedText = null;
-					int? trailing = base.LexerRule.Trailing[acceptState];
+					int? trailing = base.LexerRule.Symbols[acceptState].Trailing;
 					if (trailing.HasValue)
 					{
 						// 是向前看状态。
@@ -100,7 +100,7 @@ namespace Cyjb.Compiler.Lexer
 					}
 					// 将文本和流调整到与接受状态匹配的状态。
 					text.Length = lastIndex - startIndex;
-					DoAction(base.LexerRule.Actions[acceptState], acceptState, text.ToString());
+					DoAction(base.LexerRule.Symbols[acceptState].Action, acceptState, text.ToString());
 					if (base.IsReject)
 					{
 						// 被 Reject，恢复文本和流的状态。

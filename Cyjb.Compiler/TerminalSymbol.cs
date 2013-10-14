@@ -18,18 +18,6 @@ namespace Cyjb.Compiler
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private HashSet<LexerContext> context = new HashSet<LexerContext>();
 		/// <summary>
-		/// 使用符号的索引、正则表达式和动作初始化 <see cref="Symbol"/> 类的新实例。
-		/// </summary>
-		/// <param name="index">当前终结符的索引。</param>
-		/// <param name="regex">终结符对应的正则表达式。</param>
-		/// <param name="action">终结符的动作。</param>
-		internal TerminalSymbol(int index, Regex regex, Action<ReaderController> action)
-			: base("T" + index.ToString(CultureInfo.InvariantCulture), index)
-		{
-			this.RegularExpression = regex;
-			this.Action = action;
-		}
-		/// <summary>
 		/// 使用符号的标识符、索引、正则表达式和动作初始化 <see cref="Symbol"/> 类的新实例。
 		/// </summary>
 		/// <param name="id">当前终结符的标识符。</param>
@@ -37,7 +25,7 @@ namespace Cyjb.Compiler
 		/// <param name="regex">终结符对应的正则表达式。</param>
 		/// <param name="action">终结符的动作。</param>
 		internal TerminalSymbol(string id, int index, Regex regex, Action<ReaderController> action)
-			: base(id, index)
+			: base(id ?? "_TS_#" + index.ToString(CultureInfo.InvariantCulture), index)
 		{
 			this.RegularExpression = regex;
 			this.Action = action;

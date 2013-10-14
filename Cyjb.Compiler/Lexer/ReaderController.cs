@@ -107,17 +107,15 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// 接受给定的匹配。
 		/// </summary>
-		/// <param name="id">词法单元的标识符。</param>
 		/// <param name="text">文本。</param>
 		/// <param name="value">用户数据。</param>
-		public void Accept(string id, string text, object value)
+		public void Accept(string text, object value)
 		{
 			if (this.reader.IsReject)
 			{
 				throw CompilerExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
-			this.Id = id;
 			this.Text = text;
 			this.Value = value;
 		}
