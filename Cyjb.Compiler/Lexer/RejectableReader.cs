@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 using Cyjb.IO;
 
 namespace Cyjb.Compiler.Lexer
@@ -13,10 +12,6 @@ namespace Cyjb.Compiler.Lexer
 		/// 接受状态的堆栈。
 		/// </summary>
 		private Stack<AcceptState> stateStack = new Stack<AcceptState>();
-		/// <summary>
-		/// 当前匹配的文本。
-		/// </summary>
-		private StringBuilder text = new StringBuilder(20);
 		/// <summary>
 		/// 使用给定的词法分析器信息初始化 <see cref="RejectableReader"/> 类的新实例。
 		/// </summary>
@@ -33,17 +28,15 @@ namespace Cyjb.Compiler.Lexer
 		protected override bool InternalReadToken(int state)
 		{
 			stateStack.Clear();
-			text.Clear();
 			int startIndex = Source.Index;
 			while (true)
 			{
-				state = TransitionState(state, base.Source.Peek());
+				state = TransitionState(state, base.Source.Read());
 				if (state == LexerRule.DeadState)
 				{
 					// 没有合适的转移，退出。
 					break;
 				}
-				text.Append((char)base.Source.Read());
 				IList<int> symbolIndex = base.LexerRule.States[state].SymbolIndex;
 				if (symbolIndex.Count > 0)
 				{
@@ -60,12 +53,10 @@ namespace Cyjb.Compiler.Lexer
 					int acceptState = astate.SymbolIndex[i];
 					int lastIndex = astate.Index;
 					// 将文本和流调整到与接受状态匹配的状态。
-					text.Length = lastIndex - startIndex;
-					DoAction(base.LexerRule.Symbols[acceptState].Action, acceptState, text.ToString());
+					Source.Index = lastIndex;
+					DoAction(base.LexerRule.Symbols[acceptState].Action, acceptState);
 					if (!base.IsReject)
 					{
-						Source.Unget(Source.Index - lastIndex);
-						Source.Drop();
 						return true;
 					}
 				}

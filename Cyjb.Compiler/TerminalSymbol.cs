@@ -18,7 +18,7 @@ namespace Cyjb.Compiler
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private HashSet<LexerContext> context = new HashSet<LexerContext>();
 		/// <summary>
-		/// 使用符号的标识符、索引、正则表达式和动作初始化 <see cref="Symbol"/> 类的新实例。
+		/// 使用终结符的标识符、索引、正则表达式和动作初始化 <see cref="Symbol"/> 类的新实例。
 		/// </summary>
 		/// <param name="id">当前终结符的标识符。</param>
 		/// <param name="index">当前终结符的索引。</param>

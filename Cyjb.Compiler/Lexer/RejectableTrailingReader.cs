@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 using Cyjb.Collections;
 using Cyjb.IO;
 
@@ -14,10 +13,6 @@ namespace Cyjb.Compiler.Lexer
 		/// 接受状态的堆栈。
 		/// </summary>
 		private ListStack<AcceptState> stateStack = new ListStack<AcceptState>();
-		/// <summary>
-		/// 当前匹配的文本。
-		/// </summary>
-		private StringBuilder text = new StringBuilder(20);
 		/// <summary>
 		/// 使用给定的词法分析器信息初始化 <see cref="RejectableTrailingReader"/> 类的新实例。
 		/// </summary>
@@ -34,12 +29,10 @@ namespace Cyjb.Compiler.Lexer
 		protected override bool InternalReadToken(int state)
 		{
 			stateStack.Clear();
-			text.Clear();
 			int startIndex = Source.Index;
 			while (true)
 			{
-				state = TransitionState(state, base.Source.Peek());
-				text.Append((char)base.Source.Read());
+				state = TransitionState(state, base.Source.Read());
 				if (state == LexerRule.DeadState)
 				{
 					// 没有合适的转移，退出。
@@ -59,14 +52,12 @@ namespace Cyjb.Compiler.Lexer
 				for (int i = 0; i < astate.SymbolIndex.Count; i++)
 				{
 					int acceptState = astate.SymbolIndex[i];
-					if (acceptState >= base.LexerRule.Symbols.Count)
+					if (acceptState >= base.LexerRule.SymbolCount)
 					{
 						// 跳过向前看的头状态。
 						break;
 					}
 					int lastIndex = astate.Index;
-					// 保存向前看跳过的文本。
-					string savedText = null;
 					int? trailing = base.LexerRule.Symbols[acceptState].Trailing;
 					if (trailing.HasValue)
 					{
@@ -95,24 +86,12 @@ namespace Cyjb.Compiler.Lexer
 								}
 							}
 						}
-						// 这里需要保存字符串状态，以保证可以正确 Reject。
-						savedText = text.ToString(lastIndex - startIndex, astate.Index - lastIndex);
 					}
 					// 将文本和流调整到与接受状态匹配的状态。
-					text.Length = lastIndex - startIndex;
-					DoAction(base.LexerRule.Symbols[acceptState].Action, acceptState, text.ToString());
-					if (base.IsReject)
+					Source.Index = lastIndex;
+					DoAction(base.LexerRule.Symbols[acceptState].Action, acceptState);
+					if (!base.IsReject)
 					{
-						// 被 Reject，恢复文本和流的状态。
-						if (savedText != null)
-						{
-							text.Append(savedText);
-						}
-					}
-					else
-					{
-						Source.Unget(Source.Index - lastIndex);
-						Source.Drop();
 						return true;
 					}
 				}

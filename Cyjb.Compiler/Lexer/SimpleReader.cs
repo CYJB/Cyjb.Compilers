@@ -27,7 +27,8 @@ namespace Cyjb.Compiler.Lexer
 			int lastAccept = -1, lastIndex = Source.Index;
 			while (true)
 			{
-				state = TransitionState(state, base.Source.Read());
+				int ch = base.Source.Read();
+				state = TransitionState(state, ch);
 				if (state == LexerRule.DeadState)
 				{
 					// 没有合适的转移，退出。
@@ -43,8 +44,8 @@ namespace Cyjb.Compiler.Lexer
 			if (lastAccept >= 0)
 			{
 				// 将流调整到与接受状态匹配的状态。
-				Source.Unget(Source.Index - lastIndex);
-				DoAction(base.LexerRule.Symbols[lastAccept].Action, lastAccept, Source.Accept());
+				Source.Index = lastIndex;
+				DoAction(base.LexerRule.Symbols[lastAccept].Action, lastAccept);
 				return true;
 			}
 			return false;

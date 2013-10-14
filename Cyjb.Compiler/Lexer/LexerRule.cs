@@ -359,7 +359,7 @@ namespace Cyjb.Compiler.Lexer
 				case TrailingType.Fixed:
 					return new FixedTrailingReader(this, source);
 				case TrailingType.Variable:
-					return new VariableTrailingReader(this, source);
+					return new RejectableTrailingReader(this, source);
 			}
 			return null;
 		}

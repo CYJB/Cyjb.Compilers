@@ -31,7 +31,7 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		private KeyValuePair<string, int> context;
 		/// <summary>
-		/// 上一个词法单元匹配的文本。
+		/// 之前匹配的文本。
 		/// </summary>
 		private string oldText;
 		/// <summary>
@@ -59,6 +59,7 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// 获取当前词法单元的起始位置。
 		/// </summary>
+		/// <value>当前词法单元的起始位置。</value>
 		protected SourceLocation Start { get; private set; }
 		/// <summary>
 		/// 获取或设置是否接受了当前的词法单元。
@@ -86,7 +87,7 @@ namespace Cyjb.Compiler.Lexer
 					Action<ReaderController> action = this.LexerRule.EofActions[context.Value];
 					if (action != null)
 					{
-						this.DoAction(action, EndOfFileIndex, string.Empty);
+						this.DoAction(action, EndOfFileIndex);
 						if (this.IsAccept)
 						{
 							return new Token(this.controller.Id, this.controller.Text,
@@ -97,7 +98,7 @@ namespace Cyjb.Compiler.Lexer
 				}
 				// 起始状态与当前上下文相关。
 				int state = this.context.Value * 2;
-				if (Source.StartLocation.Col == 1)
+				if (this.Source.StartLocation.Col == 1)
 				{
 					// 行首规则。
 					state++;
@@ -108,16 +109,10 @@ namespace Cyjb.Compiler.Lexer
 				}
 				if (InternalReadToken(state))
 				{
-					if (this.IsMore)
-					{
-						oldText = this.controller.Text;
-					}
-					else
-					{
-						oldText = null;
-					}
+					oldText = this.IsMore ? this.controller.Text : null;
 					if (this.IsAccept)
 					{
+						this.Source.Drop();
 						return new Token(this.controller.Id, this.controller.Text,
 							this.Start, this.Source.BeforeStartLocation, this.controller.Value);
 					}
@@ -148,19 +143,11 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="action">要执行的动作。</param>
 		/// <param name="index">词法单元的符号索引。</param>
-		/// <param name="text">词法单元的文本。</param>
-		protected void DoAction(Action<ReaderController> action, int index, string text)
+		protected void DoAction(Action<ReaderController> action, int index)
 		{
 			this.IsAccept = this.IsReject = this.IsMore = false;
 			this.controller.Id = index == EndOfFileIndex ? Token.EndOfFile : lexerRule.Symbols[index].Id;
-			if (oldText == null)
-			{
-				this.controller.Text = text;
-			}
-			else
-			{
-				this.controller.Text = oldText + text;
-			}
+			this.controller.Text = string.Concat(this.oldText, this.Source.ReadBlock());
 			this.controller.Value = null;
 			action(controller);
 		}

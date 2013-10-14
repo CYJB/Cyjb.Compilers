@@ -24,10 +24,11 @@ namespace Cyjb.Compiler.Lexer
 		protected override bool InternalReadToken(int state)
 		{
 			// 最后一次匹配的符号和文本索引。
-			int startIndex = Source.Index, lastAccept = -1, lastIndex = Source.Index;
+			int lastAccept = -1, lastIndex = Source.Index;
 			while (true)
 			{
-				state = TransitionState(state, base.Source.Read());
+				int ch = base.Source.Read();
+				state = TransitionState(state, ch);
 				if (state == LexerRule.DeadState)
 				{
 					// 没有合适的转移，退出。
@@ -55,7 +56,7 @@ namespace Cyjb.Compiler.Lexer
 					if (index > 0)
 					{
 						// 前面长度固定。
-						lastIndex = startIndex + index;
+						lastIndex = Start.Index + index;
 					}
 					else
 					{
@@ -64,8 +65,8 @@ namespace Cyjb.Compiler.Lexer
 					}
 				}
 				// 将流调整到与接受状态匹配的状态。
-				Source.Unget(Source.Index - lastIndex);
-				DoAction(base.LexerRule.Symbols[lastAccept].Action, lastAccept, base.Source.Accept());
+				Source.Index = lastIndex;
+				DoAction(base.LexerRule.Symbols[lastAccept].Action, lastAccept);
 				return true;
 			}
 			return false;

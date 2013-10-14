@@ -72,7 +72,6 @@
     <Compile Include="Lexer\TokenReaderBase.cs" />
     <Compile Include="Lexer\TrailingType.cs" />
     <Compile Include="Lexer\SimpleReader.cs" />
-    <Compile Include="Lexer\VariableTrailingReader.cs" />
     <Compile Include="Lexer\RejectableReader.cs" />
     <Compile Include="Lexer\RejectableTrailingReader.cs" />
     <Compile Include="RegularExpressions\AlternationExp.cs" />
