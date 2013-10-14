@@ -10,7 +10,7 @@ namespace Cyjb.Compiler
 	/// <summary>
 	/// 表示词法分析或语法分析中的终结符。
 	/// </summary>
-	public sealed class TerminalSymbol : Symbol
+	internal sealed class TerminalSymbol : Symbol
 	{
 		/// <summary>
 		/// 定义当前终结符的上下文。

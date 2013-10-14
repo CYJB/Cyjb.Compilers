@@ -67,7 +67,7 @@
     <Compile Include="Lexer\Nfa.cs" />
     <Compile Include="Lexer\NfaState.cs" />
     <Compile Include="Lexer\NfaStateType.cs" />
-    <Compile Include="Lexer\ReaderController.cs" />
+    <Compile Include="ReaderController.cs" />
     <Compile Include="Lexer\SymbolData.cs" />
     <Compile Include="Lexer\TokenReaderBase.cs" />
     <Compile Include="Lexer\TrailingType.cs" />

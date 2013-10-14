@@ -3,7 +3,7 @@
 	/// <summary>
 	/// 词法分析器上下文的类型。
 	/// </summary>
-	public enum LexerContextType
+	internal enum LexerContextType
 	{
 		/// <summary>
 		/// 包含型上下文，默认上下文的规则也会有效。

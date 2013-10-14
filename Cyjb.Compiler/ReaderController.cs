@@ -1,6 +1,7 @@
-﻿using Cyjb.IO;
+﻿using Cyjb.Compiler.Lexer;
+using Cyjb.IO;
 
-namespace Cyjb.Compiler.Lexer
+namespace Cyjb.Compiler
 {
 	/// <summary>
 	/// 表示词法单元读取器的控制器。

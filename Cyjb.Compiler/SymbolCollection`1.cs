@@ -1,5 +1,4 @@
-﻿using System;
-using Cyjb.Collections.ObjectModel;
+﻿using Cyjb.Collections.ObjectModel;
 
 namespace Cyjb.Compiler
 {
@@ -7,8 +6,7 @@ namespace Cyjb.Compiler
 	/// 表示终结符或非终结符的集合。
 	/// </summary>
 	/// <typeparam name="T">终结符或非终结符的类型。</typeparam>
-	[Serializable]
-	public class SymbolCollection<T> : KeyedCollectionBase<string, T>
+	internal class SymbolCollection<T> : KeyedCollectionBase<string, T>
 		where T : Symbol
 	{
 		/// <summary>

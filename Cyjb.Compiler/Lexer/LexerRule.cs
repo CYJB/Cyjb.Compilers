@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Cyjb.Compiler.RegularExpressions;
 using Cyjb.IO;
+using Cyjb.Text;
 
 namespace Cyjb.Compiler.Lexer
 {
@@ -324,6 +326,78 @@ namespace Cyjb.Compiler.Lexer
 		}
 
 		#endregion // 构造词法分析器
+
+		#region 获取词法单元读取器
+
+		/// <summary>
+		/// 返回指定源文件的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回指定源文件的词法单元读取器。
+		/// </summary>
+		/// </overloads>
+		public TokenReader GetReader(string source)
+		{
+			ExceptionHelper.CheckArgumentNull(source, "source");
+			return GetReader(new SourceReader(new StringReader(source)));
+		}
+		/// <summary>
+		/// 返回指定源文件的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		public TokenReader GetReader(SourceReader source)
+		{
+			ExceptionHelper.CheckArgumentNull(source, "source");
+			switch (this.trailingType)
+			{
+				case TrailingType.None:
+					return new SimpleReader(this, source);
+				case TrailingType.Fixed:
+					return new FixedTrailingReader(this, source);
+				case TrailingType.Variable:
+					return new VariableTrailingReader(this, source);
+			}
+			return null;
+		}
+		/// <summary>
+		/// 返回指定源文件的允许拒绝的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		/// <overloads>
+		/// <summary>
+		/// 返回指定源文件的允许拒绝的词法单元读取器。
+		/// </summary>
+		/// </overloads>
+		public TokenReader GetRejectableReader(string source)
+		{
+			ExceptionHelper.CheckArgumentNull(source, "source");
+			return GetRejectableReader(new SourceReader(new StringReader(source)));
+		}
+		/// <summary>
+		/// 返回指定源文件的允许拒绝的词法单元读取器。
+		/// </summary>
+		/// <param name="source">要读取的源文件。</param>
+		/// <returns>指定源文件的词法单元读取器。</returns>
+		public TokenReader GetRejectableReader(SourceReader source)
+		{
+			ExceptionHelper.CheckArgumentNull(source, "source");
+			switch (this.trailingType)
+			{
+				case TrailingType.None:
+					return new RejectableReader(this, source);
+				case TrailingType.Fixed:
+				case TrailingType.Variable:
+					return new RejectableTrailingReader(this, source);
+			}
+			return null;
+		}
+
+		#endregion // 获取词法单元读取器
 
 	}
 }

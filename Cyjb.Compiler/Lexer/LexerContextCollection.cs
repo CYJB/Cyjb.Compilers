@@ -1,13 +1,11 @@
-﻿using System;
-using Cyjb.Collections.ObjectModel;
+﻿using Cyjb.Collections.ObjectModel;
 
 namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示词法分析器上下文的集合。
 	/// </summary>
-	[Serializable]
-	public sealed class LexerContextCollection : KeyedCollectionBase<string, LexerContext>
+	internal sealed class LexerContextCollection : KeyedCollectionBase<string, LexerContext>
 	{
 		/// <summary>
 		/// 初始化 <see cref="LexerContextCollection"/> 类的新实例。

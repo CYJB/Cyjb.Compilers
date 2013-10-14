@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Cyjb.Compiler.Lexer;
 using Cyjb.Compiler.RegularExpressions;
@@ -46,21 +45,20 @@ namespace Cyjb.Compiler
 	/// <seealso cref="LexerRule"/>
 	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerIntroduce.html">
 	/// 《C# 词法分析器（一）词法分析介绍》</seealso>
-	[Serializable]
 	public sealed class Grammar
 	{
 
 		#region 词法分析器定义
 
 		/// <summary>
+		/// 初始的词法分析器上下文。
+		/// </summary>
+		public const string InitialContext = "Initial";
+		/// <summary>
 		/// 默认的接受动作。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private static readonly Action<ReaderController> DefaultAccept = c => c.Accept();
-		/// <summary>
-		/// 初始的词法分析器上下文。
-		/// </summary>
-		public const string InitialContext = "Initial";
 		/// <summary>
 		/// 正则表达式列表。
 		/// </summary>
@@ -81,13 +79,13 @@ namespace Cyjb.Compiler
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private LexerRule lexerRule;
+		/// <summary>
+		/// 词法分析器的规则是否发生了改变。
+		/// </summary>
+		private bool lexerChanged = true;
 
 		#endregion // 词法分析器定义
 
-		/// <summary>
-		/// 语法规则是否发生了改变。
-		/// </summary>
-		private bool changed = true;
 		/// <summary>
 		/// 初始化 <see cref="Grammar"/> 类的新实例。
 		/// </summary>
@@ -102,23 +100,15 @@ namespace Cyjb.Compiler
 		/// 获取词法分析器上下文列表。
 		/// </summary>
 		/// <value>词法分析器的上下文列表。</value>
-		public LexerContextCollection Contexts
+		internal LexerContextCollection Contexts
 		{
 			get { return lexerContexts; }
-		}
-		/// <summary>
-		/// 获取定义的正则表达式的字典。
-		/// </summary>
-		/// <value>所有定义的正则表达式的字典。</value>
-		public IDictionary<string, Regex> Regexs
-		{
-			get { return regexs; }
 		}
 		/// <summary>
 		/// 获取定义的终结符号的集合。
 		/// </summary>
 		/// <value>所有定义的终结符号的集合。</value>
-		public SymbolCollection<TerminalSymbol> TerminalSymbols
+		internal SymbolCollection<TerminalSymbol> TerminalSymbols
 		{
 			get { return terminalSymbols; }
 		}
@@ -130,7 +120,7 @@ namespace Cyjb.Compiler
 		{
 			get
 			{
-				if (changed)
+				if (lexerChanged)
 				{
 					this.lexerRule = new LexerRule(this);
 				}
@@ -149,8 +139,7 @@ namespace Cyjb.Compiler
 		/// </overloads>
 		public TokenReader GetReader(string source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			return GetReader(new SourceReader(new StringReader(source)));
+			return LexerRule.GetReader(source);
 		}
 		/// <summary>
 		/// 返回指定源文件的词法单元读取器。
@@ -159,17 +148,7 @@ namespace Cyjb.Compiler
 		/// <returns>指定源文件的词法单元读取器。</returns>
 		public TokenReader GetReader(SourceReader source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			switch (LexerRule.TrailingType)
-			{
-				case TrailingType.None:
-					return new SimpleReader(lexerRule, source);
-				case TrailingType.Fixed:
-					return new FixedTrailingReader(lexerRule, source);
-				case TrailingType.Variable:
-					return new VariableTrailingReader(lexerRule, source);
-			}
-			return null;
+			return LexerRule.GetReader(source);
 		}
 		/// <summary>
 		/// 返回指定源文件的允许拒绝的词法单元读取器。
@@ -183,8 +162,7 @@ namespace Cyjb.Compiler
 		/// </overloads>
 		public TokenReader GetRejectableReader(string source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			return GetRejectableReader(new SourceReader(new StringReader(source)));
+			return LexerRule.GetRejectableReader(source);
 		}
 		/// <summary>
 		/// 返回指定源文件的允许拒绝的词法单元读取器。
@@ -193,16 +171,7 @@ namespace Cyjb.Compiler
 		/// <returns>指定源文件的词法单元读取器。</returns>
 		public TokenReader GetRejectableReader(SourceReader source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			switch (lexerRule.TrailingType)
-			{
-				case TrailingType.None:
-					return new RejectableReader(lexerRule, source);
-				case TrailingType.Fixed:
-				case TrailingType.Variable:
-					return new RejectableTrailingReader(lexerRule, source);
-			}
-			return null;
+			return LexerRule.GetRejectableReader(source);
 		}
 
 		#endregion // 获取词法分析器
@@ -395,7 +364,7 @@ namespace Cyjb.Compiler
 				symbol.Context.UnionWith(CheckContexts(contexts));
 			}
 			terminalSymbols.InternalAdd(symbol);
-			changed = true;
+			lexerChanged = true;
 		}
 		/// <summary>
 		/// 检查给定的上下文是否是有效的。

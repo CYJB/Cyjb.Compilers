@@ -3,7 +3,7 @@
 	/// <summary>
 	/// 表示词法分析器的上下文。
 	/// </summary>
-	public struct LexerContext
+	internal struct LexerContext
 	{
 		/// <summary>
 		/// 获取当前上下文的索引。
