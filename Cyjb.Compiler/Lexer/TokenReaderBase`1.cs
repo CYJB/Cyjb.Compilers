@@ -8,7 +8,9 @@ namespace Cyjb.Compiler.Lexer
 	/// <summary>
 	/// 表示词法单元读取器的基类。
 	/// </summary>
-	internal abstract class TokenReaderBase : TokenReader
+	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
+	internal abstract class TokenReaderBase<T> : TokenReader<T>
+		where T : struct
 	{
 		/// <summary>
 		/// 表示文件结束的终结符索引。
@@ -17,11 +19,11 @@ namespace Cyjb.Compiler.Lexer
 		/// <summary>
 		/// 词法分析器的规则。
 		/// </summary>
-		private readonly LexerRule lexerRule;
+		private readonly LexerRule<T> lexerRule;
 		/// <summary>
 		/// 当前词法分析器的控制器。
 		/// </summary>
-		private readonly ReaderController controller;
+		private readonly ReaderController<T> controller;
 		/// <summary>
 		/// 上下文的堆栈。
 		/// </summary>
@@ -35,22 +37,22 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		private string oldText;
 		/// <summary>
-		/// 使用给定的词法分析器信息初始化 <see cref="TokenReaderBase"/> 类的新实例。
+		/// 使用给定的词法分析器信息初始化 <see cref="TokenReaderBase&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="lexerRule">要使用的词法分析器的规则。</param>
 		/// <param name="rejectable">当前词法分析器是否允许 Reject 动作。</param>
 		/// <param name="reader">要使用的源文件读取器。</param>
-		protected TokenReaderBase(LexerRule lexerRule, bool rejectable, SourceReader reader)
+		protected TokenReaderBase(LexerRule<T> lexerRule, bool rejectable, SourceReader reader)
 			: base(reader)
 		{
 			this.lexerRule = lexerRule;
-			controller = new ReaderController(this, rejectable);
-			this.BeginContext(Grammar.InitialContext);
+			controller = new ReaderController<T>(this, rejectable);
+			this.BeginContext(Constants.InitialContext);
 		}
 		/// <summary>
 		/// 获取词法分析器的规则。
 		/// </summary>
-		protected LexerRule LexerRule { get { return this.lexerRule; } }
+		protected LexerRule<T> LexerRule { get { return this.lexerRule; } }
 		/// <summary>
 		/// 获取当前的上下文标签。
 		/// </summary>
@@ -77,24 +79,24 @@ namespace Cyjb.Compiler.Lexer
 		/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
 		/// </summary>
 		/// <returns>输入流中的下一个词法单元。</returns>
-		protected override Token InternalReadToken()
+		protected override Token<T> InternalReadToken()
 		{
 			while (true)
 			{
 				if (this.Source.Peek() == -1)
 				{
 					// 到达了流的结尾。
-					Action<ReaderController> action = this.LexerRule.EofActions[context.Value];
+					Action<ReaderController<T>> action = this.LexerRule.EofActions[context.Value];
 					if (action != null)
 					{
 						this.DoAction(action, EndOfFileIndex);
 						if (this.IsAccept)
 						{
-							return new Token(this.controller.Id, this.controller.Text,
+							return new Token<T>(this.controller.Id, this.controller.Text,
 								Source.StartLocation, SourceLocation.Invalid, this.controller.Value);
 						}
 					}
-					return Token.GetEndOfFile(Source.StartLocation);
+					return Token<T>.GetEndOfFile(Source.StartLocation);
 				}
 				// 起始状态与当前上下文相关。
 				int state = this.context.Value * 2;
@@ -116,7 +118,7 @@ namespace Cyjb.Compiler.Lexer
 					}
 					if (this.IsAccept)
 					{
-						return new Token(this.controller.Id, this.controller.Text,
+						return new Token<T>(this.controller.Id, this.controller.Text,
 							this.Start, this.Source.BeforeStartLocation, this.controller.Value);
 					}
 				}
@@ -146,10 +148,10 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="action">要执行的动作。</param>
 		/// <param name="index">词法单元的符号索引。</param>
-		protected void DoAction(Action<ReaderController> action, int index)
+		protected void DoAction(Action<ReaderController<T>> action, int index)
 		{
 			this.IsAccept = this.IsReject = this.IsMore = false;
-			this.controller.Id = index == EndOfFileIndex ? Token.EndOfFile : lexerRule.Symbols[index].Id;
+			this.controller.Id = index == EndOfFileIndex ? Token<T>.EndOfFile : lexerRule.Symbols[index].Id;
 			this.controller.Text = string.Concat(this.oldText, this.Source.ReadedBlock());
 			this.controller.Value = null;
 			action(controller);
@@ -164,8 +166,7 @@ namespace Cyjb.Compiler.Lexer
 		{
 			if (ch == -1)
 			{
-				// End Of File。
-				return LexerRule.DeadState;
+				return EndOfFileIndex;
 			}
 			return this.LexerRule.States[state].Transitions[this.LexerRule.CharClass[ch]];
 		}
@@ -200,7 +201,7 @@ namespace Cyjb.Compiler.Lexer
 			}
 			else
 			{
-				this.context = new KeyValuePair<string, int>(Grammar.InitialContext, 0);
+				this.context = new KeyValuePair<string, int>(Constants.InitialContext, 0);
 			}
 		}
 		/// <summary>

@@ -51,29 +51,72 @@
     <Compile Include="CompilerExceptionHelper.cs" />
     <Compile Include="ExceptionResources.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Grammar.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Grammar`1.cs" />
     <Compile Include="Lexer\AcceptState.cs" />
     <Compile Include="Lexer\CharClass.cs" />
     <Compile Include="Lexer\Dfa.cs" />
     <Compile Include="Lexer\StateData.cs" />
     <Compile Include="Lexer\DfaState.cs" />
-    <Compile Include="Lexer\FixedTrailingReader.cs">
+    <Compile Include="Lexer\FixedTrailingReader`1.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Lexer\LexerRule.cs" />
+    <Compile Include="Lexer\LexerRule`1.cs" />
     <Compile Include="Lexer\LexerContext.cs" />
     <Compile Include="Lexer\LexerContextCollection.cs" />
     <Compile Include="Lexer\LexerContextType.cs" />
     <Compile Include="Lexer\Nfa.cs" />
     <Compile Include="Lexer\NfaState.cs" />
     <Compile Include="Lexer\NfaStateType.cs" />
-    <Compile Include="ReaderController.cs" />
-    <Compile Include="Lexer\SymbolData.cs" />
-    <Compile Include="Lexer\TokenReaderBase.cs" />
+    <Compile Include="AssociativeType.cs" />
+    <Compile Include="NonTerminal`1.cs" />
+    <Compile Include="Parser\Associativity.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\LRParser`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\LRItem`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\LRItemCollection`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\LRItemset`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\ParseAction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\ParseActionType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\ParserConflict.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\ParserConflictItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\ParserRule`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\ProductionData`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\StateData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\Production`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ProductionBody`1.cs" />
+    <Compile Include="ReaderController`1.cs" />
+    <Compile Include="Lexer\SymbolData`1.cs" />
+    <Compile Include="Lexer\TokenReaderBase`1.cs" />
     <Compile Include="Lexer\TrailingType.cs" />
-    <Compile Include="Lexer\SimpleReader.cs" />
-    <Compile Include="Lexer\RejectableReader.cs" />
-    <Compile Include="Lexer\RejectableTrailingReader.cs" />
+    <Compile Include="Lexer\SimpleReader`1.cs" />
+    <Compile Include="Lexer\RejectableReader`1.cs" />
+    <Compile Include="Lexer\RejectableTrailingReader`1.cs" />
     <Compile Include="RegularExpressions\AlternationExp.cs" />
     <Compile Include="RegularExpressions\AnchorExp.cs" />
     <Compile Include="RegularExpressions\CharClassExp.cs" />
@@ -85,9 +128,9 @@
     <Compile Include="RegularExpressions\RegexOptions.cs" />
     <Compile Include="RegularExpressions\RegexParser.cs" />
     <Compile Include="RegularExpressions\RepeatExp.cs" />
-    <Compile Include="Symbol.cs" />
-    <Compile Include="SymbolCollection`1.cs" />
-    <Compile Include="TerminalSymbol.cs" />
+    <Compile Include="ParserController`1.cs" />
+    <Compile Include="Symbol`1.cs" />
+    <Compile Include="Terminal`1.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ExceptionResource.resx" />

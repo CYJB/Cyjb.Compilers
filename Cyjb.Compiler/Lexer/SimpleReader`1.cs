@@ -4,16 +4,18 @@ using Cyjb.IO;
 namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
-	/// 表示支持定长向前看符号的词法单元读取器。
+	/// 表示基本的词法单元读取器。
 	/// </summary>
-	internal sealed class FixedTrailingReader : TokenReaderBase
+	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
+	internal sealed class SimpleReader<T> : TokenReaderBase<T>
+		where T : struct
 	{
 		/// <summary>
-		/// 使用给定的词法分析器信息初始化 <see cref="FixedTrailingReader"/> 类的新实例。
+		/// 使用给定的词法分析器信息初始化 <see cref="SimpleReader&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="lexerRule">要使用的词法分析器的规则。</param>
 		/// <param name="reader">要使用的源文件读取器。</param>
-		public FixedTrailingReader(LexerRule lexerRule, SourceReader reader) :
+		public SimpleReader(LexerRule<T> lexerRule, SourceReader reader) :
 			base(lexerRule, false, reader)
 		{ }
 		/// <summary>
@@ -29,7 +31,7 @@ namespace Cyjb.Compiler.Lexer
 			{
 				int ch = base.Source.Read();
 				state = TransitionState(state, ch);
-				if (state == LexerRule.DeadState)
+				if (state == -1)
 				{
 					// 没有合适的转移，退出。
 					break;
@@ -37,33 +39,12 @@ namespace Cyjb.Compiler.Lexer
 				IList<int> symbolIndex = base.LexerRule.States[state].SymbolIndex;
 				if (symbolIndex.Count > 0)
 				{
-					// 确定不是向前看的头状态。
-					int tmp = symbolIndex[0];
-					if (tmp < base.LexerRule.Symbols.Count)
-					{
-						lastAccept = tmp;
-						lastIndex = Source.Index;
-					}
+					lastAccept = symbolIndex[0];
+					lastIndex = Source.Index;
 				}
 			}
 			if (lastAccept >= 0)
 			{
-				if (base.LexerRule.Symbols[lastAccept].Trailing.HasValue)
-				{
-					// 是向前看状态。
-					int index = base.LexerRule.Symbols[lastAccept].Trailing.Value;
-					// 将流调整到与接受状态匹配的状态。
-					if (index > 0)
-					{
-						// 前面长度固定。
-						lastIndex = Start.Index + index;
-					}
-					else
-					{
-						// 后面长度固定，注意此时 index 是负数。
-						lastIndex += index;
-					}
-				}
 				// 将流调整到与接受状态匹配的状态。
 				Source.Index = lastIndex;
 				DoAction(base.LexerRule.Symbols[lastAccept].Action, lastAccept);

@@ -129,6 +129,10 @@
     <value>拒绝动作与接受动作冲突。</value>
     <comment>冲突的拒绝动作。</comment>
   </data>
+  <data name="DuplicatedSymbolId" xml:space="preserve">
+    <value>符号标识符 '{0}' 已经定义。</value>
+    <comment>重复的符号标识符。</comment>
+  </data>
   <data name="IllegalEndEscape" xml:space="preserve">
     <value>\ 在模式末尾非法。</value>
     <comment>\ 在模式末尾非法。</comment>
@@ -146,7 +150,7 @@
     <comment>无效的词法分析上下文。</comment>
   </data>
   <data name="InvalidSymbolId" xml:space="preserve">
-    <value>无效的符号标识符 '{0}'，不能包含空白。</value>
+    <value>无效的符号标识符 '{0}'。</value>
     <comment>无效的符号标识符。</comment>
   </data>
   <data name="MalformedSlashP" xml:space="preserve">
@@ -182,7 +186,7 @@
     <comment>) 不足。</comment>
   </data>
   <data name="NotRejectable" xml:space="preserve">
-    <value>当前的 TokenReader 不支持拒绝动作。</value>
+    <value>当前的 TokenReader&lt;T&gt; 不支持拒绝动作。</value>
     <comment>不允许拒绝动作。</comment>
   </data>
   <data name="ParsingException" xml:space="preserve">

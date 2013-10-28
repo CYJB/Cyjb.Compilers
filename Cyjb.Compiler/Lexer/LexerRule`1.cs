@@ -11,24 +11,22 @@ namespace Cyjb.Compiler.Lexer
 	/// <summary>
 	/// 表示词法分析器的规则。
 	/// </summary>
-	/// <remarks><para><see cref="LexerRule"/> 类包含了用于构造词法分析器的全部信息，
+	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
+	/// <remarks><para><see cref="LexerRule&lt;T&gt;"/> 类包含了用于构造词法分析器的全部信息，
 	/// 一般用于自己构造词法分析器。如果不希望手动构造词法分析器，请使用 
-	/// <see cref="Grammar.GetReader(SourceReader)"/> 或 
-	/// <see cref="Grammar.GetRejectableReader(SourceReader)"/> 方法，
+	/// <see cref="Grammar&lt;T&gt;.GetReader(SourceReader)"/> 或 
+	/// <see cref="Grammar&lt;T&gt;.GetRejectableReader(SourceReader)"/> 方法，
 	/// 得到自动构造的词法分析器。</para>
 	/// <para>关于如何构造自己的词法分析器，可以参考我的博文
 	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
 	/// 《C# 词法分析器（六）构造词法分析器》</see>。</para></remarks>
-	/// <seealso cref="Grammar"/>
+	/// <seealso cref="Grammar&lt;T&gt;"/>
 	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
 	/// 《C# 词法分析器（六）构造词法分析器》</seealso>
 	[Serializable]
-	public sealed class LexerRule
+	public sealed class LexerRule<T>
+		where T : struct
 	{
-		/// <summary>
-		/// 表示词法分析器使用的 DFA 中的死状态。
-		/// </summary>
-		public const int DeadState = -1;
 		/// <summary>
 		/// 上下文字典。
 		/// </summary>
@@ -38,7 +36,7 @@ namespace Cyjb.Compiler.Lexer
 		/// EOF 动作。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private Action<ReaderController>[] eofActions;
+		private Action<ReaderController<T>>[] eofActions;
 		/// <summary>
 		/// 词法分析器中定义的上下文数量。
 		/// </summary>
@@ -48,7 +46,7 @@ namespace Cyjb.Compiler.Lexer
 		/// 词法分析器的终结符列表。
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private SymbolData[] symbols;
+		private SymbolData<T>[] symbols;
 		/// <summary>
 		/// 词法分析器中定义的终结符数量。
 		/// </summary>
@@ -80,10 +78,10 @@ namespace Cyjb.Compiler.Lexer
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private TrailingType trailingType;
 		/// <summary>
-		/// 使用指定的语法规则初始化 <see cref="Cyjb.Compiler.Lexer.LexerRule"/> 类的新实例。
+		/// 使用指定的语法规则初始化 <see cref="Cyjb.Compiler.Lexer.LexerRule&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法规则。</param>
-		internal LexerRule(Grammar grammar)
+		internal LexerRule(Grammar<T> grammar)
 		{
 			ExceptionHelper.CheckArgumentNull(grammar, "grammar");
 			this.contextCount = grammar.Contexts.Count;
@@ -92,11 +90,11 @@ namespace Cyjb.Compiler.Lexer
 			{
 				this.contexts.Add(context.Label, context.Index);
 			}
-			this.symbolCount = grammar.TerminalSymbols.Count;
-			this.symbols = new SymbolData[this.symbolCount];
-			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
+			this.symbolCount = grammar.Terminals.Count;
+			this.symbols = new SymbolData<T>[this.symbolCount];
+			foreach (Terminal<T> sym in grammar.Terminals)
 			{
-				this.symbols[sym.Index] = new SymbolData(sym.Id, sym.Action);
+				this.symbols[sym.Index] = new SymbolData<T>(sym.Id, sym.Action);
 			}
 			FillEOFActions(grammar);
 			bool useTrailing;
@@ -119,7 +117,7 @@ namespace Cyjb.Compiler.Lexer
 		/// 获取 EOF 动作。
 		/// </summary>
 		/// <value>与文件结束对应的动作，其长度与定义的上下文数量 <see cref="ContextCount"/> 相同。</value>
-		public IList<Action<ReaderController>> EofActions { get { return eofActions; } }
+		public IList<Action<ReaderController<T>>> EofActions { get { return eofActions; } }
 		/// <summary>
 		/// 获取词法分析器中定义的上下文数量。
 		/// </summary>
@@ -130,7 +128,7 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <value>词法分析器的终结符列表，
 		/// 其长度与词法分析器中定义的终结符数量 <see cref="SymbolCount"/> 相同。</value>
-		public IList<SymbolData> Symbols { get { return symbols; } }
+		public IList<SymbolData<T>> Symbols { get { return symbols; } }
 		/// <summary>
 		/// 获取词法分析器中定义的终结符数量。
 		/// </summary>
@@ -169,10 +167,10 @@ namespace Cyjb.Compiler.Lexer
 		/// 填充 EOF 动作。
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法。</param>
-		private void FillEOFActions(Grammar grammar)
+		private void FillEOFActions(Grammar<T> grammar)
 		{
-			this.eofActions = new Action<ReaderController>[this.contextCount];
-			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
+			this.eofActions = new Action<ReaderController<T>>[this.contextCount];
+			foreach (Terminal<T> sym in grammar.Terminals)
 			{
 				if (sym.RegularExpression is EndOfFileExp)
 				{
@@ -192,7 +190,7 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法。</param>
 		/// <param name="useTrailing">是否用到了向前看。</param>
-		private void FillDfa(Grammar grammar, out bool useTrailing)
+		private void FillDfa(Grammar<T> grammar, out bool useTrailing)
 		{
 			// 构造 DFA。
 			Nfa nfa = BuildNfa(grammar, out useTrailing);
@@ -213,7 +211,7 @@ namespace Cyjb.Compiler.Lexer
 					DfaState target = state[j];
 					if (target == null)
 					{
-						transitions[j] = DeadState;
+						transitions[j] = Constants.DeadState;
 					}
 					else
 					{
@@ -227,10 +225,10 @@ namespace Cyjb.Compiler.Lexer
 		/// 填充向前看的数据。
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法。</param>
-		private void FillTrailing(Grammar grammar)
+		private void FillTrailing(Grammar<T> grammar)
 		{
 			bool variableTrailing = false;
-			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
+			foreach (Terminal<T> sym in grammar.Terminals)
 			{
 				AnchorExp exp = sym.RegularExpression as AnchorExp;
 				if (exp != null && exp.TrailingExpression != null)
@@ -270,7 +268,7 @@ namespace Cyjb.Compiler.Lexer
 		/// <param name="grammar">语法分析的语法。</param>
 		/// <param name="useTrailing">是否使用了向前看符号。</param>
 		/// <returns>构造得到的 NFA。</returns>
-		private static Nfa BuildNfa(Grammar grammar, out bool useTrailing)
+		private static Nfa BuildNfa(Grammar<T> grammar, out bool useTrailing)
 		{
 			int contextCnt = grammar.Contexts.Count;
 			// 将多个上下文的规则放入一个 NFA 中，但起始状态不同。
@@ -283,7 +281,7 @@ namespace Cyjb.Compiler.Lexer
 				nfa.NewState();
 			}
 			useTrailing = false;
-			foreach (TerminalSymbol sym in grammar.TerminalSymbols)
+			foreach (Terminal<T> sym in grammar.Terminals)
 			{
 				if (sym.RegularExpression is EndOfFileExp)
 				{
@@ -339,7 +337,7 @@ namespace Cyjb.Compiler.Lexer
 		/// 返回指定源文件的词法单元读取器。
 		/// </summary>
 		/// </overloads>
-		public TokenReader GetReader(string source)
+		public TokenReader<T> GetReader(string source)
 		{
 			ExceptionHelper.CheckArgumentNull(source, "source");
 			return GetReader(new SourceReader(new StringReader(source)));
@@ -349,17 +347,17 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="source">要读取的源文件。</param>
 		/// <returns>指定源文件的词法单元读取器。</returns>
-		public TokenReader GetReader(SourceReader source)
+		public TokenReader<T> GetReader(SourceReader source)
 		{
 			ExceptionHelper.CheckArgumentNull(source, "source");
 			switch (this.trailingType)
 			{
 				case TrailingType.None:
-					return new SimpleReader(this, source);
+					return new SimpleReader<T>(this, source);
 				case TrailingType.Fixed:
-					return new FixedTrailingReader(this, source);
+					return new FixedTrailingReader<T>(this, source);
 				case TrailingType.Variable:
-					return new RejectableTrailingReader(this, source);
+					return new RejectableTrailingReader<T>(this, source);
 			}
 			return null;
 		}
@@ -373,7 +371,7 @@ namespace Cyjb.Compiler.Lexer
 		/// 返回指定源文件的允许拒绝的词法单元读取器。
 		/// </summary>
 		/// </overloads>
-		public TokenReader GetRejectableReader(string source)
+		public TokenReader<T> GetRejectableReader(string source)
 		{
 			ExceptionHelper.CheckArgumentNull(source, "source");
 			return GetRejectableReader(new SourceReader(new StringReader(source)));
@@ -383,16 +381,16 @@ namespace Cyjb.Compiler.Lexer
 		/// </summary>
 		/// <param name="source">要读取的源文件。</param>
 		/// <returns>指定源文件的词法单元读取器。</returns>
-		public TokenReader GetRejectableReader(SourceReader source)
+		public TokenReader<T> GetRejectableReader(SourceReader source)
 		{
 			ExceptionHelper.CheckArgumentNull(source, "source");
 			switch (this.trailingType)
 			{
 				case TrailingType.None:
-					return new RejectableReader(this, source);
+					return new RejectableReader<T>(this, source);
 				case TrailingType.Fixed:
 				case TrailingType.Variable:
-					return new RejectableTrailingReader(this, source);
+					return new RejectableTrailingReader<T>(this, source);
 			}
 			return null;
 		}

@@ -6,22 +6,24 @@ namespace Cyjb.Compiler
 	/// <summary>
 	/// 表示词法单元读取器的控制器。
 	/// </summary>
-	public sealed class ReaderController
+	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
+	public sealed class ReaderController<T>
+		where T : struct
 	{
 		/// <summary>
 		/// 当前的词法单元读取器。
 		/// </summary>
-		private TokenReaderBase reader;
+		private TokenReaderBase<T> reader;
 		/// <summary>
 		/// 是否允许 Reject 动作。
 		/// </summary>
 		private bool rejectable;
 		/// <summary>
-		/// 使用当前的词法单元信息初始化 <see cref="ReaderController"/> 类的新实例。
+		/// 使用当前的词法单元信息初始化 <see cref="ReaderController&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="reader">词法单元的读取器。</param>
 		/// <param name="rejectable">是否允许 Reject 动作。</param>
-		internal ReaderController(TokenReaderBase reader, bool rejectable)
+		internal ReaderController(TokenReaderBase<T> reader, bool rejectable)
 		{
 			this.reader = reader;
 			this.rejectable = rejectable;
@@ -40,7 +42,7 @@ namespace Cyjb.Compiler
 		/// 获取词法单元的标识符。
 		/// </summary>
 		/// <value>词法单元的标识符。</value>
-		public string Id { get; internal set; }
+		public T Id { get; internal set; }
 		/// <summary>
 		/// 获取词法单元的文本。
 		/// </summary>

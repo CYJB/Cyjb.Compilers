@@ -96,7 +96,7 @@ namespace Cyjb.Compiler.Lexer
 							dfaStateMap.Add(set, newState);
 							stack.Push(newState);
 							// 合并符号索引。
-							newState.SymbolIndex = set.Where(s => s.SymbolIndex != Symbol.None)
+							newState.SymbolIndex = set.Where(s => s.SymbolIndex != Constants.None)
 								.Select(s =>
 								{
 									if (s.StateType == NfaStateType.TrailingHead)

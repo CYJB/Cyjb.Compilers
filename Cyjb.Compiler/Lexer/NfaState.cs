@@ -29,7 +29,7 @@ namespace Cyjb.Compiler.Lexer
 		{
 			Nfa = nfa;
 			Index = index;
-			SymbolIndex = Symbol.None;
+			SymbolIndex = Constants.None;
 			StateType = NfaStateType.Normal;
 		}
 		/// <summary>
@@ -103,7 +103,7 @@ namespace Cyjb.Compiler.Lexer
 		/// <returns>当前对象的字符串表示形式。</returns>
 		public override string ToString()
 		{
-			if (SymbolIndex == Symbol.None)
+			if (SymbolIndex == Constants.None)
 			{
 				return string.Concat("State #", Index);
 			}

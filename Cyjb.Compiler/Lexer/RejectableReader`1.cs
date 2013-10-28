@@ -6,18 +6,20 @@ namespace Cyjb.Compiler.Lexer
 	/// <summary>
 	/// 表示支持 Reject 动作的词法单元读取器。
 	/// </summary>
-	internal sealed class RejectableReader : TokenReaderBase
+	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
+	internal sealed class RejectableReader<T> : TokenReaderBase<T>
+		where T : struct
 	{
 		/// <summary>
 		/// 接受状态的堆栈。
 		/// </summary>
 		private Stack<AcceptState> stateStack = new Stack<AcceptState>();
 		/// <summary>
-		/// 使用给定的词法分析器信息初始化 <see cref="RejectableReader"/> 类的新实例。
+		/// 使用给定的词法分析器信息初始化 <see cref="RejectableReader&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="lexerRule">要使用的词法分析器的规则。</param>
 		/// <param name="reader">要使用的源文件读取器。</param>
-		public RejectableReader(LexerRule lexerRule, SourceReader reader) :
+		public RejectableReader(LexerRule<T> lexerRule, SourceReader reader) :
 			base(lexerRule, true, reader)
 		{ }
 		/// <summary>
@@ -32,7 +34,7 @@ namespace Cyjb.Compiler.Lexer
 			while (true)
 			{
 				state = TransitionState(state, base.Source.Read());
-				if (state == LexerRule.DeadState)
+				if (state == -1)
 				{
 					// 没有合适的转移，退出。
 					break;

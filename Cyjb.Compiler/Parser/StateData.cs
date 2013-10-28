@@ -1,56 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Cyjb.Compiler.Lexer
+namespace Cyjb.Compiler.Parser
 {
 	/// <summary>
-	/// 表示 DFA 的状态。
+	/// 表示 LR 语法分析器的状态。
 	/// </summary>
 	[Serializable]
 	public struct StateData : IEquatable<StateData>
 	{
 		/// <summary>
-		/// DFA 状态的转移。
+		/// LR 语法分析表的动作。
 		/// </summary>
-		private int[] transitions;
+		private ParseAction[] actions;
 		/// <summary>
-		/// DFA 状态对应的终结符索引。
+		/// LR 语法分析表的转移。
 		/// </summary>
-		private int[] symbolIndex;
+		private int[] gotos;
 		/// <summary>
-		/// 使用指定的转移和终结符索引初始化 <see cref="StateData"/> 结构的新实例。
+		/// 使用指定的动作和转移引初始化 <see cref="StateData"/> 结构的新实例。
 		/// </summary>
-		/// <param name="trans">DFA 状态的转移。</param>
-		/// <param name="symbolIndex">DFA 状态对应的终结符索引。</param>
-		internal StateData(int[] trans, int[] symbolIndex)
+		/// <param name="actions">LR 语法分析表的动作。</param>
+		/// <param name="gotos">LR 语法分析表的转移。</param>
+		internal StateData(ParseAction[] actions, int[] gotos)
 		{
-			this.transitions = trans;
-			this.symbolIndex = symbolIndex;
+			this.actions = actions;
+			this.gotos = gotos;
 		}
 		/// <summary>
-		/// 获取 DFA 状态的转移。
+		/// 获取 LR 语法分析表的动作。
 		/// </summary>
-		/// <value>其长度与词法分析器使用的字符类数量 <see cref="LexerRule&lt;T&gt;.CharClassCount"/> 相同。
-		/// 使用 <c>-1</c> 表示空转移。</value>
-		public IList<int> Transitions { get { return this.transitions; } }
+		/// <value>LR 语法分析表的动作，每个元素分别对应唯一归约、分析错误、文件结束和所有终结符。
+		/// 其长度与 <see cref="ParserRule&lt;T&gt;.ActionCount"/> 相同，
+		/// 索引 <c>0</c> 表示唯一归约，索引 <c>1</c> 表示分析错误，
+		/// 索引 <c>2</c> 表示文件结束，剩余的对应所有终结符。</value>
+		public IList<ParseAction> Actions { get { return this.actions; } }
 		/// <summary>
-		/// 获取 DFA 状态对应的终结符索引。
+		/// 获取 LR 语法分析表的转移。
 		/// </summary>
-		/// <value>使用大于零，小于终结符数量 <see cref="LexerRule&lt;T&gt;.SymbolCount"/> 的数表示终结符索引，
-		/// 使用 <see cref="Int32.MaxValue"/> - index 表示向前看符号的头节点。</value>
-		public IList<int> SymbolIndex { get { return this.symbolIndex; } }
-		/// <summary>
-		/// 返回当前对象的字符串表示形式。
-		/// </summary>
-		/// <returns>当前对象的字符串表示形式。</returns>
-		public override string ToString()
-		{
-			if (symbolIndex.Length == 0)
-			{
-				return "[]";
-			}
-			return string.Concat("[", string.Join(",", symbolIndex), "]");
-		}
+		/// <value>LR 语法分析表的转移，每个元素分别对应所有非终结符。
+		/// 其中大于等于零的数表示转移到的状态，<c>-1</c> 表示不存在转移。</value>
+		public IList<int> Gotos { get { return this.gotos; } }
 
 		#region IEquatable<StateData> 成员
 
@@ -71,11 +61,11 @@ namespace Cyjb.Compiler.Lexer
 			{
 				return true;
 			}
-			if (this.transitions != other.transitions)
+			if (this.actions != other.actions)
 			{
 				return false;
 			}
-			return this.symbolIndex == other.symbolIndex;
+			return this.gotos == other.gotos;
 		}
 
 		#endregion // IEquatable<StateData> 成员
@@ -102,7 +92,7 @@ namespace Cyjb.Compiler.Lexer
 		/// <returns>当前 <see cref="StateData"/> 的哈希代码。</returns>
 		public override int GetHashCode()
 		{
-			return this.transitions.GetHashCode() ^ this.symbolIndex.GetHashCode();
+			return this.actions.GetHashCode() ^ this.gotos.GetHashCode();
 		}
 
 		#endregion // object 成员

@@ -173,6 +173,16 @@ namespace Cyjb.Compiler
 		#endregion // 词法分析异常
 
 		/// <summary>
+		/// 返回重复的符号标识符的异常。
+		/// </summary>
+		/// <param name="paramName">产生异常的参数名称。</param>
+		/// <param name="id">重复的符号标识符。</param>
+		/// <returns><see cref="System.ArgumentException"/> 对象。</returns>
+		public static ArgumentException DuplicatedSymbolId(string paramName, string id)
+		{
+			return GetArgumentException(paramName, "DuplicatedSymbolId", id);
+		}
+		/// <summary>
 		/// 返回无效的符号标识符的异常。
 		/// </summary>
 		/// <param name="paramName">产生异常的参数名称。</param>
@@ -182,6 +192,5 @@ namespace Cyjb.Compiler
 		{
 			return GetArgumentException(paramName, "InvalidSymbolId", id);
 		}
-
 	}
 }

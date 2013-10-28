@@ -1,21 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Cyjb.Compiler.Lexer
 {
 	/// <summary>
 	/// 表示词法分析中终结符的数据。
 	/// </summary>
+	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
 	[Serializable]
-	public struct SymbolData : IEquatable<SymbolData>
+	public struct SymbolData<T> : IEquatable<SymbolData<T>>
+		where T : struct
 	{
 		/// <summary>
 		/// 终结符的标识符。
 		/// </summary>
-		private string id;
+		private T id;
 		/// <summary>
 		/// 终结符的动作。
 		/// </summary>
-		private Action<ReaderController> action;
+		private Action<ReaderController<T>> action;
 		/// <summary>
 		/// 终结符的向前看信息。
 		/// </summary>
@@ -24,11 +27,11 @@ namespace Cyjb.Compiler.Lexer
 		/// </remarks>
 		private int? trailing;
 		/// <summary>
-		/// 使用指定的标识符和动作初始化 <see cref="SymbolData"/> 结构的新实例。
+		/// 使用指定的标识符和动作初始化 <see cref="SymbolData&lt;T&gt;"/> 结构的新实例。
 		/// </summary>
 		/// <param name="id">终结符的标识符。</param>
 		/// <param name="action">终结符的动作。</param>
-		internal SymbolData(string id, Action<ReaderController> action)
+		internal SymbolData(T id, Action<ReaderController<T>> action)
 		{
 			this.id = id;
 			this.action = action;
@@ -38,12 +41,12 @@ namespace Cyjb.Compiler.Lexer
 		/// 获取终结符的标识符。
 		/// </summary>
 		/// <value>终结符的标识符。</value>
-		public string Id { get { return this.id; } }
+		public T Id { get { return this.id; } }
 		/// <summary>
 		/// 获取终结符的动作。
 		/// </summary>
 		/// <value>终结符的动作。</value>
-		public Action<ReaderController> Action { get { return this.action; } }
+		public Action<ReaderController<T>> Action { get { return this.action; } }
 		/// <summary>
 		/// 获取终结符的向前看信息。
 		/// </summary>
@@ -61,10 +64,6 @@ namespace Cyjb.Compiler.Lexer
 		/// <returns>当前对象的字符串表示形式。</returns>
 		public override string ToString()
 		{
-			if (Id == null)
-			{
-				return "[]";
-			}
 			string str = string.Concat("[", Id, "]");
 			if (Trailing != null)
 			{
@@ -73,7 +72,7 @@ namespace Cyjb.Compiler.Lexer
 			return str;
 		}
 
-		#region IEquatable<SymbolData> 成员
+		#region IEquatable<SymbolData<T>> 成员
 
 		/// <summary>
 		/// 指示当前对象是否等于同一类型的另一个对象。
@@ -86,13 +85,13 @@ namespace Cyjb.Compiler.Lexer
 		/// 指示当前对象是否等于另一个对象。
 		/// </summary>
 		/// </overloads>
-		public bool Equals(SymbolData other)
+		public bool Equals(SymbolData<T> other)
 		{
 			if (object.ReferenceEquals(other, this))
 			{
 				return true;
 			}
-			if (this.id != other.id)
+			if (!EqualityComparer<T>.Default.Equals(this.id, other.id))
 			{
 				return false;
 			}
@@ -103,28 +102,28 @@ namespace Cyjb.Compiler.Lexer
 			return this.trailing == other.trailing;
 		}
 
-		#endregion // IEquatable<SymbolData> 成员
+		#endregion // IEquatable<SymbolData<T>> 成员
 
 		#region object 成员
 
 		/// <summary>
-		/// 确定指定的 <see cref="System.Object"/> 是否等于当前的 <see cref="SymbolData"/>。
+		/// 确定指定的 <see cref="System.Object"/> 是否等于当前的 <see cref="SymbolData&lt;T&gt;"/>。
 		/// </summary>
-		/// <param name="obj">与当前的 <see cref="SymbolData"/> 进行比较的 object。</param>
-		/// <returns>如果指定的 <see cref="System.Object"/> 等于当前的 <see cref="SymbolData"/>，
+		/// <param name="obj">与当前的 <see cref="SymbolData&lt;T&gt;"/> 进行比较的 object。</param>
+		/// <returns>如果指定的 <see cref="System.Object"/> 等于当前的 <see cref="SymbolData&lt;T&gt;"/>，
 		/// 则为 <c>true</c>；否则为 <c>false</c>。</returns>
 		public override bool Equals(object obj)
 		{
-			if (!(obj is SymbolData))
+			if (!(obj is SymbolData<T>))
 			{
 				return false;
 			}
-			return this.Equals((SymbolData)obj);
+			return this.Equals((SymbolData<T>)obj);
 		}
 		/// <summary>
-		/// 用于 <see cref="SymbolData"/> 类型的哈希函数。
+		/// 用于 <see cref="SymbolData&lt;T&gt;"/> 类型的哈希函数。
 		/// </summary>
-		/// <returns>当前 <see cref="SymbolData"/> 的哈希代码。</returns>
+		/// <returns>当前 <see cref="SymbolData&lt;T&gt;"/> 的哈希代码。</returns>
 		public override int GetHashCode()
 		{
 			int hashCode = this.id.GetHashCode();
@@ -144,13 +143,13 @@ namespace Cyjb.Compiler.Lexer
 		#region 运算符重载
 
 		/// <summary>
-		/// 判断两个 <see cref="SymbolData"/> 是否相同。
+		/// 判断两个 <see cref="SymbolData&lt;T&gt;"/> 是否相同。
 		/// </summary>
-		/// <param name="obj1">要比较的第一个 <see cref="SymbolData"/> 对象。</param>
-		/// <param name="obj2">要比较的第二个 <see cref="SymbolData"/> 对象。</param>
-		/// <returns>如果两个 <see cref="SymbolData"/> 对象相同，则为 <c>true</c>；
+		/// <param name="obj1">要比较的第一个 <see cref="SymbolData&lt;T&gt;"/> 对象。</param>
+		/// <param name="obj2">要比较的第二个 <see cref="SymbolData&lt;T&gt;"/> 对象。</param>
+		/// <returns>如果两个 <see cref="SymbolData&lt;T&gt;"/> 对象相同，则为 <c>true</c>；
 		/// 否则为 <c>false</c>。</returns>
-		public static bool operator ==(SymbolData obj1, SymbolData obj2)
+		public static bool operator ==(SymbolData<T> obj1, SymbolData<T> obj2)
 		{
 			if (object.ReferenceEquals(obj1, obj2))
 			{
@@ -164,13 +163,13 @@ namespace Cyjb.Compiler.Lexer
 		}
 
 		/// <summary>
-		/// 判断两个 <see cref="SymbolData"/> 是否不同。
+		/// 判断两个 <see cref="SymbolData&lt;T&gt;"/> 是否不同。
 		/// </summary>
-		/// <param name="obj1">要比较的第一个 <see cref="SymbolData"/> 对象。</param>
-		/// <param name="obj2">要比较的第二个 <see cref="SymbolData"/> 对象。</param>
-		/// <returns>如果两个 <see cref="SymbolData"/> 对象不同，则为 <c>true</c>；
+		/// <param name="obj1">要比较的第一个 <see cref="SymbolData&lt;T&gt;"/> 对象。</param>
+		/// <param name="obj2">要比较的第二个 <see cref="SymbolData&lt;T&gt;"/> 对象。</param>
+		/// <returns>如果两个 <see cref="SymbolData&lt;T&gt;"/> 对象不同，则为 <c>true</c>；
 		/// 否则为 <c>false</c>。</returns>
-		public static bool operator !=(SymbolData obj1, SymbolData obj2)
+		public static bool operator !=(SymbolData<T> obj1, SymbolData<T> obj2)
 		{
 			return !(obj1 == obj2);
 		}
