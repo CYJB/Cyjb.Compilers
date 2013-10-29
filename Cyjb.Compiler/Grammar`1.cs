@@ -76,7 +76,8 @@ namespace Cyjb.Compiler
 	/// Console.WriteLine(parser.Result.Value);
 	/// </code>
 	/// </example>
-	/// <seealso cref="LexerRule"/>
+	/// <seealso cref="Cyjb.Compiler.Lexer.LexerRule&lt;T&gt;"/>
+	/// <seealso cref="Cyjb.Compiler.Parser.ParserRule&lt;T&gt;"/>
 	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerIntroduce.html">
 	/// 《C# 词法分析器（一）词法分析介绍》</seealso>
 	public sealed class Grammar<T>
