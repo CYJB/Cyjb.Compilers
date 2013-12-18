@@ -9,7 +9,7 @@ namespace Cyjb.Compiler
 	/// 表示词法单元分析器的控制器。
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
-	public sealed class ParserController<T> : ReadOnlyList<Token<T>>
+	public sealed class ParserController<T> : ReadOnlyList<Token<T>>, ISourceLocatable
 		where T : struct
 	{
 		/// <summary>
@@ -51,7 +51,7 @@ namespace Cyjb.Compiler
 				{
 					this.Start = stack.Peek().Start;
 				}
-				this.End = SourceLocation.Invalid;
+				this.End = this.Start;
 			}
 			else
 			{
@@ -60,7 +60,7 @@ namespace Cyjb.Compiler
 					base.SetItem(count, stack.Pop());
 				}
 				this.Start = this[0].Start;
-				this.End = this[0].End;
+				this.End = this[this.Count - 1].End;
 			}
 		}
 	}

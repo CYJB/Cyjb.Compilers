@@ -325,7 +325,7 @@ namespace Cyjb.Compiler.Parser
 						LRItemCollection<T> gotoTarget = itemsets[itemset.Goto[sym]].Items;
 						LRItem<T> gotoItem = gotoTarget.AddOrGet(closureItem.Production, closureItem.Index + 1);
 						// 自发生成的向前看符号。
-						gotoItem.Forwards.UnionWith(closureItem.Forwards);
+						gotoItem.AddForwards(closureItem.Forwards);
 						// 传播的向前看符号。
 						if (gotoItem.Forwards.Contains(SpreadFlag))
 						{
@@ -368,47 +368,55 @@ namespace Cyjb.Compiler.Parser
 		private static void LR1Closure(LRItemCollection<T> items,
 			Dictionary<Symbol<T>, HashSet<Terminal<T>>> first)
 		{
-			for (int i = 0; i < items.Count; i++)
+			bool changed = true;
+			while (changed)
 			{
-				LRItem<T> item = items[i];
-				// 项的定点右边是非终结符。 
-				NonTerminal<T> nextSym = item.SymbolAtIndex as NonTerminal<T>;
-				if (nextSym == null)
+				changed = false;
+				for (int i = 0; i < items.Count; i++)
 				{
-					continue;
-				}
-				int index = item.Index + 1;
-				Production<T> production = item.Production;
-				HashSet<Terminal<T>> forwards = null;
-				if (index < production.Body.Count)
-				{
-					forwards = new HashSet<Terminal<T>>();
-					Symbol<T> nNextSym = production.Body[index];
-					Terminal<T> tSym = nNextSym as Terminal<T>;
-					if (tSym != null)
+					LRItem<T> item = items[i];
+					// 项的定点右边是非终结符。 
+					NonTerminal<T> nextSym = item.SymbolAtIndex as NonTerminal<T>;
+					if (nextSym == null)
 					{
-						forwards.Add(tSym);
+						continue;
+					}
+					int index = item.Index + 1;
+					Production<T> production = item.Production;
+					HashSet<Terminal<T>> forwards = null;
+					if (index < production.Body.Count)
+					{
+						forwards = new HashSet<Terminal<T>>();
+						Symbol<T> nNextSym = production.Body[index];
+						Terminal<T> tSym = nNextSym as Terminal<T>;
+						if (tSym != null)
+						{
+							forwards.Add(tSym);
+						}
+						else
+						{
+							forwards.UnionWith(first[nNextSym]);
+							if (forwards.Contains(Empty))
+							{
+								// FIRST 中包含 ε，需要被替换为 item 的向前看符号。
+								forwards.Remove(Empty);
+								forwards.UnionWith(item.Forwards);
+							}
+						}
 					}
 					else
 					{
-						forwards.UnionWith(first[nNextSym]);
-						if (forwards.Contains(Empty))
+						forwards = item.Forwards;
+					}
+					int pCnt = nextSym.Productions.Count;
+					for (int j = 0; j < pCnt; j++)
+					{
+						LRItem<T> newItem = items.AddOrGet(nextSym.Productions[j], 0);
+						if (newItem.AddForwards(forwards) && !changed)
 						{
-							// FIRST 中包含 ε，需要被替换为 item 的向前看符号。
-							forwards.Remove(Empty);
-							forwards.UnionWith(item.Forwards);
+							changed = true;
 						}
 					}
-				}
-				else
-				{
-					forwards = item.Forwards;
-				}
-				int pCnt = nextSym.Productions.Count;
-				for (int j = 0; j < pCnt; j++)
-				{
-					LRItem<T> newItem = items.AddOrGet(nextSym.Productions[j], 0);
-					newItem.Forwards.UnionWith(forwards);
 				}
 			}
 		}
@@ -421,10 +429,10 @@ namespace Cyjb.Compiler.Parser
 		/// 构造 LALR 语法分析表。
 		/// </summary>
 		/// <param name="grammar">语法分析器使用的语法。</param>
-		/// <param name="itemset">LR 项集族。</param>
-		private void BuildLRTable(Grammar<T> grammar, List<LRItemset<T>> itemset)
+		/// <param name="itemsets">LR 项集族。</param>
+		private void BuildLRTable(Grammar<T> grammar, List<LRItemset<T>> itemsets)
 		{
-			int stateCnt = itemset.Count;
+			int stateCnt = itemsets.Count;
 			this.states = new StateData[stateCnt];
 			int gotoCnt = grammar.NonTerminals.Count;
 			for (int i = 0; i < stateCnt; i++)
@@ -434,7 +442,8 @@ namespace Cyjb.Compiler.Parser
 				{
 					actions[j] = new List<Tuple<LRItem<T>, ParseAction>>();
 				}
-				foreach (LRItem<T> item in itemset[i].Items)
+				LRItemset<T> itemset = itemsets[i];
+				foreach (LRItem<T> item in itemset.Items)
 				{
 					if (item.Index < item.Production.Body.Count)
 					{
@@ -443,7 +452,7 @@ namespace Cyjb.Compiler.Parser
 						Terminal<T> tSym = sym as Terminal<T>;
 						if (tSym != null)
 						{
-							int targetIndex = itemset[i].Goto[tSym];
+							int targetIndex = itemset.Goto[tSym];
 							actions[tSym.Index + Constants.TokenOffset].Add(
 								new Tuple<LRItem<T>, ParseAction>(item, ParseAction.Shift(targetIndex)));
 						}
@@ -469,13 +478,18 @@ namespace Cyjb.Compiler.Parser
 				foreach (NonTerminal<T> sym in grammar.NonTerminals)
 				{
 					int state;
-					if (!itemset[i].Goto.TryGetValue(sym, out state))
+					if (!itemset.Goto.TryGetValue(sym, out state))
 					{
 						state = Constants.DeadState;
 					}
 					gotos[sym.Index] = state;
 				}
-				this.states[i] = new StateData(ResolveActions(grammar, i, actions), gotos);
+				string[] originRules = new string[itemset.Items.Count];
+				for (int j = 0; j < originRules.Length; j++)
+				{
+					originRules[j] = itemset.Items[j].ToString();
+				}
+				this.states[i] = new StateData(ResolveActions(grammar, i, actions), gotos, originRules);
 			}
 		}
 		/// <summary>

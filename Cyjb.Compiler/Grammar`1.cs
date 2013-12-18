@@ -114,6 +114,7 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 词法分析器的规则是否发生了改变。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private bool lexerChanged = true;
 
 		#endregion // 词法分析器定义
@@ -126,9 +127,10 @@ namespace Cyjb.Compiler
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private readonly List<NonTerminal<T>> nonTerminals = new List<NonTerminal<T>>();
 		/// <summary>
-		/// 定义的产生式的数量。
+		/// 定义的产生式的数量，跳过增广文法的产生式。
 		/// </summary>
-		private int productionCount = 0;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private int productionCount = 1;
 		/// <summary>
 		/// 终结符的结合性信息。
 		/// </summary>
@@ -148,6 +150,7 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 语法分析器的规则是否发生了改变。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private bool parserChanged = true;
 
 		#endregion // 语法分析器定义
@@ -648,7 +651,7 @@ namespace Cyjb.Compiler
 			{
 				// 定义增广文法。
 				this.AugmentedStart = new NonTerminal<T>(Symbol<T>.Invalid, 0,
-					new ProductionBody<T>[] { Body(id) });
+					new ProductionBody<T>[] { new ProductionBody<T>(0, new T[] { id }) });
 				nonTerminals.Add(this.AugmentedStart);
 			}
 			// 索引之后会被更新。

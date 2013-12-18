@@ -82,5 +82,17 @@ namespace Cyjb.Compiler
 			this.PrecedenceSet = true;
 			return this;
 		}
+		/// <summary>
+		/// 返回当前对象的字符串表示形式。
+		/// </summary>
+		/// <returns>当前对象的字符串表示形式。</returns>
+		public override string ToString()
+		{
+			if (Body.Count == 0)
+			{
+				return "ε";
+			}
+			return string.Join(" ", Body);
+		}
 	}
 }

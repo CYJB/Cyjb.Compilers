@@ -5,6 +5,7 @@ namespace Cyjb.Compiler.Parser
 	/// <summary>
 	/// 表示语法分析器的 LR(1) 冲突项。
 	/// </summary>
+	[Serializable]
 	public struct ParserConflictItem : IEquatable<ParserConflictItem>
 	{
 		/// <summary>

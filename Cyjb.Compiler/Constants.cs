@@ -14,6 +14,10 @@ namespace Cyjb.Compiler
 		/// </summary>
 		public const string InitialContext = "Initial";
 		/// <summary>
+		/// 增广文法的起始非终结符的标签。
+		/// </summary>
+		public const string AugmentedStartLabel = "$accept";
+		/// <summary>
 		/// DFA 的死状态。
 		/// </summary>
 		public const int DeadState = -1;

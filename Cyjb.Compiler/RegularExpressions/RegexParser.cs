@@ -783,7 +783,7 @@ namespace Cyjb.Compiler.RegularExpressions
 					int index = reader.Index;
 					if (reader.Read() != '(' || reader.Read() != '?' || reader.Read() != '#')
 					{
-						reader.Unget(reader.Index - index);
+						reader.Index = index;
 						return;
 					}
 					while ((ich = reader.Peek()) >= 0 && ich != ')')
@@ -812,7 +812,7 @@ namespace Cyjb.Compiler.RegularExpressions
 					int index = reader.Index;
 					if (reader.Read() != '(' || reader.Read() != '?' || reader.Read() != '#')
 					{
-						reader.Unget(reader.Index - index);
+						reader.Index = index;
 						return;
 					}
 					while ((ich = reader.Peek()) >= 0 && ich != ')')
@@ -834,7 +834,7 @@ namespace Cyjb.Compiler.RegularExpressions
 					int index = reader.Index;
 					if (reader.Read() != '(' || reader.Read() != '?' || reader.Read() != '#')
 					{
-						reader.Unget(reader.Index - index);
+						reader.Index = index;
 						return;
 					}
 					while ((ich = reader.Peek()) >= 0 && ich != ')')
@@ -1661,7 +1661,7 @@ namespace Cyjb.Compiler.RegularExpressions
 			reader.Unget();
 			reader.Drop();
 			string message = ExceptionResources.GetString(resName);
-			throw CompilerExceptionHelper.ParsingException(pattern, message, reader.StartLocation, SourceLocation.Invalid);
+			throw CompilerExceptionHelper.ParsingException(pattern, message, reader.StartLocation, reader.StartLocation);
 		}
 		/// <summary>
 		/// 抛出分析异常。
@@ -1673,7 +1673,7 @@ namespace Cyjb.Compiler.RegularExpressions
 			reader.Unget();
 			reader.Drop();
 			string message = ExceptionResources.GetString(resName, args);
-			throw CompilerExceptionHelper.ParsingException(pattern, message, reader.StartLocation, SourceLocation.Invalid);
+			throw CompilerExceptionHelper.ParsingException(pattern, message, reader.StartLocation, reader.StartLocation);
 		}
 
 		#endregion // 异常信息

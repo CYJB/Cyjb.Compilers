@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using Cyjb.Collections;
+using Cyjb.IO;
 using Cyjb.Text;
 
 namespace Cyjb.Compiler.Parser
@@ -77,6 +80,7 @@ namespace Cyjb.Compiler.Parser
 						result = tokenStack.Pop();
 						return;
 					case ParseActionType.Error:
+						ReportError(state, token);
 						// ErrorRecovery(state, token.Id);
 						return;
 				}
@@ -134,6 +138,44 @@ namespace Cyjb.Compiler.Parser
 			tokenStack.Push(new Token<T>((T)(object)(info.Head + rule.NonTerminalOffset), null,
 				controller.Start, controller.End, value));
 			stateStack.Push(rule.States[stateStack.Peek()].Gotos[info.Head]);
+		}
+		/// <summary>
+		/// 报告分析错误。
+		/// </summary>
+		/// <param name="state">当前状态。</param>
+		/// <param name="token">未能识别的词法单元。</param>
+		private void ReportError(int state, Token<T> token)
+		{
+			StateData data = rule.States[state];
+			StringBuilder msg = new StringBuilder();
+			msg.Append("语法分析错误，未识别的词法单元 ");
+			msg.Append(token.Id);
+			List<T> expected = new List<T>();
+			for (int i = Constants.TokenOffset; i < rule.ActionCount; i++)
+			{
+				if (data.Actions[i].ActionType != ParseActionType.Error)
+				{
+					expected.Add((T)Enum.ToObject(typeof(T), i));
+				}
+			}
+			if (expected.Count > 0)
+			{
+				msg.Append("；期待的是 ");
+				for (int i = 0; i < expected.Count; i++)
+				{
+					if (i > 0)
+					{
+						msg.Append("，");
+					}
+					msg.Append(expected[i]);
+				}
+				msg.Append("。");
+			}
+			else
+			{
+				msg.Append("。");
+			}
+			throw new SourceException(msg.ToString(), token.Start, token.End, false);
 		}
 	}
 }

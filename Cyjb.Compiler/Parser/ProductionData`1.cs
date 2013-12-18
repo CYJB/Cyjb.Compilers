@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Cyjb.Compiler.Parser
 {
@@ -13,14 +14,17 @@ namespace Cyjb.Compiler.Parser
 		/// <summary>
 		/// 产生式头的索引。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private int head;
 		/// <summary>
 		/// 产生式体包含的符号个数。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private int bodySize;
 		/// <summary>
 		/// 产生式对应的动作。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private Func<ParserController<T>, object> action;
 		/// <summary>
 		/// 使用产生式的数据初始化 <see cref="ProductionData&lt;T&gt;"/> 结构的新实例。

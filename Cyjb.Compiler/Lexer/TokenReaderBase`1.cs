@@ -93,7 +93,7 @@ namespace Cyjb.Compiler.Lexer
 						if (this.IsAccept)
 						{
 							return new Token<T>(this.controller.Id, this.controller.Text,
-								Source.StartLocation, SourceLocation.Invalid, this.controller.Value);
+								Source.StartLocation, Source.StartLocation, this.controller.Value);
 						}
 					}
 					return Token<T>.GetEndOfFile(Source.StartLocation);

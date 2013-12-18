@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Cyjb.Compiler.Parser
@@ -14,14 +15,17 @@ namespace Cyjb.Compiler.Parser
 		/// <summary>
 		/// 项对应的产生式。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private Production<T> production;
 		/// <summary>
 		/// 项的定点。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private int index;
 		/// <summary>
 		/// 向前看符号集合。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private HashSet<Terminal<T>> forwards = new HashSet<Terminal<T>>();
 		/// <summary>
 		/// 使用给定的语法产生式和定点初始化 <see cref="LRItem&lt;T&gt;"/> 结构的新实例。
@@ -53,12 +57,29 @@ namespace Cyjb.Compiler.Parser
 		{
 			get
 			{
-				if (index >= production.Body.Count)
+				if (index < production.Body.Count)
 				{
-					return null;
+					return production.Body[index];
 				}
-				return production.Body[index];
+				return null;
 			}
+		}
+		/// <summary>
+		/// 添加指定的向前看符号。
+		/// </summary>
+		/// <param name="forwardSymbols">要添加的向前看符号集合。</param>
+		/// <returns>如果成功添加了一个或多个向前看符号，则为 <c>true</c>；否则为 <c>false</c>。</returns>
+		public bool AddForwards(IEnumerable<Terminal<T>> forwardSymbols)
+		{
+			bool changed = false;
+			foreach (Terminal<T> sym in forwardSymbols)
+			{
+				if (this.forwards.Add(sym) && !changed)
+				{
+					changed = true;
+				}
+			}
+			return changed;
 		}
 		/// <summary>
 		/// 返回当前对象的字符串表示形式。
@@ -67,7 +88,16 @@ namespace Cyjb.Compiler.Parser
 		public override string ToString()
 		{
 			StringBuilder text = new StringBuilder();
-			text.Append(production.Head.ToString());
+			text.Append(production.Index);
+			text.Append(' ');
+			if (EqualityComparer<T>.Default.Equals(production.Head.Id, Symbol<T>.Invalid))
+			{
+				text.Append(Constants.AugmentedStartLabel);
+			}
+			else
+			{
+				text.Append(production.Head);
+			}
 			text.Append(" → ");
 			int cnt = production.Body.Count;
 			if (cnt == 0)
@@ -93,15 +123,16 @@ namespace Cyjb.Compiler.Parser
 					text.Append("·");
 				}
 			}
-			if (forwards.Count > 0)
+			if (index >= production.Body.Count && forwards.Count > 0)
 			{
-				text.Append(", ");
+				text.Append(" [");
 				foreach (Terminal<T> sym in forwards)
 				{
 					text.Append(sym.ToString());
-					text.Append('/');
+					text.Append(", ");
 				}
-				text.Length--;
+				text.Length -= 2;
+				text.Append(']');
 			}
 			return text.ToString();
 		}

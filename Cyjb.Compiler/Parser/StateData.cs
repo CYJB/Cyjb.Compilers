@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Cyjb.Compiler.Parser
 {
@@ -12,20 +13,29 @@ namespace Cyjb.Compiler.Parser
 		/// <summary>
 		/// LR 语法分析表的动作。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private ParseAction[] actions;
 		/// <summary>
 		/// LR 语法分析表的转移。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private int[] gotos;
+		/// <summary>
+		/// LR 语法分析器状态包含的原始规则。
+		/// </summary>
+		[NonSerialized, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private string[] originRules;
 		/// <summary>
 		/// 使用指定的动作和转移引初始化 <see cref="StateData"/> 结构的新实例。
 		/// </summary>
 		/// <param name="actions">LR 语法分析表的动作。</param>
 		/// <param name="gotos">LR 语法分析表的转移。</param>
-		internal StateData(ParseAction[] actions, int[] gotos)
+		/// <param name="originRules">LR 语法分析器状态包含的原始规则。</param>
+		internal StateData(ParseAction[] actions, int[] gotos, string[] originRules)
 		{
 			this.actions = actions;
 			this.gotos = gotos;
+			this.originRules = originRules;
 		}
 		/// <summary>
 		/// 获取 LR 语法分析表的动作。
@@ -41,6 +51,11 @@ namespace Cyjb.Compiler.Parser
 		/// <value>LR 语法分析表的转移，每个元素分别对应所有非终结符。
 		/// 其中大于等于零的数表示转移到的状态，<c>-1</c> 表示不存在转移。</value>
 		public IList<int> Gotos { get { return this.gotos; } }
+		/// <summary>
+		/// 获取 LR 语法分析器状态包含的原始规则。
+		/// </summary>
+		/// <value>LR 语法分析器状态包含的原始规则，仅用于调试。</value>
+		public IList<string> OriginRules { get { return this.originRules; } }
 
 		#region IEquatable<StateData> 成员
 

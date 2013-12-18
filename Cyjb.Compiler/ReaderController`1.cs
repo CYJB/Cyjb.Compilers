@@ -95,7 +95,20 @@ namespace Cyjb.Compiler
 			this.reader.IsAccept = true;
 		}
 		/// <summary>
-		/// 接受给定的匹配。
+		/// 接受当前的匹配，使用指定的标识符。
+		/// </summary>
+		/// <param name="id">匹配的标识符。</param>
+		public void Accept(T id)
+		{
+			if (this.reader.IsReject)
+			{
+				throw CompilerExceptionHelper.ConflictingAcceptAction();
+			}
+			this.reader.IsAccept = true;
+			this.Id = id;
+		}
+		/// <summary>
+		/// 接受当前的匹配，使用指定的用户数据。
 		/// </summary>
 		/// <param name="value">用户数据。</param>
 		public void Accept(object value)
@@ -108,9 +121,24 @@ namespace Cyjb.Compiler
 			this.Value = value;
 		}
 		/// <summary>
-		/// 接受给定的匹配。
+		/// 接受当前的匹配，使用指定的标识符和用户数据。
 		/// </summary>
-		/// <param name="text">文本。</param>
+		/// <param name="id">匹配的标识符。</param>
+		/// <param name="value">用户数据。</param>
+		public void Accept(T id, object value)
+		{
+			if (this.reader.IsReject)
+			{
+				throw CompilerExceptionHelper.ConflictingAcceptAction();
+			}
+			this.reader.IsAccept = true;
+			this.Id = Id;
+			this.Value = value;
+		}
+		/// <summary>
+		/// 接受当前的匹配，使用指定的文本和用户数据。
+		/// </summary>
+		/// <param name="text">匹配的文本。</param>
 		/// <param name="value">用户数据。</param>
 		public void Accept(string text, object value)
 		{
@@ -119,6 +147,23 @@ namespace Cyjb.Compiler
 				throw CompilerExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
+			this.Text = text;
+			this.Value = value;
+		}
+		/// <summary>
+		/// 接受当前的匹配，使用指定的标识符、文本和用户数据。
+		/// </summary>
+		/// <param name="id">匹配的标识符。</param>
+		/// <param name="text">匹配的文本。</param>
+		/// <param name="value">用户数据。</param>
+		public void Accept(T id, string text, object value)
+		{
+			if (this.reader.IsReject)
+			{
+				throw CompilerExceptionHelper.ConflictingAcceptAction();
+			}
+			this.reader.IsAccept = true;
+			this.Id = Id;
 			this.Text = text;
 			this.Value = value;
 		}

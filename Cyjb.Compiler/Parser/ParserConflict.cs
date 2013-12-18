@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Cyjb.Collections.ObjectModel;
 
 namespace Cyjb.Compiler.Parser
@@ -6,6 +7,7 @@ namespace Cyjb.Compiler.Parser
 	/// <summary>
 	/// 表示语法分析器的冲突和解决办法。
 	/// </summary>
+	[Serializable]
 	public class ParserConflict : ReadOnlyList<ParserConflictItem>
 	{
 		/// <summary>
@@ -33,9 +35,9 @@ namespace Cyjb.Compiler.Parser
 		/// <value>产生冲突的终结符。</value>
 		public string Symbol { get; private set; }
 		/// <summary>
-		/// 获取被选择的冲突项。
+		/// 获取默认被选择的冲突项。
 		/// </summary>
-		/// <value>被选择的冲突项。</value>
+		/// <value>默认被选择的冲突项。</value>
 		public int Choice { get; private set; }
 		/// <summary>
 		/// 返回当前对象的字符串表示形式。

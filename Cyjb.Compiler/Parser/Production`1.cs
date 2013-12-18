@@ -61,7 +61,14 @@ namespace Cyjb.Compiler
 		public override string ToString()
 		{
 			StringBuilder text = new StringBuilder();
-			text.Append(Head.Id);
+			if (EqualityComparer<T>.Default.Equals(Head.Id, Symbol<T>.Invalid))
+			{
+				text.Append(Constants.AugmentedStartLabel);
+			}
+			else
+			{
+				text.Append(Head.Id);
+			}
 			text.Append(" → ");
 			int cnt = Body.Count;
 			if (cnt == 0)

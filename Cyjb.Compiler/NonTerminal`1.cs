@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Cyjb.Text;
 
 namespace Cyjb.Compiler
@@ -17,6 +18,7 @@ namespace Cyjb.Compiler
 		/// <summary>
 		/// 当前非终结符的所有产生式。
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private Production<T>[] productions;
 		/// <summary>
 		/// 使用非终结符的标识符、索引和产生式体初始化 <see cref="NonTerminal&lt;T&gt;"/> 类的新实例。
