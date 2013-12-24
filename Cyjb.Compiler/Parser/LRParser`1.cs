@@ -155,7 +155,7 @@ namespace Cyjb.Compiler.Parser
 			{
 				if (data.Actions[i].ActionType != ParseActionType.Error)
 				{
-					expected.Add((T)Enum.ToObject(typeof(T), i));
+					expected.Add((T)Enum.ToObject(typeof(T), i - Constants.TokenOffset));
 				}
 			}
 			if (expected.Count > 0)
