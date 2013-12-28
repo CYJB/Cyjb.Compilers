@@ -3,7 +3,7 @@
 	/// <summary>
 	/// 表示终结符的结合性。
 	/// </summary>
-	internal class Associativity
+	internal sealed class Associativity
 	{
 		/// <summary>
 		/// 使用指定结合性的优先级和类型初始化 <see cref="Associativity"/> 类的新实例。
