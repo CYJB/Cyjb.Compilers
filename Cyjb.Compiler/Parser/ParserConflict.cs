@@ -8,7 +8,7 @@ namespace Cyjb.Compiler.Parser
 	/// 表示语法分析器的冲突和解决办法。
 	/// </summary>
 	[Serializable]
-	public class ParserConflict : ReadOnlyList<ParserConflictItem>
+	public sealed class ParserConflict : ReadOnlyList<ParserConflictItem>
 	{
 		/// <summary>
 		/// 使用冲突的信息初始化 <see cref="ParserConflict"/> 类的新实例。
