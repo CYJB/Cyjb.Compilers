@@ -9,7 +9,7 @@ namespace Cyjb.Compiler.Parser
 	/// 表示 LR 的项，项的相等比较仅考虑产生式和定点，不会考虑向前看符号。
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
-	internal class LRItem<T> : IEquatable<LRItem<T>>
+	internal sealed class LRItem<T> : IEquatable<LRItem<T>>
 		where T : struct
 	{
 		/// <summary>

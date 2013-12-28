@@ -8,7 +8,7 @@ namespace Cyjb.Compiler.Parser
 	/// 表示 LR 项的集合，实现了按集合的内容比较。
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
-	internal class LRItemCollection<T> : ListBase<LRItem<T>>, IEquatable<LRItemCollection<T>>
+	internal sealed class LRItemCollection<T> : ListBase<LRItem<T>>, IEquatable<LRItemCollection<T>>
 		where T : struct
 	{
 		/// <summary>

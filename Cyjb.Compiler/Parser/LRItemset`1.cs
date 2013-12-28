@@ -6,7 +6,7 @@ namespace Cyjb.Compiler.Parser
 	/// 表示 LR 项集。
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
-	internal class LRItemset<T>
+	internal sealed class LRItemset<T>
 		where T : struct
 	{
 		/// <summary>
