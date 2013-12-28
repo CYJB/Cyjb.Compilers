@@ -27,7 +27,7 @@ namespace Cyjb.Compiler
 	/// <example>
 	/// 下面简单的构造一个数学算式的词法分析器：
 	/// <code>
-	/// enum Clac { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace }
+	/// enum Calc { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace }
 	/// Grammar&lt;Calc&gt; grammar = new Grammar&lt;Calc&gt;();
 	/// // 终结符的定义。
 	/// grammar.DefineSymbol(Calc.Id, "[0-9]+", c => c.Accept(double.Parse(c.Text)));
@@ -54,6 +54,7 @@ namespace Cyjb.Compiler
 	/// </code>
 	/// 下面构造一个相应的语法分析器：
 	/// <code>
+	/// enum Calc { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace, E }
 	/// // 非终结符的定义。
 	/// grammar.DefineSymbol(Calc.E,
 	/// 	grammar.Body(Calc.Id).Action(c => c[0].Value),
@@ -62,7 +63,7 @@ namespace Cyjb.Compiler
 	/// 	grammar.Body(Calc.E, Calc.Mul, Calc.E).Action(c => (double)c[0].Value * (double)c[2].Value),
 	/// 	grammar.Body(Calc.E, Calc.Div, Calc.E).Action(c => (double)c[0].Value / (double)c[2].Value),
 	/// 	grammar.Body(Calc.E, Calc.Pow, Calc.E).Action(c => Math.Pow((double)c[0].Value, (double)c[2].Value)),
-	/// 	grammar.Body(Calc.LB, Calc.E, Calc.RB).Action(c => c[1].Value)
+	/// 	grammar.Body(Calc.LBrace, Calc.E, Calc.RBrace).Action(c => c[1].Value)
 	/// );
 	/// // 定义运算符优先级。
 	/// grammar.DefineAssociativity(AssociativeType.Left, Calc.Add, Calc.Sub);
