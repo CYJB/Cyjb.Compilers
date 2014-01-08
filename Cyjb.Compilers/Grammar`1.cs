@@ -444,10 +444,9 @@ namespace Cyjb.Compilers
 		/// 在指定上下文中定义具有指定正则表达式和动作的终结符。
 		/// </summary>
 		/// <param name="regex">终结符对应的正则表达式。</param>
-		/// <param name="action">终结符的动作。</param>
 		/// <param name="contexts">定义终结符的上下文。</param>
-		public void DefineSymbol(Regex regex, Action<ReaderController<T>> action,
-			IEnumerable<string> contexts)
+		/// <param name="action">终结符的动作。</param>
+		public void DefineSymbol(Regex regex, IEnumerable<string> contexts, Action<ReaderController<T>> action)
 		{
 			InternalDefineSymbol(regex, action, contexts);
 		}
@@ -457,12 +456,11 @@ namespace Cyjb.Compilers
 		/// <param name="id">终结符的标识符，不能与 <see cref="Token&lt;T&gt;"/> 
 		/// 类中定义的特殊标识符相同。</param>
 		/// <param name="regex">终结符对应的正则表达式。</param>
-		/// <param name="action">终结符的动作。</param>
 		/// <param name="contexts">定义终结符的上下文。</param>
+		/// <param name="action">终结符的动作。</param>
 		/// <exception cref="System.ArgumentException">标识符与 <see cref="Token&lt;T&gt;"/> 
 		/// 类中定义的特殊标识符相同。</exception>
-		public void DefineSymbol(T id, Regex regex, Action<ReaderController<T>> action,
-			IEnumerable<string> contexts)
+		public void DefineSymbol(T id, Regex regex, IEnumerable<string> contexts, Action<ReaderController<T>> action)
 		{
 			CheckSymbolId(id);
 			InternalDefineSymbol(id, regex, action, contexts);
