@@ -45,7 +45,7 @@ namespace Cyjb.Compiler
 			{
 				if (stack.Count == 0)
 				{
-					this.Start = new SourceLocation(0, 1, 1);
+					this.Start = SourceLocation.Unknown;
 				}
 				else
 				{
@@ -59,8 +59,9 @@ namespace Cyjb.Compiler
 				{
 					base.SetItem(count, stack.Pop());
 				}
-				this.Start = this[0].Start;
-				this.End = this[this.Count - 1].End;
+				SourceRange range = SourceRange.Merge((IEnumerable<ISourceLocatable>)this);
+				this.Start = range.Start;
+				this.End = range.End;
 			}
 		}
 	}
