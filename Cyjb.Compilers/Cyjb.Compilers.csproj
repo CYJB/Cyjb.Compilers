@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E9A3C60A-50B1-4DC3-A177-EADA35B369B9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Cyjb.Compilers</RootNamespace>
+    <AssemblyName>Cyjb.Compilers</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\..\Cyjb\CyjbRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>..\bin\Cyjb.Compilers.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\bin\Cyjb.Compilers.XML</DocumentationFile>
+    <CodeAnalysisRuleSet>..\..\Cyjb\CyjbRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Cyjb, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40880b37bef542a8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Cyjb\bin\Cyjb.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CompilerExceptionHelper.cs" />
+    <Compile Include="ExceptionResources.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Grammar`1.cs" />
+    <Compile Include="Lexers\AcceptState.cs" />
+    <Compile Include="Lexers\CharClass.cs" />
+    <Compile Include="Lexers\Dfa.cs" />
+    <Compile Include="Lexers\StateData.cs" />
+    <Compile Include="Lexers\DfaState.cs" />
+    <Compile Include="Lexers\FixedTrailingReader`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lexers\LexerRule`1.cs" />
+    <Compile Include="Lexers\LexerContext.cs" />
+    <Compile Include="Lexers\LexerContextCollection.cs" />
+    <Compile Include="Lexers\LexerContextType.cs" />
+    <Compile Include="Lexers\Nfa.cs" />
+    <Compile Include="Lexers\NfaState.cs" />
+    <Compile Include="Lexers\NfaStateType.cs" />
+    <Compile Include="AssociativeType.cs" />
+    <Compile Include="NonTerminal`1.cs" />
+    <Compile Include="Parsers\Associativity.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\LRParser`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\LRItem`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\LRItemCollection`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\LRItemset`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\ParseAction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\ParseActionType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\ParserConflict.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\ParserConflictItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\ParserRule`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\ProductionData`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\StateData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsers\Production`1.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ProductionBody`1.cs" />
+    <Compile Include="ReaderController`1.cs" />
+    <Compile Include="Lexers\SymbolData`1.cs" />
+    <Compile Include="Lexers\TokenReaderBase`1.cs" />
+    <Compile Include="Lexers\TrailingType.cs" />
+    <Compile Include="Lexers\SimpleReader`1.cs" />
+    <Compile Include="Lexers\RejectableReader`1.cs" />
+    <Compile Include="Lexers\RejectableTrailingReader`1.cs" />
+    <Compile Include="RegularExpressions\AlternationExp.cs" />
+    <Compile Include="RegularExpressions\AnchorExp.cs" />
+    <Compile Include="RegularExpressions\CharClassExp.cs" />
+    <Compile Include="RegularExpressions\ConcatenationExp.cs" />
+    <Compile Include="RegularExpressions\EndOfFileExp.cs" />
+    <Compile Include="RegularExpressions\LiteralExp.cs" />
+    <Compile Include="RegularExpressions\Regex.cs" />
+    <Compile Include="RegularExpressions\RegexCharClass.cs" />
+    <Compile Include="RegularExpressions\RegexOptions.cs" />
+    <Compile Include="RegularExpressions\RegexParser.cs" />
+    <Compile Include="RegularExpressions\RepeatExp.cs" />
+    <Compile Include="ParserController`1.cs" />
+    <Compile Include="Symbol`1.cs" />
+    <Compile Include="Terminal`1.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ExceptionResource.resx" />
+    <EmbeddedResource Include="ExceptionResource.zh-CN.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CYJB_Code_Key.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

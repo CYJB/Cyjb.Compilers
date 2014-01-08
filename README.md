@@ -1,11 +1,11 @@
-Cyjb.Compiler
+Cyjb.Compilers
 ====
 
 我开发的 C# 编译类库，以 BSD 协议发布。基于 .Net Framework 4.0，使用 Visual Studio 2012 作为开发工具。
 
-本项目包括一些与编译相关的类，目前仅包括词法分析器。
+本项目包括一些与编译相关的类，目前包括词法分析器和 LALR 语法分析器。
 
-详细的类库文档，请参见 [Wiki](https://github.com/CYJB/Cyjb.Compiler/wiki)。
+详细的类库文档，请参见 [Wiki](https://github.com/CYJB/Cyjb.Compilers/wiki)。
 
 欢迎访问我的[博客](http://www.cnblogs.com/cyjb/)获取更多信息。
 
