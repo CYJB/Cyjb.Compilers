@@ -218,7 +218,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <param name="text">要表示的字符串。</param>
 		/// <returns>表示字符串的正则表达式。</returns>
 		[SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo",
-			MessageId = "Cyjb.Compiler.RegularExpressions.LiteralExp.#ctor(System.String)")]
+			MessageId = "Cyjb.Compilers.RegularExpressions.LiteralExp.#ctor(System.String)")]
 		public static Regex Literal(string text)
 		{
 			ExceptionHelper.CheckArgumentNull(text, "text");

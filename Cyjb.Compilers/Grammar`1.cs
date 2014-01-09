@@ -18,12 +18,14 @@ namespace Cyjb.Compilers
 	/// <remarks>
 	/// <para>泛型参数 <typeparamref name="T"/> 必须是一个枚举类型，用于标识词法单元。
 	/// 其中包含了所有终结符和非终结符的定义，要求终结符必须先于非终结符定义，
-	/// 而且它们的值必须是从零开始且连续的。</para>
+	/// 而且它们的值必须是从零开始的。</para>
 	/// <para>对于词法分析中的冲突，总是选择最长的词素。如果最长的词素可以与多个模式匹配，
 	/// 则选择最先被定义的模式。关于词法分析的相关信息，请参考我的系列博文
 	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerIntroduce.html">
-	/// 《C# 词法分析器（一）词法分析介绍》</see>。</para></remarks>
-	/// <para>在词法分析中，认为第一个被定义的非终结符，是文法的起始非终结符。</para>
+	/// 《C# 词法分析器（一）词法分析介绍》</see>，词法分析器的使用指南请参见
+	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerSummary.html">
+	/// 《C# 词法分析器（七）总结》</see>。</para></remarks>
+	/// <para>在语法分析中，认为第一个被定义的非终结符，是文法的起始非终结符。</para>
 	/// <example>
 	/// 下面简单的构造一个数学算式的词法分析器：
 	/// <code>
@@ -44,12 +46,9 @@ namespace Cyjb.Compilers
 	/// string source = "1 + 20 * 3 / 4*(5+6)";
 	/// // 构造词法分析器。
 	/// TokenReader&lt;Calc&gt; reader = grammar.GetReader(source);
-	/// while (true) {
-	/// 	Token&lt;Calc&gt; token = reader.ReadToken();
+	/// foreach (Token&lt;Calc&gt; token in reader)
+	/// {
 	/// 	Console.WriteLine(token);
-	/// 	if (token.IsEndOfFile) {
-	/// 		break;
-	/// 	}
 	/// }
 	/// </code>
 	/// 下面构造一个相应的语法分析器：
@@ -81,6 +80,8 @@ namespace Cyjb.Compilers
 	/// <seealso cref="Cyjb.Compilers.Parsers.ParserRule&lt;T&gt;"/>
 	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerIntroduce.html">
 	/// 《C# 词法分析器（一）词法分析介绍》</seealso>
+	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerSummary.html">
+	/// 《C# 词法分析器（七）总结》</seealso>
 	public sealed class Grammar<T>
 		where T : struct
 	{
