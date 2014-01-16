@@ -115,7 +115,7 @@ namespace Cyjb.Compilers
 		/// </summary>
 		private ExceptionResources()
 		{
-			this.resManager = new ResourceManager("Cyjb.Compiler.ExceptionResource", this.GetType().Assembly);
+			this.resManager = new ResourceManager("Cyjb.Compilers.ExceptionResource", this.GetType().Assembly);
 		}
 	}
 }
