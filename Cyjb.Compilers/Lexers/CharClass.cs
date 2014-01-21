@@ -88,6 +88,15 @@ namespace Cyjb.Compilers.Lexers
 			return map;
 		}
 		/// <summary>
+		/// 返回指定索引的字符类对应的字符集合。
+		/// </summary>
+		/// <param name="index">字符类的索引。</param>
+		/// <returns>指定索引的字符类对应的字符集合。</returns>
+		public ISet<char> GetCharSet(int index)
+		{
+			return charClassList[index];
+		}
+		/// <summary>
 		/// 返回指定的字符类对应的字符类索引。
 		/// </summary>
 		/// <param name="charClass">要获取字符类索引的字符类。</param>

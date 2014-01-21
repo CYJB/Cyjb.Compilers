@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cyjb.Collections;
 using Cyjb.Collections.ObjectModel;
@@ -242,16 +243,20 @@ namespace Cyjb.Compilers.Lexers
 				}
 			}
 			// 得到字符类的等价类。
-			IEnumerable<IEnumerable<int>> charClassGroup = 0.To(ccCnt - 1).GroupBy(i => charClassMap[i],
-				ListEqualityComparer<int>.Default);
-			if (charClassGroup.Count() < ccCnt)
+			IEnumerable<int>[] charClassGroup = 0.To(ccCnt - 1).GroupBy(i => charClassMap[i],
+				ListEqualityComparer<int>.Default).ToArray();
+			// 对字符类按照首字符的出现顺序进行排序。
+			char[] keys = new char[charClassGroup.Length];
+			for (int i = 0; i < keys.Length; i++)
 			{
-				// 需要更新字符类。
-				Dictionary<int, int> charClassUpdate = CharClass.MergeCharClass(charClassGroup);
-				for (int i = 0; i < cnt; i++)
-				{
-					base.Items[i].UdpateCharClass(charClassUpdate);
-				}
+				keys[i] = CharClass.GetCharSet(charClassGroup[i].First()).First();
+			}
+			Array.Sort(keys, charClassGroup);
+			// 更新字符类。
+			Dictionary<int, int> charClassUpdate = CharClass.MergeCharClass(charClassGroup);
+			for (int i = 0; i < cnt; i++)
+			{
+				base.Items[i].UdpateCharClass(charClassUpdate);
 			}
 		}
 
