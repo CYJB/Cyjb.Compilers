@@ -107,6 +107,7 @@ namespace Cyjb.Compilers.Lexers
 			{
 				this.trailingType = TrailingType.None;
 			}
+			this.ContainsBeginningOfLineHeader = true;
 		}
 		/// <summary>
 		/// 获取词法分析的上下文字典。
@@ -160,6 +161,12 @@ namespace Cyjb.Compilers.Lexers
 		/// </summary>
 		/// <value>指示正则表达式中是否使用了向前看符号，以及向前看符号的类型。</value>
 		public TrailingType TrailingType { get { return this.trailingType; } }
+		/// <summary>
+		/// 获取当前词法分析器中，是否包含与行首匹配对应的头节点。
+		/// </summary>
+		/// <value>如果包含与行首匹配对应的头节点，则为 <c>true</c>，包含 <see cref="ContextCount"/> * 2 个头节点；
+		/// 否则为 <c>false</c>，只包含 <see cref="ContextCount"/> 个头节点。</value>
+		public bool ContainsBeginningOfLineHeader { get; private set; }
 
 		#region 构造词法分析器
 
@@ -324,6 +331,78 @@ namespace Cyjb.Compilers.Lexers
 		}
 
 		#endregion // 构造词法分析器
+
+		#region 调整词法分析器
+
+		/// <summary>
+		/// 对状态进行排序。
+		/// </summary>
+		/// <param name="comparer">比较状态时使用的比较器。</param>
+		public void SortStates(IComparer<StateData> comparer)
+		{
+			ExceptionHelper.CheckArgumentNull(comparer, "comparer");
+			int[] indexs = new int[this.stateCount].Fill(i => i);
+			int headCnt = this.contextCount * 2;
+			Array.Sort(this.states, indexs, headCnt, this.stateCount - headCnt, comparer);
+			int[] mapper = new int[indexs.Length];
+			for (int i = 0; i < indexs.Length; i++)
+			{
+				mapper[indexs[i]] = i;
+			}
+			for (int i = 0; i < this.stateCount; i++)
+			{
+				StateData state = this.states[i];
+				for (int j = 0; j < this.charClassCount; j++)
+				{
+					int next = state.Transitions[j];
+					if (next >= 0)
+					{
+						state.Transitions[j] = mapper[next];
+					}
+				}
+			}
+		}
+		/// <summary>
+		/// 移除行首匹配的头节点，该操作会将头节点的数量减半，并调整状态索引。
+		/// </summary>
+		public void RemoveBeginningOfLineHeader()
+		{
+			if (!this.ContainsBeginningOfLineHeader)
+			{
+				return;
+			}
+			this.ContainsBeginningOfLineHeader = false;
+			StateData[] newStates = new StateData[this.stateCount - this.contextCount];
+			int idx = 0;
+			for (int i = 0; i < this.contextCount; i++)
+			{
+				newStates[idx++] = AdjustState(this.states[i + i]);
+			}
+			for (int i = this.contextCount * 2; i < this.stateCount; i++)
+			{
+				newStates[idx++] = AdjustState(this.states[i]);
+			}
+			this.states = newStates;
+			this.stateCount -= this.contextCount;
+		}
+		/// <summary>
+		/// 调整状态的索引。
+		/// </summary>
+		/// <param name="state">要调整索引的状态。</param>
+		/// <returns>调整完索引的状态。</returns>
+		private StateData AdjustState(StateData state)
+		{
+			for (int i = 0; i < this.charClassCount; i++)
+			{
+				if (state.Transitions[i] != -1)
+				{
+					state.Transitions[i] -= this.contextCount;
+				}
+			}
+			return state;
+		}
+
+		#endregion // 调整词法分析器
 
 		#region 获取词法单元读取器
 
