@@ -78,6 +78,11 @@ namespace Cyjb.Compilers.Lexers
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private TrailingType trailingType;
 		/// <summary>
+		/// 是否包含行首匹配的规则。
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private bool containsBeginningOfLineRule;
+		/// <summary>
 		/// 使用指定的语法规则初始化 <see cref="Cyjb.Compilers.Lexers.LexerRule&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法规则。</param>
@@ -86,9 +91,10 @@ namespace Cyjb.Compilers.Lexers
 			ExceptionHelper.CheckArgumentNull(grammar, "grammar");
 			this.contextCount = grammar.Contexts.Count;
 			this.contexts = new Dictionary<string, int>(contextCount);
-			foreach (LexerContext context in grammar.Contexts)
+			int i = 0;
+			foreach (string context in grammar.Contexts)
 			{
-				this.contexts.Add(context.Label, context.Index);
+				this.contexts.Add(context, i++);
 			}
 			this.symbolCount = grammar.Terminals.Count;
 			this.symbols = new SymbolData<T>[this.symbolCount];
@@ -229,33 +235,41 @@ namespace Cyjb.Compilers.Lexers
 			}
 		}
 		/// <summary>
-		/// 填充向前看的数据。
+		/// 填充行首匹配和向前看的数据。
 		/// </summary>
 		/// <param name="grammar">词法分析器使用的语法。</param>
 		private void FillTrailing(Grammar<T> grammar)
 		{
 			bool variableTrailing = false;
+			this.containsBeginningOfLineRule = false;
 			foreach (Terminal<T> sym in grammar.Terminals)
 			{
 				AnchorExp exp = sym.RegularExpression as AnchorExp;
-				if (exp != null && exp.TrailingExpression != null)
+				if (exp != null)
 				{
-					int len = exp.TrailingExpression.Length;
-					if (len != -1)
+					if (exp.BeginningOfLine == true)
 					{
-						this.symbols[sym.Index].Trailing = -len;
+						this.containsBeginningOfLineRule = true;
 					}
-					else
+					if (exp.TrailingExpression != null)
 					{
-						len = exp.InnerExpression.Length;
+						int len = exp.TrailingExpression.Length;
 						if (len != -1)
 						{
-							this.symbols[sym.Index].Trailing = len;
+							this.symbols[sym.Index].Trailing = -len;
 						}
 						else
 						{
-							this.symbols[sym.Index].Trailing = 0;
-							variableTrailing = true;
+							len = exp.InnerExpression.Length;
+							if (len != -1)
+							{
+								this.symbols[sym.Index].Trailing = len;
+							}
+							else
+							{
+								this.symbols[sym.Index].Trailing = 0;
+								variableTrailing = true;
+							}
 						}
 					}
 				}
@@ -365,25 +379,30 @@ namespace Cyjb.Compilers.Lexers
 		/// <summary>
 		/// 移除行首匹配的头节点，该操作会将头节点的数量减半，并调整状态索引。
 		/// </summary>
-		public void RemoveBeginningOfLineHeader()
+		/// <returns>如果不包含任何行首匹配的规则，成功移除头节点则为 <c>true</c>；否则为 <c>false</c>。</returns>
+		public bool RemoveBeginningOfLineHeader()
 		{
-			if (!this.ContainsBeginningOfLineHeader)
+			if (this.containsBeginningOfLineRule)
 			{
-				return;
+				return false;
 			}
-			this.ContainsBeginningOfLineHeader = false;
-			StateData[] newStates = new StateData[this.stateCount - this.contextCount];
-			int idx = 0;
-			for (int i = 0; i < this.contextCount; i++)
+			if (this.ContainsBeginningOfLineHeader)
 			{
-				newStates[idx++] = AdjustState(this.states[i + i]);
+				this.ContainsBeginningOfLineHeader = false;
+				StateData[] newStates = new StateData[this.stateCount - this.contextCount];
+				int idx = 0;
+				for (int i = 0; i < this.contextCount; i++)
+				{
+					newStates[idx++] = AdjustState(this.states[i + i]);
+				}
+				for (int i = this.contextCount * 2; i < this.stateCount; i++)
+				{
+					newStates[idx++] = AdjustState(this.states[i]);
+				}
+				this.states = newStates;
+				this.stateCount -= this.contextCount;
 			}
-			for (int i = this.contextCount * 2; i < this.stateCount; i++)
-			{
-				newStates[idx++] = AdjustState(this.states[i]);
-			}
-			this.states = newStates;
-			this.stateCount -= this.contextCount;
+			return true;
 		}
 		/// <summary>
 		/// 调整状态的索引。

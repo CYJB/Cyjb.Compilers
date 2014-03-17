@@ -33,10 +33,6 @@ namespace Cyjb.Compilers.Lexers
 		/// </summary>
 		private KeyValuePair<string, int> context;
 		/// <summary>
-		/// 之前匹配的文本。
-		/// </summary>
-		private string oldText;
-		/// <summary>
 		/// 使用给定的词法分析器信息初始化 <see cref="TokenReaderBase&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="lexerRule">要使用的词法分析器的规则。</param>
@@ -99,11 +95,15 @@ namespace Cyjb.Compilers.Lexers
 					return Token<T>.GetEndOfFile(Source.StartLocation);
 				}
 				// 起始状态与当前上下文相关。
-				int state = this.context.Value * 2;
-				if (this.Source.StartLocation.Col == 1)
+				int state = this.context.Value;
+				if (this.lexerRule.ContainsBeginningOfLineHeader)
 				{
-					// 行首规则。
-					state++;
+					state *= 2;
+					if (this.Source.StartLocation.Col == 1)
+					{
+						// 行首规则。
+						state++;
+					}
 				}
 				if (!this.IsMore)
 				{
@@ -111,7 +111,6 @@ namespace Cyjb.Compilers.Lexers
 				}
 				if (InternalReadToken(state))
 				{
-					oldText = this.IsMore ? this.controller.Text : null;
 					if (!this.IsMore && !this.IsReject)
 					{
 						this.Source.Drop();
@@ -152,7 +151,7 @@ namespace Cyjb.Compilers.Lexers
 		{
 			this.IsAccept = this.IsReject = this.IsMore = false;
 			this.controller.Id = index == EndOfFileIndex ? Token<T>.EndOfFile : lexerRule.Symbols[index].Id;
-			this.controller.Text = string.Concat(this.oldText, this.Source.ReadedBlock());
+			this.controller.Text = this.Source.ReadedBlock();
 			this.controller.Value = null;
 			action(controller);
 		}

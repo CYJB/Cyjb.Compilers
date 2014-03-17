@@ -173,12 +173,20 @@ namespace Cyjb.Compilers
 		#region 获取词法分析器
 
 		/// <summary>
+		/// 获取定义的正则表达式列表。
+		/// </summary>
+		/// <value>定义的正则表达式列表。</value>
+		public IDictionary<string, Regex> Regexs
+		{
+			get { return this.regexs; }
+		}
+		/// <summary>
 		/// 获取词法分析器上下文列表。
 		/// </summary>
 		/// <value>词法分析器的上下文列表。</value>
-		internal LexerContextCollection Contexts
+		public ICollection<string> Contexts
 		{
-			get { return lexerContexts; }
+			get { return lexerContexts.Labels; }
 		}
 		/// <summary>
 		/// 获取定义的终结符号的集合。
