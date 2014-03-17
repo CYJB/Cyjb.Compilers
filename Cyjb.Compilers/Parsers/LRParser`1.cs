@@ -35,7 +35,6 @@ namespace Cyjb.Compilers.Parsers
 		/// 语法分析器的控制器。
 		/// </summary>
 		private ParserController<T> controller = new ParserController<T>();
-
 		/// <summary>
 		/// 使用指定的语法规则初始化 <see cref="LRParser&lt;T&gt;"/> 类的新实例。
 		/// </summary>

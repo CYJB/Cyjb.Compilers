@@ -64,7 +64,7 @@ namespace Cyjb.Compilers
 			}
 			if (this.reader.IsAccept)
 			{
-				throw CompilerExceptionHelper.ConflictingRejectAction();
+				throw ExceptionHelper.ConflictingRejectAction();
 			}
 			this.reader.IsReject = true;
 		}
@@ -90,7 +90,7 @@ namespace Cyjb.Compilers
 		{
 			if (this.reader.IsReject)
 			{
-				throw CompilerExceptionHelper.ConflictingAcceptAction();
+				throw ExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
 		}
@@ -102,7 +102,7 @@ namespace Cyjb.Compilers
 		{
 			if (this.reader.IsReject)
 			{
-				throw CompilerExceptionHelper.ConflictingAcceptAction();
+				throw ExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
 			this.Id = id;
@@ -115,7 +115,7 @@ namespace Cyjb.Compilers
 		{
 			if (this.reader.IsReject)
 			{
-				throw CompilerExceptionHelper.ConflictingAcceptAction();
+				throw ExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
 			this.Value = value;
@@ -129,7 +129,7 @@ namespace Cyjb.Compilers
 		{
 			if (this.reader.IsReject)
 			{
-				throw CompilerExceptionHelper.ConflictingAcceptAction();
+				throw ExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
 			this.Id = Id;
@@ -144,7 +144,7 @@ namespace Cyjb.Compilers
 		{
 			if (this.reader.IsReject)
 			{
-				throw CompilerExceptionHelper.ConflictingAcceptAction();
+				throw ExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
 			this.Text = text;
@@ -160,7 +160,7 @@ namespace Cyjb.Compilers
 		{
 			if (this.reader.IsReject)
 			{
-				throw CompilerExceptionHelper.ConflictingAcceptAction();
+				throw ExceptionHelper.ConflictingAcceptAction();
 			}
 			this.reader.IsAccept = true;
 			this.Id = Id;

@@ -121,14 +121,6 @@
     <value>Cannot include class \{0} in character range.</value>
     <comment>不能在字符范围中包括类。</comment>
   </data>
-  <data name="ConflictingAcceptAction" xml:space="preserve">
-    <value>Accept action is conflicted with Reject action.</value>
-    <comment>冲突的接受动作。</comment>
-  </data>
-  <data name="ConflictingRejectAction" xml:space="preserve">
-    <value>Reject action is conflicted with Accept action.</value>
-    <comment>冲突的拒绝动作。</comment>
-  </data>
   <data name="DuplicatedSymbolId" xml:space="preserve">
     <value>Symbol identifier '{0}' is already exists.</value>
     <comment>重复的符号标识符。</comment>
@@ -144,10 +136,6 @@
   <data name="IncompleteSlashP" xml:space="preserve">
     <value>Incomplete \p{X} character escape.</value>
     <comment>不完整的 \p{X} 字符转义。</comment>
-  </data>
-  <data name="InvalidLexerContext" xml:space="preserve">
-    <value>Invalid lexer context '{0}'.</value>
-    <comment>无效的词法分析上下文。</comment>
   </data>
   <data name="InvalidSymbolId" xml:space="preserve">
     <value>Invalid symbol identifier '{0}'.</value>
@@ -228,10 +216,6 @@
   <data name="UnrecognizedGrouping" xml:space="preserve">
     <value>Unrecognized grouping construct.</value>
     <comment>无法识别的分组构造。</comment>
-  </data>
-  <data name="UnrecognizedToken" xml:space="preserve">
-    <value>Unrecognized token "{0}".</value>
-    <comment>未识别的词法单元异常。</comment>
   </data>
   <data name="UnterminatedBracket" xml:space="preserve">
     <value>Unterminated [] set.</value>
