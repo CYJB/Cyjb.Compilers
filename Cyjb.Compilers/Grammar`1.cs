@@ -587,7 +587,7 @@ namespace Cyjb.Compilers
 					LexerContext context;
 					if (!this.lexerContexts.TryGetItem(tmpLabel, out context))
 					{
-						throw CompilerExceptionHelper.InvalidLexerContext("contexts", tmpLabel);
+						throw ExceptionHelper.InvalidLexerContext("contexts", tmpLabel);
 					}
 					yield return context;
 				}

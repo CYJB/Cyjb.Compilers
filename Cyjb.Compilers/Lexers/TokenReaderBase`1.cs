@@ -131,7 +131,7 @@ namespace Cyjb.Compilers.Lexers
 						this.Source.Read();
 						text = this.Source.Accept();
 					}
-					throw CompilerExceptionHelper.UnrecognizedToken(text,
+					throw ExceptionHelper.UnrecognizedToken(text,
 						this.Start, this.Source.BeforeStartLocation);
 				}
 			}
@@ -217,7 +217,7 @@ namespace Cyjb.Compilers.Lexers
 			}
 			else
 			{
-				throw CompilerExceptionHelper.InvalidLexerContext("label", label);
+				throw ExceptionHelper.InvalidLexerContext("label", label);
 			}
 		}
 
