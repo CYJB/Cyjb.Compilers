@@ -17,3 +17,4 @@ C# 词法分析器系列博文
  - [C# 词法分析器（四）构造 NFA](http://www.cnblogs.com/cyjb/archive/p/LexerNfa.html)
  - [C# 词法分析器（五）转换 DFA](http://www.cnblogs.com/cyjb/archive/p/LexerDfa.html)
  - [C# 词法分析器（六）构造词法分析器](http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html)
+ - [C# 词法分析器（七）总结](http://www.cnblogs.com/cyjb/p/LexerSummary.html)
