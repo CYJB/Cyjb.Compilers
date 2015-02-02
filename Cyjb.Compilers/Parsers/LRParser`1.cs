@@ -174,7 +174,7 @@ namespace Cyjb.Compilers.Parsers
 			{
 				msg.Append("。");
 			}
-			throw new SourceException(msg.ToString(), token.Start, token.End, false);
+			throw new SourceException(msg.ToString(), token, false);
 		}
 	}
 }

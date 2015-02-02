@@ -361,7 +361,10 @@ namespace Cyjb.Compilers
 		public void DefineSymbol(T id, string regex)
 		{
 			CheckSymbolId(id);
-			ExceptionHelper.CheckArgumentNull(regex, "regex");
+			if (regex == null)
+			{
+				throw CommonExceptions.ArgumentNull("regex");
+			}
 			InternalDefineSymbol(id, regex, DefaultAccept);
 		}
 		/// <summary>
@@ -371,7 +374,10 @@ namespace Cyjb.Compilers
 		/// <param name="action">终结符的动作。</param>
 		public void DefineSymbol(string regex, Action<ReaderController<T>> action)
 		{
-			ExceptionHelper.CheckArgumentNull(regex, "regex");
+			if (regex == null)
+			{
+				throw CommonExceptions.ArgumentNull("regex");
+			} 
 			InternalDefineSymbol(regex, action);
 		}
 		/// <summary>
@@ -386,7 +392,10 @@ namespace Cyjb.Compilers
 		public void DefineSymbol(T id, string regex, Action<ReaderController<T>> action)
 		{
 			CheckSymbolId(id);
-			ExceptionHelper.CheckArgumentNull(regex, "regex");
+			if (regex == null)
+			{
+				throw CommonExceptions.ArgumentNull("regex");
+			}
 			InternalDefineSymbol(id, regex, action);
 		}
 
@@ -507,7 +516,10 @@ namespace Cyjb.Compilers
 		private void InternalDefineSymbol(Regex regex, Action<ReaderController<T>> action,
 			IEnumerable<string> contexts)
 		{
-			ExceptionHelper.CheckArgumentNull(regex, "regex");
+			if (regex == null)
+			{
+				throw CommonExceptions.ArgumentNull("regex");
+			}
 			Terminal<T> sym = new Terminal<T>(terminals.Count, regex, action);
 			if (contexts == null || !contexts.Any())
 			{
@@ -532,7 +544,10 @@ namespace Cyjb.Compilers
 		private void InternalDefineSymbol(T id, Regex regex, Action<ReaderController<T>> action,
 			IEnumerable<string> contexts)
 		{
-			ExceptionHelper.CheckArgumentNull(regex, "regex");
+			if (regex == null)
+			{
+				throw CommonExceptions.ArgumentNull("regex");
+			}
 			Terminal<T> sym = new Terminal<T>(id, terminals.Count, regex, action);
 			if (contexts == null || !contexts.Any())
 			{
@@ -561,7 +576,7 @@ namespace Cyjb.Compilers
 				int idx = regex.IndexOf('>');
 				if (idx == -1)
 				{
-					throw CompilerExceptionHelper.IncompleteLexerContext("regex");
+					throw CompilerCommonExceptions.IncompleteLexerContext("regex");
 				}
 				string contextStr = regex.Substring(1, idx - 1);
 				regex = regex.Substring(idx + 1);
@@ -585,9 +600,9 @@ namespace Cyjb.Compilers
 				{
 					string tmpLabel = label.Trim();
 					LexerContext context;
-					if (!this.lexerContexts.TryGetItem(tmpLabel, out context))
+					if (!this.lexerContexts.TryGetValue(tmpLabel, out context))
 					{
-						throw ExceptionHelper.InvalidLexerContext("contexts", tmpLabel);
+						throw CommonExceptions.InvalidLexerContext("contexts", tmpLabel);
 					}
 					yield return context;
 				}
@@ -679,12 +694,12 @@ namespace Cyjb.Compilers
 			{
 				if (EqualityComparer<T>.Default.Equals(bodies[i], Token<T>.EndOfFile))
 				{
-					throw CompilerExceptionHelper.InvalidSymbolId("bodies", bodies[i].ToString());
+					throw CompilerCommonExceptions.InvalidSymbolId("bodies", bodies[i].ToString());
 				}
 				else if (!EqualityComparer<T>.Default.Equals(bodies[i], Token<T>.Error) &&
 					Constants.ToInt32(bodies[i]) < 0)
 				{
-					throw CompilerExceptionHelper.InvalidSymbolId("bodies", bodies[i].ToString());
+					throw CompilerCommonExceptions.InvalidSymbolId("bodies", bodies[i].ToString());
 				}
 			}
 			return new ProductionBody<T>(productionCount++, bodies ?? new T[0]);
@@ -795,15 +810,15 @@ namespace Cyjb.Compilers
 			if (EqualityComparer<T>.Default.Equals(id, Token<T>.EndOfFile) ||
 				EqualityComparer<T>.Default.Equals(id, Token<T>.Error))
 			{
-				throw CompilerExceptionHelper.InvalidSymbolId("id", id.ToString());
+				throw CompilerCommonExceptions.InvalidSymbolId("id", id.ToString());
 			}
 			else if (Constants.ToInt32(id) < 0)
 			{
-				throw CompilerExceptionHelper.InvalidSymbolId("id", id.ToString());
+				throw CompilerCommonExceptions.InvalidSymbolId("id", id.ToString());
 			}
 			if (symbolIds.ContainsKey(id))
 			{
-				throw CompilerExceptionHelper.DuplicatedSymbolId("id", id.ToString());
+				throw CompilerCommonExceptions.DuplicatedSymbolId("id", id.ToString());
 			}
 		}
 	}

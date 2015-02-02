@@ -328,9 +328,9 @@ namespace Cyjb.Compilers.RegularExpressions
 							{
 								// {regexName} 情况。
 								reader.Drop();
-								SourceLocation start = reader.StartLocation;
+								SourcePosition start = reader.StartPosition;
 								string name = ScanCapname();
-								SourceLocation end = reader.StartLocation;
+								SourcePosition end = reader.StartPosition;
 								if (reader.Read() == '}')
 								{
 									if (!regexDefinition.TryGetValue(name, out current))
@@ -1052,7 +1052,7 @@ namespace Cyjb.Compilers.RegularExpressions
 				reader.Read();
 				if (i > MaxValueDiv10 || (i == MaxValueDiv10 && d > MaxValueMod10))
 				{
-					throw ExceptionHelper.OverflowInt32();
+					throw CommonExceptions.OverflowInt32();
 				}
 				i *= 10;
 				i += d;
@@ -1611,10 +1611,10 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <param name="name">未定义的正则表达式的名字。</param>
 		/// <param name="start">异常的起始位置。</param>
 		/// <param name="end">异常的结束位置。</param>
-		private void ThrowUndefinedRegex(string name, SourceLocation start, SourceLocation end)
+		private void ThrowUndefinedRegex(string name, SourcePosition start, SourcePosition end)
 		{
 			string message = ExceptionResources.GetString("UndefinedRegex", name);
-			throw CompilerExceptionHelper.ParsingException(pattern, message, start, end);
+			throw CompilerCommonExceptions.ParsingException(pattern, message, start, end);
 		}
 		/// <summary>
 		/// 抛出未识别的控制字符的异常。
@@ -1661,7 +1661,7 @@ namespace Cyjb.Compilers.RegularExpressions
 			reader.Unget();
 			reader.Drop();
 			string message = ExceptionResources.GetString(resName);
-			throw CompilerExceptionHelper.ParsingException(pattern, message, reader.StartLocation, reader.StartLocation);
+			throw CompilerCommonExceptions.ParsingException(pattern, message, reader.StartPosition, reader.StartPosition);
 		}
 		/// <summary>
 		/// 抛出分析异常。
@@ -1673,7 +1673,7 @@ namespace Cyjb.Compilers.RegularExpressions
 			reader.Unget();
 			reader.Drop();
 			string message = ExceptionResources.GetString(resName, args);
-			throw CompilerExceptionHelper.ParsingException(pattern, message, reader.StartLocation, reader.StartLocation);
+			throw CompilerCommonExceptions.ParsingException(pattern, message, reader.StartPosition, reader.StartPosition);
 		}
 
 		#endregion // 异常信息

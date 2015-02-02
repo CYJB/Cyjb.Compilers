@@ -31,9 +31,14 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <param name="right">要并联的第二个正则表达式。</param>
 		internal AlternationExp(Regex left, Regex right)
 		{
-			ExceptionHelper.CheckArgumentNull(left, "left");
-			ExceptionHelper.CheckArgumentNull(right, "right");
-			CheckRegex(left);
+			if (left == null)
+			{
+				throw CommonExceptions.ArgumentNull("left");
+			}
+			if (right == null)
+			{
+				throw CommonExceptions.ArgumentNull("right");
+			} CheckRegex(left);
 			CheckRegex(right);
 			this.left = left;
 			this.right = right;

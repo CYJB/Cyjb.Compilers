@@ -8,7 +8,7 @@ namespace Cyjb.Compilers.Parsers
 	/// 表示 LR 项的集合，实现了按集合的内容比较。
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
-	internal sealed class LRItemCollection<T> : ListBase<LRItem<T>>, IEquatable<LRItemCollection<T>>
+	internal sealed class LRItemCollection<T> : ReadOnlyList<LRItem<T>>, IEquatable<LRItemCollection<T>>
 		where T : struct
 	{
 		/// <summary>
@@ -18,13 +18,12 @@ namespace Cyjb.Compilers.Parsers
 		/// <summary>
 		/// 初始化 <see cref="LRItemCollection&lt;T&gt;"/> 类的新实例。
 		/// </summary>
-		public LRItemCollection() : base(true) { }
+		public LRItemCollection() { }
 		/// <summary>
 		/// 使用指定的初始集合初始化 <see cref="LRItemCollection&lt;T&gt;"/> 类的新实例。
 		/// </summary>
 		/// <param name="other">初始的 LR 项集合。</param>
 		public LRItemCollection(IEnumerable<LRItem<T>> other)
-			: base(true)
 		{
 			this.UnionWith(other);
 		}
@@ -32,13 +31,13 @@ namespace Cyjb.Compilers.Parsers
 		/// 如果指定的 LR 项在当前集合中不存在，则添加到当前集合中。
 		/// </summary>
 		/// <param name="item">要添加的 LR 项。</param>
-		public new void Add(LRItem<T> item)
+		public void Add(LRItem<T> item)
 		{
 			LRItem<T>[] items = GetItems(item.Production);
 			if (items[item.Index] == null)
 			{
 				items[item.Index] = item;
-				base.InsertItem(base.Count, item);
+				base.Items.Add(item);
 			}
 		}
 		/// <summary>
@@ -53,7 +52,7 @@ namespace Cyjb.Compilers.Parsers
 			{
 				LRItem<T> item = new LRItem<T>(production, index);
 				items[index] = item;
-				base.InsertItem(Count, item);
+				base.Items.Add(item);
 			}
 		}
 		/// <summary>
@@ -70,7 +69,7 @@ namespace Cyjb.Compilers.Parsers
 			{
 				LRItem<T> item = new LRItem<T>(production, index);
 				items[index] = item;
-				; base.InsertItem(Count, item);
+				base.Items.Add(item);
 			}
 			return items[index];
 		}

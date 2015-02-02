@@ -45,17 +45,17 @@ namespace Cyjb.Compilers.RegularExpressions
 			{
 				if (anchor.BeginningOfLine)
 				{
-					throw CompilerExceptionHelper.NestedBeginningOfLine("regex");
+					throw CompilerCommonExceptions.NestedBeginningOfLine("regex");
 				}
 				if (anchor.TrailingExpression == AnchorExp.EndOfLine)
 				{
-					throw CompilerExceptionHelper.NestedEndOfLine("regex");
+					throw CompilerCommonExceptions.NestedEndOfLine("regex");
 				}
-				throw CompilerExceptionHelper.NestedTrailing("regex");
+				throw CompilerCommonExceptions.NestedTrailing("regex");
 			}
 			if (regex is EndOfFileExp)
 			{
-				throw CompilerExceptionHelper.NestedEndOfFile("regex");
+				throw CompilerCommonExceptions.NestedEndOfFile("regex");
 			}
 		}
 
@@ -221,7 +221,10 @@ namespace Cyjb.Compilers.RegularExpressions
 			MessageId = "Cyjb.Compilers.RegularExpressions.LiteralExp.#ctor(System.String)")]
 		public static Regex Literal(string text)
 		{
-			ExceptionHelper.CheckArgumentNull(text, "text");
+			if (text == null)
+			{
+				throw CommonExceptions.ArgumentNull("text");
+			}
 			if (text.Length == 1)
 			{
 				return Symbol(text[0]);
@@ -261,8 +264,10 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <returns>表示字符串的正则表达式。</returns>
 		public static Regex LiteralIgnoreCase(string text, CultureInfo culture)
 		{
-			ExceptionHelper.CheckArgumentNull(text, "text");
-			if (text.Length == 1)
+			if (text == null)
+			{
+				throw CommonExceptions.ArgumentNull("text");
+			} if (text.Length == 1)
 			{
 				return SymbolIgnoreCase(text[0], culture);
 			}
@@ -316,7 +321,10 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// </overloads>
 		public static Regex CharClassPattern(string pattern)
 		{
-			ExceptionHelper.CheckArgumentNull(pattern, "pattern");
+			if (pattern == null)
+			{
+				throw CommonExceptions.ArgumentNull("pattern");
+			}
 			return new CharClassExp(RegexCharClass.ParsePattern(pattern).ToStringClass());
 		}
 		/// <summary>
@@ -327,7 +335,10 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <returns>表示字符类的正则表达式。</returns>
 		public static Regex CharClassPattern(string pattern, RegexOptions options)
 		{
-			ExceptionHelper.CheckArgumentNull(pattern, "pattern");
+			if (pattern == null)
+			{
+				throw CommonExceptions.ArgumentNull("pattern");
+			}
 			return new CharClassExp(RegexCharClass.ParsePattern(pattern, options).ToStringClass());
 		}
 		/// <summary>
@@ -342,7 +353,10 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// </overloads>
 		public static Regex CharClass(string cc)
 		{
-			ExceptionHelper.CheckArgumentNull(cc, "cc");
+			if (cc == null)
+			{
+				throw CommonExceptions.ArgumentNull("cc");
+			}
 			return new CharClassExp(cc);
 		}
 		/// <summary>
@@ -352,7 +366,10 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <returns>表示字符类的正则表达式。</returns>
 		public static Regex CharClass(RegexCharClass cc)
 		{
-			ExceptionHelper.CheckArgumentNull(cc, "cc");
+			if (cc == null)
+			{
+				throw CommonExceptions.ArgumentNull("cc");
+			}
 			return new CharClassExp(cc.ToStringClass());
 		}
 		/// <summary>

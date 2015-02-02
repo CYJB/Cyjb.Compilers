@@ -310,21 +310,21 @@ namespace Cyjb.Compilers.Lexers
 								{
 									if (last + 1 != iter.Current)
 									{
-										text.Append(first.ToPrintableString());
+										text.Append(first.Escape());
 										if (first != last)
 										{
 											text.Append('-');
-											text.Append(last.ToPrintableString());
+											text.Append(last.Escape());
 										}
 										first = iter.Current;
 									}
 									last = iter.Current;
 								}
-								text.Append(first.ToPrintableString());
+								text.Append(first.Escape());
 								if (first != last)
 								{
 									text.Append('-');
-									text.Append(last.ToPrintableString());
+									text.Append(last.Escape());
 								}
 							}
 						}

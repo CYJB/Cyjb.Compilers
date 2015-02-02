@@ -6,7 +6,7 @@ namespace Cyjb.Compilers
 	/// <summary>
 	/// 提供用于异常处理的辅助方法。
 	/// </summary>
-	internal static class CompilerExceptionHelper
+	internal static class CompilerCommonExceptions
 	{
 
 		#region ArgumentException
@@ -97,9 +97,9 @@ namespace Cyjb.Compilers
 		/// <param name="end">分析异常的结束位置。</param>
 		/// <returns><see cref="Cyjb.IO.SourceException"/> 对象。</returns>
 		internal static SourceException ParsingException(string pattern, string message,
-			SourceLocation start, SourceLocation end)
+			SourcePosition start, SourcePosition end)
 		{
-			return new SourceException(ExceptionResources.GetString("ParsingException", pattern, message), start, end);
+			return new SourceException(ExceptionResources.GetString("ParsingException", pattern, message), new SourceRange(start, end));
 		}
 		/// <summary>
 		/// 返回正则表达式字符类不可以合并的异常。

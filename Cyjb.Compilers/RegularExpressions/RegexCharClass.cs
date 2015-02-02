@@ -656,7 +656,7 @@ namespace Cyjb.Compilers.RegularExpressions
 			{
 				return "\\-";
 			}
-			return ch.ToPrintableString();
+			return ch.Escape();
 		}
 		/// <summary>
 		/// 所有 Unicode 通用类别的名称。
@@ -770,7 +770,7 @@ namespace Cyjb.Compilers.RegularExpressions
 			// 而不是复制副本，有时会导致出错。
 			if (!(cc.CanMerge && this.CanMerge))
 			{
-				CompilerExceptionHelper.RegexCharClassCannotMerge("charClass");
+				CompilerCommonExceptions.RegexCharClassCannotMerge("charClass");
 			}
 			int ccRangeCount = RccRangeCount.Value(cc.charClass);
 			int thisRangeCount = RccRangeCount.Value(this.charClass);

@@ -58,7 +58,7 @@ namespace Cyjb.Compilers.Lexers
 		/// 获取当前词法单元的起始位置。
 		/// </summary>
 		/// <value>当前词法单元的起始位置。</value>
-		protected SourceLocation Start { get; private set; }
+		protected SourcePosition Start { get; private set; }
 		/// <summary>
 		/// 获取或设置是否接受了当前的词法单元。
 		/// </summary>
@@ -89,17 +89,17 @@ namespace Cyjb.Compilers.Lexers
 						if (this.IsAccept)
 						{
 							return new Token<T>(this.controller.Id, this.controller.Text,
-								Source.StartLocation, Source.StartLocation, this.controller.Value);
+								Source.StartPosition, Source.StartPosition, this.controller.Value);
 						}
 					}
-					return Token<T>.GetEndOfFile(Source.StartLocation);
+					return Token<T>.GetEndOfFile(Source.StartPosition);
 				}
 				// 起始状态与当前上下文相关。
 				int state = this.context.Value;
 				if (this.lexerRule.ContainsBeginningOfLineHeader)
 				{
 					state *= 2;
-					if (this.Source.StartLocation.Col == 1)
+					if (this.Source.StartPosition.Col == 1)
 					{
 						// 行首规则。
 						state++;
@@ -107,7 +107,7 @@ namespace Cyjb.Compilers.Lexers
 				}
 				if (!this.IsMore)
 				{
-					this.Start = Source.StartLocation;
+					this.Start = Source.StartPosition;
 				}
 				if (InternalReadToken(state))
 				{
@@ -118,7 +118,7 @@ namespace Cyjb.Compilers.Lexers
 					if (this.IsAccept)
 					{
 						return new Token<T>(this.controller.Id, this.controller.Text,
-							this.Start, this.Source.BeforeStartLocation, this.controller.Value);
+							this.Start, this.Source.BeforeStartPosition, this.controller.Value);
 					}
 				}
 				else
@@ -131,8 +131,8 @@ namespace Cyjb.Compilers.Lexers
 						this.Source.Read();
 						text = this.Source.Accept();
 					}
-					throw ExceptionHelper.UnrecognizedToken(text,
-						this.Start, this.Source.BeforeStartLocation);
+					throw CommonExceptions.UnrecognizedToken(text,
+						this.Start, this.Source.BeforeStartPosition);
 				}
 			}
 		}
@@ -217,7 +217,7 @@ namespace Cyjb.Compilers.Lexers
 			}
 			else
 			{
-				throw ExceptionHelper.InvalidLexerContext("label", label);
+				throw CommonExceptions.InvalidLexerContext("label", label);
 			}
 		}
 

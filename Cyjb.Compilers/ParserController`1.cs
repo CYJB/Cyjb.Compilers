@@ -20,12 +20,12 @@ namespace Cyjb.Compilers
 		/// 获取词法单元的起始位置。
 		/// </summary>
 		/// <value>词法单元的起始位置。</value>
-		public SourceLocation Start { get; private set; }
+		public SourcePosition Start { get; private set; }
 		/// <summary>
 		/// 获取词法单元的结束位置。
 		/// </summary>
 		/// <value>词法单元的结束位置。</value>
-		public SourceLocation End { get; private set; }
+		public SourcePosition End { get; private set; }
 		/// <summary>
 		/// 向 <see cref="ParserController&lt;T&gt;"/> 中添加指定堆栈中的词法单元。
 		/// </summary>
@@ -35,17 +35,17 @@ namespace Cyjb.Compilers
 		{
 			while (this.Count > count)
 			{
-				base.RemoveAt(this.Count - 1);
+				base.Items.RemoveAt(this.Count - 1);
 			}
 			while (this.Count < count)
 			{
-				base.InsertItem(this.Count, null);
+				base.Items.Add(null);
 			}
 			if (count == 0)
 			{
 				if (stack.Count == 0)
 				{
-					this.Start = SourceLocation.Unknown;
+					this.Start = SourcePosition.Unknown;
 				}
 				else
 				{
@@ -57,7 +57,7 @@ namespace Cyjb.Compilers
 			{
 				while (count-- > 0)
 				{
-					base.SetItem(count, stack.Pop());
+					base.Items[count] = stack.Pop();
 				}
 				SourceRange range = SourceRange.Merge((IEnumerable<ISourceLocatable>)this);
 				this.Start = range.Start;

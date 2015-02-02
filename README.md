@@ -1,7 +1,7 @@
 Cyjb.Compilers
 ====
 
-我开发的 C# 编译类库，以 BSD 协议发布。基于 .Net Framework 4.0，使用 Visual Studio 2012 作为开发工具。
+我开发的 C# 编译类库，以 BSD 协议发布。基于 .Net Framework 4.5，使用 Visual Studio 2013 作为开发工具。
 
 本项目包括一些与编译相关的类，目前包括词法分析器和 LALR 语法分析器。
 

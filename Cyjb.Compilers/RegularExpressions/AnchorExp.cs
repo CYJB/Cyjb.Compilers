@@ -24,7 +24,10 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <param name="innerExp">包含的内部正则表达式。</param>
 		internal AnchorExp(Regex innerExp)
 		{
-			ExceptionHelper.CheckArgumentNull(innerExp, "innerExp");
+			if (innerExp == null)
+			{
+				throw CommonExceptions.ArgumentNull("innerExp");
+			}
 			CheckRegex(innerExp);
 			this.innerExp = innerExp;
 			this.BeginningOfLine = false;

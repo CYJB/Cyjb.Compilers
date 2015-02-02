@@ -34,17 +34,20 @@ namespace Cyjb.Compilers.RegularExpressions
 		{
 			if (minTimes < 0)
 			{
-				ExceptionHelper.ArgumentNegative("minTimes");
+				CommonExceptions.ArgumentNegative("minTimes", minTimes);
 			}
 			if (maxTimes < 0)
 			{
-				ExceptionHelper.ArgumentNegative("maxTimes");
+				CommonExceptions.ArgumentNegative("maxTimes", maxTimes);
 			}
 			if (minTimes > maxTimes)
 			{
-				ExceptionHelper.ReversedArgument("minTimes", "maxTimes");
+				CommonExceptions.ReversedArgument("minTimes", "maxTimes");
 			}
-			ExceptionHelper.CheckArgumentNull(innerExp, "innerExp");
+			if (innerExp == null)
+			{
+				throw CommonExceptions.ArgumentNull("innerExp");
+			}
 			CheckRegex(innerExp);
 			this.innerExp = innerExp;
 			this.minTimes = minTimes;

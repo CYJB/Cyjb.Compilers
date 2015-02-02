@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Cyjb.Compilers.Lexers;
+using Cyjb;
 
 namespace Cyjb.Compilers.RegularExpressions
 {
@@ -75,13 +76,11 @@ namespace Cyjb.Compilers.RegularExpressions
 					case '+': return "\\+";
 					case '*': return "\\*";
 					case '|': return "\\|";
-					default: return symbol.ToPrintableString();
+					default:
+						return symbol.Escape();
 				}
 			}
-			else
-			{
-				return RegexCharClass.GetDescription(charClass);
-			}
+			return RegexCharClass.GetDescription(charClass);
 		}
 	}
 }

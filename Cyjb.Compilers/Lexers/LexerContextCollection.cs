@@ -7,7 +7,7 @@ namespace Cyjb.Compilers.Lexers
 	/// <summary>
 	/// 表示词法分析器上下文的集合。
 	/// </summary>
-	internal sealed class LexerContextCollection : KeyedCollectionBase<string, LexerContext>
+	internal sealed class LexerContextCollection : ReadOnlyKeyedCollectionBase<string, LexerContext>
 	{
 		/// <summary>
 		/// 上下文的标签集合。
@@ -16,7 +16,7 @@ namespace Cyjb.Compilers.Lexers
 		/// <summary>
 		/// 初始化 <see cref="LexerContextCollection"/> 类的新实例。
 		/// </summary>
-		public LexerContextCollection() : base(true) { }
+		public LexerContextCollection() { }
 		/// <summary>
 		/// 获取上下文的标签集合。
 		/// </summary>
@@ -38,12 +38,12 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="label">上下文的标签。</param>
 		public void DefineContext(string label)
 		{
-			if (this.Contains(label))
+			if (this.ContainsKey(label))
 			{
-				throw ExceptionHelper.KeyDuplicate("label");
+				throw CommonExceptions.KeyDuplicate("label");
 			}
 			LexerContext item = new LexerContext(base.Count, label, LexerContextType.Exclusive);
-			base.AddItem(item);
+			base.Dictionary.Add(label, item);
 		}
 		/// <summary>
 		/// 定义一个新的词法分析器的包含型上下文。
@@ -51,12 +51,12 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="label">上下文的标签。</param>
 		public void DefineInclusiveContext(string label)
 		{
-			if (this.Contains(label))
+			if (this.ContainsKey(label))
 			{
-				throw ExceptionHelper.KeyDuplicate("label");
+				throw CommonExceptions.KeyDuplicate("label");
 			}
 			LexerContext item = new LexerContext(base.Count, label, LexerContextType.Inclusive);
-			base.AddItem(item);
+			base.Dictionary.Add(label, item);
 		}
 
 		#region KeyedCollectionBase<string, LexerContext> 成员
@@ -101,7 +101,7 @@ namespace Cyjb.Compilers.Lexers
 			/// <see cref="LabelCollection"/> 是只读的。</exception>
 			public void Add(string item)
 			{
-				throw ExceptionHelper.MethodNotSupported();
+				throw CommonExceptions.MethodNotSupported();
 			}
 			/// <summary>
 			/// 从 <see cref="LabelCollection"/> 中移除所有元素。
@@ -110,7 +110,7 @@ namespace Cyjb.Compilers.Lexers
 			/// <see cref="LabelCollection"/> 是只读的。</exception>
 			public void Clear()
 			{
-				throw ExceptionHelper.MethodNotSupported();
+				throw CommonExceptions.MethodNotSupported();
 			}
 			/// <summary>
 			/// 确定 <see cref="LabelCollection"/> 是否包含特定值。
@@ -120,7 +120,7 @@ namespace Cyjb.Compilers.Lexers
 			/// 则为 <c>true</c>；否则为 <c>false</c>。</returns>
 			public bool Contains(string item)
 			{
-				return this.contexts.Contains(item);
+				return this.contexts.ContainsKey(item);
 			}
 			/// <summary>
 			/// 从特定的 <see cref="System.Array"/> 索引处开始，
@@ -141,15 +141,24 @@ namespace Cyjb.Compilers.Lexers
 			/// 末尾之间的可用空间。</exception>
 			public void CopyTo(string[] array, int arrayIndex)
 			{
-				ExceptionHelper.CheckArgumentNull(array, "array");
-				ExceptionHelper.CheckFlatArray(array, "array");
-				if (arrayIndex < 0)
+				if (array == null)
 				{
-					throw ExceptionHelper.ArgumentOutOfRange("arrayIndex");
+					throw CommonExceptions.ArgumentNull("array");
+				}
+				if (array.Rank != 1)
+				{
+					throw CommonExceptions.MultidimensionalArrayNotSupported("array");
+				}
+				if (array.GetLowerBound(0) != 0)
+				{
+					throw CommonExceptions.ArrayNonZeroLowerBound("array");
+				} if (arrayIndex < 0)
+				{
+					throw CommonExceptions.ArgumentOutOfRange("arrayIndex", arrayIndex);
 				}
 				if (array.Length - arrayIndex < this.Count)
 				{
-					throw ExceptionHelper.ArrayTooSmall("array");
+					throw CommonExceptions.ArrayTooSmall("array");
 				}
 				foreach (LexerContext context in this.contexts)
 				{
@@ -184,7 +193,7 @@ namespace Cyjb.Compilers.Lexers
 			/// <see cref="LabelCollection"/> 是只读的。</exception>
 			public bool Remove(string item)
 			{
-				throw ExceptionHelper.MethodNotSupported();
+				throw CommonExceptions.MethodNotSupported();
 			}
 
 			#endregion

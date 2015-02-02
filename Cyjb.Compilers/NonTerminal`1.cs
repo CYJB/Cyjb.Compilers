@@ -63,7 +63,7 @@ namespace Cyjb.Compilers
 					}
 					else
 					{
-						throw CompilerExceptionHelper.InvalidSymbolId("body", id.ToString());
+						throw CompilerCommonExceptions.InvalidSymbolId("body", id.ToString());
 					}
 				}
 				Terminal<T> prec = null;
@@ -72,12 +72,12 @@ namespace Cyjb.Compilers
 					Symbol<T> sym;
 					if (!symbolMapper.TryGetValue(body.Precedence, out sym))
 					{
-						throw CompilerExceptionHelper.InvalidSymbolId("Precedence", body.Precedence.ToString());
+						throw CompilerCommonExceptions.InvalidSymbolId("Precedence", body.Precedence.ToString());
 					}
 					prec = sym as Terminal<T>;
 					if (prec == null)
 					{
-						throw CompilerExceptionHelper.InvalidSymbolId("Precedence", body.Precedence.ToString());
+						throw CompilerCommonExceptions.InvalidSymbolId("Precedence", body.Precedence.ToString());
 					}
 				}
 				else

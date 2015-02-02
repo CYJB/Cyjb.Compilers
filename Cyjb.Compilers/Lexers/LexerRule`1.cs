@@ -88,7 +88,10 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="grammar">词法分析器使用的语法规则。</param>
 		internal LexerRule(Grammar<T> grammar)
 		{
-			ExceptionHelper.CheckArgumentNull(grammar, "grammar");
+			if (grammar == null)
+			{
+				throw CommonExceptions.ArgumentNull("grammar");
+			}
 			this.contextCount = grammar.Contexts.Count;
 			this.contexts = new Dictionary<string, int>(contextCount);
 			int i = 0;
@@ -354,7 +357,10 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="comparer">比较状态时使用的比较器。</param>
 		public void SortStates(IComparer<StateData> comparer)
 		{
-			ExceptionHelper.CheckArgumentNull(comparer, "comparer");
+			if (comparer == null)
+			{
+				throw CommonExceptions.ArgumentNull("comparer");
+			}
 			int[] indexs = new int[this.stateCount].Fill(i => i);
 			int headCnt = this.contextCount * 2;
 			Array.Sort(this.states, indexs, headCnt, this.stateCount - headCnt, comparer);
@@ -437,7 +443,10 @@ namespace Cyjb.Compilers.Lexers
 		/// </overloads>
 		public TokenReader<T> GetReader(string source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
+			if (source == null)
+			{
+				throw CommonExceptions.ArgumentNull("source");
+			}
 			return GetReader(new SourceReader(new StringReader(source)));
 		}
 		/// <summary>
@@ -447,8 +456,10 @@ namespace Cyjb.Compilers.Lexers
 		/// <returns>指定源文件的词法单元读取器。</returns>
 		public TokenReader<T> GetReader(SourceReader source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			switch (this.trailingType)
+			if (source == null)
+			{
+				throw CommonExceptions.ArgumentNull("source");
+			} switch (this.trailingType)
 			{
 				case TrailingType.None:
 					return new SimpleReader<T>(this, source);
@@ -471,8 +482,10 @@ namespace Cyjb.Compilers.Lexers
 		/// </overloads>
 		public TokenReader<T> GetRejectableReader(string source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			return GetRejectableReader(new SourceReader(new StringReader(source)));
+			if (source == null)
+			{
+				throw CommonExceptions.ArgumentNull("source");
+			} return GetRejectableReader(new SourceReader(new StringReader(source)));
 		}
 		/// <summary>
 		/// 返回指定源文件的允许拒绝的词法单元读取器。
@@ -481,8 +494,10 @@ namespace Cyjb.Compilers.Lexers
 		/// <returns>指定源文件的词法单元读取器。</returns>
 		public TokenReader<T> GetRejectableReader(SourceReader source)
 		{
-			ExceptionHelper.CheckArgumentNull(source, "source");
-			switch (this.trailingType)
+			if (source == null)
+			{
+				throw CommonExceptions.ArgumentNull("source");
+			} switch (this.trailingType)
 			{
 				case TrailingType.None:
 					return new RejectableReader<T>(this, source);

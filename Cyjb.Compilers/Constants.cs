@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using Cyjb.Reflection;
 
 namespace Cyjb.Compilers
 {
@@ -48,21 +49,11 @@ namespace Cyjb.Compilers
 		/// <returns><see cref="System.Int32"/> 类型的枚举值。</returns>
 		public static int ToInt32(object value)
 		{
-			switch (Convert.GetTypeCode(value))
+			if (value.GetType().IsUnsigned())
 			{
-				case TypeCode.SByte:
-				case TypeCode.Int16:
-				case TypeCode.Int32:
-				case TypeCode.Int64:
-					return Convert.ToInt32(value, CultureInfo.InvariantCulture);
-				case TypeCode.Byte:
-				case TypeCode.UInt16:
-				case TypeCode.UInt32:
-				case TypeCode.UInt64:
-					return (int)Convert.ToUInt32(value, CultureInfo.InvariantCulture);
+				return unchecked((int)Convert.ChangeType<uint>(value));
 			}
-			Debug.Fail("无效的枚举类型");
-			return 0;
+			return Convert.ChangeType<int>(value);
 		}
 	}
 }
