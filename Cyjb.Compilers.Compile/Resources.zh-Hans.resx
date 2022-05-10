@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BadClassInCharRange" xml:space="preserve">
+    <value>不能在字符范围中包括类 \{0}。</value>
+    <comment>不能在字符范围中包括类。</comment>
+  </data>
+  <data name="DuplicatedSymbolId" xml:space="preserve">
+    <value>符号标识符“{0}”已经定义。</value>
+    <comment>重复的符号标识符。</comment>
+  </data>
+  <data name="EmptyCharClass" xml:space="preserve">
+    <value>空的字符类。</value>
+    <comment>空的字符类。</comment>
+  </data>
+  <data name="IllegalEndEscape" xml:space="preserve">
+    <value>\ 在模式末尾非法。</value>
+    <comment>\ 在模式末尾非法。</comment>
+  </data>
+  <data name="IncompleteLexerContext" xml:space="preserve">
+    <value>不完整的词法分析上下文。</value>
+    <comment>不完整的词法分析上下文。</comment>
+  </data>
+  <data name="IncompleteRegexReference" xml:space="preserve">
+    <value>不完整的正则表达式引用。</value>
+    <comment>不完整的正则表达式引用。</comment>
+  </data>
+  <data name="InvalidRegexPattern" xml:space="preserve">
+    <value>无效的正则表达式模式“{0}” 位于 {1}：{2}</value>
+    <comment>无效的正则表达式模式。</comment>
+  </data>
+  <data name="InvalidSymbolId" xml:space="preserve">
+    <value>无效的符号标识符“{0}”。</value>
+    <comment>无效的符号标识符。</comment>
+  </data>
+  <data name="InvalidUnicodePropertyEscape" xml:space="preserve">
+    <value>不完整的 \p{X} 字符转义。</value>
+    <comment>不完整的 \p{X} 字符转义。</comment>
+  </data>
+  <data name="MalformedUnicodePropertyEscape" xml:space="preserve">
+    <value>格式不正确的 \p{X} 字符转义。</value>
+    <comment>格式不正确的 \p{X} 字符转义。</comment>
+  </data>
+  <data name="MissingControl" xml:space="preserve">
+    <value>缺少控制字符。</value>
+    <comment>缺少控制字符。</comment>
+  </data>
+  <data name="NestedBeginningOfLine" xml:space="preserve">
+    <value>嵌套行起始定位点。</value>
+    <comment>嵌套行起始定位点。</comment>
+  </data>
+  <data name="NestedEndOfFile" xml:space="preserve">
+    <value>嵌套文件结束。</value>
+    <comment>嵌套文件结束。</comment>
+  </data>
+  <data name="NestedEndOfLine" xml:space="preserve">
+    <value>嵌套行结束定位点。</value>
+    <comment>嵌套行结束定位点。</comment>
+  </data>
+  <data name="NestedQuantify" xml:space="preserve">
+    <value>嵌套限定符 {0}。</value>
+    <comment>嵌套限定符。</comment>
+  </data>
+  <data name="NestedTrailing" xml:space="preserve">
+    <value>嵌套向前看正则表达式。</value>
+    <comment>嵌套向前看正则表达式。</comment>
+  </data>
+  <data name="NotEnoughParens" xml:space="preserve">
+    <value>) 不足。</value>
+    <comment>) 不足。</comment>
+  </data>
+  <data name="NotRejectable" xml:space="preserve">
+    <value>当前的 TokenReader&lt;T&gt; 不支持拒绝动作。</value>
+    <comment>不允许拒绝动作。</comment>
+  </data>
+  <data name="ParsingException" xml:space="preserve">
+    <value>正在分析“{0}”－ {1}</value>
+    <comment>分析异常。</comment>
+  </data>
+  <data name="QuantifierOutOfRange" xml:space="preserve">
+    <value>数量必须小于等于 Int32.MaxValue。</value>
+    <comment>数量超出范围。</comment>
+  </data>
+  <data name="QuantifyAfterNothing" xml:space="preserve">
+    <value>限定符 {x,y} 前没有任何内容。</value>
+    <comment>限定符前没有任何内容。</comment>
+  </data>
+  <data name="ReversedCharRange" xml:space="preserve">
+    <value>[x-y] 范围的顺序颠倒。</value>
+    <comment>[x-y] 范围的顺序颠倒。</comment>
+  </data>
+  <data name="ReversedQuantifierRange" xml:space="preserve">
+    <value>无效的 {x,y}，x &gt; y。</value>
+    <comment>数量范围的顺序颠倒。</comment>
+  </data>
+  <data name="SubtractionMustBeLast" xml:space="preserve">
+    <value>减去的字符类必须是字符类中的最后一个元素。</value>
+    <comment>减去的字符类必须是字符类中的最后一个元素。</comment>
+  </data>
+  <data name="TooFewHex" xml:space="preserve">
+    <value>十六进制位数不足。</value>
+    <comment>十六进制位数不足。</comment>
+  </data>
+  <data name="TooManyParens" xml:space="preserve">
+    <value>) 过多。</value>
+    <comment>) 过多。</comment>
+  </data>
+  <data name="UndefinedRegex" xml:space="preserve">
+    <value>未定义的正则表达式“{0}”。</value>
+    <comment>未定义的正则表达式。</comment>
+  </data>
+  <data name="UnrecognizedControl" xml:space="preserve">
+    <value>无法识别的控制字符。</value>
+    <comment>无法识别的控制字符。</comment>
+  </data>
+  <data name="UnrecognizedEscape" xml:space="preserve">
+    <value>无法识别的转义序列 \{0}。</value>
+    <comment>无法识别的转义序列。</comment>
+  </data>
+  <data name="UnrecognizedGrouping" xml:space="preserve">
+    <value>无法识别的分组构造。</value>
+    <comment>无法识别的分组构造。</comment>
+  </data>
+  <data name="UnrecognizedUnicodeProperty" xml:space="preserve">
+    <value>未识别的 Unicode 属性“{0}”。</value>
+    <comment>未识别的 Unicode 属性。</comment>
+  </data>
+  <data name="UnterminatedBracket" xml:space="preserve">
+    <value>未终止的 [] 集。</value>
+    <comment>未终止的 [] 集。</comment>
+  </data>
+  <data name="UnterminatedComment" xml:space="preserve">
+    <value>未终止的(?#...)注释。</value>
+    <comment>未终止的注释。</comment>
+  </data>
+</root>

@@ -1,9 +1,9 @@
-Cyjb.Compilers
+Cyjb.Compilers.Compile
 ====
 
 提供编译相关功能，基于 .NET 6。
 
-本项目包括一些与编译相关的功能，目前包含词法分析器和 LALR 语法分析器，以及相应的运行时。
+本项目包括一些与编译相关的功能，目前包含词法分析器和 LALR 语法分析器。
 
 详细的类库文档，请参见 [Wiki](https://github.com/CYJB/Cyjb.Compilers/wiki)。
 
@@ -18,4 +18,3 @@ C# 词法分析器系列博文
  - [C# 词法分析器（五）转换 DFA](http://www.cnblogs.com/cyjb/archive/p/LexerDfa.html)
  - [C# 词法分析器（六）构造词法分析器](http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html)
  - [C# 词法分析器（七）总结](http://www.cnblogs.com/cyjb/p/LexerSummary.html)
-

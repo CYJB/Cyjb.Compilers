@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // 有关程序集的常规信息通过以下
@@ -14,5 +14,5 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("ca903a41-123d-48ff-a523-e6011a1859f8")]
+[assembly: Guid("12f9eef0-249a-41be-a68f-72c7b6f426b1")]
 
