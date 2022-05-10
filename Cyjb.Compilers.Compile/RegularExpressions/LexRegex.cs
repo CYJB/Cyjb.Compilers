@@ -31,7 +31,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// </overloads>
 		public static LexRegex Parse(string pattern, IDictionary<string, LexRegex>? regexDef = null)
 		{
-			CommonExceptions.CheckArgumentNull(pattern);
+			ArgumentNullException.ThrowIfNull(pattern);
 			return RegexParser.ParseRegex(pattern, RegexOptions.None, regexDef);
 		}
 
@@ -48,7 +48,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <see cref="RegexOptions.ECMAScript"/> 和 <see cref="RegexOptions.CultureInvariant"/>。</remarks>
 		public static LexRegex Parse(string pattern, RegexOptions option, IDictionary<string, LexRegex>? regexDef = null)
 		{
-			CommonExceptions.CheckArgumentNull(pattern);
+			ArgumentNullException.ThrowIfNull(pattern);
 			return RegexParser.ParseRegex(pattern, option, regexDef);
 		}
 
@@ -77,7 +77,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <exception cref="ArgumentNullException"><paramref name="pattern"/> 为 <c>null</c>。</exception>
 		public static LexRegex Symbol(string pattern)
 		{
-			CommonExceptions.CheckArgumentNull(pattern);
+			ArgumentNullException.ThrowIfNull(pattern);
 			return new CharClassExp(RegexParser.ParseCharClass(pattern, RegexOptions.None, false));
 		}
 
@@ -90,7 +90,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <exception cref="ArgumentNullException"><paramref name="pattern"/> 为 <c>null</c>。</exception>
 		public static LexRegex Symbol(string pattern, RegexOptions options)
 		{
-			CommonExceptions.CheckArgumentNull(pattern);
+			ArgumentNullException.ThrowIfNull(pattern);
 			return new CharClassExp(RegexParser.ParseCharClass(pattern, options, false));
 		}
 
@@ -143,7 +143,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <returns>表示字符串的正则表达式。</returns>
 		public static LexRegex Literal(string text)
 		{
-			CommonExceptions.CheckArgumentNull(text);
+			ArgumentNullException.ThrowIfNull(text);
 			return new LiteralExp(text);
 		}
 
@@ -182,7 +182,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <returns>表示字符串的正则表达式。</returns>
 		public static LexRegex LiteralIgnoreCase(string text, CultureInfo? culture)
 		{
-			CommonExceptions.CheckArgumentNull(text);
+			ArgumentNullException.ThrowIfNull(text);
 			if (culture == null)
 			{
 				culture = CultureInfo.CurrentCulture;
@@ -272,7 +272,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <param name="paramName">参数名称。</param>
 		protected static void CheckRegex(LexRegex regex, [CallerArgumentExpression("regex")] string? paramName = null)
 		{
-			CommonExceptions.CheckArgumentNull(regex, paramName);
+			ArgumentNullException.ThrowIfNull(regex, paramName);
 			if (regex is AnchorExp anchor)
 			{
 				if (anchor.BeginningOfLine)

@@ -26,7 +26,7 @@ namespace Cyjb.Text
 		/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
 		protected TokenReader(SourceReader source)
 		{
-			CommonExceptions.CheckArgumentNull(source);
+			ArgumentNullException.ThrowIfNull(source);
 			Source = source;
 		}
 

@@ -84,7 +84,7 @@ namespace Cyjb.Text
 		/// <exception cref="ArgumentNullException"><paramref name="reader"/> 为 <c>null</c>。</exception>
 		public SourceReader(TextReader reader)
 		{
-			CommonExceptions.CheckArgumentNull(reader);
+			ArgumentNullException.ThrowIfNull(reader);
 			this.reader = reader;
 			last = current;
 			first = current;

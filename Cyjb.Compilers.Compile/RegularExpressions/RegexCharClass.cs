@@ -197,7 +197,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <see cref="RegexOptions.ECMAScript"/> 和 <see cref="RegexOptions.CultureInvariant"/>。</remarks>
 		public static RegexCharClass Parse(string pattern, RegexOptions option = RegexOptions.None)
 		{
-			CommonExceptions.CheckArgumentNull(pattern);
+			ArgumentNullException.ThrowIfNull(pattern);
 			return RegexParser.ParseCharClass(pattern, option, false);
 		}
 

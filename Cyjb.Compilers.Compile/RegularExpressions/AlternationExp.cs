@@ -26,7 +26,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <param name="expressions">要并联的正则表达式。</param>
 		internal AlternationExp(LexRegex[] expressions)
 		{
-			CommonExceptions.CheckArgumentNull(expressions);
+			ArgumentNullException.ThrowIfNull(expressions);
 			UniqueValue<int?> len = new();
 			foreach (LexRegex regex in expressions)
 			{

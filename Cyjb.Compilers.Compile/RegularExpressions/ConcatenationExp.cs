@@ -26,7 +26,7 @@ namespace Cyjb.Compilers.RegularExpressions
 		/// <param name="expressions">要连接的正则表达式。</param>
 		internal ConcatenationExp(LexRegex[] expressions)
 		{
-			CommonExceptions.CheckArgumentNull(expressions);
+			ArgumentNullException.ThrowIfNull(expressions);
 			length = 0;
 			foreach (LexRegex regex in expressions)
 			{
