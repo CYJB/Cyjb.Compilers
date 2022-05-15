@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cyjb.Test" Version="1.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
@@ -15,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cyjb.Compilers\Cyjb.Compilers.csproj" />
+    <ProjectReference Include="..\Cyjb.Compilers.Compile\Cyjb.Compilers.Compile.csproj" />
   </ItemGroup>
 
   <ItemGroup>
