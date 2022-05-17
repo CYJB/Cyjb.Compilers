@@ -22,10 +22,10 @@ public class UnitTestNFA
 		start.Add(nfa.BuildRegex(LexRegex.Parse("(a|b)*baa"), 4).Head);
 		DFA dfa = nfa.BuildDFA(1);
 		// dfa 参见 https://www.cnblogs.com/cyjb/archive/2013/05/02/LexerDfa.html DFA 最小化 (b) 部分
-		Assert.AreEqual(3, dfa.CharClasses.Count);
+		Assert.AreEqual(2, dfa.CharClasses.Count);
 		Assert.AreEqual(4, dfa.Count);
-		CharClass ccA = dfa.CharClasses[1];
-		CharClass ccB = dfa.CharClasses[2];
+		CharClass ccA = dfa.CharClasses[0];
+		CharClass ccB = dfa.CharClasses[1];
 		Assert.AreEqual("[a]", ccA.ToString());
 		Assert.AreEqual("[b]", ccB.ToString());
 		Assert.AreEqual(dfa[0], dfa[0][ccA]);

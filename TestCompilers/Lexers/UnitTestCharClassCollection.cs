@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Cyjb;
 using Cyjb.Collections;
 using Cyjb.Compilers.Lexers;
 using Cyjb.Test;
@@ -30,25 +32,29 @@ public class UnitTestCharClassCollection
 		charClassCollection.Invoke("GetCharClassSet", new CharSet("\u0283\u0287"));
 		charClassCollection.Invoke("GetCharClassSet", new CharSet("\u028A"));
 
+		// 合并后才会最小化 CharClass 集合。
+		charClassCollection.Invoke("MergeCharClass", new Dictionary<CharClass, CharClass>());
+
 		CharClassMap map = (CharClassMap)charClassCollection.Invoke("GetCharClassMap")!;
 		int[] indexes = new int[] { 0x268027A, 0x280028A };
 		int[] charClasses = new int[128 + 2 + 0xB];
-		charClasses['A'] = 1;
-		charClasses['B'] = 2;
-		charClasses['C'] = 3;
-		charClasses[128] = 4;
+		charClasses.Fill(-1, 0, 128);
+		charClasses['A'] = 0;
+		charClasses['B'] = 1;
+		charClasses['C'] = 2;
+		charClasses[128] = 3;
 		charClasses[129] = -130;
-		charClasses[130] = 5;
-		charClasses[131] = 6;
-		charClasses[132] = 5;
-		charClasses[133] = 7;
-		charClasses[134] = 6;
-		charClasses[135] = 5;
-		charClasses[136] = 4;
-		charClasses[137] = 7;
-		charClasses[138] = 6;
-		charClasses[139] = 5;
-		charClasses[140] = 8;
+		charClasses[130] = 4;
+		charClasses[131] = 5;
+		charClasses[132] = 4;
+		charClasses[133] = 6;
+		charClasses[134] = 5;
+		charClasses[135] = 4;
+		charClasses[136] = 3;
+		charClasses[137] = 6;
+		charClasses[138] = 5;
+		charClasses[139] = 4;
+		charClasses[140] = 7;
 		CollectionAssert.AreEqual(indexes, map.Indexes);
 		CollectionAssert.AreEqual(charClasses, map.CharClasses);
 	}

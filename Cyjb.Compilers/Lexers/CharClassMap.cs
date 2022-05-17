@@ -44,7 +44,7 @@ public class CharClassMap
 	/// 返回指定字符所属的字符类。
 	/// </summary>
 	/// <param name="ch">要获取所属字符类的字符。</param>
-	/// <returns>字符所属的字符类。</returns>
+	/// <returns>字符所属的字符类，使用 <c>-1</c> 表示未找到字符类。</returns>
 	public int GetCharClass(char ch)
 	{
 		// ASCII 范围直接读取。
@@ -62,13 +62,13 @@ public class CharClassMap
 				if (charClassIdx == 0)
 				{
 					// 未找到字符类。
-					return 0;
+					return -1;
 				}
 				charClassIdx--;
 				if ((indexes[charClassIdx] & 0xFFFF) < ch)
 				{
 					// 未找到字符类。
-					return 0;
+					return -1;
 				}
 			}
 			index = charClasses[charClassIdx + 0x80];
