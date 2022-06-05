@@ -47,7 +47,7 @@ namespace TestCompilers.Text
 			Assert.AreEqual("456", reader.ReadedText());
 			reader.Drop();
 
-			Assert.AreEqual(-1, reader.Read(10));
+			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read(10));
 			Assert.AreEqual("7890", reader.ReadedText());
 			Token<int> token = reader.AcceptToken(11);
 			Assert.AreEqual(11, token.Kind);
@@ -97,12 +97,91 @@ namespace TestCompilers.Text
 			Assert.AreEqual(text[1483..(1483 + 561 + 1)], reader.ReadedText());
 			reader.Drop();
 
-			Assert.AreEqual(-1, reader.Read(4000));
+			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read(4000));
 			Assert.AreEqual(text[(1483 + 561 + 1)..], reader.ReadedText());
 			Token<int> token = reader.AcceptToken(11);
 			Assert.AreEqual(11, token.Kind);
 			Assert.AreEqual(text[(1483 + 561 + 1)..], token.Text);
 			Assert.AreEqual(new TextSpan(1483 + 561 + 1, text.Length), token.Span);
+		}
+
+		/// <summary>
+		/// 对 <see cref="SourceReader.IsLineStart"/> 进行测试。
+		/// </summary>
+		[TestMethod]
+		public void TestIsLineStart()
+		{
+			const int BufferLength = 0x200;
+			StringBuilder builder = new(1030);
+			builder.Append("123\r\r456\n\n789\r\n\r\n123\r\r\n\n");
+			builder.Append('1', BufferLength - builder.Length - 1);
+			builder.Append("\r\n123");
+			builder.Append('1', BufferLength * 2 - builder.Length - 1);
+			builder.Append("\n123");
+			SourceReader reader = new(new StringReader(builder.ToString()));
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('3', reader.Read(2));
+			Assert.IsFalse(reader.IsLineStart);
+
+			Assert.AreEqual('\r', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('\r', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('6', reader.Read(2));
+			Assert.IsFalse(reader.IsLineStart);
+
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('9', reader.Read(2));
+			Assert.IsFalse(reader.IsLineStart);
+
+			Assert.AreEqual('\r', reader.Read());
+			Assert.IsFalse(reader.IsLineStart);
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('\r', reader.Read());
+			Assert.IsFalse(reader.IsLineStart);
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('3', reader.Read(2));
+			Assert.IsFalse(reader.IsLineStart);
+
+			Assert.AreEqual('\r', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('\r', reader.Read());
+			Assert.IsFalse(reader.IsLineStart);
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			reader.Index = BufferLength - 1;
+			Assert.IsFalse(reader.IsLineStart);
+
+			Assert.AreEqual('\r', reader.Read());
+			Assert.IsFalse(reader.IsLineStart);
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			reader.Index = BufferLength * 2 - 1;
+			Assert.IsFalse(reader.IsLineStart);
+
+			Assert.AreEqual('\n', reader.Read());
+			Assert.IsTrue(reader.IsLineStart);
+
+			Assert.AreEqual('3', reader.Read(2));
+			Assert.IsFalse(reader.IsLineStart);
 		}
 	}
 }

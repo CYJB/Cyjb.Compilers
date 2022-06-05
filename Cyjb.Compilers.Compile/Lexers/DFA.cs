@@ -6,22 +6,22 @@ namespace Cyjb.Compilers.Lexers;
 /// <summary>
 /// 表示确定有穷自动机（DFA）。
 /// </summary>
-public sealed class DFA : ReadOnlyListBase<DFAState>
+public sealed class Dfa : ReadOnlyListBase<DfaState>
 {
 	/// <summary>
 	/// DFA 状态列表。
 	/// </summary>
-	private readonly List<DFAState> states = new();
+	private readonly List<DfaState> states = new();
 	/// <summary>
 	/// DFA 使用的字符类。
 	/// </summary>
 	private readonly CharClassCollection charClasses;
 
 	/// <summary>
-	/// 初始化 <see cref="DFA"/> 类的新实例。
+	/// 初始化 <see cref="Dfa"/> 类的新实例。
 	/// </summary>
 	/// <param name="charClasses">DFA 使用的字符类。</param>
-	internal DFA(CharClassCollection charClasses)
+	internal Dfa(CharClassCollection charClasses)
 	{
 		this.charClasses = charClasses;
 	}
@@ -32,12 +32,31 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	public IReadOnlyList<CharClass> CharClasses => charClasses;
 
 	/// <summary>
+	/// 返回字符类的映射表。
+	/// </summary>
+	/// <returns>字符类的映射表。</returns>
+	public CharClassMap GetCharClassMap()
+	{
+		return charClasses.GetCharClassMap();
+	}
+
+	/// <summary>
+	/// 返回 DFA 的数据。
+	/// </summary>
+	/// <returns>DFA 的数据。</returns>
+	public DfaData GetData()
+	{
+		DfaDataBuilder builder = new(states);
+		return builder.Build();
+	}
+
+	/// <summary>
 	/// 在当前 DFA 中创建一个新状态。
 	/// </summary>
 	/// <returns>新创建的状态。</returns>
-	internal DFAState NewState()
+	internal DfaState NewState()
 	{
-		DFAState state = new(this, states.Count);
+		DfaState state = new(this, states.Count);
 		states.Add(state);
 		return state;
 	}
@@ -50,7 +69,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// <param name="headCnt">DFA 中头节点的数目。</param>
 	internal void Minimize(int headCnt)
 	{
-		List<IEnumerable<DFAState>> groups = MapGroup();
+		List<IEnumerable<DfaState>> groups = MapGroup();
 		if (groups.Count > 0)
 		{
 			// 根据分组信息合并等价状态。
@@ -63,12 +82,12 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// 将 DFA 的状态划分为等价状态的组。仅包含等价的状态。
 	/// </summary>
 	/// <returns>划分得到的等价状态的组。</returns>
-	private List<IEnumerable<DFAState>> MapGroup()
+	private List<IEnumerable<DfaState>> MapGroup()
 	{
 		int[] groupIdx = new int[Count];
 		int[] newGroupIdx = new int[Count];
-		List<IEnumerable<DFAState>> groups = new();
-		List<IEnumerable<DFAState>> newGroups = new();
+		List<IEnumerable<DfaState>> groups = new();
+		List<IEnumerable<DfaState>> newGroups = new();
 		// 首先按照接受状态划分组。
 		int groupIndex = 0;
 		IEqualityComparer<int[]> cmp = ListEqualityComparer<int>.Default;
@@ -92,7 +111,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 			for (int i = 0; i < groupCount; i++)
 			{
 				// 分割新分组，使用状态的转移对应的分组信息进行分组。
-				foreach (var group in groups[i].GroupBy<DFAState, int[]>(state => MapGroupIndex(state, groupIdx), cmp))
+				foreach (var group in groups[i].GroupBy<DfaState, int[]>(state => MapGroupIndex(state, groupIdx), cmp))
 				{
 					int cnt = FillGroupIdx(group, newGroupIdx, groupIndex);
 					groupIndex++;
@@ -115,7 +134,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 				int[] tmpGroupIdx = groupIdx;
 				groupIdx = newGroupIdx;
 				newGroupIdx = tmpGroupIdx;
-				List<IEnumerable<DFAState>> tmpGroup = groups;
+				List<IEnumerable<DfaState>> tmpGroup = groups;
 				groups = newGroups;
 				newGroups = tmpGroup;
 			}
@@ -129,10 +148,10 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// <param name="groupIdx">分组索引数组。</param>
 	/// <param name="groupIndex">分组的索引。</param>
 	/// <returns>分组中包含的状态数。</returns>
-	private static int FillGroupIdx(IEnumerable<DFAState> group, int[] groupIdx, int groupIndex)
+	private static int FillGroupIdx(IEnumerable<DfaState> group, int[] groupIdx, int groupIndex)
 	{
 		int cnt = 0;
-		foreach (DFAState state in group)
+		foreach (DfaState state in group)
 		{
 			groupIdx[state.Index] = groupIndex;
 			cnt++;
@@ -146,13 +165,13 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// <param name="state">要获取组的 DFA 状态</param>
 	/// <param name="groupIdx">分组信息。</param>
 	/// <returns>指定 DFA 状态的转移对应的组。</returns>
-	private int[] MapGroupIndex(DFAState state, int[] groupIdx)
+	private int[] MapGroupIndex(DfaState state, int[] groupIdx)
 	{
 		int[] idx = new int[charClasses.Count];
 		int index = 0;
 		foreach (CharClass charClass in charClasses)
 		{
-			DFAState? nextState = state[charClass];
+			DfaState? nextState = state[charClass];
 			if (nextState == null)
 			{
 				idx[index++] = -1;
@@ -170,14 +189,14 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// </summary>
 	/// <param name="headCnt">DFA 中头节点的数目。</param>
 	/// <param name="groups">分组信息。</param>
-	private void MergeState(int headCnt, List<IEnumerable<DFAState>> groups)
+	private void MergeState(int headCnt, List<IEnumerable<DfaState>> groups)
 	{
 		// 状态映射表。
-		Dictionary<DFAState, DFAState> mappedState = new();
-		foreach (IEnumerable<DFAState> group in groups)
+		Dictionary<DfaState, DfaState> mappedState = new();
+		foreach (IEnumerable<DfaState> group in groups)
 		{
-			DFAState? first = null;
-			foreach (DFAState state in group)
+			DfaState? first = null;
+			foreach (DfaState state in group)
 			{
 				if (first == null)
 				{
@@ -195,7 +214,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 		int idx = 0;
 		for (int i = 0; i < cnt; i++)
 		{
-			DFAState state = states[i];
+			DfaState state = states[i];
 			// 头节点不能移除。
 			if (i >= headCnt && mappedState.ContainsKey(state))
 			{
@@ -223,7 +242,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	{
 		// 构造转置的 DFA 表格。
 		int[][] transitions = new int[charClasses.Count][].Fill(i => new int[states.Count]);
-		foreach (DFAState state in states)
+		foreach (DfaState state in states)
 		{
 			GetTransition(state, transitions);
 		}
@@ -249,7 +268,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 		}
 		// 更新字符类。
 		charClasses.MergeCharClass(mappedCharClass);
-		foreach (DFAState state in states)
+		foreach (DfaState state in states)
 		{
 			state.RemoveCharClass(mappedCharClass.Keys);
 		}
@@ -260,12 +279,12 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// </summary>
 	/// <param name="state">要获取转移的状态。</param>
 	/// <param name="transitions">转移的数组。</param>
-	private void GetTransition(DFAState state, int[][] transitions)
+	private void GetTransition(DfaState state, int[][] transitions)
 	{
 		int index = state.Index;
 		foreach (CharClass charClass in charClasses)
 		{
-			DFAState? nextState = state[charClass];
+			DfaState? nextState = state[charClass];
 			if (nextState == null)
 			{
 				transitions[charClass.Index][index] = -1;
@@ -292,7 +311,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// </summary>
 	/// <param name="index">要返回元素的从零开始的索引。</param>
 	/// <returns>位于指定索引处的元素。</returns>
-	protected override DFAState GetItemAt(int index)
+	protected override DfaState GetItemAt(int index)
 	{
 		return states[index];
 	}
@@ -302,7 +321,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// </summary>
 	/// <param name="item">要在当前列表中定位的对象。</param>
 	/// <returns>如果在当前列表中找到 <paramref name="item"/>，则为该对象的索引；否则为 <c>-1</c>。</returns>
-	public override int IndexOf(DFAState item)
+	public override int IndexOf(DfaState item)
 	{
 		return states.IndexOf(item);
 	}
@@ -311,7 +330,7 @@ public sealed class DFA : ReadOnlyListBase<DFAState>
 	/// 返回一个循环访问集合的枚举器。
 	/// </summary>
 	/// <returns>可用于循环访问集合的 <see cref="IEnumerator{T}"/> 对象。</returns>
-	public override IEnumerator<DFAState> GetEnumerator()
+	public override IEnumerator<DfaState> GetEnumerator()
 	{
 		return states.GetEnumerator();
 	}

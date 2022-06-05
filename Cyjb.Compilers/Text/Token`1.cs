@@ -3,12 +3,27 @@ namespace Cyjb.Text;
 /// <summary>
 /// 表示一个词法单元。
 /// </summary>
-/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
+/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 /// <remarks><typeparamref name="T"/> 必须的枚举类型，使用该类型的特殊值 
 /// <c>-1</c> 用于表示文件结束，<c>-2</c> 表示语法产生式的错误。</remarks>
 public struct Token<T> : IEquatable<Token<T>>
 	where T : struct
 {
+	/// <summary>
+	/// 表示文件结束的值。
+	/// </summary>
+	private static readonly object EndOfFileValue = new();
+
+	/// <summary>
+	/// 返回表示文件结束的词法单元。
+	/// </summary>
+	/// <param name="index">文件结束的位置。</param>
+	/// <returns>表示文件结束的词法单元。</returns>
+	public static Token<T> GetEndOfFile(int index)
+	{
+		return new Token<T>(default, string.Empty, new TextSpan(index, index), EndOfFileValue);
+	}
+
 	/// <summary>
 	/// 使用词法单元的相关信息初始化 <see cref="Token{T}"/> 类的新实例。
 	/// </summary>
@@ -29,24 +44,25 @@ public struct Token<T> : IEquatable<Token<T>>
 	/// </summary>
 	/// <value>词法单元的类型。</value>
 	public T Kind { get; }
-
 	/// <summary>
 	/// 获取词法单元的文本。
 	/// </summary>
 	/// <value>词法单元的文本。</value>
 	public string Text { get; }
-
 	/// <summary>
 	/// 获取词法单元的范围。
 	/// </summary>
 	/// <value>词法单元的范围。</value>
 	public TextSpan Span { get; }
-
 	/// <summary>
 	/// 获取词法单元的值。
 	/// </summary>
 	/// <value>词法单元的值。</value>
 	public object? Value { get; }
+	/// <summary>
+	/// 获取当前是否是表示文件结束的词法单元。
+	/// </summary>
+	public bool IsEndOfFile => Value == EndOfFileValue;
 
 	#region IEquatable<Token> 成员
 
@@ -113,11 +129,10 @@ public struct Token<T> : IEquatable<Token<T>>
 	/// <returns>当前对象的字符串表示形式。</returns>
 	public override string ToString()
 	{
-		string result = Kind.ToString()!;
-		if (Text.Length > 0)
+		if (IsEndOfFile)
 		{
-			result += " \"" + Text + "\"";
+			return "<<EOF>>";
 		}
-		return result;
+		return $"{Kind} \"{Text}\" at {Span}";
 	}
 }

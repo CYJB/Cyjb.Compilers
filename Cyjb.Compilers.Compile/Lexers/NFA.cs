@@ -7,12 +7,12 @@ namespace Cyjb.Compilers.Lexers;
 /// <summary>
 /// 表示不确定有穷自动机（NFA）。
 /// </summary>
-public sealed class NFA : ReadOnlyListBase<NFAState>
+public sealed class Nfa : ReadOnlyListBase<NfaState>
 {
 	/// <summary>
 	/// NFA 状态列表。
 	/// </summary>
-	private readonly List<NFAState> states = new();
+	private readonly List<NfaState> states = new();
 	/// <summary>
 	/// NFA 使用的字符类。
 	/// </summary>
@@ -32,9 +32,9 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// 在当前 NFA 中创建一个新状态。
 	/// </summary>
 	/// <returns>新创建的状态。</returns>
-	public NFAState NewState()
+	public NfaState NewState()
 	{
-		NFAState state = new(this, states.Count);
+		NfaState state = new(this, states.Count);
 		states.Add(state);
 		return state;
 	}
@@ -52,9 +52,9 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// <param name="regex">使用的正则表达式。</param>
 	/// <param name="symbol">正则表达式关联到的符号。</param>
 	/// <returns>构造结果。</returns>
-	public NFABuildResult BuildRegex(LexRegex regex, int symbol)
+	public NfaBuildResult BuildRegex(LexRegex regex, int symbol)
 	{
-		NFABuildResult result = new();
+		NfaBuildResult result = new();
 		var (head, tail) = BuildNFA(regex);
 		tail.Symbol = symbol;
 		result.Head = head;
@@ -70,10 +70,10 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 			{
 				// 设置向前看状态类型。
 				result.UseTrailing = true;
-				tail.StateType = NFAStateType.TrailingHead;
+				tail.StateType = NfaStateType.TrailingHead;
 				var (trailingHead, trailingTail) = BuildNFA(trailingExp);
 				tail.Add(trailingHead);
-				trailingTail.StateType = NFAStateType.Trailing;
+				trailingTail.StateType = NfaStateType.Trailing;
 				trailingTail.Symbol = symbol;
 				result.Tail = trailingTail;
 				// 检查向前看的长度。
@@ -110,10 +110,10 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// 使用指定正则表达式构造 NFA，并返回构造结果。
 	/// </summary>
 	/// <param name="regex">使用的正则表达式。</param>
-	private (NFAState head, NFAState tail) BuildNFA(LexRegex regex)
+	private (NfaState head, NfaState tail) BuildNFA(LexRegex regex)
 	{
-		NFAState head = NewState();
-		NFAState tail = NewState();
+		NfaState head = NewState();
+		NfaState tail = NewState();
 		if (regex is AlternationExp alternation)
 		{
 			foreach (LexRegex subRegex in alternation.Expressions)
@@ -142,7 +142,7 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 			tail = head;
 			foreach (char ch in literal.Literal)
 			{
-				NFAState state = NewState();
+				NfaState state = NewState();
 				if (literal.IgnoreCase)
 				{
 					// 不区分大小写。
@@ -160,7 +160,7 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 		}
 		else if (regex is QuantifierExp quantifier)
 		{
-			NFAState lastHead = head;
+			NfaState lastHead = head;
 			// 如果没有上限，则需要特殊处理。
 			int times = quantifier.MaxTimes == int.MaxValue ? quantifier.MinTimes : quantifier.MaxTimes;
 			if (times == 0)
@@ -203,37 +203,38 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// 根据当前的 NFA 构造 DFA，采用子集构造法。
 	/// </summary>
 	/// <param name="headCnt">头节点的个数。</param>
-	public DFA BuildDFA(int headCnt)
+	/// <returns>构造得到的最简 DFA。</returns>
+	public Dfa BuildDFA(int headCnt)
 	{
-		DFA dfa = new(charClasses);
+		Dfa dfa = new(charClasses);
 		// DFA 和 NFA 的状态映射表，DFA 的一个状态对应 NFA 的一个状态集合。
-		Dictionary<DFAState, HashSet<NFAState>> stateMap = new();
+		Dictionary<DfaState, HashSet<NfaState>> stateMap = new();
 		// 由 NFA 状态集合到对应的 DFA 状态的映射表（与上表互逆）。
-		Dictionary<HashSet<NFAState>, DFAState> dfaStateMap = new(SetEqualityComparer<NFAState>.Default);
-		Stack<DFAState> stack = new();
+		Dictionary<HashSet<NfaState>, DfaState> dfaStateMap = new(SetEqualityComparer<NfaState>.Default);
+		Stack<DfaState> stack = new();
 		// 添加头节点。
 		for (int i = 0; i < headCnt; i++)
 		{
-			DFAState head = dfa.NewState();
+			DfaState head = dfa.NewState();
 			head.Symbols = Array.Empty<int>();
-			HashSet<NFAState> headStates = EpsilonClosure(Enumerable.Repeat(this[i], 1));
+			HashSet<NfaState> headStates = EpsilonClosure(Enumerable.Repeat(this[i], 1));
 			stateMap.Add(head, headStates);
 			dfaStateMap.Add(headStates, head);
 			stack.Push(head);
 		}
 		while (stack.Count > 0)
 		{
-			DFAState state = stack.Pop();
-			HashSet<NFAState> stateSet = stateMap[state];
+			DfaState state = stack.Pop();
+			HashSet<NfaState> stateSet = stateMap[state];
 			// 遍历字符类单元。
 			foreach (CharClass charClass in charClasses)
 			{
 				// 对于 NFA 中的每个转移，寻找 Move 集合。
-				HashSet<NFAState> set = Move(stateSet, charClass);
+				HashSet<NfaState> set = Move(stateSet, charClass);
 				if (set.Count > 0)
 				{
 					set = EpsilonClosure(set);
-					if (!dfaStateMap.TryGetValue(set, out DFAState? newState))
+					if (!dfaStateMap.TryGetValue(set, out DfaState? newState))
 					{
 						// 添加新状态.
 						newState = dfa.NewState();
@@ -241,18 +242,15 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 						dfaStateMap.Add(set, newState);
 						stack.Push(newState);
 						// 合并符号索引。
-						newState.Symbols = set.Where(state => state.Symbol != null)
-							.Select(state =>
+						newState.Symbols = set.Where(state => state.Symbol != null).Select(state =>
+						{
+							int value = state.Symbol!.Value;
+							if (state.StateType == NfaStateType.TrailingHead)
 							{
-								if (state.StateType == NFAStateType.TrailingHead)
-								{
-									return int.MaxValue - state.Symbol!.Value;
-								}
-								else
-								{
-									return state.Symbol!.Value;
-								}
-							}).OrderBy(idx => idx).ToArray();
+								value = -value;
+							}
+							return value;
+						}).OrderBy(idx => idx < 0 ? int.MaxValue - idx : idx).ToArray();
 					}
 					// 添加 DFA 的转移。
 					state[charClass] = newState;
@@ -268,16 +266,16 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// </summary>
 	/// <param name="states">要获取 ϵ 闭包的 NFA 状态集合。</param>
 	/// <returns>得到的 ϵ 闭包。</returns>
-	private static HashSet<NFAState> EpsilonClosure(IEnumerable<NFAState> states)
+	private static HashSet<NfaState> EpsilonClosure(IEnumerable<NfaState> states)
 	{
-		HashSet<NFAState> set = new();
-		Stack<NFAState> stack = new(states);
+		HashSet<NfaState> set = new();
+		Stack<NfaState> stack = new(states);
 		while (stack.Count > 0)
 		{
-			NFAState state = stack.Pop();
+			NfaState state = stack.Pop();
 			set.Add(state);
 			// 这里只需遍历 ϵ 转移。
-			foreach (NFAState target in state.EpsilonTransitions)
+			foreach (NfaState target in state.EpsilonTransitions)
 			{
 				if (set.Add(target))
 				{
@@ -294,10 +292,10 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// <param name="states">要获取字符类转移集合的 NFA 状态集合。</param>
 	/// <param name="charClassItem">转移使用的字符类单元。</param>
 	/// <returns>得到的字符类转移集合。</returns>
-	private static HashSet<NFAState> Move(IEnumerable<NFAState> states, CharClass charClassItem)
+	private static HashSet<NfaState> Move(IEnumerable<NfaState> states, CharClass charClassItem)
 	{
-		HashSet<NFAState> set = new();
-		foreach (NFAState state in states)
+		HashSet<NfaState> set = new();
+		foreach (NfaState state in states)
 		{
 			if (state.CharClassSet != null && state.CharClassSet.Contains(charClassItem))
 			{
@@ -322,7 +320,7 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// </summary>
 	/// <param name="index">要返回元素的从零开始的索引。</param>
 	/// <returns>位于指定索引处的元素。</returns>
-	protected override NFAState GetItemAt(int index)
+	protected override NfaState GetItemAt(int index)
 	{
 		return states[index];
 	}
@@ -332,7 +330,7 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// </summary>
 	/// <param name="item">要在当前列表中定位的对象。</param>
 	/// <returns>如果在当前列表中找到 <paramref name="item"/>，则为该对象的索引；否则为 <c>-1</c>。</returns>
-	public override int IndexOf(NFAState item)
+	public override int IndexOf(NfaState item)
 	{
 		return states.IndexOf(item);
 	}
@@ -341,7 +339,7 @@ public sealed class NFA : ReadOnlyListBase<NFAState>
 	/// 返回一个循环访问集合的枚举器。
 	/// </summary>
 	/// <returns>可用于循环访问集合的 <see cref="IEnumerator{T}"/> 对象。</returns>
-	public override IEnumerator<NFAState> GetEnumerator()
+	public override IEnumerator<NfaState> GetEnumerator()
 	{
 		return states.GetEnumerator();
 	}

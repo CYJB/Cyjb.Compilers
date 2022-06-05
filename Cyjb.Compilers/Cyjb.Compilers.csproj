@@ -18,14 +18,31 @@
 
   <ItemGroup>
 	<None Include="..\.editorconfig" Link=".editorconfig" />
-	<None Include="README.md" Pack="True" PackagePath="">
-	  <Generator>ResXFileCodeGenerator</Generator>
-	</None>
+	<None Include="README.md" Pack="True" PackagePath="" />
 	<None Include="LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cyjb" Version="1.0.3" />
+    <PackageReference Include="Cyjb" Version="1.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Resources.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
 </Project>

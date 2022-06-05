@@ -11,7 +11,7 @@ internal class UnicodeCategoryCharSet
 	/// <summary>
 	/// Unicode 类别对应的字符集合。
 	/// </summary>
-	private static readonly Dictionary<UnicodeCategory, CharSet> map = GetCharSetMap();
+	public static readonly IReadOnlyDictionary<UnicodeCategory, CharSet> CategoryCharSets = GetCharSetMap();
 
 	/// <summary>
 	/// 计算 Unicode 类别对应的字符集合。
@@ -40,6 +40,6 @@ internal class UnicodeCategoryCharSet
 	/// <returns>Unicode 类别对应的字符集合。</returns>
 	public static CharSet GetCharSet(UnicodeCategory category)
 	{
-		return map[category];
+		return CategoryCharSets[category];
 	}
 }

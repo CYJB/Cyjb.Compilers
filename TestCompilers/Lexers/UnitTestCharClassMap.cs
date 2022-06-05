@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Globalization;
 using Cyjb;
 using Cyjb.Compilers.Lexers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,39 +18,55 @@ public class UnitTestCharClassMap
 	[TestMethod]
 	public void TestGetCharClass()
 	{
-		int[] indexes = new int[] { 0x268027A, 0x280028A };
-		int[] charClasses = new int[128 + 2 + 0xB];
+		int[] indexes = new int[] { 0x268027A, 0x280028A, 0x3AA03AD };
+		int[] charClasses = new int[128 + 3 + 0xB];
 		charClasses.Fill(-1, 0, 128);
 		charClasses['A'] = 0;
 		charClasses['B'] = 1;
 		charClasses['C'] = 2;
 		charClasses[128] = 3;
-		charClasses[129] = -130;
-		charClasses[130] = 4;
-		charClasses[131] = 5;
-		charClasses[132] = 4;
-		charClasses[133] = 6;
-		charClasses[134] = 5;
-		charClasses[135] = 4;
-		charClasses[136] = 3;
-		charClasses[137] = 6;
-		charClasses[138] = 5;
-		charClasses[139] = 4;
-		charClasses[140] = 7;
-		CharClassMap map = new(indexes, charClasses);
+		charClasses[129] = -131;
+		charClasses[130] = -1;
+		charClasses[131] = 4;
+		charClasses[132] = 5;
+		charClasses[133] = 4;
+		charClasses[134] = 6;
+		charClasses[135] = 5;
+		charClasses[136] = 4;
+		charClasses[137] = 3;
+		charClasses[138] = 6;
+		charClasses[139] = 5;
+		charClasses[140] = 4;
+		charClasses[141] = 7;
+		Dictionary<UnicodeCategory, int> categories = new()
+		{
+			{ UnicodeCategory.UppercaseLetter, 8 },
+			{ UnicodeCategory.LowercaseLetter, 9 },
+		};
+
+		CharClassMap map = new(indexes, charClasses, categories);
 		Assert.AreEqual(-1, map.GetCharClass('\0'));
 		Assert.AreEqual(0, map.GetCharClass('A'));
 		Assert.AreEqual(1, map.GetCharClass('B'));
 		Assert.AreEqual(2, map.GetCharClass('C'));
 		Assert.AreEqual(-1, map.GetCharClass('D'));
+		Assert.AreEqual(-1, map.GetCharClass('a'));
+		Assert.AreEqual(-1, map.GetCharClass('b'));
+		Assert.AreEqual(-1, map.GetCharClass('c'));
+		Assert.AreEqual(-1, map.GetCharClass('d'));
 		Assert.AreEqual(-1, map.GetCharClass('\u0080'));
-		Assert.AreEqual(-1, map.GetCharClass('\u0267'));
+		Assert.AreEqual(-1, map.GetCharClass('\u00BF'));
+		Assert.AreEqual(8, map.GetCharClass('\u00C0'));
+		Assert.AreEqual(8, map.GetCharClass('\u00DE'));
+		Assert.AreEqual(9, map.GetCharClass('\u00DF'));
+		Assert.AreEqual(9, map.GetCharClass('\u00FF'));
+		Assert.AreEqual(9, map.GetCharClass('\u0267'));
 		Assert.AreEqual(3, map.GetCharClass('\u0268'));
 		Assert.AreEqual(3, map.GetCharClass('\u0269'));
 		Assert.AreEqual(3, map.GetCharClass('\u0279'));
 		Assert.AreEqual(3, map.GetCharClass('\u027A'));
-		Assert.AreEqual(-1, map.GetCharClass('\u027B'));
-		Assert.AreEqual(-1, map.GetCharClass('\u027F'));
+		Assert.AreEqual(9, map.GetCharClass('\u027B'));
+		Assert.AreEqual(9, map.GetCharClass('\u027F'));
 		Assert.AreEqual(4, map.GetCharClass('\u0280'));
 		Assert.AreEqual(5, map.GetCharClass('\u0281'));
 		Assert.AreEqual(4, map.GetCharClass('\u0282'));
@@ -60,7 +78,15 @@ public class UnitTestCharClassMap
 		Assert.AreEqual(5, map.GetCharClass('\u0288'));
 		Assert.AreEqual(4, map.GetCharClass('\u0289'));
 		Assert.AreEqual(7, map.GetCharClass('\u028A'));
-		Assert.AreEqual(-1, map.GetCharClass('\u028B'));
+		Assert.AreEqual(9, map.GetCharClass('\u028B'));
+		Assert.AreEqual(9, map.GetCharClass('\u02AF'));
+		Assert.AreEqual(-1, map.GetCharClass('\u02B0'));
+		Assert.AreEqual(8, map.GetCharClass('\u03A9'));
+		Assert.AreEqual(-1, map.GetCharClass('\u03AA'));
+		Assert.AreEqual(-1, map.GetCharClass('\u03AB'));
+		Assert.AreEqual(-1, map.GetCharClass('\u03AC'));
+		Assert.AreEqual(-1, map.GetCharClass('\u03AD'));
+		Assert.AreEqual(9, map.GetCharClass('\u03AE'));
 		Assert.AreEqual(-1, map.GetCharClass('\uFFFF'));
 	}
 }

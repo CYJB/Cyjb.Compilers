@@ -18,9 +18,7 @@
 
   <ItemGroup>
 	<None Include="..\.editorconfig" Link=".editorconfig" />
-	<None Include="README.md" Pack="True" PackagePath="">
-	  <Generator>ResXFileCodeGenerator</Generator>
-	</None>
+	<None Include="README.md" Pack="True" PackagePath="" />
 	<None Include="LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 
@@ -29,18 +27,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources.Designer.cs">
+    <Compile Update="Resources.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
+      <DependentUpon>Resources.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <None Update="Resources.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Resources.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ namespace Cyjb.Compilers.Lexers;
 /// <summary>
 /// 表示 NFA 状态的类型。
 /// </summary>
-public enum NFAStateType
+public enum NfaStateType
 {
 	/// <summary>
 	/// 普通状态。

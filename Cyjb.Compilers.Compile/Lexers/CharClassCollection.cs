@@ -54,6 +54,7 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 				{
 					// 完全匹配
 					charClass.Add(item);
+					item.Containers.Add(charClass);
 				}
 				else
 				{
@@ -61,7 +62,7 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 					CharClass newItem = item.Split(cnt, set);
 					charClasses.Add(newItem);
 					charClass.Add(newItem);
-					// 新的单元只包含一个字符，不会再继续分割，因此不需要维护 Containers
+					newItem.Containers.Add(charClass);
 				}
 				charClassSets[set] = charClass;
 				return charClass;
@@ -101,6 +102,7 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 			{
 				// 完全包含当前单元，直接添加即可。
 				charClass.Add(item);
+				item.Containers.Add(charClass);
 				resetChars.ExceptWith(item.Chars);
 				continue;
 			}
@@ -110,10 +112,7 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 			resetChars.ExceptWith(item.Chars);
 			CharClass newItem = item.Split(index++, curSet);
 			charClasses.Add(newItem);
-			if (curSet.Count > 1)
-			{
-				newItem.Containers.Add(charClass);
-			}
+			newItem.Containers.Add(charClass);
 			charClass.Add(newItem);
 		}
 		charClassSets[charSet] = charClass;
@@ -128,7 +127,13 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 	{
 		int cnt = charClasses.Count;
 		int idx = 0;
-		for (int i = 0; i < cnt; i++)
+		int i = 0;
+		if (charClasses[0].Containers.Count == 0)
+		{
+			// 如果首个字符类（默认字符类）没有被使用，可以直接删掉表示不存在。
+			i++;
+		}
+		for (; i < cnt; i++)
 		{
 			CharClass charClass = charClasses[i];
 			// 合并字符类。
@@ -151,135 +156,13 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 	}
 
 	/// <summary>
-	/// 获取字符类的映射表。
+	/// 返回字符类的映射表。
 	/// </summary>
 	/// <returns>字符类的映射表。</returns>
 	public CharClassMap GetCharClassMap()
 	{
-		List<int> resultCharClasses = new(128);
-		List<CharClassRange> ranges = new();
-		resultCharClasses.AddRange(Enumerable.Repeat(0, 0x80));
-		int[] arr = new int[char.MaxValue + 1];
-		int cnt = charClasses.Count;
-		for (int i = 0; i < cnt; i++)
-		{
-			CharClass charClass = charClasses[i];
-			CharSet set = new(charClass.Chars);
-			foreach (char ch in set)
-			{
-				if (ch < '\x80')
-				{
-					resultCharClasses[ch] = i;
-				}
-				else
-				{
-					break;
-				}
-			}
-			// 不添加默认字符类
-			if (i > 0 || charClass.Containers.Count > 0)
-			{
-				set.Remove('\0', '\x80');
-				foreach (var (start, end) in set.Ranges())
-				{
-					ranges.Add(new CharClassRange
-					{
-						Start = start,
-						End = end,
-						CharClass = i,
-					});
-				}
-			}
-		}
-		// 合并短范围
-		ranges.Sort((CharClassRange left, CharClassRange right) => left.Start - right.Start);
-		CharClassRange? lastRange = null;
-		for (int i = 0; i < ranges.Count; i++)
-		{
-			CharClassRange range = ranges[i];
-			if (range.Length < 5)
-			{
-				// 只合并较短的范围。
-				if (lastRange == null)
-				{
-					lastRange = range;
-				}
-				else if (range.Start - lastRange.End <= 5)
-				{
-					// 合并范围
-					lastRange.Merge(range);
-					ranges.RemoveAt(i);
-					i--;
-				}
-				else
-				{
-					lastRange = null;
-				}
-			}
-			else
-			{
-				lastRange = null;
-			}
-		}
-		resultCharClasses.AddRange(Enumerable.Repeat(0, ranges.Count));
-		List<int> resultRange = new();
-		for (int i = 0; i < ranges.Count; i++)
-		{
-			CharClassRange range = ranges[i];
-			resultRange.Add((range.Start << 0x10) | range.End);
-			if (range.CharClassList == null)
-			{
-				resultCharClasses[0x80 + i] = range.CharClass;
-			}
-			else
-			{
-				resultCharClasses[0x80 + 1] = -resultCharClasses.Count;
-				resultCharClasses.AddRange(range.CharClassList);
-			}
-		}
-		return new CharClassMap(resultRange.ToArray(), resultCharClasses.ToArray());
-	}
-
-	/// <summary>
-	/// 字符类的范围。
-	/// </summary>
-	private class CharClassRange
-	{
-		/// <summary>
-		/// 起始字符（包含）。
-		/// </summary>
-		public char Start;
-		/// <summary>
-		/// 结束字符（包含）。
-		/// </summary>
-		public char End;
-		/// <summary>
-		/// 字符类。
-		/// </summary>
-		public int CharClass;
-		/// <summary>
-		/// 字符类列表。
-		/// </summary>
-		public List<int>? CharClassList;
-		/// <summary>
-		/// 范围的长度。
-		/// </summary>
-		public int Length => End - Start + 1;
-
-		/// <summary>
-		/// 将指定字符类范围合并到当前范围中。
-		/// </summary>
-		/// <param name="range">要合并的范围。</param>
-		public void Merge(CharClassRange range)
-		{
-			if (CharClassList == null)
-			{
-				CharClassList = new();
-				CharClassList.AddRange(Enumerable.Repeat(CharClass, Length));
-			}
-			CharClassList.AddRange(Enumerable.Repeat(range.CharClass, range.Length));
-			End = range.End;
-		}
+		CharClassMapBuilder builder = new();
+		return builder.Build(charClasses);
 	}
 
 	#region ReadOnlyListBase<CharClass> 成员

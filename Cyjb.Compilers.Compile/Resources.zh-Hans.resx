@@ -125,9 +125,9 @@
     <value>符号标识符“{0}”已经定义。</value>
     <comment>重复的符号标识符。</comment>
   </data>
-  <data name="EmptyCharClass" xml:space="preserve">
-    <value>空的字符类。</value>
-    <comment>空的字符类。</comment>
+  <data name="DuplicateLexerContext" xml:space="preserve">
+    <value>重复的词法分析上下文“{0}”。</value>
+    <comment>重复的词法分析上下文。</comment>
   </data>
   <data name="IllegalEndEscape" xml:space="preserve">
     <value>\ 在模式末尾非法。</value>
@@ -137,9 +137,9 @@
     <value>不完整的词法分析上下文。</value>
     <comment>不完整的词法分析上下文。</comment>
   </data>
-  <data name="IncompleteRegexReference" xml:space="preserve">
-    <value>不完整的正则表达式引用。</value>
-    <comment>不完整的正则表达式引用。</comment>
+  <data name="InvalidLexerContext" xml:space="preserve">
+    <value>无效的词法分析上下文“{0}”。</value>
+    <comment>无效的词法分析上下文。</comment>
   </data>
   <data name="InvalidRegexPattern" xml:space="preserve">
     <value>无效的正则表达式模式“{0}” 位于 {1}：{2}</value>
@@ -165,10 +165,6 @@
     <value>嵌套行起始定位点。</value>
     <comment>嵌套行起始定位点。</comment>
   </data>
-  <data name="NestedEndOfFile" xml:space="preserve">
-    <value>嵌套文件结束。</value>
-    <comment>嵌套文件结束。</comment>
-  </data>
   <data name="NestedEndOfLine" xml:space="preserve">
     <value>嵌套行结束定位点。</value>
     <comment>嵌套行结束定位点。</comment>
@@ -184,10 +180,6 @@
   <data name="NotEnoughParens" xml:space="preserve">
     <value>) 不足。</value>
     <comment>) 不足。</comment>
-  </data>
-  <data name="NotRejectable" xml:space="preserve">
-    <value>当前的 TokenReader&lt;T&gt; 不支持拒绝动作。</value>
-    <comment>不允许拒绝动作。</comment>
   </data>
   <data name="ParsingException" xml:space="preserve">
     <value>正在分析“{0}”－ {1}</value>

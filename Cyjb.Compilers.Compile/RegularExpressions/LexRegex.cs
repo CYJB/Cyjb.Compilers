@@ -249,15 +249,6 @@ public abstract class LexRegex : IEquatable<LexRegex>
 		return new ConcatenationExp(expressions);
 	}
 
-	/// <summary>
-	/// 返回表示文件结束的正则表达式。
-	/// </summary>
-	/// <returns>表示文件结束的正则表达式。</returns>
-	public static LexRegex EndOfFile()
-	{
-		return EndOfFileExp.Default;
-	}
-
 	#endregion // 静态方法
 
 	/// <summary>
@@ -277,17 +268,13 @@ public abstract class LexRegex : IEquatable<LexRegex>
 		{
 			if (anchor.BeginningOfLine)
 			{
-				throw CompilerExceptions.NestedBeginningOfLine(paramName);
+				throw new ArgumentException(Resources.NestedBeginningOfLine, paramName);
 			}
 			if (anchor.TrailingExpression == AnchorExp.EndOfLine)
 			{
-				throw CompilerExceptions.NestedEndOfLine(paramName);
+				throw new ArgumentException(Resources.NestedEndOfLine, paramName);
 			}
-			throw CompilerExceptions.NestedTrailing(paramName);
-		}
-		if (regex is EndOfFileExp)
-		{
-			throw CompilerExceptions.NestedEndOfFile(paramName);
+			throw new ArgumentException(Resources.NestedTrailing, paramName);
 		}
 	}
 

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using Cyjb.Compilers;
 
 namespace Cyjb.Text;
 
@@ -15,15 +16,28 @@ namespace Cyjb.Text;
 public sealed class SourceReader : IDisposable
 {
 	/// <summary>
+	/// 用于表示到达流结尾的字符。
+	/// </summary>
+	/// <remarks>使用非 Unicode 字符 0xFFFF。</remarks>
+	public const char InvalidCharacter = char.MaxValue;
+	/// <summary>
 	/// 缓冲区的大小。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private const int BufferSize = 0x200;
 
 	/// <summary>
+	/// 返回指定的字符是否是换行符。
+	/// </summary>
+	private static bool IsLineBreak(char ch)
+	{
+		return ch is '\n' or '\r' or '\u0085' or '\u2028' or '\u2029';
+	}
+
+	/// <summary>
 	/// 当前存有数据的缓冲区的指针。
 	/// </summary>
-	private SourceBuffer current = new();
+	private SourceBuffer current;
 	/// <summary>
 	/// 最后一个存有数据的缓冲区的指针。
 	/// </summary>
@@ -76,6 +90,10 @@ public sealed class SourceReader : IDisposable
 	/// 已向 <see cref="builder"/> 中复制了的字符串长度。
 	/// </summary>
 	private int builderCopiedLen;
+	/// <summary>
+	/// 行列定位器。
+	/// </summary>
+	private LineLocator? locator;
 
 	/// <summary>
 	/// 使用指定的字符读取器初始化 <see cref="SourceReader"/> 类的新实例。
@@ -86,6 +104,10 @@ public sealed class SourceReader : IDisposable
 	{
 		ArgumentNullException.ThrowIfNull(reader);
 		this.reader = reader;
+		current = new SourceBuffer
+		{
+			IsLineStart = true
+		};
 		last = current;
 		first = current;
 		firstIndex = lastLength = 0;
@@ -95,10 +117,7 @@ public sealed class SourceReader : IDisposable
 	/// 获取基础的字符读取器。
 	/// </summary>
 	/// <value>基础的字符读取器。如果当前读取器已被关闭，则返回 <c>null</c>。</value>
-	public TextReader? BaseReader
-	{
-		get { return reader; }
-	}
+	public TextReader? BaseReader => reader;
 
 	/// <summary>
 	/// 获取或设置当前的字符索引。
@@ -118,6 +137,86 @@ public sealed class SourceReader : IDisposable
 				Unget(globalIndex - value);
 			}
 		}
+	}
+
+	/// <summary>
+	/// 返回当前是否位于行首。
+	/// </summary>
+	public bool IsLineStart
+	{
+		get
+		{
+			if (index <= 0)
+			{
+				return current.IsLineStart;
+			}
+			int idx = index - 1;
+			char ch = current.Buffer[idx];
+			if (!IsLineBreak(ch))
+			{
+				return false;
+			}
+			if (ch == '\r')
+			{
+				if (index == length)
+				{
+					SourceBuffer cur = current;
+					// 达到当前缓冲区结尾，加载下一缓冲区
+					if (cur == last)
+					{
+						// 下一块缓冲区没有数据，需要从基础字符读取器中读取。
+						if (PrepareBuffer() == 0)
+						{
+							return true;
+						}
+						cur = last;
+					}
+					else
+					{
+						// 下一块缓冲区有数据，直接后移。
+						cur = cur.Next;
+					}
+					ch = cur.Buffer[0];
+				}
+				else
+				{
+					ch = current.Buffer[index];
+				}
+				if (ch == '\n')
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	/// <summary>
+	/// 开启行列定位功能，允许通过 <see cref="GetPosition"/> 获取指定索引的行列位置。
+	/// 需要在读取字符之前设置。
+	/// </summary>
+	/// <param name="tabSize">Tab 的宽度。</param>
+	public void UseLineLocator(int tabSize = 4)
+	{
+		if (locator == null)
+		{
+			locator = new LineLocator(tabSize);
+		}
+	}
+
+	/// <summary>
+	/// 返回指定索引的行列位置，需要提前 <see cref="UseLineLocator"/>。
+	/// </summary>
+	/// <param name="index">要检查行列位置的索引。</param>
+	/// <returns>指定索引的行列位置。</returns>
+	/// <exception cref="InvalidOperationException"></exception>
+	public LinePosition GetPosition(int index)
+	{
+		if (locator == null)
+		{
+			throw new InvalidOperationException(Resources.GetPositionBeforeUse);
+		}
+		return locator.GetPosition(index);
 	}
 
 	/// <summary>
@@ -156,11 +255,11 @@ public sealed class SourceReader : IDisposable
 	/// 返回之后可用的字符，但不使用它。
 	/// </summary>
 	/// </overloads>
-	public int Peek()
+	public char Peek()
 	{
 		if (index == length && !NextBuffer())
 		{
-			return -1;
+			return InvalidCharacter;
 		}
 		return current.Buffer[index];
 	}
@@ -172,7 +271,7 @@ public sealed class SourceReader : IDisposable
 	/// <returns>文本读取器中之后的 <paramref name="idx"/> 索引的字符，或为 <c>-1</c>（如果没有更多的可用字符）。</returns>
 	/// <exception cref="ObjectDisposedException">当前 <see cref="SourceReader"/> 已关闭。</exception>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="idx"/> 小于 <c>0</c>。</exception>
-	public int Peek(int idx)
+	public char Peek(int idx)
 	{
 		if (idx < 0)
 		{
@@ -193,7 +292,7 @@ public sealed class SourceReader : IDisposable
 				if (temp == last && (tempLen = PrepareBuffer()) == 0)
 				{
 					// 没有可读数据了，返回。
-					return -1;
+					return InvalidCharacter;
 				}
 				temp = temp.Next;
 			}
@@ -213,11 +312,11 @@ public sealed class SourceReader : IDisposable
 	/// 返回之后可用的字符，并使该字符的位置提升。
 	/// </summary>
 	/// </overloads>
-	public int Read()
+	public char Read()
 	{
 		if (index == length && !NextBuffer())
 		{
-			return -1;
+			return InvalidCharacter;
 		}
 		globalIndex++;
 		return current.Buffer[index++];
@@ -232,7 +331,7 @@ public sealed class SourceReader : IDisposable
 	/// 或为 <c>-1</c>（如果没有更多的可用字符）。</returns>
 	/// <exception cref="ObjectDisposedException">当前 <see cref="SourceReader"/> 已关闭。</exception>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="idx"/> 小于 <c>0</c>。</exception>
-	public int Read(int idx)
+	public char Read(int idx)
 	{
 		if (idx < 0)
 		{
@@ -253,7 +352,7 @@ public sealed class SourceReader : IDisposable
 				{
 					// 没有数据了，返回。
 					index = length;
-					return -1;
+					return InvalidCharacter;
 				}
 			}
 			else
@@ -414,7 +513,7 @@ public sealed class SourceReader : IDisposable
 	/// 将当前位置之前的数据全部丢弃，并以 <see cref="Cyjb.Text.Token{T}"/> 的形式返回被丢弃的数据。
 	/// 之后的 <see cref="Unget()"/> 操作至多回退到当前位置。
 	/// </summary>
-	/// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
+	/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 	/// <param name="kind">返回的 <see cref="Cyjb.Text.Token{T}"/> 的标识符。</param>
 	/// <param name="value"><see cref="Cyjb.Text.Token{T}"/> 的值。</param>
 	/// <returns>当前位置之前的数据。</returns>
@@ -521,7 +620,31 @@ public sealed class SourceReader : IDisposable
 		{
 			// len 为 0 应仅当 last == current 时。
 		}
+		// 检查前一缓冲区最后位置的字符，确定是否是行首。
+		if (last == first)
+		{
+			// 是行首。
+			last.IsLineStart = true;
+		}
+		else
+		{
+			SourceBuffer prev = last.Prev;
+			char lastChar = prev.Buffer[BufferSize - 1];
+			// 兼容 \r\n 的场景
+			if (IsLineBreak(lastChar) && (lastChar != '\r' || last.Buffer[0] != '\n'))
+			{
+				last.IsLineStart = true;
+			}
+			else
+			{
+				last.IsLineStart = false;
+			}
+		}
 		lastLength = reader.ReadBlock(last.Buffer, 0, BufferSize);
+		if (locator != null)
+		{
+			locator.Read(last.Buffer.AsSpan(0, lastLength));
+		}
 		if (length == 0)
 		{
 			length = lastLength;
@@ -551,6 +674,10 @@ public sealed class SourceReader : IDisposable
 		/// 字符缓冲区起始位置的字符索引。
 		/// </summary>
 		public int StartIndex;
+		/// <summary>
+		/// 缓冲区起始是否是行首。
+		/// </summary>
+		public bool IsLineStart = false;
 		/// <summary>
 		/// 上一个字符缓冲区。
 		/// </summary>

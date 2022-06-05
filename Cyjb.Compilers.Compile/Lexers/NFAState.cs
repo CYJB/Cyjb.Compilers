@@ -7,12 +7,12 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示不确定有穷自动机（NFA）的状态。
 /// </summary>
 [DebuggerTypeProxy(typeof(DebugView))]
-public sealed class NFAState
+public sealed class NfaState
 {
 	/// <summary>
 	/// 包含当前状态的 NFA。
 	/// </summary>
-	private readonly NFA nfa;
+	private readonly Nfa nfa;
 	/// <summary>
 	/// 当前状态的索引。
 	/// </summary>
@@ -21,19 +21,19 @@ public sealed class NFAState
 	/// ϵ 转移的集合。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly List<NFAState> epsilonTransitions = new();
+	private readonly List<NfaState> epsilonTransitions = new();
 
 	/// <summary>
-	/// 初始化 <see cref="NFAState"/> 类的新实例。
+	/// 初始化 <see cref="NfaState"/> 类的新实例。
 	/// </summary>
 	/// <param name="nfa">包含状态的 NFA。</param>
 	/// <param name="index">状态的索引。</param>
-	internal NFAState(NFA nfa, int index)
+	internal NfaState(Nfa nfa, int index)
 	{
 		this.nfa = nfa;
 		this.index = index;
 		Symbol = null;
-		StateType = NFAStateType.Normal;
+		StateType = NfaStateType.Normal;
 	}
 
 	/// <summary>
@@ -43,11 +43,12 @@ public sealed class NFAState
 	/// <summary>
 	/// 获取或设置当前状态关联到的符号。
 	/// </summary>
+	/// <remarks>使用负数表示向前看的头状态。</remarks>
 	public int? Symbol { get; set; }
 	/// <summary>
 	/// 获取或设置当前状态的类型。
 	/// </summary>
-	public NFAStateType StateType { get; set; }
+	public NfaStateType StateType { get; set; }
 	/// <summary>
 	/// 获取字符类的转移对应的字符类集合。
 	/// </summary>
@@ -55,18 +56,18 @@ public sealed class NFAState
 	/// <summary>
 	/// 获取字符类转移的目标状态。
 	/// </summary>
-	public NFAState? CharClassTarget { get; private set; }
+	public NfaState? CharClassTarget { get; private set; }
 	/// <summary>
 	/// 获取 ϵ 转移的集合。
 	/// </summary>
-	public IList<NFAState> EpsilonTransitions => epsilonTransitions;
+	public IList<NfaState> EpsilonTransitions => epsilonTransitions;
 
 	/// <summary>
 	/// 添加一个到特定状态的转移。
 	/// </summary>
 	/// <param name="state">要转移到的状态。</param>
 	/// <param name="ch">转移的字符。</param>
-	public void Add(NFAState state, char ch)
+	public void Add(NfaState state, char ch)
 	{
 		CharClassSet = nfa.CharClasses.GetCharClassSet(ch);
 		CharClassTarget = state;
@@ -77,7 +78,7 @@ public sealed class NFAState
 	/// </summary>
 	/// <param name="state">要转移到的状态。</param>
 	/// <param name="chars">转移的字符集合。</param>
-	public void Add(NFAState state, CharSet chars)
+	public void Add(NfaState state, CharSet chars)
 	{
 		if (state != null && chars != null && chars.Count > 0)
 		{
@@ -90,7 +91,7 @@ public sealed class NFAState
 	/// 添加一个到特定状态的 ϵ 转移。
 	/// </summary>
 	/// <param name="state">要转移到的状态。</param>
-	public void Add(NFAState state)
+	public void Add(NfaState state)
 	{
 		if (state != null)
 		{
@@ -124,12 +125,12 @@ public sealed class NFAState
 		/// <summary>
 		/// 调试视图的源状态。
 		/// </summary>
-		private readonly NFAState state;
+		private readonly NfaState state;
 		/// <summary>
 		/// 使用指定的源状态初始化 <see cref="DebugView"/> 类的实例。
 		/// </summary>
 		/// <param name="state">使用调试视图的源状态。</param>
-		public DebugView(NFAState state)
+		public DebugView(NfaState state)
 		{
 			this.state = state;
 		}

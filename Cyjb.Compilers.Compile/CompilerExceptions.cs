@@ -7,83 +7,15 @@ namespace Cyjb.Compilers;
 /// </summary>
 internal static class CompilerExceptions
 {
-
-	#region 正则表达式异常
-
 	/// <summary>
-	/// 返回嵌套的行起始的异常。
+	/// 返回重复的词法分析上下文的异常。
 	/// </summary>
-	/// <param name="paramName">产生异常的参数名称。</param>
+	/// <param name="context">词法分析上下文名称。</param>
 	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException NestedBeginningOfLine(string? paramName)
+	public static ArgumentException DuplicateLexerContext(string? context)
 	{
-		return new ArgumentException(Resources.NestedBeginningOfLine, paramName);
+		return new ArgumentException(Resources.DuplicateLexerContext(context));
 	}
-
-	/// <summary>
-	/// 返回嵌套的文件结束的异常。
-	/// </summary>
-	/// <param name="paramName">产生异常的参数名称。</param>
-	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException NestedEndOfFile(string? paramName)
-	{
-		return new ArgumentException(Resources.NestedEndOfFile, paramName);
-	}
-
-	/// <summary>
-	/// 返回嵌套的行结束的异常。
-	/// </summary>
-	/// <param name="paramName">产生异常的参数名称。</param>
-	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException NestedEndOfLine(string? paramName)
-	{
-		return new ArgumentException(Resources.NestedEndOfLine, paramName);
-	}
-
-	/// <summary>
-	/// 返回嵌套的向前看的异常。
-	/// </summary>
-	/// <param name="paramName">产生异常的参数名称。</param>
-	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException NestedTrailing(string? paramName)
-	{
-		return new ArgumentException(Resources.NestedTrailing, paramName);
-	}
-
-	/// <summary>
-	/// 返回未识别的 Unicode 类别的异常。
-	/// </summary>
-	/// <param name="name">产生异常的参数名称。</param>
-	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException UnrecognizedUnicodeProperty(string? name)
-	{
-		return new ArgumentException(ResourcesUtil.Format(Resources.UnrecognizedUnicodeProperty, name));
-	}
-
-	#endregion // 正则表达式异常
-
-	#region 词法分析异常
-
-	/// <summary>
-	/// 返回不完整正词法分析上下文的异常。
-	/// </summary>
-	/// <param name="paramName">产生异常的参数名称。</param>
-	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException IncompleteLexerContext(string? paramName)
-	{
-		return new ArgumentException(Resources.IncompleteLexerContext, paramName);
-	}
-
-	/// <summary>
-	/// 返回不允许拒绝动作的异常。
-	/// </summary>
-	/// <returns><see cref="System.InvalidOperationException"/> 对象。</returns>
-	public static InvalidOperationException NotRejectable()
-	{
-		return new InvalidOperationException(Resources.NotRejectable);
-	}
-
-	#endregion // 词法分析异常
 
 	/// <summary>
 	/// 返回重复的符号标识符的异常。
@@ -93,7 +25,7 @@ internal static class CompilerExceptions
 	/// <returns><see cref="ArgumentException"/> 对象。</returns>
 	public static ArgumentException DuplicatedSymbolId(string id, [CallerArgumentExpression("id")] string? paramName = null)
 	{
-		return new ArgumentException(ResourcesUtil.Format(Resources.DuplicatedSymbolId, id), paramName);
+		return new ArgumentException(Resources.DuplicatedSymbolId(id), paramName);
 	}
 
 	/// <summary>
@@ -104,6 +36,6 @@ internal static class CompilerExceptions
 	/// <returns><see cref="ArgumentException"/> 对象。</returns>
 	public static ArgumentException InvalidSymbolId(string id, [CallerArgumentExpression("id")] string? paramName = null)
 	{
-		return new ArgumentException(ResourcesUtil.Format(Resources.InvalidSymbolId, id), paramName);
+		return new ArgumentException(Resources.InvalidSymbolId(id), paramName);
 	}
 }

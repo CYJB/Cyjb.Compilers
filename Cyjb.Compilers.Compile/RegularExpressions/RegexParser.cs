@@ -121,11 +121,6 @@ internal sealed class RegexParser
 	/// <returns><see cref="LexRegex"/> 对象。</returns>
 	private LexRegex StartScanRegex()
 	{
-		// <<EOF>> 的特殊判断。
-		if (Scan("<<EOF>>"))
-		{
-			return LexRegex.EndOfFile();
-		}
 		// ^ 仅在开头表示行起始，否则表示普通的符号。
 		bool beginningOfLine = Scan('^');
 		LexRegex tempRegex = ScanRegex();
@@ -271,8 +266,9 @@ internal sealed class RegexParser
 								MoveRight();
 								if (!regexDefinition.TryGetValue(name, out current))
 								{
-									throw CreateException(RegexParseError.Unknown, Resources.UndefinedRegex, name);
+									throw CreateException(RegexParseError.Unknown, Resources.UndefinedRegex(name));
 								}
+								break;
 							}
 							else
 							{
@@ -281,7 +277,7 @@ internal sealed class RegexParser
 						}
 						else if (wasPrevQuantifier)
 						{
-							throw CreateException(RegexParseError.Unknown, Resources.NestedQuantify, ch.ToString());
+							throw CreateException(RegexParseError.Unknown, Resources.NestedQuantify(ch));
 						}
 						else
 						{
@@ -862,7 +858,7 @@ internal sealed class RegexParser
 				MoveLeft();
 				return ScanCharEscape();
 		}
-		throw CreateException(RegexParseError.ShorthandClassInCharacterRange, Resources.BadClassInCharRange, ch);
+		throw CreateException(RegexParseError.ShorthandClassInCharacterRange, Resources.BadClassInCharRange(ch));
 	}
 
 	/// <summary>
@@ -966,7 +962,7 @@ internal sealed class RegexParser
 			default:
 				if (!IsECMA && ch.IsWord())
 				{
-					throw CreateException(RegexParseError.UnrecognizedEscape, Resources.UnrecognizedEscape, ch);
+					throw CreateException(RegexParseError.UnrecognizedEscape, Resources.UnrecognizedEscape(ch));
 				}
 				return ch;
 		}
@@ -1366,7 +1362,7 @@ internal sealed class RegexParser
 		}
 		// 跳过单词。
 		int len = CharsRight();
-		while (--len > 0 && CharAt(++idx).IsWord()) ;
+		while (--len > 0 && (ch = CharAt(++idx)).IsWord()) ;
 		return ch == '}' && idx - currentPos > 2;
 	}
 
@@ -1404,15 +1400,10 @@ internal sealed class RegexParser
 	/// </summary>
 	/// <param name="error">正则表达式解析错误。</param>
 	/// <param name="message">错误消息。</param>
-	/// <param name="args">错误参数。</param>
 	/// <returns>正则表达式解析错误。</returns>
-	private RegexParseException CreateException(RegexParseError error, string message, params object?[] args)
+	private RegexParseException CreateException(RegexParseError error, string message)
 	{
-		if (args != null && args.Length > 0)
-		{
-			message = ResourcesUtil.Format(message, args);
-		}
-		string formatedMessage = ResourcesUtil.Format(Resources.InvalidRegexPattern, pattern, currentPos, message);
+		string formatedMessage = Resources.InvalidRegexPattern(pattern, currentPos, message);
 		return CreateParseException(error, currentPos, formatedMessage);
 	}
 

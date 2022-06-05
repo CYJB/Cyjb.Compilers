@@ -7,23 +7,23 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示确定有穷自动机（DFA）的状态。
 /// </summary>
 [DebuggerTypeProxy(typeof(DebugView))]
-public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
+public sealed class DfaState : ReadOnlyCollectionBase<DfaState>
 {
 	/// <summary>
 	/// 包含当前状态的 DFA。
 	/// </summary>
-	private readonly DFA dfa;
+	private readonly Dfa dfa;
 	/// <summary>
 	/// DFA 状态的转移。
 	/// </summary>
-	private readonly Dictionary<CharClass, DFAState> transitions = new();
+	private readonly Dictionary<CharClass, DfaState> transitions = new();
 
 	/// <summary>
-	/// 初始化 <see cref="DFAState"/> 类的新实例。
+	/// 初始化 <see cref="DfaState"/> 类的新实例。
 	/// </summary>
 	/// <param name="dfa">包含当前状态的 DFA。</param>
 	/// <param name="index">状态的索引。</param>
-	internal DFAState(DFA dfa, int index)
+	internal DfaState(Dfa dfa, int index)
 	{
 		this.dfa = dfa;
 		Index = index;
@@ -35,8 +35,9 @@ public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
 	/// </summary>
 	public int Index { get; internal set; }
 	/// <summary>
-	/// 获取当前状态的符号列表。
+	/// 获取当前状态的符号列表，按符号索引排序。
 	/// </summary>
+	/// <remarks>使用负数表示向前看的头状态。</remarks>
 	public int[] Symbols { get; internal set; }
 
 	/// <summary>
@@ -44,11 +45,11 @@ public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
 	/// </summary>
 	/// <param name="charClass">要获取转移的字符类。</param>
 	/// <returns>转移到的状态。</returns>
-	public DFAState? this[CharClass charClass]
+	public DfaState? this[CharClass charClass]
 	{
 		get
 		{
-			if (transitions.TryGetValue(charClass, out DFAState? state))
+			if (transitions.TryGetValue(charClass, out DfaState? state))
 			{
 				return state;
 			}
@@ -72,11 +73,11 @@ public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
 	/// </summary>
 	/// <param name="charClass">要获取转移的字符类索引。</param>
 	/// <returns>转移到的状态。</returns>
-	public DFAState? this[int charClass]
+	public DfaState? this[int charClass]
 	{
 		get
 		{
-			if (transitions.TryGetValue(dfa.CharClasses[charClass], out DFAState? state))
+			if (transitions.TryGetValue(dfa.CharClasses[charClass], out DfaState? state))
 			{
 				return state;
 			}
@@ -85,15 +86,70 @@ public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
 	}
 
 	/// <summary>
+	/// 返回当前状态的转移可以覆盖其它状态的转移的个数。
+	/// </summary>
+	/// <param name="state">要检查的另一状态。</param>
+	/// <returns>当前状态可以覆盖其它状态的转移的个数。</returns>
+	internal int CountCoverTransition(DfaState state)
+	{
+		int coverCount = 0;
+		int sameCount = 0;
+		foreach (KeyValuePair<CharClass, DfaState> pair in transitions)
+		{
+			if (state.transitions.TryGetValue(pair.Key, out DfaState? target))
+			{
+				coverCount++;
+				if (target == pair.Value)
+				{
+					sameCount++;
+				}
+			}
+		}
+		// 未能覆盖 state 的全部状态转移，
+		if (coverCount < state.Count)
+		{
+			return 0;
+		}
+		return sameCount;
+	}
+
+	/// <summary>
+	/// 返回转移列表。
+	/// </summary>
+	/// <param name="defaultState">默认状态。</param>
+	/// <returns>转移列表。</returns>
+	internal KeyValuePair<int, DfaState>[] GetTransitions(DfaState? defaultState)
+	{
+		IEnumerable<KeyValuePair<CharClass, DfaState>> transitions = this.transitions;
+		if (defaultState != null)
+		{
+			transitions = transitions.Where(pair =>
+			{
+				if (defaultState.transitions.TryGetValue(pair.Key, out DfaState? target))
+				{
+					return target != pair.Value;
+				}
+				else
+				{
+					return true;
+				}
+			});
+		}
+		return transitions.Select(pair => new KeyValuePair<int, DfaState>(pair.Key.Index, pair.Value))
+			.OrderBy(pair => pair.Key)
+			.ToArray();
+	}
+
+	/// <summary>
 	/// 更新状态。
 	/// </summary>
 	/// <param name="map">状态映射表。</param>
-	internal void UpdateState(Dictionary<DFAState, DFAState> map)
+	internal void UpdateState(Dictionary<DfaState, DfaState> map)
 	{
-		Dictionary<CharClass, DFAState> transitionMap = new();
+		Dictionary<CharClass, DfaState> transitionMap = new();
 		foreach (var (charClass, state) in transitions)
 		{
-			if (map.TryGetValue(state, out DFAState? newState))
+			if (map.TryGetValue(state, out DfaState? newState))
 			{
 				transitionMap[charClass] = newState;
 			}
@@ -145,7 +201,7 @@ public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
 	/// </summary>
 	/// <param name="item">要在当前集合中定位的对象。</param>
 	/// <returns>如果在当前集合中找到 <paramref name="item"/>，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	public override bool Contains(DFAState? item)
+	public override bool Contains(DfaState item)
 	{
 		if (item == null)
 		{
@@ -158,7 +214,7 @@ public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
 	/// 返回一个循环访问集合的枚举器。
 	/// </summary>
 	/// <returns>可用于循环访问集合的 <see cref="IEnumerator{T}"/> 对象。</returns>
-	public override IEnumerator<DFAState?> GetEnumerator()
+	public override IEnumerator<DfaState> GetEnumerator()
 	{
 		return transitions.Values.GetEnumerator();
 	}
@@ -175,12 +231,12 @@ public sealed class DFAState : ReadOnlyCollectionBase<DFAState?>
 		/// <summary>
 		/// 调试视图的源状态。
 		/// </summary>
-		private readonly DFAState state;
+		private readonly DfaState state;
 		/// <summary>
 		/// 使用指定的源状态初始化 <see cref="DebugView"/> 类的实例。
 		/// </summary>
 		/// <param name="state">使用调试视图的源状态。</param>
-		public DebugView(DFAState state)
+		public DebugView(DfaState state)
 		{
 			this.state = state;
 		}

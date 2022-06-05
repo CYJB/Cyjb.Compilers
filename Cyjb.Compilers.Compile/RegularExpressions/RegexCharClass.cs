@@ -604,7 +604,7 @@ public sealed class RegexCharClass : IEquatable<RegexCharClass>
 		}
 		else
 		{
-			throw CompilerExceptions.UnrecognizedUnicodeProperty(categoryName);
+			throw new ArgumentException(Resources.UnrecognizedUnicodeProperty(categoryName));
 		}
 	}
 
