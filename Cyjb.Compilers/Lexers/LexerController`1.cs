@@ -6,17 +6,13 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析器的控制器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-public sealed class LexerController<T>
+public class LexerController<T>
 	where T : struct
 {
 	/// <summary>
-	/// 当前的词法分析器。
-	/// </summary>
-	private readonly TokenReaderBase<T> reader;
-	/// <summary>
 	/// 当前词法分析的上下文。
 	/// </summary>
-	private readonly IReadOnlyDictionary<string, ContextData<T>> contexts;
+	private IReadOnlyDictionary<string, ContextData<T>> contexts;
 	/// <summary>
 	/// 上下文的堆栈。
 	/// </summary>
@@ -26,35 +22,45 @@ public sealed class LexerController<T>
 	/// </summary>
 	private ContextData<T> context;
 	/// <summary>
+	/// 动作的处理器。
+	/// </summary>
+	private Action<Delegate> actionHandler;
+	/// <summary>
 	/// 是否允许 Reject 动作。
 	/// </summary>
-	private readonly bool rejectable;
+	private bool rejectable;
 	/// <summary>
 	/// 是否用户指定了接受。
 	/// </summary>
 	private bool userAccepted = false;
-	/// <summary>
-	/// 当前的环境信息。
-	/// </summary>
-	private readonly object? env;
+
+#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
 	/// <summary>
-	/// 使用指定的词法单元读信息初始化 <see cref="LexerController{T}"/> 类的新实例。
+	/// 初始化 <see cref="LexerController{T}"/> 类的新实例。
 	/// </summary>
-	/// <param name="reader">词法分析器。</param>
-	/// <param name="contexts">词法分析的上下文。</param>
-	/// <param name="env">词法分析器的环境信息。</param>
-	/// <param name="rejectable">是否允许 Reject 动作。</param>
-	internal LexerController(TokenReaderBase<T> reader,
-		IReadOnlyDictionary<string, ContextData<T>> contexts,
-		object? env, bool rejectable)
+	public LexerController()
 	{
-		this.reader = reader;
+		Text = string.Empty;
+	}
+
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
+
+	/// <summary>
+	/// 设置指定的词法单元读信息。
+	/// </summary>
+	/// <param name="source">源文件读取器。</param>
+	/// <param name="contexts">词法分析的上下文。</param>
+	/// <param name="actionHandler">动作的处理器。</param>
+	/// <param name="rejectable">是否允许 Reject 动作。</param>
+	internal void Init(SourceReader source, IReadOnlyDictionary<string, ContextData<T>> contexts,
+		Action<Delegate> actionHandler, bool rejectable)
+	{
 		this.contexts = contexts;
 		context = contexts[ContextData.Initial];
-		this.env = env;
+		this.actionHandler = actionHandler;
 		this.rejectable = rejectable;
-		Text = string.Empty;
+		Source = source;
 	}
 
 	/// <summary>
@@ -66,7 +72,7 @@ public sealed class LexerController<T>
 	/// 获取要扫描的源文件。
 	/// </summary>
 	/// <value>要扫描的源文件。</value>
-	public SourceReader Source => reader.Source;
+	public SourceReader Source { get; private set; }
 	/// <summary>
 	/// 获取当前词法单元的标识符。
 	/// </summary>
@@ -107,7 +113,7 @@ public sealed class LexerController<T>
 	/// <param name="start">当前词法单元的起始索引。</param>
 	/// <param name="kind">当前匹配的词法单元标识符。</param>
 	/// <param name="action">当前要执行的动作。</param>
-	internal void DoAction(int start, T? kind, Action<LexerController<T>>? action)
+	internal void DoAction(int start, T? kind, Delegate? action)
 	{
 		userAccepted = false;
 		IsReject = false;
@@ -116,7 +122,10 @@ public sealed class LexerController<T>
 		Text = Source.ReadedText();
 		Start = start;
 		Value = null;
-		action?.Invoke(this);
+		if (action != null)
+		{
+			actionHandler(action);
+		}
 	}
 
 	/// <summary>
@@ -126,14 +135,6 @@ public sealed class LexerController<T>
 	internal Token<T> CreateToken()
 	{
 		return new Token<T>(Kind!.Value, Text, new TextSpan(Start, Source.Index), Value);
-	}
-
-	/// <summary>
-	/// 返回当前的环境信息。
-	/// </summary>
-	public TEnv GetEnv<TEnv>()
-	{
-		return (TEnv)env!;
 	}
 
 	/// <summary>

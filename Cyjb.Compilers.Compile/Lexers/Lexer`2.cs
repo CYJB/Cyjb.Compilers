@@ -8,6 +8,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析规则。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
+/// <typeparam name="TController">词法分析控制器的类型。</typeparam>
 /// <remarks>
 /// <para>泛型参数 <typeparamref name="T"/> 一般是一个枚举类型，用于标识词法单元。</para>
 /// <para>对于词法分析中的冲突，总是选择最长的词素。如果最长的词素可以与多个模式匹配，
@@ -48,8 +49,9 @@ namespace Cyjb.Compilers.Lexers;
 /// 《C# 词法分析器（一）词法分析介绍》</seealso>
 /// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerSummary.html">
 /// 《C# 词法分析器（七）总结》</seealso>
-public sealed class Lexer<T>
+public class Lexer<T, TController>
 	where T : struct
+	where TController : LexerController<T>, new()
 {
 	/// <summary>
 	/// 正则表达式列表。
@@ -76,7 +78,7 @@ public sealed class Lexer<T>
 	private bool containsBeginningOfLine = false;
 
 	/// <summary>
-	/// 初始化 <see cref="Lexer{T}"/> 类的新实例。
+	/// 初始化 <see cref="Lexer{T,TController}"/> 类的新实例。
 	/// </summary>
 	public Lexer()
 	{
@@ -148,18 +150,18 @@ public sealed class Lexer<T>
 	/// <param name="options">正则表达式的选项。</param>
 	/// <returns>终结符的构造器。</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="regex"/> 为 <c>null</c>。</exception>
-	public ITerminalBuilder<T> DefineSymbol(string regex, RegexOptions options = RegexOptions.None)
+	public ITerminalBuilder<T, TController> DefineSymbol(string regex, RegexOptions options = RegexOptions.None)
 	{
 		ArgumentNullException.ThrowIfNull(regex);
 		if (regex == "<<EOF>>")
 		{
-			return new EofBuilder<T>(this);
+			return new EofBuilder<T, TController>(this);
 		}
 		else
 		{
 			Terminal<T> terminal = new(terminals.Count, LexRegex.Parse(regex, options, regexs));
 			terminals.Add(terminal);
-			return new TerminalBuilder<T>(this, terminal);
+			return new TerminalBuilder<T, TController>(this, terminal);
 		}
 	}
 
@@ -182,8 +184,9 @@ public sealed class Lexer<T>
 	/// <summary>
 	/// 返回词法分析的数据。
 	/// </summary>
+	/// <param name="rejectable">是否用到了 Reject 动作。</param>
 	/// <returns>词法分析的数据。</returns>
-	public LexerData<T> GetData()
+	public LexerData<T> GetData(bool rejectable = false)
 	{
 		LexerContext[] inclusiveContexts = this.contexts.Values
 			.Where(c => c.Type == LexerContextType.Inclusive).ToArray();
@@ -209,8 +212,20 @@ public sealed class Lexer<T>
 		}
 		Dfa dfa = nfa.BuildDFA(headCount);
 		TerminalData<T>[] terminals = this.terminals.Select(t => t.GetData()).ToArray();
-		return new LexerData<T>(contexts, terminals, dfa.GetCharClassMap(), dfa.GetData(),
-			trailingType, containsBeginningOfLine);
+		DfaData data = dfa.GetData();
+		return new LexerData<T>(contexts, terminals, dfa.GetCharClassMap(), data.States, data.Next, data.Check,
+			trailingType, containsBeginningOfLine, rejectable, typeof(TController));
+	}
+
+	/// <summary>
+	/// 返回词法分析的工厂。
+	/// </summary>
+	/// <param name="rejectable">是否用到了 Reject 动作。</param>
+	/// <returns>词法分析的数据。</returns>
+	public LexerFactory<T, TController> GetFactory(bool rejectable = false)
+	{
+		LexerData<T> data = GetData(rejectable);
+		return new LexerFactory<T, TController>(data);
 	}
 
 	/// <summary>

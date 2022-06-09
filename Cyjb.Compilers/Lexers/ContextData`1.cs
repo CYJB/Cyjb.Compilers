@@ -5,7 +5,7 @@ namespace Cyjb.Compilers.Lexers;
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 [Serializable]
-public class ContextData<T>
+public sealed class ContextData<T>
 	where T : struct
 {
 	/// <summary>
@@ -14,7 +14,7 @@ public class ContextData<T>
 	/// <param name="index">上下文的索引。</param>
 	/// <param name="label">上下文的标签。</param>
 	/// <param name="eofAction">EOF 动作。</param>
-	public ContextData(int index, string label, Action<LexerController<T>>? eofAction)
+	public ContextData(int index, string label, Delegate? eofAction)
 	{
 		Index = index;
 		Label = label;
@@ -32,5 +32,5 @@ public class ContextData<T>
 	/// <summary>
 	/// 上下文的 EOF 动作。
 	/// </summary>
-	public Action<LexerController<T>>? EofAction { get; }
+	public Delegate? EofAction { get; }
 }

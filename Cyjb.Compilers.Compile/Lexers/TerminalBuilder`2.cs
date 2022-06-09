@@ -4,24 +4,26 @@ namespace Cyjb.Compilers.Lexers;
 /// 词法分析的终结符构造器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal sealed class TerminalBuilder<T> : ITerminalBuilder<T>
+/// <typeparam name="TController">词法分析控制器的类型。</typeparam>
+internal sealed class TerminalBuilder<T, TController> : ITerminalBuilder<T, TController>
 	where T : struct
+	where TController : LexerController<T>, new()
 {
 	/// <summary>
 	/// 词法分析器。
 	/// </summary>
-	private readonly Lexer<T> lexer;
+	private readonly Lexer<T, TController> lexer;
 	/// <summary>
 	/// 词法分析的终结符。
 	/// </summary>
 	private readonly Terminal<T> terminal;
 
 	/// <summary>
-	/// 使用词法分析器和终结符初始化 <see cref="TerminalBuilder{T}"/> 类的新实例。
+	/// 使用词法分析器和终结符初始化 <see cref="TerminalBuilder{T,TController}"/> 类的新实例。
 	/// </summary>
 	/// <param name="lexer">词法分析器。</param>
 	/// <param name="terminal">终结符。</param>
-	public TerminalBuilder(Lexer<T> lexer, Terminal<T> terminal)
+	public TerminalBuilder(Lexer<T, TController> lexer, Terminal<T> terminal)
 	{
 		this.lexer = lexer;
 		this.terminal = terminal;
@@ -32,7 +34,7 @@ internal sealed class TerminalBuilder<T> : ITerminalBuilder<T>
 	/// </summary>
 	/// <param name="contexts">词法分析器的上下文。</param>
 	/// <returns>终结符的构造器。</returns>
-	public ITerminalBuilder<T> Context(params string[] contexts)
+	public ITerminalBuilder<T, TController> Context(params string[] contexts)
 	{
 		foreach (string label in contexts)
 		{
@@ -49,7 +51,7 @@ internal sealed class TerminalBuilder<T> : ITerminalBuilder<T>
 	/// </summary>
 	/// <param name="kind">词法单元的类型。</param>
 	/// <returns>终结符的构造器。</returns>
-	public ITerminalBuilder<T> Kind(T kind)
+	public ITerminalBuilder<T, TController> Kind(T kind)
 	{
 		terminal.Kind = kind;
 		return this;
@@ -60,7 +62,7 @@ internal sealed class TerminalBuilder<T> : ITerminalBuilder<T>
 	/// </summary>
 	/// <param name="action">词法单元的动作。</param>
 	/// <returns>终结符的构造器。</returns>
-	public void Action(Action<LexerController<T>> action)
+	public void Action(Action<TController> action)
 	{
 		if (action != null)
 		{

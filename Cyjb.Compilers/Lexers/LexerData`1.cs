@@ -5,15 +5,14 @@ namespace Cyjb.Compilers.Lexers
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 	/// <remarks><para><see cref="LexerData{T}"/> 类包含了用于构造词法分析器的全部信息，
-	/// 可以用于自己构造词法分析器。或者可以使用 <see cref="LexerData{T}.GetFactory"/>
-	/// 获取默认实现。</para>
+	/// 可以用于构造词法分析器。</para>
 	/// <para>关于如何构造自己的词法分析器，可以参考我的博文
 	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
 	/// 《C# 词法分析器（六）构造词法分析器》</see>。</para></remarks>
 	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
 	/// 《C# 词法分析器（六）构造词法分析器》</seealso>
 	[Serializable]
-	public sealed class LexerData<T>
+	public class LexerData<T>
 		where T : struct
 	{
 		/// <summary>
@@ -22,20 +21,27 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="contexts">上下文数据。</param>
 		/// <param name="terminals">终结符列表。</param>
 		/// <param name="charClasses">字符类的映射。</param>
-		/// <param name="dfa">DFA 的数据。</param>
+		/// <param name="states">DFA 的状态列表。</param>
+		/// <param name="next">下一状态列表。</param>
+		/// <param name="check">状态检查。</param>
 		/// <param name="trailingType">向前看符号的类型。</param>
 		/// <param name="containsBeginningOfLine">是否包含行首匹配的规则。</param>
+		/// <param name="rejectable">是否用到了 Reject 动作。</param>
+		/// <param name="controllerType">词法分析控制器的类型。</param>
 		public LexerData(Dictionary<string, ContextData<T>> contexts, TerminalData<T>[] terminals,
-			CharClassMap charClasses, DfaData dfa, TrailingType trailingType, bool containsBeginningOfLine)
+			CharClassMap charClasses, DfaStateData[] states, int[] next, int[] check,
+			TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
 		{
 			Contexts = contexts;
 			Terminals = terminals;
 			CharClasses = charClasses;
-			States = dfa.States;
-			Next = dfa.Next;
-			Check = dfa.Check;
+			States = states;
+			Next = next;
+			Check = check;
 			TrailingType = trailingType;
 			ContainsBeginningOfLine = containsBeginningOfLine;
+			Rejectable = rejectable;
+			ControllerType = controllerType;
 		}
 
 		/// <summary>
@@ -72,31 +78,13 @@ namespace Cyjb.Compilers.Lexers
 		/// <value>如果包含与行首匹配对应的头节点，则为 <c>true</c>，包含上下文个数×2 个头节点；
 		/// 否则为 <c>false</c>，包含上下文个数个头节点。</value>
 		public bool ContainsBeginningOfLine { get; }
-
 		/// <summary>
-		/// 返回使用当前数据的词法分析器工厂。
+		/// 是否用到了 Reject 动作。
 		/// </summary>
-		/// <param name="rejectable">是否允许 Reject 动作。</param>
-		/// <returns>词法分析器工厂。</returns>
-		/// <overloads>
+		public bool Rejectable { get; }
 		/// <summary>
-		/// 返回使用当前数据的词法分析器工厂。
+		/// 词法分析控制器的类型。
 		/// </summary>
-		/// </overloads>
-		public TokenReaderFactory<T> GetFactory(bool rejectable = false)
-		{
-			return new TokenReaderFactory<T>(this, null, TrailingType, rejectable);
-		}
-
-		/// <summary>
-		/// 返回使用当前数据的词法分析器工厂。
-		/// </summary>
-		/// <param name="envInitializer">词法分析器的环境初始化器。</param>
-		/// <param name="rejectable">是否允许 Reject 动作。</param>
-		/// <returns>词法分析器工厂。</returns>
-		public TokenReaderFactory<T> GetFactory(Func<object?>? envInitializer, bool rejectable = false)
-		{
-			return new TokenReaderFactory<T>(this, envInitializer, TrailingType, rejectable);
-		}
+		public Type ControllerType { get; }
 	}
 }

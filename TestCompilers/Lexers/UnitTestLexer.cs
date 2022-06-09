@@ -37,9 +37,7 @@ public class UnitTestLexer
 		lexer.DefineSymbol("\\)").Kind(Calc.RBrace);
 		// 吃掉所有空白。
 		lexer.DefineSymbol("\\s");
-
-		LexerData<Calc> data = lexer.GetData();
-		TokenReaderFactory<Calc> factory = data.GetFactory();
+		LexerFactory<Calc> factory = lexer.GetFactory();
 
 		// 测试分析源码
 		string source = "1 + 20 * 3 / 4*(5+6)";
@@ -75,9 +73,7 @@ public class UnitTestLexer
 		lexer.DefineRegex("verbatim_char", @"[^""]|\""\""");
 		lexer.DefineRegex("verbatim_literal", @"@\""{verbatim_char}*\""");
 		lexer.DefineSymbol("{regular_literal}|{verbatim_literal}").Kind(Str.Str);
-
-		LexerData<Str> data = lexer.GetData();
-		TokenReaderFactory<Str> factory = data.GetFactory();
+		LexerFactory<Str> factory = lexer.GetFactory();
 
 		// 测试分析源码
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
@@ -89,16 +85,16 @@ public class UnitTestLexer
 		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
 	}
 
-	private class StrEnv
+	private class StrController : LexerController<Str>
 	{
 		/// <summary>
-		/// 起始索引。
+		/// 当前起始索引。
 		/// </summary>
-		public int Start;
+		public int CurStart;
 		/// <summary>
-		/// 转义后的文本。
+		/// 处理后的文本。
 		/// </summary>
-		public StringBuilder Text = new();
+		public StringBuilder DecodedText = new();
 	}
 
 	/// <summary>
@@ -107,7 +103,7 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestEscapeString()
 	{
-		Lexer<Str> lexer = new();
+		Lexer<Str, StrController> lexer = new();
 		const string ctxStr = "str";
 		const string ctxVstr = "vstr";
 		lexer.DefineContext(ctxStr);
@@ -116,68 +112,62 @@ public class UnitTestLexer
 		lexer.DefineSymbol(@"\""").Action(c =>
 		{
 			c.PushContext(ctxStr);
-			StrEnv env = c.GetEnv<StrEnv>();
-			env.Start = c.Start;
-			env.Text.Clear();
+			c.CurStart = c.Start;
+			c.DecodedText.Clear();
 		});
 		lexer.DefineSymbol(@"@\""").Action(c =>
 		{
 			c.PushContext(ctxVstr);
-			StrEnv env = c.GetEnv<StrEnv>();
-			env.Start = c.Start;
-			env.Text.Clear();
+			c.CurStart = c.Start;
+			c.DecodedText.Clear();
 		});
 		lexer.DefineSymbol(@"\""").Context(ctxStr).Action(c =>
 		{
 			c.PopContext();
-			StrEnv env = c.GetEnv<StrEnv>();
-			c.Start = env.Start;
-			c.Text = env.Text.ToString();
+			c.Start = c.CurStart;
+			c.Text = c.DecodedText.ToString();
 			c.Accept(Str.Str);
 		});
 		lexer.DefineSymbol(@"\\u[0-9]{4}").Context(ctxStr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append((char)int.Parse(c.Text.AsSpan()[2..], NumberStyles.HexNumber));
+			c.DecodedText.Append((char)int.Parse(c.Text.AsSpan()[2..], NumberStyles.HexNumber));
 		});
 		lexer.DefineSymbol(@"\\x[0-9]{2}").Context(ctxStr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append((char)int.Parse(c.Text.AsSpan()[2..], NumberStyles.HexNumber));
+			c.DecodedText.Append((char)int.Parse(c.Text.AsSpan()[2..], NumberStyles.HexNumber));
 		});
 		lexer.DefineSymbol(@"\\n").Context(ctxStr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append('\n');
+			c.DecodedText.Append('\n');
 		});
 		lexer.DefineSymbol(@"\\\""").Context(ctxStr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append('\"');
+			c.DecodedText.Append('\"');
 		});
 		lexer.DefineSymbol(@"\\r").Context(ctxStr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append('\r');
+			c.DecodedText.Append('\r');
 		});
 		lexer.DefineSymbol(@".").Context(ctxStr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append(c.Text);
+			c.DecodedText.Append(c.Text);
 		});
 		lexer.DefineSymbol(@"\""").Context(ctxVstr).Action(c =>
 		{
 			c.PopContext();
-			StrEnv env = c.GetEnv<StrEnv>();
-			c.Start = env.Start;
-			c.Text = env.Text.ToString();
+			c.Start = c.CurStart;
+			c.Text = c.DecodedText.ToString();
 			c.Accept(Str.Str);
 		});
 		lexer.DefineSymbol(@"\""\""").Context(ctxVstr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append('"');
+			c.DecodedText.Append('"');
 		});
 		lexer.DefineSymbol(@".").Context(ctxVstr).Action(c =>
 		{
-			c.GetEnv<StrEnv>().Text.Append(c.Text);
+			c.DecodedText.Append(c.Text);
 		});
-
-		LexerData<Str> data = lexer.GetData();
-		TokenReaderFactory<Str> factory = data.GetFactory(() => new StrEnv());
+		LexerFactory<Str, StrController> factory = lexer.GetFactory();
 
 		// 测试分析源码
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";

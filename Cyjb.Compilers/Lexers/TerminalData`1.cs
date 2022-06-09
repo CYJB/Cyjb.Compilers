@@ -5,7 +5,7 @@ namespace Cyjb.Compilers.Lexers;
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 [Serializable]
-public class TerminalData<T>
+public sealed class TerminalData<T>
 	where T : struct
 {
 	/// <summary>
@@ -14,7 +14,7 @@ public class TerminalData<T>
 	/// <param name="kind">终结符的类型。</param>
 	/// <param name="action">终结符的动作。</param>
 	/// <param name="trailing">向前看信息。</param>
-	public TerminalData(T? kind, Action<LexerController<T>>? action, int? trailing)
+	public TerminalData(T? kind, Delegate? action, int? trailing)
 	{
 		Kind = kind;
 		Action = action;
@@ -28,7 +28,7 @@ public class TerminalData<T>
 	/// <summary>
 	/// 终结符的动作。
 	/// </summary>
-	public Action<LexerController<T>>? Action { get; }
+	public Delegate? Action { get; }
 	/// <summary>
 	/// 终结符的向前看信息。
 	/// </summary>

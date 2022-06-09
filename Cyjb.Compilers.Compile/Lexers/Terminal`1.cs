@@ -43,7 +43,7 @@ internal sealed class Terminal<T>
 	/// 获取或设置当前终结符的动作。
 	/// </summary>
 	/// <value>当前终结符的动作。</value>
-	public Action<LexerController<T>>? Action { get; set; }
+	public Delegate? Action { get; set; }
 	/// <summary>
 	/// 获取或设置终结符的向前看信息。
 	/// </summary>

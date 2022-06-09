@@ -13,10 +13,10 @@ internal sealed class FixedTrailingReader<T> : TokenReaderBase<T>
 	/// 使用给定的词法分析器信息初始化 <see cref="FixedTrailingReader{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="lexerData">要使用的词法分析器的数据。</param>
-	/// <param name="env">词法分析器的环境信息。</param>
+	/// <param name="controller">词法分析控制器。</param>
 	/// <param name="reader">要使用的源文件读取器。</param>
-	public FixedTrailingReader(LexerData<T> lexerData, object? env, SourceReader reader) :
-		base(lexerData, env, false, reader)
+	public FixedTrailingReader(LexerData<T> lexerData, LexerController<T> controller, SourceReader reader) :
+		base(lexerData, controller, reader)
 	{ }
 
 	/// <summary>

@@ -22,14 +22,13 @@ internal abstract class TokenReaderBase<T> : TokenReader<T>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenReaderBase{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="data">要使用的词法分析器数据。</param>
-	/// <param name="env">词法分析器的环境信息。</param>
-	/// <param name="rejectable">当前词法分析器是否允许 Reject 动作。</param>
+	/// <param name="controller">词法分析控制器。</param>
 	/// <param name="source">要使用的源文件读取器。</param>
-	protected TokenReaderBase(LexerData<T> data, object? env, bool rejectable, SourceReader source)
+	protected TokenReaderBase(LexerData<T> data, LexerController<T> controller, SourceReader source)
 		: base(source)
 	{
 		this.data = data;
-		controller = new LexerController<T>(this, data.Contexts, env, rejectable);
+		this.controller = controller;
 	}
 
 	/// <summary>
