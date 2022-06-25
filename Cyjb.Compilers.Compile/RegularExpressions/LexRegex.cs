@@ -24,6 +24,7 @@ public abstract class LexRegex : IEquatable<LexRegex>
 	/// <param name="regexDef">正则表达式的定义。</param>
 	/// <returns>解析得到的正则表达式。</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="pattern"/> 为 <c>null</c>。</exception>
+	/// <exception cref="RegexParseException">正则表达式解析失败。</exception>
 	/// <overloads>
 	/// <summary>
 	/// 根据给定的字符串或源文件解析正则表达式。
@@ -43,6 +44,7 @@ public abstract class LexRegex : IEquatable<LexRegex>
 	/// <param name="regexDef">正则表达式的定义。</param>
 	/// <returns>解析得到的正则表达式。</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="pattern"/> 为 <c>null</c>。</exception>
+	/// <exception cref="RegexParseException">正则表达式解析失败。</exception>
 	/// <remarks>支持的正则表达式选项有 <see cref="RegexOptions.IgnoreCase"/>、
 	/// <see cref="RegexOptions.Singleline"/>、<see cref="RegexOptions.IgnorePatternWhitespace"/>、
 	/// <see cref="RegexOptions.ECMAScript"/> 和 <see cref="RegexOptions.CultureInvariant"/>。</remarks>

@@ -13,13 +13,11 @@ namespace TestCompilers.Lexers;
 [TestClass]
 public class UnitTestLexer
 {
-	enum Calc { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace }
-
 	/// <summary>
 	/// 对计算器词法分析进行测试。
 	/// </summary>
 	[TestMethod]
-	public void TestCalc()
+	public void TestDefineCalc()
 	{
 		Lexer<Calc> lexer = new();
 		// 终结符的定义。
@@ -58,13 +56,38 @@ public class UnitTestLexer
 		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), reader.Read());
 	}
 
-	enum Str { Str }
+	/// <summary>
+	/// 对设计时计算器词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestInDesignCalc()
+	{
+		LexerFactory<Calc, TestCalcController> factory = Lexer.GetFactory<Calc, TestCalcController>();
+
+		// 测试分析源码
+		string source = "1 + 20 * 3 / 4*(5+6)";
+		TokenReader<Calc> reader = factory.CreateReader(source);
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(7, 8)), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "3", new TextSpan(9, 10), 3), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Div, "/", new TextSpan(11, 12)), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "4", new TextSpan(13, 14), 4), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(14, 15)), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.LBrace, "(", new TextSpan(15, 16)), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "5", new TextSpan(16, 17), 5), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(17, 18)), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), reader.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), reader.Read());
+		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), reader.Read());
+	}
 
 	/// <summary>
 	/// 对字符串词法分析进行测试。
 	/// </summary>
 	[TestMethod]
-	public void TestString()
+	public void TestDefineString()
 	{
 		Lexer<Str> lexer = new();
 		// 终结符的定义。
@@ -85,7 +108,25 @@ public class UnitTestLexer
 		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
 	}
 
-	private class StrController : LexerController<Str>
+	/// <summary>
+	/// 对设计时字符串词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestInDesignString()
+	{
+		LexerFactory<Str, TestStrController> factory = Lexer.GetFactory<Str, TestStrController>();
+
+		// 测试分析源码
+		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
+		TokenReader<Str> reader = factory.CreateReader(source);
+		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), reader.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), reader.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), reader.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"@""aabb\""""ccd\u0045\x47""", new TextSpan(42, 65)), reader.Read());
+		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
+	}
+
+	private class EscapeStrController : LexerController<Str>
 	{
 		/// <summary>
 		/// 当前起始索引。
@@ -101,9 +142,9 @@ public class UnitTestLexer
 	/// 对转义字符串词法分析进行测试。
 	/// </summary>
 	[TestMethod]
-	public void TestEscapeString()
+	public void TestDefineEscapeString()
 	{
-		Lexer<Str, StrController> lexer = new();
+		Lexer<Str, EscapeStrController> lexer = new();
 		const string ctxStr = "str";
 		const string ctxVstr = "vstr";
 		lexer.DefineContext(ctxStr);
@@ -167,7 +208,25 @@ public class UnitTestLexer
 		{
 			c.DecodedText.Append(c.Text);
 		});
-		LexerFactory<Str, StrController> factory = lexer.GetFactory();
+		LexerFactory<Str, EscapeStrController> factory = lexer.GetFactory();
+
+		// 测试分析源码
+		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
+		TokenReader<Str> reader = factory.CreateReader(source);
+		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), reader.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), reader.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), reader.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"aabb\""ccd\u0045\x47", new TextSpan(42, 65)), reader.Read());
+		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
+	}
+
+	/// <summary>
+	/// 对设计时转义字符串词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestInDesignEscapeString()
+	{
+		LexerFactory<Str, TestEscapeStrController> factory = Lexer.GetFactory<Str, TestEscapeStrController>();
 
 		// 测试分析源码
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";

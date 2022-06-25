@@ -33,12 +33,12 @@ internal partial class Resources
 	/// <summary>
 	/// 获取此类使用的缓存的 <see cref="ResourceManager"/> 实例。
 	/// </summary>
-	[ComponentModel.EditorBrowsableAttribute(ComponentModel.EditorBrowsableState.Advanced)]
+	[ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Advanced)]
 	internal static ResourceManager ResourceManager
 	{
 		get
 		{
-			if (object.ReferenceEquals(resourceManager, null))
+			if (resourceManager is null)
 			{
 				resourceManager = new ResourceManager("Cyjb.Compilers.Resources", typeof(Resources).Assembly);
 			}
@@ -49,7 +49,7 @@ internal partial class Resources
 	/// <summary>
 	/// 获取或设置资源使用的区域信息。
 	/// </summary>
-	[ComponentModel.EditorBrowsableAttribute(ComponentModel.EditorBrowsableState.Advanced)]
+	[ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Advanced)]
 	internal static CultureInfo? Culture
 	{
 		get
@@ -67,7 +67,7 @@ internal partial class Resources
 	/// </summary>
 	internal static string BadClassInCharRange(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("BadClassInCharRange", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("BadClassInCharRange", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -75,7 +75,7 @@ internal partial class Resources
 	/// </summary>
 	internal static string DuplicatedSymbolId(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("DuplicatedSymbolId", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("DuplicatedSymbolId", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -83,13 +83,23 @@ internal partial class Resources
 	/// </summary>
 	internal static string DuplicateLexerContext(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("DuplicateLexerContext", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("DuplicateLexerContext", resourceCulture)!, Format(arg0));
 	}
+	
+	/// <summary>
+	/// 返回类似 <c>Empty regex</c> 的本地化字符串。
+	/// </summary>
+	internal static string EmptyRegex => ResourceManager.GetString("EmptyRegex", resourceCulture)!;
 	
 	/// <summary>
 	/// 返回类似 <c>Illegal \ at end of pattern.</c> 的本地化字符串。
 	/// </summary>
 	internal static string IllegalEndEscape => ResourceManager.GetString("IllegalEndEscape", resourceCulture)!;
+	
+	/// <summary>
+	/// 返回类似 <c>Incomplete lexer context.</c> 的本地化字符串。
+	/// </summary>
+	internal static string IncompleteLexerContext => ResourceManager.GetString("IncompleteLexerContext", resourceCulture)!;
 	
 	/// <summary>
 	/// 返回类似 <c>Incomplete regex reference.</c> 的本地化字符串。
@@ -101,15 +111,36 @@ internal partial class Resources
 	/// </summary>
 	internal static string InvalidLexerContext(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("InvalidLexerContext", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("InvalidLexerContext", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Invalid regular expression pattern '{0}' at offset {1}: {2}</c> 的本地化字符串。
+	/// 返回类似 <c>Invalid lexer symbol '{0}': {1}.</c> 的本地化字符串。
+	/// </summary>
+	internal static string InvalidLexerSymbol(object? arg0, object? arg1)
+	{
+		return string.Format(resourceCulture, ResourceManager.GetString("InvalidLexerSymbol", resourceCulture)!, Format(arg0), Format(arg1));
+	}
+	
+	/// <summary>
+	/// 返回类似 <c>Invalid lexer symbol action '{0}', parameter must empty or optional.</c> 的本地化字符串。
+	/// </summary>
+	internal static string InvalidLexerSymbolAction(object? arg0)
+	{
+		return string.Format(resourceCulture, ResourceManager.GetString("InvalidLexerSymbolAction", resourceCulture)!, Format(arg0));
+	}
+	
+	/// <summary>
+	/// 返回类似 <c>Invalid regex options</c> 的本地化字符串。
+	/// </summary>
+	internal static string InvalidRegexOptions => ResourceManager.GetString("InvalidRegexOptions", resourceCulture)!;
+	
+	/// <summary>
+	/// 返回类似 <c>Invalid regular expression pattern '{0}' at offset {1}: {2}.</c> 的本地化字符串。
 	/// </summary>
 	internal static string InvalidRegexPattern(object? arg0, object? arg1, object? arg2)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("InvalidRegexPattern", resourceCulture)!, arg0, arg1, arg2);
+		return string.Format(resourceCulture, ResourceManager.GetString("InvalidRegexPattern", resourceCulture)!, Format(arg0), Format(arg1), Format(arg2));
 	}
 	
 	/// <summary>
@@ -117,8 +148,13 @@ internal partial class Resources
 	/// </summary>
 	internal static string InvalidSymbolId(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("InvalidSymbolId", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("InvalidSymbolId", resourceCulture)!, Format(arg0));
 	}
+	
+	/// <summary>
+	/// 返回类似 <c>Invalid symbol kind</c> 的本地化字符串。
+	/// </summary>
+	internal static string InvalidSymbolKind => ResourceManager.GetString("InvalidSymbolKind", resourceCulture)!;
 	
 	/// <summary>
 	/// 返回类似 <c>Incomplete \p{X} character escape.</c> 的本地化字符串。
@@ -150,7 +186,7 @@ internal partial class Resources
 	/// </summary>
 	internal static string NestedQuantify(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("NestedQuantify", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("NestedQuantify", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -164,11 +200,11 @@ internal partial class Resources
 	internal static string NotEnoughParens => ResourceManager.GetString("NotEnoughParens", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>parsing "{0}" - {1}</c> 的本地化字符串。
+	/// 返回类似 <c>'{0}' not extends LexerController&lt;T&gt;.</c> 的本地化字符串。
 	/// </summary>
-	internal static string ParsingException(object? arg0, object? arg1)
+	internal static string NotExtendsLexerController(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("ParsingException", resourceCulture)!, arg0, arg1);
+		return string.Format(resourceCulture, ResourceManager.GetString("NotExtendsLexerController", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -187,7 +223,7 @@ internal partial class Resources
 	internal static string ReversedCharRange => ResourceManager.GetString("ReversedCharRange", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Illegal {x,y} with x > y.</c> 的本地化字符串。
+	/// 返回类似 <c>Illegal {x,y} with x &gt; y.</c> 的本地化字符串。
 	/// </summary>
 	internal static string ReversedQuantifierRange => ResourceManager.GetString("ReversedQuantifierRange", resourceCulture)!;
 	
@@ -211,7 +247,7 @@ internal partial class Resources
 	/// </summary>
 	internal static string UndefinedRegex(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("UndefinedRegex", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("UndefinedRegex", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -224,7 +260,7 @@ internal partial class Resources
 	/// </summary>
 	internal static string UnrecognizedEscape(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedEscape", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedEscape", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -237,7 +273,7 @@ internal partial class Resources
 	/// </summary>
 	internal static string UnrecognizedUnicodeProperty(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedUnicodeProperty", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedUnicodeProperty", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -254,7 +290,7 @@ internal partial class Resources
 	/// 将指定对象格式化为字符串。
 	/// </summary>
 	/// <param name="value">要格式化的对象。</param>
-	private static object? Format(object? value)
+	private static object Format(object? value)
 	{
 		if (value == null)
 		{

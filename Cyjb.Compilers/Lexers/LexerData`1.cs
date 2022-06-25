@@ -5,7 +5,7 @@ namespace Cyjb.Compilers.Lexers
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 	/// <remarks><para><see cref="LexerData{T}"/> 类包含了用于构造词法分析器的全部信息，
-	/// 可以用于构造词法分析器。</para>
+	/// 可以用于构造词法分析器。也可以使用默认的词法分析器工厂 <see cref="LexerFactory{T}"/>。</para>
 	/// <para>关于如何构造自己的词法分析器，可以参考我的博文
 	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
 	/// 《C# 词法分析器（六）构造词法分析器》</see>。</para></remarks>

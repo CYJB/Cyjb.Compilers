@@ -33,12 +33,12 @@ internal partial class Resources
 	/// <summary>
 	/// 获取此类使用的缓存的 <see cref="ResourceManager"/> 实例。
 	/// </summary>
-	[ComponentModel.EditorBrowsableAttribute(ComponentModel.EditorBrowsableState.Advanced)]
+	[ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Advanced)]
 	internal static ResourceManager ResourceManager
 	{
 		get
 		{
-			if (object.ReferenceEquals(resourceManager, null))
+			if (resourceManager is null)
 			{
 				resourceManager = new ResourceManager("Cyjb.Compilers.Resources", typeof(Resources).Assembly);
 			}
@@ -49,7 +49,7 @@ internal partial class Resources
 	/// <summary>
 	/// 获取或设置资源使用的区域信息。
 	/// </summary>
-	[ComponentModel.EditorBrowsableAttribute(ComponentModel.EditorBrowsableState.Advanced)]
+	[ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Advanced)]
 	internal static CultureInfo? Culture
 	{
 		get
@@ -82,7 +82,7 @@ internal partial class Resources
 	/// </summary>
 	internal static string InvalidLexerContext(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("InvalidLexerContext", resourceCulture)!, arg0);
+		return string.Format(resourceCulture, ResourceManager.GetString("InvalidLexerContext", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
@@ -91,7 +91,7 @@ internal partial class Resources
 	internal static string InvalidLexerKind => ResourceManager.GetString("InvalidLexerKind", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Reject action is not supported by current TokenReader<T>.</c> 的本地化字符串。
+	/// 返回类似 <c>Reject action is not supported by current TokenReader&lt;T&gt;.</c> 的本地化字符串。
 	/// </summary>
 	internal static string NotRejectable => ResourceManager.GetString("NotRejectable", resourceCulture)!;
 	
@@ -100,14 +100,14 @@ internal partial class Resources
 	/// </summary>
 	internal static string UnrecognizedToken(object? arg0, object? arg1)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedToken", resourceCulture)!, arg0, arg1);
+		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedToken", resourceCulture)!, Format(arg0), Format(arg1));
 	}
 	
 	/// <summary>
 	/// 将指定对象格式化为字符串。
 	/// </summary>
 	/// <param name="value">要格式化的对象。</param>
-	private static object? Format(object? value)
+	private static object Format(object? value)
 	{
 		if (value == null)
 		{

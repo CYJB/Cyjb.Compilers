@@ -5,7 +5,7 @@ using Cyjb.Compilers.RegularExpressions;
 namespace Cyjb.Compilers.Lexers;
 
 /// <summary>
-/// 表示词法分析规则。
+/// 提供构造词法分析器的功能。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 /// <typeparam name="TController">词法分析控制器的类型。</typeparam>
@@ -33,13 +33,12 @@ namespace Cyjb.Compilers.Lexers;
 /// lexer.DefineSymbol("\\)").Kind(Calc.RBrace);
 /// // 吃掉所有空白。
 /// lexer.DefineSymbol("\\s");
-/// LexerData&lt;Calc&gt; data = lexer.GetData();
-/// TokenReaderFactory&lt;Calc&gt; factory = data.GetFactory();
+/// LexerFactory&lt;Calc&gt; factory = lexer.GetFactory();
 /// // 要分析的源文件。
 /// string source = "1 + 20 * 3 / 4*(5+6)";
 /// TokenReader&lt;Calc&gt; reader = factory.CreateReader(source);
 /// // 构造词法分析器。
-/// foreach (Token&lt;Calc&gt; token in grammar.GetReader(source))
+/// foreach (Token&lt;Calc&gt; token in reader)
 /// {
 /// 	Console.WriteLine(token);
 /// }
@@ -68,6 +67,10 @@ public class Lexer<T, TController>
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly Dictionary<string, LexerContext> contexts = new();
+	/// <summary>
+	/// 词法分析器上下文标签列表。
+	/// </summary>
+	private string[]? contextLabels;
 	/// <summary>
 	/// 向前看符号的类型。
 	/// </summary>
@@ -113,6 +116,7 @@ public class Lexer<T, TController>
 		}
 		LexerContext item = new(contexts.Count, label, LexerContextType.Exclusive);
 		contexts[label] = item;
+		contextLabels = null;
 	}
 
 	/// <summary>
@@ -127,6 +131,7 @@ public class Lexer<T, TController>
 		}
 		LexerContext item = new(contexts.Count, label, LexerContextType.Inclusive);
 		contexts[label] = item;
+		contextLabels = null;
 	}
 
 	/// <summary>
@@ -136,7 +141,7 @@ public class Lexer<T, TController>
 	/// <returns>词法分析的上下文。</returns>
 	internal LexerContext GetContext(string label)
 	{
-		if (contexts.TryGetValue(label, out LexerContext? context))
+		if (contexts.TryGetValue(label.Trim(), out LexerContext? context))
 		{
 			return context;
 		}
@@ -174,7 +179,17 @@ public class Lexer<T, TController>
 	/// 获取词法分析器上下文列表。
 	/// </summary>
 	/// <value>词法分析器的上下文列表。</value>
-	public IReadOnlyCollection<string> Contexts => contexts.Keys;
+	public string[] Contexts
+	{
+		get
+		{
+			if (contextLabels == null)
+			{
+				contextLabels = contexts.Keys.ToArray();
+			}
+			return contextLabels;
+		}
+	}
 	/// <summary>
 	/// 获取定义的终结符号的集合。
 	/// </summary>
@@ -221,7 +236,7 @@ public class Lexer<T, TController>
 	/// 返回词法分析的工厂。
 	/// </summary>
 	/// <param name="rejectable">是否用到了 Reject 动作。</param>
-	/// <returns>词法分析的数据。</returns>
+	/// <returns>词法分析器的工厂。</returns>
 	public LexerFactory<T, TController> GetFactory(bool rejectable = false)
 	{
 		LexerData<T> data = GetData(rejectable);

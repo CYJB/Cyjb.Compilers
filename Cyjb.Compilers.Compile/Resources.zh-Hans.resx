@@ -129,6 +129,10 @@
     <value>重复的词法分析上下文“{0}”。</value>
     <comment>重复的词法分析上下文。</comment>
   </data>
+  <data name="EmptyRegex" xml:space="preserve">
+    <value>空的正则表达式</value>
+    <comment>空的正则表达式。</comment>
+  </data>
   <data name="IllegalEndEscape" xml:space="preserve">
     <value>\ 在模式末尾非法。</value>
     <comment>\ 在模式末尾非法。</comment>
@@ -137,17 +141,37 @@
     <value>不完整的词法分析上下文。</value>
     <comment>不完整的词法分析上下文。</comment>
   </data>
+  <data name="IncompleteRegexReference" xml:space="preserve">
+    <value>不完整的正则表达式引用。</value>
+    <comment>不完整的正则表达式引用。</comment>
+  </data>
   <data name="InvalidLexerContext" xml:space="preserve">
     <value>无效的词法分析上下文“{0}”。</value>
     <comment>无效的词法分析上下文。</comment>
   </data>
+  <data name="InvalidLexerSymbol" xml:space="preserve">
+    <value>无效的词法分析符号“{0}”：{1}。</value>
+    <comment>无效的词法分析符号。</comment>
+  </data>
+  <data name="InvalidLexerSymbolAction" xml:space="preserve">
+    <value>无效的词法分析符号动作“{0}”，形参必须为空或可选的。</value>
+    <comment>无效的词法分析符号动作。</comment>
+  </data>
+  <data name="InvalidRegexOptions" xml:space="preserve">
+    <value>无效的 RegexOptions</value>
+    <comment>无效的正则表达式选项。</comment>
+  </data>
   <data name="InvalidRegexPattern" xml:space="preserve">
-    <value>无效的正则表达式模式“{0}” 位于 {1}：{2}</value>
+    <value>无效的正则表达式模式“{0}” 位于 {1}：{2}。</value>
     <comment>无效的正则表达式模式。</comment>
   </data>
   <data name="InvalidSymbolId" xml:space="preserve">
     <value>无效的符号标识符“{0}”。</value>
     <comment>无效的符号标识符。</comment>
+  </data>
+  <data name="InvalidSymbolKind" xml:space="preserve">
+    <value>无效的终结符类型</value>
+    <comment>无效的终结符类型。</comment>
   </data>
   <data name="InvalidUnicodePropertyEscape" xml:space="preserve">
     <value>不完整的 \p{X} 字符转义。</value>
@@ -181,9 +205,9 @@
     <value>) 不足。</value>
     <comment>) 不足。</comment>
   </data>
-  <data name="ParsingException" xml:space="preserve">
-    <value>正在分析“{0}”－ {1}</value>
-    <comment>分析异常。</comment>
+  <data name="NotExtendsLexerController" xml:space="preserve">
+    <value>“{0}” 必须继承自 LexerController&lt;T&gt;。</value>
+    <comment>类型未继承自 LexerController&lt;T&gt;。</comment>
   </data>
   <data name="QuantifierOutOfRange" xml:space="preserve">
     <value>数量必须小于等于 Int32.MaxValue。</value>

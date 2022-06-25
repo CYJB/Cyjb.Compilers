@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cyjb" Version="1.0.5" />
+    <PackageReference Include="Cyjb" Version="1.0.6" />
   </ItemGroup>
 
   <ItemGroup>

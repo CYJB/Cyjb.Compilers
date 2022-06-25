@@ -129,9 +129,17 @@
     <value>Duplicate lexer context '{0}'.</value>
     <comment>重复的词法分析上下文。</comment>
   </data>
+  <data name="EmptyRegex" xml:space="preserve">
+    <value>Empty regex</value>
+    <comment>空的正则表达式。</comment>
+  </data>
   <data name="IllegalEndEscape" xml:space="preserve">
     <value>Illegal \ at end of pattern.</value>
     <comment>\ 在模式末尾非法。</comment>
+  </data>
+  <data name="IncompleteLexerContext" xml:space="preserve">
+    <value>Incomplete lexer context.</value>
+    <comment>不完整的词法分析上下文。</comment>
   </data>
   <data name="IncompleteRegexReference" xml:space="preserve">
     <value>Incomplete regex reference.</value>
@@ -141,13 +149,29 @@
     <value>Invalid lexer context '{0}'.</value>
     <comment>无效的词法分析上下文。</comment>
   </data>
+  <data name="InvalidLexerSymbol" xml:space="preserve">
+    <value>Invalid lexer symbol '{0}': {1}.</value>
+    <comment>无效的词法分析符号。</comment>
+  </data>
+  <data name="InvalidLexerSymbolAction" xml:space="preserve">
+    <value>Invalid lexer symbol action '{0}', parameter must empty or optional.</value>
+    <comment>无效的词法分析符号动作。</comment>
+  </data>
+  <data name="InvalidRegexOptions" xml:space="preserve">
+    <value>Invalid regex options</value>
+    <comment>无效的正则表达式选项。</comment>
+  </data>
   <data name="InvalidRegexPattern" xml:space="preserve">
-    <value>Invalid regular expression pattern '{0}' at offset {1}: {2}</value>
+    <value>Invalid regular expression pattern '{0}' at offset {1}: {2}.</value>
     <comment>无效的正则表达式模式。</comment>
   </data>
   <data name="InvalidSymbolId" xml:space="preserve">
     <value>Invalid symbol identifier '{0}'.</value>
     <comment>无效的符号标识符。</comment>
+  </data>
+  <data name="InvalidSymbolKind" xml:space="preserve">
+    <value>Invalid symbol kind</value>
+    <comment>无效的终结符类型。</comment>
   </data>
   <data name="InvalidUnicodePropertyEscape" xml:space="preserve">
     <value>Incomplete \p{X} character escape.</value>
@@ -181,9 +205,9 @@
     <value>Not enough )'s.</value>
     <comment>) 不足。</comment>
   </data>
-  <data name="ParsingException" xml:space="preserve">
-    <value>parsing "{0}" - {1}</value>
-    <comment>分析异常。</comment>
+  <data name="NotExtendsLexerController" xml:space="preserve">
+    <value>'{0}' not extends LexerController&lt;T&gt;.</value>
+    <comment>类型未继承自 LexerController&lt;T&gt;。</comment>
   </data>
   <data name="QuantifierOutOfRange" xml:space="preserve">
     <value>Quantifier must be less than or equal to Int32.MaxValue.</value>
