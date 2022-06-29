@@ -7,13 +7,13 @@ namespace Cyjb.Compilers.Lexers
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 	/// <typeparam name="TController">词法分析控制器的类型。</typeparam>
-	/// <para>关于如何构造自己的词法分析器，可以参考我的博文
+	/// <remarks>关于如何构造自己的词法分析器，可以参考我的博文
 	/// <see href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
-	/// 《C# 词法分析器（六）构造词法分析器》</see>。</para></remarks>
+	/// 《C# 词法分析器（六）构造词法分析器》</see>。</remarks>
 	/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html">
 	/// 《C# 词法分析器（六）构造词法分析器》</seealso>
 	[Serializable]
-	public sealed class LexerFactory<T, TController>
+	public sealed class LexerFactory<T, TController> : ILexerFactory<T>
 		where T : struct
 		where TController : LexerController<T>, new()
 	{

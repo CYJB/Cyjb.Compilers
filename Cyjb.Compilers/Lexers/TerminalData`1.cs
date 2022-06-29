@@ -14,7 +14,7 @@ public sealed class TerminalData<T>
 	/// <param name="kind">终结符的类型。</param>
 	/// <param name="action">终结符的动作。</param>
 	/// <param name="trailing">向前看信息。</param>
-	public TerminalData(T? kind, Delegate? action, int? trailing)
+	public TerminalData(T? kind = null, Delegate? action = null, int? trailing = null)
 	{
 		Kind = kind;
 		Action = action;

@@ -14,6 +14,7 @@
 	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	<NeutralLanguage>en</NeutralLanguage>
 	<RootNamespace>Cyjb.Compilers</RootNamespace>
+	<Authors>CYJB</Authors>
   </PropertyGroup>
 
   <ItemGroup>

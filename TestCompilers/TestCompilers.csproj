@@ -20,9 +20,43 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Cyjb">
-      <HintPath>..\..\Cyjb\Cyjb\bin\Release\net6.0\Cyjb.dll</HintPath>
-    </Reference>
+    <None Update="Lexers\TestCalcController.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestCalcController.lexer.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\TestEscapeStrController.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestEscapeStrController.lexer.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\TestStrController.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestStrController.lexer.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\UnitTestTemplateDiagnostics.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Lexers\TestCalcController.lexer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestCalcController.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestEscapeStrController.lexer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestEscapeStrController.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestStrController.lexer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestStrController.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
 </Project>

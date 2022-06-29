@@ -28,7 +28,7 @@ namespace Cyjb.Compilers.Lexers;
 /// lexer.DefineSymbol("\\)").Kind(Calc.RBrace);
 /// // 吃掉所有空白。
 /// lexer.DefineSymbol("\\s");
-/// LexerFactory&lt;Calc&gt; factory = lexer.GetFactory();
+/// ILexerFactory&lt;Calc&gt; factory = lexer.GetFactory();
 /// // 要分析的源文件。
 /// string source = "1 + 20 * 3 / 4*(5+6)";
 /// TokenReader&lt;Calc&gt; reader = factory.CreateReader(source);
@@ -45,15 +45,4 @@ namespace Cyjb.Compilers.Lexers;
 /// 《C# 词法分析器（七）总结》</seealso>
 public sealed class Lexer<T> : Lexer<T, LexerController<T>>
 	where T : struct
-{
-	/// <summary>
-	/// 返回词法分析的工厂。
-	/// </summary>
-	/// <param name="rejectable">是否用到了 Reject 动作。</param>
-	/// <returns>词法分析的数据。</returns>
-	public new LexerFactory<T> GetFactory(bool rejectable = false)
-	{
-		LexerData<T> data = GetData(rejectable);
-		return new LexerFactory<T>(data);
-	}
-}
+{ }

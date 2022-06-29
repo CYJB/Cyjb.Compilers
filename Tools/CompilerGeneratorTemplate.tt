@@ -1,0 +1,64 @@
+<#
+/**
+ * 为词法分析器生成实现。
+ */
+#>
+<#@ template language="C#" hostspecific="true" #>
+<#@output extension=".lexer.cs"#>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="VSLangProj" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.CodeDom.Compiler" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#
+	EnvDTE.DTE dte = ((IServiceProvider)Host).GetCOMService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+	if (dte == null)
+	{
+		Error("当前词法分析器模板只能在 Visual Studio 环境下执行");
+	}
+	string suffix = Environment.Is64BitOperatingSystem ? "x64" : "x86";
+	string toolPath = $@"Tools\CompilerGenerator-{suffix}.exe";
+	string filePath = Host.TemplateFile.Replace(".tt", ".cs");
+	try
+	{
+		using System.Diagnostics.Process myProcess = new();
+		myProcess.StartInfo.UseShellExecute = false;
+		myProcess.StartInfo.RedirectStandardOutput = true;
+		myProcess.StartInfo.FileName = toolPath;
+		myProcess.StartInfo.Arguments = Path.GetFullPath(filePath);
+		myProcess.StartInfo.CreateNoWindow = true;
+		myProcess.Start();
+		string content = myProcess.StandardOutput.ReadToEnd();
+		myProcess.WaitForExit();
+
+		if (content.StartsWith(Path.GetFileName(filePath)))
+		{
+			// 包含异常
+			string[] lines = content.Trim().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+			Regex errorRegex = new Regex(@"^.+\((\d+),(\d+)\): (.+)$");
+			foreach(string line in lines)
+			{
+				Match match = errorRegex.Match(line);
+				if (match.Success) {
+					string lineNum = match.Groups[1].Captures[0].Value;
+					string colNum = match.Groups[2].Captures[0].Value;
+					string message = match.Groups[3].Captures[0].Value;
+					Errors.Add(new CompilerError(filePath, int.Parse(lineNum), int.Parse(colNum), "", message));
+				}
+			}
+			Write("// 生成异常");
+		} else {
+			Write(content);
+		}
+	}
+	catch (Exception e)
+	{
+		Error($"执行 {toolPath} 失败：{e.Message}");
+	}
+#>

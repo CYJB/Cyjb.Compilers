@@ -29,7 +29,7 @@ public sealed class CharClassMap
 	/// <param name="indexes">范围索引。</param>
 	/// <param name="charClasses">字符类。</param>
 	/// <param name="categories">Unicode 类别对应的字符类。</param>
-	public CharClassMap(int[] indexes, int[] charClasses, Dictionary<UnicodeCategory, int>? categories)
+	public CharClassMap(int[] indexes, int[] charClasses, Dictionary<UnicodeCategory, int>? categories = null)
 	{
 		this.indexes = indexes;
 		this.charClasses = charClasses;

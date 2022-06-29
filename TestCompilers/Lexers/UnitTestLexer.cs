@@ -35,25 +35,8 @@ public class UnitTestLexer
 		lexer.DefineSymbol("\\)").Kind(Calc.RBrace);
 		// 吃掉所有空白。
 		lexer.DefineSymbol("\\s");
-		LexerFactory<Calc> factory = lexer.GetFactory();
 
-		// 测试分析源码
-		string source = "1 + 20 * 3 / 4*(5+6)";
-		TokenReader<Calc> reader = factory.CreateReader(source);
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(7, 8)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "3", new TextSpan(9, 10), 3), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Div, "/", new TextSpan(11, 12)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "4", new TextSpan(13, 14), 4), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(14, 15)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.LBrace, "(", new TextSpan(15, 16)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "5", new TextSpan(16, 17), 5), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(17, 18)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), reader.Read());
-		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), reader.Read());
+		TestCalc(lexer.GetFactory());
 	}
 
 	/// <summary>
@@ -62,9 +45,24 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignCalc()
 	{
-		LexerFactory<Calc, TestCalcController> factory = Lexer.GetFactory<Calc, TestCalcController>();
+		TestCalc(Lexer.GetFactory<Calc, TestCalcController>());
+	}
 
-		// 测试分析源码
+	/// <summary>
+	/// 对 T4 生成的计算器词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestT4Calc()
+	{
+		TestCalc(TestCalcController.Factory);
+	}
+
+	/// <summary>
+	/// 测试计算器词法分析器。
+	/// </summary>
+	/// <param name="factory">词法分析器的工厂。</param>
+	private static void TestCalc(ILexerFactory<Calc> factory)
+	{
 		string source = "1 + 20 * 3 / 4*(5+6)";
 		TokenReader<Calc> reader = factory.CreateReader(source);
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), reader.Read());
@@ -96,16 +94,8 @@ public class UnitTestLexer
 		lexer.DefineRegex("verbatim_char", @"[^""]|\""\""");
 		lexer.DefineRegex("verbatim_literal", @"@\""{verbatim_char}*\""");
 		lexer.DefineSymbol("{regular_literal}|{verbatim_literal}").Kind(Str.Str);
-		LexerFactory<Str> factory = lexer.GetFactory();
 
-		// 测试分析源码
-		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		TokenReader<Str> reader = factory.CreateReader(source);
-		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"@""aabb\""""ccd\u0045\x47""", new TextSpan(42, 65)), reader.Read());
-		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
+		TestString(lexer.GetFactory());
 	}
 
 	/// <summary>
@@ -114,9 +104,24 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignString()
 	{
-		LexerFactory<Str, TestStrController> factory = Lexer.GetFactory<Str, TestStrController>();
+		TestString(Lexer.GetFactory<Str, TestStrController>());
+	}
 
-		// 测试分析源码
+	/// <summary>
+	/// 对 T4 字符串词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestT4String()
+	{
+		TestString(TestStrController.Factory);
+	}
+
+	/// <summary>
+	/// 测试字符串词法分析器。
+	/// </summary>
+	/// <param name="factory">词法分析器的工厂。</param>
+	private static void TestString(ILexerFactory<Str> factory)
+	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
 		TokenReader<Str> reader = factory.CreateReader(source);
 		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), reader.Read());
@@ -208,16 +213,7 @@ public class UnitTestLexer
 		{
 			c.DecodedText.Append(c.Text);
 		});
-		LexerFactory<Str, EscapeStrController> factory = lexer.GetFactory();
-
-		// 测试分析源码
-		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		TokenReader<Str> reader = factory.CreateReader(source);
-		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"aabb\""ccd\u0045\x47", new TextSpan(42, 65)), reader.Read());
-		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
+		TestEscapeString(lexer.GetFactory());
 	}
 
 	/// <summary>
@@ -226,9 +222,24 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignEscapeString()
 	{
-		LexerFactory<Str, TestEscapeStrController> factory = Lexer.GetFactory<Str, TestEscapeStrController>();
+		TestEscapeString(Lexer.GetFactory<Str, TestEscapeStrController>());
+	}
 
-		// 测试分析源码
+	/// <summary>
+	/// 对 T4 转义字符串词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestT4EscapeString()
+	{
+		TestEscapeString(TestEscapeStrController.Factory);
+	}
+
+	/// <summary>
+	/// 测试转义字符串词法分析器。
+	/// </summary>
+	/// <param name="factory">词法分析器的工厂。</param>
+	private static void TestEscapeString(ILexerFactory<Str> factory)
+	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
 		TokenReader<Str> reader = factory.CreateReader(source);
 		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), reader.Read());

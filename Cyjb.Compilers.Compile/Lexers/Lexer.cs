@@ -155,7 +155,7 @@ public class Lexer
 	/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 	/// <typeparam name="TController">词法分析控制器的类型。</typeparam>
 	/// <returns>词法分析器的工厂。</returns>
-	public static LexerFactory<T, TController> GetFactory<T, TController>()
+	public static ILexerFactory<T> GetFactory<T, TController>()
 		where T : struct
 		where TController : LexerController<T>, new()
 	{

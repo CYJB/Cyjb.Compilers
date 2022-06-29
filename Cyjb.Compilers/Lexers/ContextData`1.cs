@@ -14,7 +14,7 @@ public sealed class ContextData<T>
 	/// <param name="index">上下文的索引。</param>
 	/// <param name="label">上下文的标签。</param>
 	/// <param name="eofAction">EOF 动作。</param>
-	public ContextData(int index, string label, Delegate? eofAction)
+	public ContextData(int index, string label, Delegate? eofAction = null)
 	{
 		Index = index;
 		Label = label;

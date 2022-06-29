@@ -18,7 +18,7 @@ public sealed class DfaStateData
 	/// <param name="baseIndex">基索引。</param>
 	/// <param name="defaultState">默认状态。</param>
 	/// <param name="symbols">符号索引。</param>
-	public DfaStateData(int baseIndex, int defaultState, int[] symbols)
+	public DfaStateData(int baseIndex, int defaultState, params int[] symbols)
 	{
 		BaseIndex = baseIndex;
 		DefaultState = defaultState;
