@@ -112,12 +112,12 @@ internal static class SyntaxBuilder
 				wrap *= 2;
 				if (startNewLine)
 				{
-					list[0] = list[0].WithLeadingTrivia(format.Indentation);
+					list[0] = list[0].AsNode()!.InsertLeadingTrivia(0, format.Indentation);
 				}
 				for (int i = wrap - 1; i < list.Count; i += wrap)
 				{
 					list[i] = list[i].WithTrailingTrivia(format.EndOfLine);
-					list[i + 1] = list[i + 1].WithLeadingTrivia(format.Indentation);
+					list[i + 1] = list[i + 1].AsNode()!.InsertLeadingTrivia(0, format.Indentation);
 				}
 			}
 		}

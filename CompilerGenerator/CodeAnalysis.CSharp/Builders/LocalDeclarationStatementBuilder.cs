@@ -55,7 +55,7 @@ internal sealed class LocalDeclarationStatementBuilder : StatementBuilder
 	/// <returns>当前变量声明语句构造器。</returns>
 	public LocalDeclarationStatementBuilder Comment(string comment)
 	{
-		this.comments.Add(comment);
+		comments.Add(comment);
 		return this;
 	}
 

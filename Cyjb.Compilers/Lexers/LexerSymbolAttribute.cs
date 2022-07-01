@@ -31,8 +31,4 @@ public sealed class LexerSymbolAttribute : Attribute
 	/// 获取或设置终结符的词法单元类型。
 	/// </summary>
 	public object? Kind { get; set; }
-	/// <summary>
-	/// 获取或设置正则表达式的优先级，默认为 <c>0</c>。
-	/// </summary>
-	public int Priority { get; set; }
 }

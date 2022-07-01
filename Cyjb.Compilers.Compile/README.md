@@ -47,7 +47,7 @@ enum Calc { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace }
 [LexerSymbol("\\(", Kind = Calc.LBrace)]
 [LexerSymbol("\\)", Kind = Calc.RBrace)]
 [LexerSymbol("\\s")]
-// 必须继承自 LexerController<Calc>
+// 必须是部分类，且继承自 LexerController<Calc>
 public partial class TestCalcController : LexerController<Calc>
 {
 	/// <summary>
@@ -60,16 +60,11 @@ public partial class TestCalcController : LexerController<Calc>
 		Accept();
 	}
 }
-
-ILexerFactory<Calc> factory = lexer.GetFactory<T, TestCalcController>();
 ```
 
-还支持通过 T4 模板在设计时生成词法分析器。
-1. 同样使用上面定义的 `TestCalcController` 定义词法分析，**注意必须是部分类**。
-2. 将 Tools 下的 CompilerGenerator 可执行文件复制到项目的 Tools/ 目录下。
-3. 将 Tools/CompilerGeneratorTemplate.tt 复制到类所在目录，并重命名为同名的模板。
-
-执行 T4 模板转换，即可生成同名的 .lexer.cs，其中定义了 `public static readonly ILexerFactory<Str> Factory;` 字段，即为生成好的词法分析器工厂。
+将 Tools 下的 CompilerGenerator 可执行文件复制到项目的 Tools/ 目录下，将 Tools/CompilerGeneratorTemplate.tt
+复制到类所在目录，并重命名为同名的模板。在执行 T4 模板转换后，即可生成同名的 .lexer.cs，其中定义了
+`public static readonly ILexerFactory<Str> Factory;` 字段，就是生成好的词法分析器工厂。
 
 具体用法可以参考 TestCompilers/Lexers 目录下的示例。
 

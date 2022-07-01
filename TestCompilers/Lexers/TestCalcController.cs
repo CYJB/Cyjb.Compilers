@@ -15,8 +15,6 @@ namespace TestCompilers.Lexers
 	[LexerSymbol("\\^", Kind = Calc.Pow)]
 	[LexerSymbol("\\(", Kind = Calc.LBrace)]
 	[LexerSymbol("\\)", Kind = Calc.RBrace)]
-	[LexerSymbol("\\)", Kind = Calc.RBrace)]
-	[LexerSymbol("\\)", Kind = Calc.RBrace)]
 	[LexerSymbol("\\s")]
 	public partial class TestCalcController : LexerController<Calc>
 	{

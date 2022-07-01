@@ -30,11 +30,12 @@ public partial class TestStrController
 		// 上下文数据
 		Dictionary<string, ContextData<Str>> contexts = new()
 		{
-			{ "Initial", new ContextData<Str>(0, "Initial") }
+			 { "Initial", new ContextData<Str>(0, "Initial") }
 		};
 		// 终结符数据
 		TerminalData<Str>[] terminals = new[]
 		{
+			// 0: {regular_literal}|{verbatim_literal}
 			new TerminalData<Str>(Str.Str)
 		};
 		// 字符类索引
@@ -55,11 +56,11 @@ public partial class TestStrController
 		// 字符类 Unicode 类别
 		Dictionary<UnicodeCategory, int> categories = new()
 		{
-			{ UnicodeCategory.LineSeparator, 4 },
-			{ UnicodeCategory.ParagraphSeparator, 4 },
-			{ UnicodeCategory.Control, 2 },
-			{ UnicodeCategory.Surrogate, 2 },
-			{ UnicodeCategory.PrivateUse, 2 }
+			 { UnicodeCategory.LineSeparator, 4 },
+			 { UnicodeCategory.ParagraphSeparator, 4 },
+			 { UnicodeCategory.Control, 2 },
+			 { UnicodeCategory.Surrogate, 2 },
+			 { UnicodeCategory.PrivateUse, 2 }
 		};
 		// 状态列表
 		DfaStateData[] states = new[]

@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -20,6 +21,10 @@ internal sealed class ObjectCreationExpressionBuilder : ExpressionBuilder
 	/// 对象的初始化列表构造器。
 	/// </summary>
 	private readonly InitializerExpressionBuilder initializer = new(SyntaxKind.ObjectInitializerExpression);
+	/// <summary>
+	/// 表达式的注释。
+	/// </summary>
+	private readonly List<string> comments = new();
 
 	/// <summary>
 	/// 设置对象的类型。
@@ -89,6 +94,17 @@ internal sealed class ObjectCreationExpressionBuilder : ExpressionBuilder
 	}
 
 	/// <summary>
+	/// 设置表达式的注释。
+	/// </summary>
+	/// <param name="comment">注释的内容。</param>
+	/// <returns>当前对象创建表达式构造器。</returns>
+	public ObjectCreationExpressionBuilder Comment(string comment)
+	{
+		comments.Add(comment);
+		return this;
+	}
+
+	/// <summary>
 	/// 构造对象创建表达式语法节点。
 	/// </summary>
 	/// <param name="format">语法的格式信息。</param>
@@ -113,6 +129,17 @@ internal sealed class ObjectCreationExpressionBuilder : ExpressionBuilder
 		if (initializer.HasInitializer)
 		{
 			syntax = syntax.WithInitializer(initializer.GetSyntax(format));
+		}
+		if (comments.Count > 0)
+		{
+			List<SyntaxTrivia> triviaList = new();
+			foreach (string comment in comments)
+			{
+				triviaList.Add(SyntaxFactory.Comment($"// {comment}"));
+				triviaList.Add(format.EndOfLine);
+				triviaList.Add(format.Indentation);
+			}
+			syntax = syntax.WithLeadingTrivia(triviaList);
 		}
 		return syntax;
 	}

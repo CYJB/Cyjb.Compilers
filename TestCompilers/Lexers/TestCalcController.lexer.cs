@@ -31,21 +31,28 @@ namespace TestCompilers.Lexers
 			// 上下文数据
 			Dictionary<string, ContextData<Calc>> contexts = new()
 			{
-				{ "Initial", new ContextData<Calc>(0, "Initial") }
+				 { "Initial", new ContextData<Calc>(0, "Initial") }
 			};
 			// 终结符数据
 			TerminalData<Calc>[] terminals = new[]
 			{
+				// 0: \+
 				new TerminalData<Calc>(Calc.Add),
+				// 1: \-
 				new TerminalData<Calc>(Calc.Sub),
+				// 2: \*
 				new TerminalData<Calc>(Calc.Mul),
+				// 3: \/
 				new TerminalData<Calc>(Calc.Div),
+				// 4: \^
 				new TerminalData<Calc>(Calc.Pow),
+				// 5: \(
 				new TerminalData<Calc>(Calc.LBrace),
+				// 6: \)
 				new TerminalData<Calc>(Calc.RBrace),
-				new TerminalData<Calc>(Calc.RBrace),
-				new TerminalData<Calc>(Calc.RBrace),
+				// 7: \s
 				new TerminalData<Calc>(),
+				// 8: [0-9]+
 				new TerminalData<Calc>(Calc.Id, (TestCalcController c) => c.DigitAction())
 			};
 			// 字符类索引
@@ -67,12 +74,12 @@ namespace TestCompilers.Lexers
 			// 字符类 Unicode 类别
 			Dictionary<UnicodeCategory, int> categories = new()
 			{
-				{ UnicodeCategory.SpaceSeparator, 8 },
-				{ UnicodeCategory.LineSeparator, 8 },
-				{ UnicodeCategory.ParagraphSeparator, 8 },
-				{ UnicodeCategory.Control, 0 },
-				{ UnicodeCategory.Surrogate, 0 },
-				{ UnicodeCategory.PrivateUse, 0 }
+				 { UnicodeCategory.SpaceSeparator, 8 },
+				 { UnicodeCategory.LineSeparator, 8 },
+				 { UnicodeCategory.ParagraphSeparator, 8 },
+				 { UnicodeCategory.Control, 0 },
+				 { UnicodeCategory.Surrogate, 0 },
+				 { UnicodeCategory.PrivateUse, 0 }
 			};
 			// 状态列表
 			DfaStateData[] states = new[]
@@ -84,9 +91,9 @@ namespace TestCompilers.Lexers
 				new DfaStateData(int.MinValue, -1, 3),
 				new DfaStateData(int.MinValue, -1, 4),
 				new DfaStateData(int.MinValue, -1, 5),
-				new DfaStateData(int.MinValue, -1, 6, 7, 8),
-				new DfaStateData(int.MinValue, -1, 9),
-				new DfaStateData(0, -1, 10)
+				new DfaStateData(int.MinValue, -1, 6),
+				new DfaStateData(int.MinValue, -1, 7),
+				new DfaStateData(0, -1, 8)
 			};
 			// 后继状态列表
 			int[] next = new[]

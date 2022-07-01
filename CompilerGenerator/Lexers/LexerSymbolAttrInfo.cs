@@ -43,11 +43,6 @@ internal class LexerSymbolAttrInfo
 			{
 				info.RegexOptions = exp.GetEnumValue<RegexOptions>();
 			}
-			exp = args["Priority"];
-			if (exp != null)
-			{
-				info.Priority = exp.GetNumericLiteral<int>();
-			}
 			return true;
 		}
 		catch (CSharpException ex)
@@ -81,10 +76,6 @@ internal class LexerSymbolAttrInfo
 	/// 获取或设置正则表达式的选项。
 	/// </summary>
 	public RegexOptions RegexOptions { get; set; }
-	/// <summary>
-	/// 获取或设置终结符的优先级。
-	/// </summary>
-	public int Priority { get; set; }
 	/// <summary>
 	/// 获取或设置正则表达式的类型。
 	/// </summary>

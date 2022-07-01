@@ -28,6 +28,11 @@ internal sealed partial class LexerController
 			foreach (int idx in state.Symbols)
 			{
 				stateBuilder.Argument(SyntaxBuilder.LiteralExpression(idx));
+				// 未用到 Reject 动作的时候，只需要保留第一个终结符。
+				if (!data.Rejectable)
+				{
+					break;
+				}
 			}
 			builder.Initializer(stateBuilder);
 		}

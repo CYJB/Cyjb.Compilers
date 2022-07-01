@@ -45,15 +45,6 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignCalc()
 	{
-		TestCalc(Lexer.GetFactory<Calc, TestCalcController>());
-	}
-
-	/// <summary>
-	/// 对 T4 生成的计算器词法分析进行测试。
-	/// </summary>
-	[TestMethod]
-	public void TestT4Calc()
-	{
 		TestCalc(TestCalcController.Factory);
 	}
 
@@ -103,15 +94,6 @@ public class UnitTestLexer
 	/// </summary>
 	[TestMethod]
 	public void TestInDesignString()
-	{
-		TestString(Lexer.GetFactory<Str, TestStrController>());
-	}
-
-	/// <summary>
-	/// 对 T4 字符串词法分析进行测试。
-	/// </summary>
-	[TestMethod]
-	public void TestT4String()
 	{
 		TestString(TestStrController.Factory);
 	}
@@ -221,15 +203,6 @@ public class UnitTestLexer
 	/// </summary>
 	[TestMethod]
 	public void TestInDesignEscapeString()
-	{
-		TestEscapeString(Lexer.GetFactory<Str, TestEscapeStrController>());
-	}
-
-	/// <summary>
-	/// 对 T4 转义字符串词法分析进行测试。
-	/// </summary>
-	[TestMethod]
-	public void TestT4EscapeString()
 	{
 		TestEscapeString(TestEscapeStrController.Factory);
 	}

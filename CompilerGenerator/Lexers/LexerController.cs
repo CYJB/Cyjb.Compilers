@@ -83,8 +83,6 @@ internal sealed partial class LexerController
 	{
 		ParseClassAttributes();
 		ParseActions();
-		// 按照优先级排序。
-		symbolInfos.Sort((LexerSymbolAttrInfo left, LexerSymbolAttrInfo right) => right.Priority - left.Priority);
 		// 添加终结符定义
 		for (int i = 0; i < symbolInfos.Count; i++)
 		{
@@ -284,7 +282,7 @@ internal sealed partial class LexerController
 			)
 			.Statement(SyntaxBuilder.LocalDeclarationStatement($"TerminalData<{kindType}>[]", "terminals")
 				.Comment("终结符数据")
-				.Value(TerminalsValue(data))
+				.Value(TerminalsValue(data, symbolInfos))
 			)
 			.Statement(SyntaxBuilder.LocalDeclarationStatement("int[]", "indexes")
 				.Comment("字符类索引")

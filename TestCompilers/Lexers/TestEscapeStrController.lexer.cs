@@ -34,22 +34,32 @@ public partial class TestEscapeStrController
 		// 上下文数据
 		Dictionary<string, ContextData<Str>> contexts = new()
 		{
-			{ "Initial", new ContextData<Str>(0, "Initial") },
-			{ "str", new ContextData<Str>(1, "str") },
-			{ "vstr", new ContextData<Str>(2, "vstr") }
+			 { "Initial", new ContextData<Str>(0, "Initial") },
+			 { "str", new ContextData<Str>(1, "str") },
+			 { "vstr", new ContextData<Str>(2, "vstr") }
 		};
 		// 终结符数据
 		TerminalData<Str>[] terminals = new[]
 		{
+			// 0: \"
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.BeginStrAction()),
+			// 1: @\"
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.BeginVstrAction()),
+			// 2: <str, vstr>\"
 			new TerminalData<Str>(Str.Str, (TestEscapeStrController c) => c.EndAction()),
+			// 3: <str>\\u[0-9]{4}
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.HexEscapeAction()),
+			// 4: <str>\\x[0-9]{2}
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.HexEscapeAction()),
+			// 5: <str>\\n
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.EscapeLFAction()),
+			// 6: <str>\\\"
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.EscapeQuoteAction()),
+			// 7: <str>\\r
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.EscapeCRAction()),
+			// 8: <*>.
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.CopyAction()),
+			// 9: <vstr>\"\"
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.VstrQuoteAction())
 		};
 		// 字符类索引
@@ -70,7 +80,7 @@ public partial class TestEscapeStrController
 		// 字符类 Unicode 类别
 		Dictionary<UnicodeCategory, int> categories = new()
 		{
-			{ UnicodeCategory.Control, 9 }
+			 { UnicodeCategory.Control, 9 }
 		};
 		// 状态列表
 		DfaStateData[] states = new[]
@@ -78,10 +88,10 @@ public partial class TestEscapeStrController
 			new DfaStateData(-1, 2),
 			new DfaStateData(1, 2),
 			new DfaStateData(4, -1),
-			new DfaStateData(2, -1, 2, 8),
+			new DfaStateData(2, -1, 2),
 			new DfaStateData(int.MinValue, -1, 8),
 			new DfaStateData(int.MinValue, -1, 9),
-			new DfaStateData(int.MinValue, -1, 2, 8),
+			new DfaStateData(int.MinValue, -1, 2),
 			new DfaStateData(13, -1, 8),
 			new DfaStateData(int.MinValue, -1, 6),
 			new DfaStateData(10, -1),
@@ -94,7 +104,7 @@ public partial class TestEscapeStrController
 			new DfaStateData(18, -1),
 			new DfaStateData(19, -1),
 			new DfaStateData(int.MinValue, -1, 3),
-			new DfaStateData(int.MinValue, -1, 0, 8),
+			new DfaStateData(int.MinValue, -1, 0),
 			new DfaStateData(24, -1, 8),
 			new DfaStateData(int.MinValue, -1, 1)
 		};

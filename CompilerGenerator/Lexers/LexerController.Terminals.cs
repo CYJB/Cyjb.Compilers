@@ -7,16 +7,19 @@ internal sealed partial class LexerController
 	/// <summary>
 	/// 返回指定词法分析器数据的终结符数据。
 	/// </summary>
-	/// <param name="data">词法分析器数据</param>
+	/// <param name="data">词法分析器数据。</param>
+	/// <param name="symbols">符号信息列表。</param>
 	/// <returns>终结符数据。</returns>
-	public ExpressionBuilder TerminalsValue(LexerData<int> data)
+	public ExpressionBuilder TerminalsValue(LexerData<int> data, List<LexerSymbolAttrInfo> symbols)
 	{
 		TypeBuilder terminalType = $"TerminalData<{kindType}>";
 		var builder = SyntaxBuilder.ArrayCreationExpression().InitializerWrap(1);
-		foreach (TerminalData<int> terminal in data.Terminals)
+		for (int i = 0; i < symbols.Count; i++)
 		{
+			TerminalData<int> terminal = data.Terminals[i];
 			var terminalBuilder = SyntaxBuilder.ObjectCreationExpression().Type(terminalType);
 			builder.Initializer(terminalBuilder);
+			terminalBuilder.Comment($"{i}: {symbols[i].Regex}");
 			bool argContinues = true;
 			if (terminal.Kind == null)
 			{
