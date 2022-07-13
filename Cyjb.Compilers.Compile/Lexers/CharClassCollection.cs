@@ -25,9 +25,7 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 	/// </summary>
 	public CharClassCollection()
 	{
-		CharSet set = new();
-		set.Add('\0', char.MaxValue);
-		charClasses.Add(new CharClass(0, set));
+		charClasses.Add(new CharClass(0, new CharSet() {{ '\0', char.MaxValue }}));
 	}
 
 	/// <summary>
@@ -37,8 +35,7 @@ internal sealed class CharClassCollection : ReadOnlyListBase<CharClass>
 	/// <returns>字符对应的字符类集合。</returns>
 	public CharClassSet GetCharClassSet(char ch)
 	{
-		CharSet set = new();
-		set.Add(ch);
+		CharSet set = new() { ch };
 		if (charClassSets.TryGetValue(set, out CharClassSet? charClass))
 		{
 			return charClass;

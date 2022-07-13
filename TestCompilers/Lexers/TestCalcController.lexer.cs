@@ -55,36 +55,55 @@ namespace TestCompilers.Lexers
 				// 8: [0-9]+
 				new TerminalData<Calc>(Calc.Id, (TestCalcController c) => c.DigitAction())
 			};
+			// 字符类信息
+			// 0: [+]
+			// 1: [-]
+			// 2: [*]
+			// 3: [/]
+			// 4: [^]
+			// 5: [(]
+			// 6: [)]
+			// 7: [\t-\r \u0085\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]
+			// 8: [0-9]
 			// 字符类索引
 			int[] indexes = new[]
 			{
-				8716421, 10557055, 377561087, 537600039, 539631662, 540024926, 543174655, 805427199,
-				-117374977
+				8388740, 8781983
 			};
 			// 字符类列表
 			int[] classes = new[]
 			{
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 6, 7, 3, 1, 0, 2, 0, 4,
-				9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, 7, 7, 7, 7, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, -1, -1, -1, 5, 6, 2, 0, -1, 1, -1, 3,
+				8, 8, 8, 8, 8, 8, 8, 8, 8, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 			};
 			// 字符类 Unicode 类别
 			Dictionary<UnicodeCategory, int> categories = new()
 			{
-				 { UnicodeCategory.SpaceSeparator, 8 },
-				 { UnicodeCategory.LineSeparator, 8 },
-				 { UnicodeCategory.ParagraphSeparator, 8 },
-				 { UnicodeCategory.Control, 0 },
-				 { UnicodeCategory.Surrogate, 0 },
-				 { UnicodeCategory.PrivateUse, 0 }
+				 { UnicodeCategory.SpaceSeparator, 7 },
+				 { UnicodeCategory.LineSeparator, 7 },
+				 { UnicodeCategory.ParagraphSeparator, 7 },
+				 { UnicodeCategory.Control, 7 }
 			};
+			// 状态转移
+			//    0  1  2  3  4  5  6  7  8 -> Symbols
+			// 0  1  2  3  4  5  6  7  8  9
+			// 1                            -> 0
+			// 2                            -> 1
+			// 3                            -> 2
+			// 4                            -> 3
+			// 5                            -> 4
+			// 6                            -> 5
+			// 7                            -> 6
+			// 8                            -> 7
+			// 9                          9 -> 8
 			// 状态列表
 			DfaStateData[] states = new[]
 			{
-				new DfaStateData(-1, -1),
+				new DfaStateData(0, -1),
 				new DfaStateData(int.MinValue, -1, 0),
 				new DfaStateData(int.MinValue, -1, 1),
 				new DfaStateData(int.MinValue, -1, 2),
@@ -93,7 +112,7 @@ namespace TestCompilers.Lexers
 				new DfaStateData(int.MinValue, -1, 5),
 				new DfaStateData(int.MinValue, -1, 6),
 				new DfaStateData(int.MinValue, -1, 7),
-				new DfaStateData(0, -1, 8)
+				new DfaStateData(1, -1, 8)
 			};
 			// 后继状态列表
 			int[] next = new[]
@@ -118,7 +137,6 @@ namespace TestCompilers.Lexers
 				typeof(TestCalcController));
 			return new LexerFactory<Calc, TestCalcController>(lexerData);
 		}
-
 	}
 
 }

@@ -285,6 +285,8 @@ internal sealed partial class LexerController
 				.Value(TerminalsValue(data, symbolInfos))
 			)
 			.Statement(SyntaxBuilder.LocalDeclarationStatement("int[]", "indexes")
+				.Comment("字符类信息")
+				.Comment(lexer.GetCharClassDescription())
 				.Comment("字符类索引")
 				.Value(CharClassIndexes(data))
 			)
@@ -302,6 +304,8 @@ internal sealed partial class LexerController
 		}
 		factoryMethod
 			.Statement(SyntaxBuilder.LocalDeclarationStatement("DfaStateData[]", "states")
+				.Comment("状态转移")
+				.Comment(lexer.GetStateDescription())
 				.Comment("状态列表")
 				.Value(StatesValue(data))
 			)
@@ -348,7 +352,7 @@ internal sealed partial class LexerController
 				.Value(SyntaxBuilder.IdentifierName("CreateLexerFactory").Invoke())
 				.GetSyntax(format)
 				.AddTrailingTrivia(format.EndOfLine),
-			factoryMethod.GetSyntax(format).AddTrailingTrivia(format.EndOfLine),
+			factoryMethod.GetSyntax(format),
 		};
 
 		// 将 BaseList 的 TrailingTrivia 添加到 openBraceToken 之前，避免丢失换行符。

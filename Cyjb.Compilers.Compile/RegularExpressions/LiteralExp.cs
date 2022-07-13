@@ -93,16 +93,17 @@ public sealed class LiteralExp : LexRegex
 	/// <param name="builder">字符串构造器。</param>
 	internal override void ToString(StringBuilder builder)
 	{
+		string text = literal.Replace(@"\", @"\\").Replace("\"", "\\\"");
 		if (culture == null)
 		{
 			builder.Append('"');
-			builder.Append(literal);
+			builder.Append(text);
 			builder.Append('"');
 		}
 		else
 		{
 			builder.Append("(?i:");
-			builder.Append(literal);
+			builder.Append(text);
 			builder.Append(')');
 		}
 	}

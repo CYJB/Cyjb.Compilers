@@ -28,6 +28,7 @@ public sealed class DfaState : ReadOnlyCollectionBase<DfaState>
 		this.dfa = dfa;
 		Index = index;
 		Symbols = Array.Empty<int>();
+		ConflictedSymbols = Array.Empty<int>();
 	}
 
 	/// <summary>
@@ -39,6 +40,11 @@ public sealed class DfaState : ReadOnlyCollectionBase<DfaState>
 	/// </summary>
 	/// <remarks>使用负数表示向前看的头状态。</remarks>
 	public int[] Symbols { get; internal set; }
+	/// <summary>
+	/// 获取出现冲突时被忽略的符号列表，按符号索引排序。
+	/// </summary>
+	/// <remarks>使用负数表示向前看的头状态。</remarks>
+	public int[] ConflictedSymbols { get; internal set; }
 
 	/// <summary>
 	/// 获取指定字符类转移到的状态。

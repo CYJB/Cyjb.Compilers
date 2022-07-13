@@ -38,6 +38,13 @@ public partial class TestStrController
 			// 0: {regular_literal}|{verbatim_literal}
 			new TerminalData<Str>(Str.Str)
 		};
+		// 字符类信息
+		// 0: [\n\r]
+		// 1: ["]
+		// 2: [\0-\t\v\f\u000E-!#-?A-[]-\u0084\u0086-?\u202A-\uFFFF]
+		// 3: [\\]
+		// 4: [\u0085\u2028\u2029]
+		// 5: [@]
 		// 字符类索引
 		int[] indexes = new[]
 		{
@@ -62,6 +69,15 @@ public partial class TestStrController
 			 { UnicodeCategory.Surrogate, 2 },
 			 { UnicodeCategory.PrivateUse, 2 }
 		};
+		// 状态转移
+		//    0  1  2  3  4  5 -> Symbols
+		// 0     1           2
+		// 1     5  1  6     1
+		// 2     3            
+		// 3  3  4  3  3  3  3
+		// 4     3             -> 0
+		// 5                   -> 0
+		// 6     1  1  1  1  1
 		// 状态列表
 		DfaStateData[] states = new[]
 		{
@@ -96,5 +112,4 @@ public partial class TestStrController
 			typeof(TestStrController));
 		return new LexerFactory<Str, TestStrController>(lexerData);
 	}
-
 }

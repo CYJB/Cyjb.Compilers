@@ -62,6 +62,16 @@ public partial class TestEscapeStrController
 			// 9: <vstr>\"\"
 			new TerminalData<Str>(action: (TestEscapeStrController c) => c.VstrQuoteAction())
 		};
+		// 字符类信息
+		// 0: ["]
+		// 1: [@]
+		// 2: [\\]
+		// 3: [u]
+		// 4: [0-9]
+		// 5: [x]
+		// 6: [n]
+		// 7: [r]
+		// 8: [\0-\t\v\f\u000E-!#-/:-?A-[]-mo-qstvwy-\uFFFF]
 		// 字符类索引
 		int[] indexes = new[]
 		{
@@ -70,42 +80,66 @@ public partial class TestEscapeStrController
 		// 字符类列表
 		int[] classes = new[]
 		{
-			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 9, 9, 0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 9, 9, 9, 9, 9, 2, 9, 9, 9, 9, 9, 9, 9,
-			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 3, 9, 9, 9,
-			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 7, 9, 9, 9, 8, 9, 9, 4, 9, 9,
-			6, 9, 9, 9, 9, 9, 9, 9, 9
+			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, -1, 8, 8, -1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+			4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 1, 8, 8, 8, 8, 8, 8, 8,
+			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8,
+			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 8, 8, 8, 7, 8, 8, 3, 8, 8,
+			5, 8, 8, 8, 8, 8, 8, 8, 8
 		};
 		// 字符类 Unicode 类别
 		Dictionary<UnicodeCategory, int> categories = new()
 		{
-			 { UnicodeCategory.Control, 9 }
+			 { UnicodeCategory.Control, 8 }
 		};
+		// 状态转移
+		//      0   1   2   3   4   5   6   7   8 -> Symbols
+		//  0  19  20   4   4   4   4   4   4   4
+		//  1   6   4   7   4   4   4   4   4   4
+		//  2   3   4   4   4   4   4   4   4   4
+		//  3   5                                 -> 2 conflict 8
+		//  4                                     -> 8
+		//  5                                     -> 9
+		//  6                                     -> 2 conflict 8
+		//  7   8           9      10  11  12     -> 8
+		//  8                                     -> 6
+		//  9                  15                
+		// 10                  13                
+		// 11                                     -> 5
+		// 12                                     -> 7
+		// 13                  14                
+		// 14                                     -> 4
+		// 15                  16                
+		// 16                  17                
+		// 17                  18                
+		// 18                                     -> 3
+		// 19                                     -> 0 conflict 8
+		// 20  21                                 -> 8
+		// 21                                     -> 1
 		// 状态列表
 		DfaStateData[] states = new[]
 		{
-			new DfaStateData(-1, 2),
-			new DfaStateData(1, 2),
-			new DfaStateData(4, -1),
-			new DfaStateData(2, -1, 2),
+			new DfaStateData(0, 2),
+			new DfaStateData(2, 2),
+			new DfaStateData(5, -1),
+			new DfaStateData(3, -1, 2),
 			new DfaStateData(int.MinValue, -1, 8),
 			new DfaStateData(int.MinValue, -1, 9),
 			new DfaStateData(int.MinValue, -1, 2),
-			new DfaStateData(13, -1, 8),
+			new DfaStateData(14, -1, 8),
 			new DfaStateData(int.MinValue, -1, 6),
-			new DfaStateData(10, -1),
 			new DfaStateData(11, -1),
+			new DfaStateData(12, -1),
 			new DfaStateData(int.MinValue, -1, 5),
 			new DfaStateData(int.MinValue, -1, 7),
-			new DfaStateData(13, -1),
+			new DfaStateData(14, -1),
 			new DfaStateData(int.MinValue, -1, 4),
-			new DfaStateData(17, -1),
 			new DfaStateData(18, -1),
 			new DfaStateData(19, -1),
+			new DfaStateData(20, -1),
 			new DfaStateData(int.MinValue, -1, 3),
 			new DfaStateData(int.MinValue, -1, 0),
-			new DfaStateData(24, -1, 8),
+			new DfaStateData(25, -1, 8),
 			new DfaStateData(int.MinValue, -1, 1)
 		};
 		// 后继状态列表
@@ -133,5 +167,4 @@ public partial class TestEscapeStrController
 			typeof(TestEscapeStrController));
 		return new LexerFactory<Str, TestEscapeStrController>(lexerData);
 	}
-
 }

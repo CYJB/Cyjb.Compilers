@@ -1,3 +1,4 @@
+using System.Text;
 using Cyjb.Collections;
 using Cyjb.Collections.ObjectModel;
 
@@ -74,8 +75,9 @@ public sealed class Dfa : ReadOnlyListBase<DfaState>
 		{
 			// 根据分组信息合并等价状态。
 			MergeState(headCnt, groups);
-			MinimizeCharClass();
 		}
+		// 无论是否合并等价状态，都需要最小化字符类。
+		MinimizeCharClass();
 	}
 
 	/// <summary>
@@ -337,4 +339,71 @@ public sealed class Dfa : ReadOnlyListBase<DfaState>
 
 	#endregion // ReadOnlyListBase<DfaState> 成员
 
+	/// <summary>
+	/// 返回当前 DFA 的字符类描述信息。
+	/// </summary>
+	/// <returns>当前 DFA 的字符类描述信息。</returns>
+	public string GetCharClassDescription()
+	{
+		StringBuilder text = new();
+		int charClassCount = charClasses.Count;
+		int width = Utils.GetIndexWidth(charClassCount);
+		for (int i = 0; i < charClassCount; i++)
+		{
+			text.AppendFormat("{0}: {1}", i.ToString().PadLeft(width), charClasses[i]);
+			text.AppendLine();
+		}
+		return text.ToString();
+	}
+
+	/// <summary>
+	/// 返回当前 DFA 的状态描述信息。
+	/// </summary>
+	/// <returns>当前 DFA 的状态描述信息。</returns>
+	public string GetStateDescription()
+	{
+		StringBuilder text = new();
+		int stateCount = states.Count;
+		int stateIndexWidth = Utils.GetIndexWidth(stateCount);
+		text.Append(new string(' ', stateIndexWidth));
+		// 状态转移之间使用两个空格分割。
+		int charClassCount = charClasses.Count;
+		int width = Math.Max(Utils.GetIndexWidth(charClassCount), stateIndexWidth) + 2;
+		for (int i = 0; i < charClassCount; i++)
+		{
+			text.AppendFormat(i.ToString().PadLeft(width));
+		}
+		text.AppendLine(" -> Symbols");
+		for (int j = 0; j < stateCount; j++)
+		{
+			text.AppendFormat(j.ToString().PadLeft(stateIndexWidth));
+			DfaState state = states[j];
+			for (int i = 0; i < charClassCount; i++)
+			{
+				// 状态转移之间使用两个空格分割。
+				DfaState? nextState = state[charClasses[i]];
+				if (nextState == null)
+				{
+					text.Append(new string(' ', width));
+				}
+				else
+				{
+					text.AppendFormat(nextState.Index.ToString().PadLeft(width));
+				}
+			}
+			// 输出对应的符号索引。
+			if (state.Symbols.Length > 0)
+			{
+				text.Append(" -> ");
+				text.Append(string.Join(", ", state.Symbols));
+				if (state.ConflictedSymbols.Length > 0)
+				{
+					text.Append(" conflict ");
+					text.Append(string.Join(", ", state.ConflictedSymbols));
+				}
+			}
+			text.AppendLine();
+		}
+		return text.ToString();
+	}
 }

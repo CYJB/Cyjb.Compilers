@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using Cyjb.Compilers.RegularExpressions;
 
@@ -79,6 +80,10 @@ public class Lexer<T, TController>
 	/// 是否包含行首匹配的规则。
 	/// </summary>
 	private bool containsBeginningOfLine = false;
+	/// <summary>
+	/// 最近一次构造的 DFA。
+	/// </summary>
+	private Dfa? lastDfa;
 
 	/// <summary>
 	/// 初始化 <see cref="Lexer{T,TController}"/> 类的新实例。
@@ -171,11 +176,6 @@ public class Lexer<T, TController>
 	}
 
 	/// <summary>
-	/// 获取定义的正则表达式列表。
-	/// </summary>
-	/// <value>定义的正则表达式列表。</value>
-	public IReadOnlyDictionary<string, LexRegex> Regexs => regexs;
-	/// <summary>
 	/// 获取词法分析器上下文列表。
 	/// </summary>
 	/// <value>词法分析器的上下文列表。</value>
@@ -190,11 +190,6 @@ public class Lexer<T, TController>
 			return contextLabels;
 		}
 	}
-	/// <summary>
-	/// 获取定义的终结符号的集合。
-	/// </summary>
-	/// <value>所有定义的终结符号的集合。</value>
-	internal List<Terminal<T>> Terminals => terminals;
 
 	/// <summary>
 	/// 返回词法分析的数据。
@@ -225,7 +220,8 @@ public class Lexer<T, TController>
 		{
 			headCount *= 2;
 		}
-		Dfa dfa = nfa.BuildDFA(headCount);
+		Dfa dfa = nfa.BuildDFA(headCount, rejectable);
+		lastDfa = dfa;
 		TerminalData<T>[] terminals = this.terminals.Select(t => t.GetData()).ToArray();
 		DfaData data = dfa.GetData();
 		return new LexerData<T>(contexts, terminals, dfa.GetCharClassMap(), data.States, data.Next, data.Check,
@@ -241,6 +237,32 @@ public class Lexer<T, TController>
 	{
 		LexerData<T> data = GetData(rejectable);
 		return new LexerFactory<T, TController>(data);
+	}
+
+	/// <summary>
+	/// 返回最近一次构造的 DFA 的字符类描述信息。
+	/// </summary>
+	/// <returns>最近一次构造的 DFA 的字符类描述信息。</returns>
+	public string GetCharClassDescription()
+	{
+		if (lastDfa == null)
+		{
+			return string.Empty;
+		}
+		return lastDfa.GetCharClassDescription();
+	}
+
+	/// <summary>
+	/// 返回最近一次构造的 DFA 的状态描述信息。
+	/// </summary>
+	/// <returns>最近一次构造的 DFA 的状态描述信息。</returns>
+	public string GetStateDescription()
+	{
+		if (lastDfa == null)
+		{
+			return string.Empty;
+		}
+		return lastDfa.GetStateDescription();
 	}
 
 	/// <summary>

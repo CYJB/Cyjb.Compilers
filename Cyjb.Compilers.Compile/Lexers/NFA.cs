@@ -203,8 +203,9 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 	/// 根据当前的 NFA 构造 DFA，采用子集构造法。
 	/// </summary>
 	/// <param name="headCnt">头节点的个数。</param>
+	/// <param name="rejectable">是否用到了 Reject 动作。</param>
 	/// <returns>构造得到的最简 DFA。</returns>
-	public Dfa BuildDFA(int headCnt)
+	public Dfa BuildDFA(int headCnt, bool rejectable = false)
 	{
 		Dfa dfa = new(charClasses);
 		// DFA 和 NFA 的状态映射表，DFA 的一个状态对应 NFA 的一个状态集合。
@@ -251,6 +252,12 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 							}
 							return value;
 						}).OrderBy(idx => idx < 0 ? int.MaxValue - idx : idx).ToArray();
+						// 未用到 Reject 动作时，只需要保留第一个符号。
+						if (newState.Symbols.Length > 1 && !rejectable)
+						{
+							newState.ConflictedSymbols = newState.Symbols[1..];
+							newState.Symbols = newState.Symbols[0..1];
+						}
 					}
 					// 添加 DFA 的转移。
 					state[charClass] = newState;

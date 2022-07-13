@@ -55,7 +55,17 @@ internal sealed class LocalDeclarationStatementBuilder : StatementBuilder
 	/// <returns>当前变量声明语句构造器。</returns>
 	public LocalDeclarationStatementBuilder Comment(string comment)
 	{
-		comments.Add(comment);
+		// 支持带换行的注释
+		string[] lines = comment.Split(Environment.NewLine);
+		// 移除最后的换行
+		if (lines[^1].Length == 0)
+		{
+			comments.AddRange(lines[0..^1]);
+		}
+		else
+		{
+			comments.AddRange(lines);
+		}
 		return this;
 	}
 

@@ -55,4 +55,17 @@ internal static class SyntaxNodeUtils
 		}
 		return node.WithTrailingTrivia(node.GetTrailingTrivia().AddRange(trivia));
 	}
+
+	/// <summary>
+	/// 添加指定的后置琐事。
+	/// </summary>
+	/// <typeparam name="TNode">语法节点的类型。</typeparam>
+	/// <param name="node">语法节点。</param>
+	/// <param name="trivia">要添加的琐事。</param>
+	/// <returns>更新后的语法节点。</returns>
+	public static TNode AddTrailingTrivia<TNode>(this TNode node, IEnumerable<SyntaxTrivia> trivia)
+		where TNode : SyntaxNode
+	{
+		return node.WithTrailingTrivia(node.GetTrailingTrivia().AddRange(trivia));
+	}
 }
