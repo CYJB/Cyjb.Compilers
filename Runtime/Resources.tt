@@ -9,6 +9,7 @@
 <#@ assembly name="System.Xml" #>
 <#@ assembly name="EnvDTE" #>
 <#@ assembly name="VSLangProj" #>
+<#@ assembly name="$(PkgCyjb)\lib\net6.0\Cyjb.dll" #>
 <#@ import namespace="EnvDTE" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.IO" #>
@@ -17,6 +18,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Text.RegularExpressions" #>
 <#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ import namespace="Cyjb" #>
 <#
 	EnvDTE.DTE dte = ((IServiceProvider)Host).GetCOMService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
 	if (dte == null)

@@ -8,13 +8,14 @@
 	<SignAssembly>True</SignAssembly>
 	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
 	<PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
-	<Description>提供编译相关基础接口</Description>
+	<Description>提供编译相关运行时</Description>
 	<Copyright>﻿Copyright (c) 2022, CYJB</Copyright>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	<NeutralLanguage>en</NeutralLanguage>
 	<RootNamespace>Cyjb.Compilers</RootNamespace>
 	<Authors>CYJB</Authors>
+	<DevelopmentDependency>true</DevelopmentDependency>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cyjb" Version="1.0.6" />
+    <PackageReference Include="Cyjb" Version="1.0.7" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>

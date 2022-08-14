@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cyjb.Compilers.Compile\Cyjb.Compilers.Compile.csproj" />
+    <ProjectReference Include="..\Compilers\Cyjb.Compilers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

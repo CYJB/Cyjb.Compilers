@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers", "Cyjb.Compilers\Cyjb.Compilers.csproj", "{160E8A9F-BEDD-4F63-9084-F6E9B8C6624C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers.Runtime", "Runtime\Cyjb.Compilers.Runtime.csproj", "{160E8A9F-BEDD-4F63-9084-F6E9B8C6624C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTest", "ConsoleTest\ConsoleTest.csproj", "{2DD71EB7-07CA-48BF-8717-330112AF9B53}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCompilers", "TestCompilers\TestCompilers.csproj", "{673D3BF7-7A14-47B1-A49B-E1A2A4F6A507}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers.Compile", "Cyjb.Compilers.Compile\Cyjb.Compilers.Compile.csproj", "{B6912ADB-4D28-4948-8389-2367683D50C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers", "Compilers\Cyjb.Compilers.csproj", "{B6912ADB-4D28-4948-8389-2367683D50C6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompilerGenerator", "CompilerGenerator\CompilerGenerator.csproj", "{8DBCE916-4676-42A3-AF3A-D2415E2301FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers.Design", "Design\Cyjb.Compilers.Design.csproj", "{8DBCE916-4676-42A3-AF3A-D2415E2301FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
