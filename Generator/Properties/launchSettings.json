@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CompilerGenerator": {
+      "commandName": "Project",
+      "commandLineArgs": "../../../tests/TestEscapeStrController.cs"
+    }
+  }
+}

@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cyjb" Version="1.0.7" GeneratePathProperty="true" />
+    <PackageReference Include="Cyjb" Version="1.0.7" />
   </ItemGroup>
 
   <ItemGroup>

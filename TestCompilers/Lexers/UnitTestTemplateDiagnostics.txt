@@ -9,7 +9,6 @@
 [LexerSymbol("T", RegexOptions.Test)]
 [LexerSymbol("T", 10.3)]
 [LexerSymbol("T", "abc")]
-[LexerSymbol("T", Priority = "abc")]
 [LexerContext("")]
 [LexerSymbol("<ffffT")]
 public partial class TestController : LexerController<Test>

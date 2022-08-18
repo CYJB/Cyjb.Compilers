@@ -1,7 +1,6 @@
 # Build Folders
 bin
 obj
-Properties
 *.pdb
 .vs
 

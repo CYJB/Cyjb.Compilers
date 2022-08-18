@@ -40,7 +40,7 @@ namespace Cyjb.Compilers.Lexers
 		/// 创建分析指定源文件的词法分析器。
 		/// </summary>
 		/// </overloads>
-		public TokenReader<T> CreateReader(string source)
+		public Tokenlizer<T> CreateReader(string source)
 		{
 			ArgumentNullException.ThrowIfNull(source);
 			return CreateReader(new SourceReader(new StringReader(source)));
@@ -52,7 +52,7 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="source">要读取的源文件。</param>
 		/// <returns>指定源文件的词法分析器。</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-		public TokenReader<T> CreateReader(SourceReader source)
+		public Tokenlizer<T> CreateReader(SourceReader source)
 		{
 			ArgumentNullException.ThrowIfNull(source);
 			LexerController<T> controller = new();

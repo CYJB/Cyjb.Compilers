@@ -6,7 +6,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示支持全部功能的词法分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal sealed class RejectableTrailingReader<T> : TokenReaderBase<T>
+internal sealed class RejectableTrailingReader<T> : TokenlizerBase<T>
 	where T : struct
 {
 	/// <summary>

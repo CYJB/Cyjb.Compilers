@@ -1,28 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
-	<ImplicitUsings>enable</ImplicitUsings>
-	<Nullable>enable</Nullable>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
 	<GenerateDocumentationFile>False</GenerateDocumentationFile>
 	<SignAssembly>True</SignAssembly>
 	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
 	<PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
 	<Description>提供编译器的设计时生成功能</Description>
-	<Copyright>﻿Copyright (c) 2022, CYJB</Copyright>
+	<Copyright>Copyright (c) 2022, CYJB</Copyright>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	<NeutralLanguage>en</NeutralLanguage>
+	<Version>$(VersionPrefix)</Version>
+	<VersionPrefix>1.0.1</VersionPrefix>
 	<RootNamespace>Cyjb.Compilers</RootNamespace>
-	<OutputType>Exe</OutputType>
+	<OutputType>Library</OutputType>
+	<DeploymentPackage>true</DeploymentPackage>
 	<Authors>CYJB</Authors>
+	<PackageTags>Compiler, T4</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="tests\**" />
-    <EmbeddedResource Remove="tests\**" />
-    <None Remove="tests\**" />
-  </ItemGroup>
 
   <ItemGroup>
 	<None Include="..\.editorconfig" Link=".editorconfig" />
@@ -30,32 +28,20 @@
 	<None Include="LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Compilers\Cyjb.Compilers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Resources.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Resources.cs</LastGenOutput>
+    <None Include="Tools\**">
+	  <Pack>true</Pack>
+	  <PackageCopyToOutput>true</PackageCopyToOutput>
+	  <PackagePath>tools\</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Resources.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.tt</DependentUpon>
-    </Compile>
+    <Content Include="CompilerTemplate.t4" />
   </ItemGroup>
 
 </Project>

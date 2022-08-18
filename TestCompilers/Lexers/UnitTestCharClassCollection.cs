@@ -18,7 +18,7 @@ public class UnitTestCharClassCollection
 	/// <summary>
 	/// <see cref="CharClassCollection"/> 的类型。
 	/// </summary>
-	private static readonly Type CharClassCollectionType = Type.GetType("Cyjb.Compilers.Lexers.CharClassCollection, Cyjb.Compilers.Compile")!;
+	private static readonly Type CharClassCollectionType = Type.GetType("Cyjb.Compilers.Lexers.CharClassCollection, Cyjb.Compilers")!;
 
 	/// <summary>
 	/// 对 <see cref="CharClassCollection.GetCharClassMap"/> 方法进行测试。

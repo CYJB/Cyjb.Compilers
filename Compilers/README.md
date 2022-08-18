@@ -1,4 +1,4 @@
-Cyjb.Compilers.Compile
+Cyjb.Compilers
 ====
 
 提供编译相关功能，基于 .NET 6。
@@ -62,9 +62,22 @@ public partial class TestCalcController : LexerController<Calc>
 }
 ```
 
-将 Tools 下的 CompilerGenerator 可执行文件复制到项目的 Tools/ 目录下，将 Tools/CompilerGeneratorTemplate.tt
-复制到类所在目录，并重命名为同名的模板。在执行 T4 模板转换后，即可生成同名的 .lexer.cs，其中定义了
-`public static readonly ILexerFactory<Str> Factory;` 字段，就是生成好的词法分析器工厂。
+通过 nuget 引入 [Cyjb.Compilers.Design](https://www.nuget.org/packages/Cyjb.Compilers.Design/) 时，并指定 `GeneratePathProperty="true"`。
+
+```xml
+<ItemGroup>
+	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.0" GeneratePathProperty="true" />
+</ItemGroup>
+```
+
+添加与词法分析器同名的 tt 文件，内容如下：
+
+
+```t4
+<#@ include file="$(PkgCyjb_Compilers_Design)\content\CompilerTemplate.t4" #>
+```
+
+运行 T4 模板后即可生成同名的 `.lexer.cs` 文件，包含了词法分析器的实现。
 
 具体用法可以参考 TestCompilers/Lexers 目录下的示例。
 

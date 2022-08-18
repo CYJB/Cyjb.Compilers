@@ -55,7 +55,7 @@ public class UnitTestLexer
 	private static void TestCalc(ILexerFactory<Calc> factory)
 	{
 		string source = "1 + 20 * 3 / 4*(5+6)";
-		TokenReader<Calc> reader = factory.CreateReader(source);
+		Tokenlizer<Calc> reader = factory.CreateReader(source);
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), reader.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), reader.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), reader.Read());
@@ -105,7 +105,7 @@ public class UnitTestLexer
 	private static void TestString(ILexerFactory<Str> factory)
 	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		TokenReader<Str> reader = factory.CreateReader(source);
+		Tokenlizer<Str> reader = factory.CreateReader(source);
 		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), reader.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), reader.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), reader.Read());
@@ -214,7 +214,7 @@ public class UnitTestLexer
 	private static void TestEscapeString(ILexerFactory<Str> factory)
 	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		TokenReader<Str> reader = factory.CreateReader(source);
+		Tokenlizer<Str> reader = factory.CreateReader(source);
 		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), reader.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), reader.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), reader.Read());

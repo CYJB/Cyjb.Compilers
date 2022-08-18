@@ -38,9 +38,6 @@ internal class LexerSymbolAttrInfo
 					}
 					info.Kind = GenericConvert.ChangeType(arg.TypedValue.Value, arg.TypedValue.ArgumentType);
 					break;
-				case "Priority":
-					info.Priority = (int)arg.TypedValue.Value!;
-					break;
 			}
 		}
 		return true;
@@ -65,10 +62,6 @@ internal class LexerSymbolAttrInfo
 	/// 获取正则表达式的选项。
 	/// </summary>
 	public RegexOptions RegexOptions { get; }
-	/// <summary>
-	/// 获取或设置终结符的优先级。
-	/// </summary>
-	public int Priority { get; set; }
 	/// <summary>
 	/// 获取或设置正则表达式的类型。
 	/// </summary>

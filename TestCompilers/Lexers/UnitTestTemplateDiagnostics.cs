@@ -18,11 +18,11 @@ public class UnitTestTemplateDiagnostics
 	public void TestDiagnostics()
 	{
 		string filePath = @"Lexers\UnitTestTemplateDiagnostics.txt";
-		string suffix = Environment.Is64BitOperatingSystem ? "x64" : "x86";
+		string runtime = Environment.Is64BitOperatingSystem ? "x64" : "x86";
 		using Process myProcess = new();
 		myProcess.StartInfo.UseShellExecute = false;
 		myProcess.StartInfo.RedirectStandardOutput = true;
-		myProcess.StartInfo.FileName = $@"..\..\..\..\Tools\CompilerGenerator-{suffix}.exe";
+		myProcess.StartInfo.FileName = $@"..\..\..\..\Design\Tools\win-{runtime}\Generator.exe";
 		myProcess.StartInfo.Arguments = Path.GetFullPath(filePath);
 		myProcess.StartInfo.CreateNoWindow = true;
 		myProcess.Start();
@@ -42,10 +42,9 @@ public class UnitTestTemplateDiagnostics
 			"UnitTestTemplateDiagnostics.txt(9,32): CS0117: “RegexOptions”未包含“Test”的定义。",
 			"UnitTestTemplateDiagnostics.txt(10,19): CS0030: 无法将类型“System.Double”转换为“System.Text.RegularExpressions.RegexOptions”。",
 			"UnitTestTemplateDiagnostics.txt(11,19): CS0030: 无法将类型“System.String”转换为“System.Text.RegularExpressions.RegexOptions”。",
-			"UnitTestTemplateDiagnostics.txt(12,30): CS0030: 无法将类型“System.String”转换为“System.Int32”。",
-			"UnitTestTemplateDiagnostics.txt(13,15): 无效的词法分析上下文“”。",
-			"UnitTestTemplateDiagnostics.txt(17,2): 无效的词法分析符号动作“InvalidAction”，形参必须为空或可选的。",
-			"UnitTestTemplateDiagnostics.txt(14,2): 不完整的词法分析上下文。",
+			"UnitTestTemplateDiagnostics.txt(12,15): 无效的词法分析上下文“”。",
+			"UnitTestTemplateDiagnostics.txt(16,2): 无效的词法分析符号动作“InvalidAction”，形参必须为空或可选的。",
+			"UnitTestTemplateDiagnostics.txt(13,2): 不完整的词法分析上下文。",
 		}).Trim(), content.Trim());
 	}
 }
