@@ -134,7 +134,7 @@ public class LexerController<T>
 	/// <returns><see cref="Token{T}"/> 的新实例。</returns>
 	internal Token<T> CreateToken()
 	{
-		return new Token<T>(Kind!.Value, Text, new TextSpan(Start, Source.Index), Value);
+		return new Token<T>(Kind!.Value, Text, new TextSpan(Start, Source.Index), Source.Locator, Value);
 	}
 
 	/// <summary>

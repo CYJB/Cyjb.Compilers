@@ -118,6 +118,10 @@ public sealed class SourceReader : IDisposable
 	/// </summary>
 	/// <value>基础的字符读取器。如果当前读取器已被关闭，则返回 <c>null</c>。</value>
 	public TextReader? BaseReader => reader;
+	/// <summary>
+	/// 获取行列定位器。
+	/// </summary>
+	public LineLocator? Locator => locator;
 
 	/// <summary>
 	/// 获取或设置当前的字符索引。

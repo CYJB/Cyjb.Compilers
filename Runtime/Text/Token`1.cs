@@ -25,6 +25,11 @@ public struct Token<T> : IEquatable<Token<T>>
 	}
 
 	/// <summary>
+	/// 行定位器。
+	/// </summary>
+	private readonly LineLocator? locator;
+
+	/// <summary>
 	/// 使用词法单元的相关信息初始化 <see cref="Token{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="kind">词法单元的类型。</param>
@@ -37,6 +42,24 @@ public struct Token<T> : IEquatable<Token<T>>
 		Text = text;
 		Span = span;
 		Value = value;
+		locator = null;
+	}
+
+	/// <summary>
+	/// 使用词法单元的相关信息初始化 <see cref="Token{T}"/> 类的新实例。
+	/// </summary>
+	/// <param name="kind">词法单元的类型。</param>
+	/// <param name="text">词法单元的文本。</param>
+	/// <param name="span">词法单元的范围。</param>
+	/// <param name="locator">行定位器。</param>
+	/// <param name="value">词法单元的值。</param>
+	public Token(T kind, string text, TextSpan span, LineLocator? locator, object? value = null)
+	{
+		Kind = kind;
+		Text = text;
+		Span = span;
+		Value = value;
+		this.locator = locator;
 	}
 
 	/// <summary>
@@ -54,6 +77,26 @@ public struct Token<T> : IEquatable<Token<T>>
 	/// </summary>
 	/// <value>词法单元的范围。</value>
 	public TextSpan Span { get; }
+	/// <summary>
+	/// 获取词法单元的行列位置范围。
+	/// </summary>
+	/// <value>词法单元的行列位置范围。</value>
+	public LinePositionSpan LinePositionSpan
+	{
+		get
+		{
+			int start = Span.Start;
+			int end = Span.End;
+			if (locator == null)
+			{
+				return new LinePositionSpan(new LinePosition(1, start), new LinePosition(1, end));
+			}
+			else
+			{
+				return new LinePositionSpan(locator.GetPosition(start), locator.GetPosition(end));
+			}
+		}
+	}
 	/// <summary>
 	/// 获取词法单元的值。
 	/// </summary>
