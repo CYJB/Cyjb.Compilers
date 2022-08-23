@@ -11,15 +11,6 @@ public abstract class Tokenlizer<T> : IDisposable, IEnumerable<Token<T>>
 	where T : struct
 {
 	/// <summary>
-	/// 要读取的下一个词法单元。
-	/// </summary>
-	private Token<T> nextToken;
-	/// <summary>
-	/// 是否已读取下一个词法单元。
-	/// </summary>
-	private bool peekToken;
-
-	/// <summary>
 	/// 使用要扫描的源文件初始化 <see cref="Tokenlizer{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="source">要使用的源文件读取器。</param>
@@ -40,35 +31,7 @@ public abstract class Tokenlizer<T> : IDisposable, IEnumerable<Token<T>>
 	/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
 	/// </summary>
 	/// <returns>输入流中的下一个词法单元。</returns>
-	public Token<T> Read()
-	{
-		if (peekToken)
-		{
-			peekToken = false;
-			return nextToken;
-		}
-		return InternalRead();
-	}
-
-	/// <summary>
-	/// 读取输入流中的下一个词法单元，但是并不更改读取器的状态。
-	/// </summary>
-	/// <returns>输入流中的下一个词法单元。</returns>
-	public Token<T> Peek()
-	{
-		if (!peekToken)
-		{
-			peekToken = true;
-			nextToken = InternalRead();
-		}
-		return nextToken;
-	}
-
-	/// <summary>
-	/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
-	/// </summary>
-	/// <returns>输入流中的下一个词法单元。</returns>
-	protected abstract Token<T> InternalRead();
+	public abstract Token<T> Read();
 
 	#region IDisposable 成员
 
@@ -112,7 +75,7 @@ public abstract class Tokenlizer<T> : IDisposable, IEnumerable<Token<T>>
 	{
 		while (true)
 		{
-			Token<T> token = InternalRead();
+			Token<T> token = Read();
 			yield return token;
 			if (token.IsEndOfFile)
 			{

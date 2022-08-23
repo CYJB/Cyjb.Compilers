@@ -20,7 +20,7 @@ public interface ILexerFactory<T>
 	/// 创建分析指定源文件的词法分析器。
 	/// </summary>
 	/// </overloads>
-	Tokenlizer<T> CreateReader(string source);
+	Tokenlizer<T> CreateTokenlizer(string source);
 
 	/// <summary>
 	/// 创建分析指定源文件的词法分析器。
@@ -28,5 +28,5 @@ public interface ILexerFactory<T>
 	/// <param name="source">要读取的源文件。</param>
 	/// <returns>指定源文件的词法分析器。</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-	Tokenlizer<T> CreateReader(SourceReader source);
+	Tokenlizer<T> CreateTokenlizer(SourceReader source);
 }

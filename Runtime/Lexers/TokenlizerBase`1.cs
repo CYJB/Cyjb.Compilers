@@ -49,7 +49,7 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 	/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
 	/// </summary>
 	/// <returns>输入流中的下一个词法单元。</returns>
-	protected override Token<T> InternalRead()
+	public override Token<T> Read()
 	{
 		while (true)
 		{

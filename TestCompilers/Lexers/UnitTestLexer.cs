@@ -55,21 +55,21 @@ public class UnitTestLexer
 	private static void TestCalc(ILexerFactory<Calc> factory)
 	{
 		string source = "1 + 20 * 3 / 4*(5+6)";
-		Tokenlizer<Calc> reader = factory.CreateReader(source);
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(7, 8)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "3", new TextSpan(9, 10), 3), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Div, "/", new TextSpan(11, 12)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "4", new TextSpan(13, 14), 4), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(14, 15)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.LBrace, "(", new TextSpan(15, 16)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "5", new TextSpan(16, 17), 5), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(17, 18)), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), reader.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), reader.Read());
-		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), reader.Read());
+		Tokenlizer<Calc> tokenlizer = factory.CreateTokenlizer(source);
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(7, 8)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "3", new TextSpan(9, 10), 3), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Div, "/", new TextSpan(11, 12)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "4", new TextSpan(13, 14), 4), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(14, 15)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.LBrace, "(", new TextSpan(15, 16)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "5", new TextSpan(16, 17), 5), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(17, 18)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), tokenlizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), tokenlizer.Read());
+		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), tokenlizer.Read());
 	}
 
 	/// <summary>
@@ -105,12 +105,12 @@ public class UnitTestLexer
 	private static void TestString(ILexerFactory<Str> factory)
 	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		Tokenlizer<Str> reader = factory.CreateReader(source);
-		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"@""aabb\""""ccd\u0045\x47""", new TextSpan(42, 65)), reader.Read());
-		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
+		Tokenlizer<Str> tokenlizer = factory.CreateTokenlizer(source);
+		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"@""aabb\""""ccd\u0045\x47""", new TextSpan(42, 65)), tokenlizer.Read());
+		Assert.AreEqual(Token<Str>.GetEndOfFile(65), tokenlizer.Read());
 	}
 
 	private class EscapeStrController : LexerController<Str>
@@ -214,11 +214,11 @@ public class UnitTestLexer
 	private static void TestEscapeString(ILexerFactory<Str> factory)
 	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		Tokenlizer<Str> reader = factory.CreateReader(source);
-		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), reader.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"aabb\""ccd\u0045\x47", new TextSpan(42, 65)), reader.Read());
-		Assert.AreEqual(Token<Str>.GetEndOfFile(65), reader.Read());
+		Tokenlizer<Str> tokenlizer = factory.CreateTokenlizer(source);
+		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), tokenlizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"aabb\""ccd\u0045\x47", new TextSpan(42, 65)), tokenlizer.Read());
+		Assert.AreEqual(Token<Str>.GetEndOfFile(65), tokenlizer.Read());
 	}
 }

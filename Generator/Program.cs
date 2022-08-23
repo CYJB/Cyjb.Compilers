@@ -46,10 +46,8 @@ class Program
 				SyntaxFormat format = new(root);
 				// 添加对必须命名空间的引用。
 				newRoot = newRoot.AddUsings(
-					SyntaxBuilder.UsingDirective("System", format),
 					SyntaxBuilder.UsingDirective("System.Collections.Generic", format),
-					SyntaxBuilder.UsingDirective("System.Globalization", format),
-					SyntaxBuilder.UsingDirective("Cyjb.Text", format)
+					SyntaxBuilder.UsingDirective("System.Globalization", format)
 				).WithLeadingTrivia(
 					SyntaxFactory.Comment("//------------------------------------------------------------------------------"),
 					format.EndOfLine,

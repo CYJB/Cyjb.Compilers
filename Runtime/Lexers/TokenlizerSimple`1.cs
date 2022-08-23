@@ -3,19 +3,19 @@ using Cyjb.Text;
 namespace Cyjb.Compilers.Lexers;
 
 /// <summary>
-/// 表示支持定长向前看符号的词法分析器。
+/// 表示基本的词法分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal sealed class FixedTrailingReader<T> : TokenlizerBase<T>
+internal sealed class TokenlizerSimpler<T> : TokenlizerBase<T>
 	where T : struct
 {
 	/// <summary>
-	/// 使用给定的词法分析器信息初始化 <see cref="FixedTrailingReader{T}"/> 类的新实例。
+	/// 使用给定的词法分析器信息初始化 <see cref="TokenlizerSimpler{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="lexerData">要使用的词法分析器的数据。</param>
 	/// <param name="controller">词法分析控制器。</param>
 	/// <param name="reader">要使用的源文件读取器。</param>
-	public FixedTrailingReader(LexerData<T> lexerData, LexerController<T> controller, SourceReader reader) :
+	public TokenlizerSimpler(LexerData<T> lexerData, LexerController<T> controller, SourceReader reader) :
 		base(lexerData, controller, reader)
 	{ }
 
@@ -37,8 +37,7 @@ internal sealed class FixedTrailingReader<T> : TokenlizerBase<T>
 				break;
 			}
 			int[] symbols = Data.States[state].Symbols;
-			// 确定不是向前看的头状态。
-			if (symbols.Length > 0 && symbols[0] >= 0)
+			if (symbols.Length > 0)
 			{
 				lastAccept = symbols[0];
 				lastIndex = Source.Index;
@@ -46,25 +45,9 @@ internal sealed class FixedTrailingReader<T> : TokenlizerBase<T>
 		}
 		if (lastAccept >= 0)
 		{
-			TerminalData<T> terminal = Data.Terminals[lastAccept];
-			if (terminal.Trailing.HasValue)
-			{
-				// 是向前看状态。
-				int index = terminal.Trailing.Value;
-				// 将流调整到与接受状态匹配的状态。
-				if (index > 0)
-				{
-					// 前面长度固定。
-					lastIndex = Start + index;
-				}
-				else
-				{
-					// 后面长度固定，注意此时 index 是负数。
-					lastIndex += index;
-				}
-			}
 			// 将流调整到与接受状态匹配的状态。
 			Source.Index = lastIndex;
+			TerminalData<T> terminal = Data.Terminals[lastAccept];
 			Controller.DoAction(Start, terminal.Kind, terminal.Action);
 			return true;
 		}

@@ -6,7 +6,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示支持全部功能的词法分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal sealed class RejectableTrailingReader<T> : TokenlizerBase<T>
+internal sealed class TokenlizerRejectableTrailing<T> : TokenlizerBase<T>
 	where T : struct
 {
 	/// <summary>
@@ -15,12 +15,12 @@ internal sealed class RejectableTrailingReader<T> : TokenlizerBase<T>
 	private readonly List<AcceptState> states = new();
 
 	/// <summary>
-	/// 使用给定的词法分析器信息初始化 <see cref="RejectableTrailingReader{T}"/> 类的新实例。
+	/// 使用给定的词法分析器信息初始化 <see cref="TokenlizerRejectableTrailing{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="lexerData">要使用的词法分析器的数据。</param>
 	/// <param name="controller">词法分析控制器。</param>
 	/// <param name="reader">要使用的源文件读取器。</param>
-	public RejectableTrailingReader(LexerData<T> lexerData, LexerController<T> controller, SourceReader reader) :
+	public TokenlizerRejectableTrailing(LexerData<T> lexerData, LexerController<T> controller, SourceReader reader) :
 		base(lexerData, controller, reader)
 	{ }
 

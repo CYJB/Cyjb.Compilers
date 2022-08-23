@@ -42,10 +42,10 @@ namespace Cyjb.Compilers.Lexers
 		/// 创建分析指定源文件的词法分析器。
 		/// </summary>
 		/// </overloads>
-		public Tokenlizer<T> CreateReader(string source)
+		public Tokenlizer<T> CreateTokenlizer(string source)
 		{
 			ArgumentNullException.ThrowIfNull(source);
-			return CreateReader(new SourceReader(new StringReader(source)));
+			return CreateTokenlizer(new SourceReader(new StringReader(source)));
 		}
 
 		/// <summary>
@@ -54,7 +54,7 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="source">要读取的源文件。</param>
 		/// <returns>指定源文件的词法分析器。</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-		public Tokenlizer<T> CreateReader(SourceReader source)
+		public Tokenlizer<T> CreateTokenlizer(SourceReader source)
 		{
 			ArgumentNullException.ThrowIfNull(source);
 			TController controller = new();
@@ -66,21 +66,21 @@ namespace Cyjb.Compilers.Lexers
 			{
 				if (lexerData.TrailingType == TrailingType.None)
 				{
-					return new RejectableReader<T>(lexerData, controller, source);
+					return new TokenlizerRejectable<T>(lexerData, controller, source);
 				}
 			}
 			else
 			{
 				if (lexerData.TrailingType == TrailingType.None)
 				{
-					return new SimpleReader<T>(lexerData, controller, source);
+					return new TokenlizerSimpler<T>(lexerData, controller, source);
 				}
 				else if (lexerData.TrailingType == TrailingType.Fixed)
 				{
-					return new FixedTrailingReader<T>(lexerData, controller, source);
+					return new TokenlizerFixedTrailing<T>(lexerData, controller, source);
 				}
 			}
-			return new RejectableTrailingReader<T>(lexerData, controller, source);
+			return new TokenlizerRejectableTrailing<T>(lexerData, controller, source);
 		}
 	}
 }
