@@ -14,10 +14,10 @@
 	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	<NeutralLanguage>en</NeutralLanguage>
 	<Version>$(VersionPrefix)</Version>
-	<VersionPrefix>1.0.2</VersionPrefix>
+	<VersionPrefix>1.0.3</VersionPrefix>
 	<RootNamespace>Cyjb.Compilers</RootNamespace>
 	<OutputType>Library</OutputType>
-	<DeploymentPackage>true</DeploymentPackage>
+	<DevelopmentDependency>true</DevelopmentDependency>
 	<Authors>CYJB</Authors>
 	<PackageTags>Compiler, T4</PackageTags>
   </PropertyGroup>

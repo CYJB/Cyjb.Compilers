@@ -5,15 +5,21 @@ Cyjb.Compilers.Design
 
 使用方式：
 
-1. 在通过 nuget 引用包时，需要指定 `GeneratePathProperty="true"`。
+1. 通过 nuget 依赖运行时 [Cyjb.Compilers.Runtim](https://www.nuget.org/packages/Cyjb.Compilers.Runtime)。
+
+2. 通过 nuget 依赖生成器 [Cyjb.Compilers.Design](https://www.nuget.org/packages/Cyjb.Compilers.Design)，注意请如下指定引用配置，可以正常编译项目并避免产生运行时引用。
 
 ```xml
 <ItemGroup>
-	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.0" GeneratePathProperty="true" />
+	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.0">
+		<GeneratePathProperty>True</GeneratePathProperty>
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
 </ItemGroup>
 ```
 
-2. 编写词法分析器或语法分析器的控制器类，例如：
+3. 编写词法分析器或语法分析器的控制器类，例如：
 
 ```CSharp
 using Cyjb.Compilers.Lexers;
@@ -43,7 +49,7 @@ public partial class TestCalcController : LexerController<Calc>
 }
 ```
 
-3. 添加与词法分析器同名的 tt 文件，内容如下：
+4. 添加与词法分析器同名的 tt 文件，内容如下：
 
 
 ```t4
