@@ -28,6 +28,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TestEscapeStrController.lexer.cs</LastGenOutput>
     </None>
+    <None Update="Lexers\TestProductionController.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestProductionController.lexer.cs</LastGenOutput>
+    </None>
     <None Update="Lexers\TestStrController.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TestStrController.lexer.cs</LastGenOutput>
@@ -47,6 +51,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TestEscapeStrController.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestProductionController.lexer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestProductionController.tt</DependentUpon>
     </Compile>
     <Compile Update="Lexers\TestStrController.lexer.cs">
       <DesignTime>True</DesignTime>

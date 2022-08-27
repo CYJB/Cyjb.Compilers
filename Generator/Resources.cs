@@ -108,6 +108,14 @@ internal partial class Resources
 	}
 	
 	/// <summary>
+	/// 返回类似 <c>Invalid regex '{0}': {1}.</c> 的本地化字符串。
+	/// </summary>
+	internal static string InvalidRegex(object? arg0, object? arg1)
+	{
+		return string.Format(resourceCulture, ResourceManager.GetString("InvalidRegex", resourceCulture)!, Format(arg0), Format(arg1));
+	}
+	
+	/// <summary>
 	/// 将指定对象格式化为字符串。
 	/// </summary>
 	/// <param name="value">要格式化的对象。</param>

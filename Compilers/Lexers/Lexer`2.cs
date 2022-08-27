@@ -102,6 +102,7 @@ public class Lexer<T, TController>
 	/// <param name="options">正则表达式的选项。</param>
 	/// <exception cref="ArgumentNullException"><paramref name="name"/> 为 <c>null</c>。</exception>
 	/// <exception cref="ArgumentNullException"><paramref name="regex"/> 为 <c>null</c>。</exception>
+	/// <exception cref="RegexParseException">正则表达式解析失败。</exception>
 	public void DefineRegex(string name, string regex, RegexOptions options = RegexOptions.None)
 	{
 		ArgumentNullException.ThrowIfNull(name);
@@ -115,9 +116,18 @@ public class Lexer<T, TController>
 	/// <param name="label">上下文的标签。</param>
 	public void DefineContext(string label)
 	{
-		if (contexts.ContainsKey(label))
+		if (contexts.TryGetValue(label, out LexerContext? context))
 		{
-			throw CompilerExceptions.DuplicateLexerContext(label);
+			if (context.Type == LexerContextType.Exclusive)
+			{
+				// 已声明相同类型的上下文，忽略即可。
+				return;
+			}
+			else
+			{
+				// 类型不同，报错。
+				throw CompilerExceptions.DuplicateLexerContext(label);
+			}
 		}
 		LexerContext item = new(contexts.Count, label, LexerContextType.Exclusive);
 		contexts[label] = item;
@@ -130,9 +140,18 @@ public class Lexer<T, TController>
 	/// <param name="label">上下文的标签。</param>
 	public void DefineInclusiveContext(string label)
 	{
-		if (contexts.ContainsKey(label))
+		if (contexts.TryGetValue(label, out LexerContext? context))
 		{
-			throw CompilerExceptions.DuplicateLexerContext(label);
+			if (context.Type == LexerContextType.Inclusive)
+			{
+				// 已声明相同类型的上下文，忽略即可。
+				return;
+			}
+			else
+			{
+				// 类型不同，报错。
+				throw CompilerExceptions.DuplicateLexerContext(label);
+			}
 		}
 		LexerContext item = new(contexts.Count, label, LexerContextType.Inclusive);
 		contexts[label] = item;

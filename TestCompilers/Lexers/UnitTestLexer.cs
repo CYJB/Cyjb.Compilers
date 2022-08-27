@@ -221,4 +221,56 @@ public class UnitTestLexer
 		Assert.AreEqual(new Token<Str>(Str.Str, @"aabb\""ccd\u0045\x47", new TextSpan(42, 65)), tokenlizer.Read());
 		Assert.AreEqual(Token<Str>.GetEndOfFile(65), tokenlizer.Read());
 	}
+
+	/// <summary>
+	/// 对产生式词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestDefineProduction()
+	{
+		Lexer<ProductionKind> lexer = new();
+		// 终结符的定义。
+		lexer.DefineSymbol(@"\d+|\w[\w\d]*").Kind(ProductionKind.Id);
+		lexer.DefineSymbol(@"\(").Kind(ProductionKind.LBrace);
+		lexer.DefineSymbol(@"\)").Kind(ProductionKind.RBrace);
+		lexer.DefineSymbol(@"\+").Kind(ProductionKind.Plus);
+		lexer.DefineSymbol(@"\*").Kind(ProductionKind.Star);
+		lexer.DefineSymbol(@"\?").Kind(ProductionKind.Question);
+		// 吃掉所有空白。
+		lexer.DefineSymbol(@"\s");
+
+		TestProuction(lexer.GetFactory());
+	}
+
+	/// <summary>
+	/// 对设计时产生式词法分析进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestInDesignProuction()
+	{
+		TestProuction(TestProductionController.Factory);
+	}
+
+	/// <summary>
+	/// 测试产生式词法分析器。
+	/// </summary>
+	/// <param name="factory">词法分析器的工厂。</param>
+	private static void TestProuction(ILexerFactory<ProductionKind> factory)
+	{
+		string source = "A B21 381 D  * E+(F G2)* ";
+		Tokenlizer<ProductionKind> tokenlizer = factory.CreateTokenlizer(source);
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "A", new TextSpan(0, 1)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "B21", new TextSpan(2, 5)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "381", new TextSpan(6, 9)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "D", new TextSpan(10, 11)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Star, "*", new TextSpan(13, 14)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "E", new TextSpan(15, 16)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Plus, "+", new TextSpan(16, 17)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.LBrace, "(", new TextSpan(17, 18)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "F", new TextSpan(18, 19)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "G2", new TextSpan(20, 22)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.RBrace, ")", new TextSpan(22, 23)), tokenlizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Star, "*", new TextSpan(23, 24)), tokenlizer.Read());
+		Assert.AreEqual(Token<ProductionKind>.GetEndOfFile(25), tokenlizer.Read());
+	}
 }

@@ -145,4 +145,8 @@
     <value>无效的词法分析符号动作“{0}”，形参必须为空或可选的。</value>
     <comment>无效的词法分析符号动作。</comment>
   </data>
+  <data name="InvalidRegex" xml:space="preserve">
+    <value>无效的正则表达式“{0}”：{1}。</value>
+    <comment>无效的正则表达式。</comment>
+  </data>
 </root>

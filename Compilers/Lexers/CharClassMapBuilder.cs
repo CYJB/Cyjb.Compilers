@@ -21,6 +21,67 @@ internal class CharClassMapBuilder
 	/// Unicode 类别对应的字符集合。
 	/// </summary>
 	private static readonly Dictionary<UnicodeCategory, CharSet> UnicodeCategories = BuildUnicodeCategories();
+	/// <summary>
+	/// 表示 UppercaseLetter &amp; LowercaseLetter 的 Unicode 类别。
+	/// </summary>
+	private const UnicodeCategory Letter = (UnicodeCategory)(-1);
+	/// <summary>
+	/// 表示 InitialQuotePunctuation &amp; FinalQuotePunctuation 的 Unicode 类别。
+	/// </summary>
+	private const UnicodeCategory QuotePunctuation = (UnicodeCategory)(-2);
+	/// <summary>
+	/// 表示 OpenPunctuation &amp; ClosePunctuation 的 Unicode 类别。
+	/// </summary>
+	private const UnicodeCategory PairPunctuation = (UnicodeCategory)(-3);
+	/// <summary>
+	/// Unicode 类别列表。
+	/// </summary>
+	/// <remarks>经过筛选的顺序，确保一次遍历就可以处理所有可能的组合。</remarks>
+	private static readonly UnicodeCategory[] UnicodeCategoryList = new[] {
+		UnicodeCategory.Control,
+		UnicodeCategory.LineSeparator,
+		UnicodeCategory.ParagraphSeparator,
+		UnicodeCategory.Surrogate,
+		UnicodeCategory.PrivateUse,
+		UnicodeCategory.EnclosingMark,
+		UnicodeCategory.SpaceSeparator,
+		UnicodeCategory.ConnectorPunctuation,
+		UnicodeCategory.LetterNumber,
+		UnicodeCategory.Format,
+		UnicodeCategory.TitlecaseLetter,
+		QuotePunctuation,
+		UnicodeCategory.FinalQuotePunctuation,
+		UnicodeCategory.InitialQuotePunctuation,
+		UnicodeCategory.DashPunctuation,
+		UnicodeCategory.CurrencySymbol,
+		UnicodeCategory.ModifierSymbol,
+		PairPunctuation,
+		UnicodeCategory.OpenPunctuation,
+		UnicodeCategory.ClosePunctuation,
+		UnicodeCategory.OtherNumber,
+		UnicodeCategory.MathSymbol,
+		UnicodeCategory.OtherSymbol,
+		UnicodeCategory.OtherPunctuation,
+		UnicodeCategory.ModifierLetter,
+		Letter,
+		UnicodeCategory.LowercaseLetter,
+		UnicodeCategory.UppercaseLetter,
+		UnicodeCategory.DecimalDigitNumber,
+		UnicodeCategory.SpacingCombiningMark,
+		UnicodeCategory.NonSpacingMark,
+		UnicodeCategory.OtherNotAssigned,
+		UnicodeCategory.OtherLetter,
+		// 以下需要重复检测一遍
+		UnicodeCategory.TitlecaseLetter,
+		UnicodeCategory.ModifierLetter,
+		UnicodeCategory.LowercaseLetter,
+		UnicodeCategory.UppercaseLetter,
+		UnicodeCategory.DecimalDigitNumber,
+		UnicodeCategory.SpacingCombiningMark,
+		UnicodeCategory.NonSpacingMark,
+		UnicodeCategory.OtherNotAssigned,
+		UnicodeCategory.OtherLetter,
+	};
 
 	/// <summary>
 	/// 构造 Unicode 类别对应的字符集合。
@@ -40,6 +101,25 @@ internal class CharClassMapBuilder
 			{
 				unicodeCategories[pair.Key] = set;
 			}
+		}
+		// 特殊定义
+		// UppercaseLetter & LowercaseLetter
+		{
+			CharSet set = new(unicodeCategories[UnicodeCategory.UppercaseLetter]);
+			set.UnionWith(unicodeCategories[UnicodeCategory.LowercaseLetter]);
+			unicodeCategories[Letter] = set;
+		}
+		// UppercaseLetter & LowercaseLetter
+		{
+			CharSet set = new(unicodeCategories[UnicodeCategory.InitialQuotePunctuation]);
+			set.UnionWith(unicodeCategories[UnicodeCategory.FinalQuotePunctuation]);
+			unicodeCategories[QuotePunctuation] = set;
+		}
+		// OpenPunctuation & ClosePunctuation
+		{
+			CharSet set = new(unicodeCategories[UnicodeCategory.OpenPunctuation]);
+			set.UnionWith(unicodeCategories[UnicodeCategory.ClosePunctuation]);
+			unicodeCategories[PairPunctuation] = set;
 		}
 		return unicodeCategories;
 	}
@@ -147,26 +227,27 @@ internal class CharClassMapBuilder
 		}
 		CharSet extraChars = new();
 		// 检查每个 Unicode 类别，找到最适合的简化。
-		foreach (KeyValuePair<UnicodeCategory, CharSet> pair in UnicodeCategories)
+		foreach (UnicodeCategory category in UnicodeCategoryList)
 		{
-			CharSet categoryChars = pair.Value;
+			CharSet categoryChars = UnicodeCategories[category];
 			int maxCharCount = -1;
 			int index = -1;
 			CharSet extra = new();
-			for (int i = 0; i < cnt; i++)
+			for (int j = 0; j < cnt; j++)
 			{
-				CharSet set = items[i].Chars;
+				CharSet set = items[j].Chars;
 				if (!set.Overlaps(categoryChars))
 				{
 					continue;
 				}
-				// 确保应用 Unicode 类别后能够减少范围个数。
+				// 确保应用 Unicode 类别后能够减少范围和字符个数。
 				CharSet usedSet = new(usedChars);
 				usedSet.IntersectWith(categoryChars);
 				CharSet appliedSet = new(set);
 				appliedSet.UnionWith(categoryChars);
 				appliedSet.ExceptWith(usedSet);
-				if (appliedSet.Ranges().Count() > rangeCount[i])
+				if (appliedSet.Ranges().Count() > rangeCount[j] ||
+					appliedSet.Count > set.Count)
 				{
 					continue;
 				}
@@ -175,7 +256,7 @@ internal class CharClassMapBuilder
 				coveredChars.IntersectWith(categoryChars);
 				if (coveredChars.Count > maxCharCount)
 				{
-					index = i;
+					index = j;
 					maxCharCount = coveredChars.Count;
 					extra = usedSet;
 					extra.SymmetricExceptWith(categoryChars);
@@ -187,7 +268,25 @@ internal class CharClassMapBuilder
 				continue;
 			}
 			// 简化字符类。
-			categories[pair.Key] = items[index].Index;
+			int charClassIndex = items[index].Index;
+			switch (category)
+			{
+				case Letter:
+					categories[UnicodeCategory.UppercaseLetter] = charClassIndex;
+					categories[UnicodeCategory.LowercaseLetter] = charClassIndex;
+					break;
+				case QuotePunctuation:
+					categories[UnicodeCategory.InitialQuotePunctuation] = charClassIndex;
+					categories[UnicodeCategory.FinalQuotePunctuation] = charClassIndex;
+					break;
+				case PairPunctuation:
+					categories[UnicodeCategory.OpenPunctuation] = charClassIndex;
+					categories[UnicodeCategory.ClosePunctuation] = charClassIndex;
+					break;
+				default:
+					categories[category] = charClassIndex;
+					break;
+			}
 			CharSet targetChars = items[index].Chars;
 			targetChars.ExceptWith(categoryChars);
 			if (targetChars.Count == 0)
@@ -195,6 +294,10 @@ internal class CharClassMapBuilder
 				items.RemoveAt(index);
 				rangeCount.RemoveAt(index);
 				cnt--;
+			}
+			else
+			{
+				rangeCount[index] = targetChars.Ranges().Count();
 			}
 			extraChars.UnionWith(extra);
 		}

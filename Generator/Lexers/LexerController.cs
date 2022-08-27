@@ -198,7 +198,14 @@ internal sealed partial class LexerController
 							{
 								regexOptions = exp.GetEnumValue<RegexOptions>();
 							}
-							lexer.DefineRegex(name, regex, regexOptions);
+							try
+							{
+								lexer.DefineRegex(name, regex, regexOptions);
+							}
+							catch (RegexParseException ex)
+							{
+								context.AddError(Resources.InvalidRegex(regex, ex.Message), attr);
+							}
 							break;
 						}
 					case "LexerSymbolAttribute":

@@ -145,4 +145,8 @@
     <value>Invalid lexer symbol action '{0}', parameter must empty or optional.</value>
     <comment>无效的词法分析符号动作。</comment>
   </data>
+  <data name="InvalidRegex" xml:space="preserve">
+    <value>Invalid regex '{0}': {1}.</value>
+    <comment>无效的正则表达式。</comment>
+  </data>
 </root>

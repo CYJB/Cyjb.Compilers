@@ -174,7 +174,7 @@ public struct Token<T> : IEquatable<Token<T>>
 	{
 		if (IsEndOfFile)
 		{
-			return "<<EOF>>";
+			return $"<<EOF>> at {Span.Start}";
 		}
 		return $"{Kind} \"{Text}\" at {Span}";
 	}
