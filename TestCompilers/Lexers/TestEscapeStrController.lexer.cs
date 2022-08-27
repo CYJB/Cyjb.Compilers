@@ -11,10 +11,8 @@ using System;
 using System.Globalization;
 using System.Text;
 using Cyjb.Compilers.Lexers;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Cyjb.Text;
 
 namespace TestCompilers.Lexers;
 

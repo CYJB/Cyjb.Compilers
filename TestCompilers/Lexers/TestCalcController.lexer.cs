@@ -8,10 +8,8 @@
 //------------------------------------------------------------------------------
 
 using Cyjb.Compilers.Lexers;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Cyjb.Text;
 
 namespace TestCompilers.Lexers;
 public partial class TestCalcController 
@@ -67,7 +65,7 @@ public partial class TestCalcController
 		// 字符类索引
 		int[] indexes = new[]
 		{
-			8388740, 8781983
+			8716421
 		};
 		// 字符类列表
 		int[] classes = new[]
@@ -77,15 +75,14 @@ public partial class TestCalcController
 			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1,
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+			-1, -1, -1, -1, -1, -1, -1, -1, 7
 		};
 		// 字符类 Unicode 类别
 		Dictionary<UnicodeCategory, int> categories = new()
 		{
-			 { UnicodeCategory.SpaceSeparator, 7 },
 			 { UnicodeCategory.LineSeparator, 7 },
 			 { UnicodeCategory.ParagraphSeparator, 7 },
-			 { UnicodeCategory.Control, 7 }
+			 { UnicodeCategory.SpaceSeparator, 7 }
 		};
 		// 状态转移
 		//    0  1  2  3  4  5  6  7  8 -> Symbols
