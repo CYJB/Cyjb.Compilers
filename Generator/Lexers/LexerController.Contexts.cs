@@ -20,7 +20,7 @@ internal sealed partial class LexerController
 			var contextBuilder = SyntaxBuilder.ObjectCreationExpression()
 				.Type(contextType)
 				.Argument(SyntaxBuilder.LiteralExpression(pair.Value.Index))
-				.Argument(SyntaxBuilder.LiteralExpression(pair.Value.Label));
+				.Argument(GetContextKey(pair.Value.Label));
 			if (pair.Value.EofAction != null)
 			{
 				contextBuilder.Argument(SyntaxBuilder.LambdaExpression()
@@ -29,9 +29,26 @@ internal sealed partial class LexerController
 				);
 			}
 			builder.Initializer(SyntaxBuilder.InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
-				.Add(SyntaxBuilder.LiteralExpression(pair.Key))
+				.Add(GetContextKey(pair.Key))
 				.Add(contextBuilder));
 		}
 		return builder;
+	}
+
+	/// <summary>
+	/// 返回表示上下文的键的表达式。
+	/// </summary>
+	/// <param name="key">上下文的键。</param>
+	/// <returns>表示上下文的键的表达式。</returns>
+	private static ExpressionBuilder GetContextKey(string key)
+	{
+		if (key == ContextData.Initial)
+		{
+			return SyntaxBuilder.IdentifierName("ContextData").Access("Initial");
+		}
+		else
+		{
+			return SyntaxBuilder.LiteralExpression(key);
+		}
 	}
 }

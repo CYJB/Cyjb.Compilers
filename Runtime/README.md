@@ -1,6 +1,8 @@
 Cyjb.Compilers.Runtime
 ====
 
+[![](https://img.shields.io/nuget/v/Cyjb.svg)](https://www.nuget.org/packages/Cyjb.Compilers.Runtime)
+
 提供编译相关运行时，基于 .NET 6。
 
 本项目包括一些与编译相关的基础接口，用于运行词法分析器和语法分析器。

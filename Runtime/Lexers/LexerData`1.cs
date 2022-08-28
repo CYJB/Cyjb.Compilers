@@ -28,11 +28,22 @@ namespace Cyjb.Compilers.Lexers
 		/// <param name="containsBeginningOfLine">是否包含行首匹配的规则。</param>
 		/// <param name="rejectable">是否用到了 Reject 动作。</param>
 		/// <param name="controllerType">词法分析控制器的类型。</param>
-		public LexerData(Dictionary<string, ContextData<T>> contexts, TerminalData<T>[] terminals,
+		public LexerData(Dictionary<string, ContextData<T>>? contexts, TerminalData<T>[] terminals,
 			CharClassMap charClasses, DfaStateData[] states, int[] next, int[] check,
 			TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
 		{
-			Contexts = contexts;
+			if (contexts == null)
+			{
+				// 使用默认上下文。
+				Contexts = new Dictionary<string, ContextData<T>>()
+				{
+					 { ContextData.Initial, new ContextData<T>(0, ContextData.Initial) }
+				};
+			}
+			else
+			{
+				Contexts = contexts;
+			}
 			Terminals = terminals;
 			CharClasses = charClasses;
 			States = states;

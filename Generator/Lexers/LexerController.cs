@@ -278,15 +278,22 @@ internal sealed partial class LexerController
 		// 工厂方法
 		TypeBuilder factoryInterfaceType = $"ILexerFactory<{kindType}>";
 		TypeBuilder factoryType = $"LexerFactory<{kindType}, {controllerSyntax.Identifier}>";
+		// 如果只包含默认上下文，那么不需要创建 contexts 变量。
+		bool hasOtherContext = data.Contexts.Count > 1;
 		var factoryMethod = SyntaxBuilder.MethodDeclaration(factoryInterfaceType, "CreateLexerFactory")
 			.Comment("创建词法分析器的工厂。")
 			.Attribute(SyntaxBuilder.Attribute("global::System.Runtime.CompilerServices.CompilerGeneratedAttribute"))
-			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword)
-			.Statement(SyntaxBuilder
+			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
+		if (hasOtherContext)
+		{
+			factoryMethod
+				.Statement(SyntaxBuilder
 				.LocalDeclarationStatement($"Dictionary<string, ContextData<{kindType}>>", "contexts")
 				.Comment("上下文数据")
 				.Value(ContextsValue(data))
-			)
+			);
+		}
+		factoryMethod
 			.Statement(SyntaxBuilder.LocalDeclarationStatement($"TerminalData<{kindType}>[]", "terminals")
 				.Comment("终结符数据")
 				.Value(TerminalsValue(data, symbolInfos))
@@ -335,7 +342,7 @@ internal sealed partial class LexerController
 		factoryMethod.Statement(SyntaxBuilder.LocalDeclarationStatement($"LexerData<{kindType}>", "lexerData")
 			.Comment("词法分析器的数据")
 			.Value(SyntaxBuilder.ObjectCreationExpression().ArgumentWrap(1)
-				.Argument(SyntaxBuilder.IdentifierName("contexts"))
+				.Argument(hasOtherContext ? SyntaxBuilder.IdentifierName("contexts") : SyntaxBuilder.LiteralExpression(null))
 				.Argument(SyntaxBuilder.IdentifierName("terminals"))
 				.Argument(charClassBuilder)
 				.Argument(SyntaxBuilder.IdentifierName("states"))
