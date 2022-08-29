@@ -53,12 +53,22 @@ public partial class TestCalcController : LexerController<Calc>
 
 4. 添加与词法分析器同名的 tt 文件，内容如下：
 
-
 ```t4
 <#@ include file="$(PkgCyjb_Compilers_Design)\content\CompilerTemplate.t4" #>
 ```
 
 运行 T4 模板后即可生成同名的 `.lexer.cs` 文件，包含了词法分析器的实现。
+
+正则表达式的定义与 [C# 正则表达式](https://docs.microsoft.com/zh-cn/dotnet/standard/base-types/regular-expression-language-quick-reference)一致，但不包含定位点、捕获、Lookaround、反向引用、替换构造和替代功能。
+
+正则表达式支持通过 `/` 指定向前看符号，支持指定匹配的上下文，并在执行动作时根据需要切换上下文。
+
+如果前缀可以与多个正则表达式匹配，那么：
+
+1. 总是选择最长的前缀。
+2. 如果最长的可能前缀与多个正则表达式匹配，总是选择先定义的正则表达式。
+
+支持启用 Reject 功能自行选择要匹配的正则表达式。
 
 欢迎访问我的[博客](http://www.cnblogs.com/cyjb/)获取更多信息。
 

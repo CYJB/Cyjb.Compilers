@@ -70,6 +70,12 @@ public class UnitTestLexer
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), tokenlizer.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), tokenlizer.Read());
 		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), tokenlizer.Read());
+		
+		Tokenlizer<Calc> errorTokenlizer = factory.CreateTokenlizer("1ss");
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), errorTokenlizer.Read());
+		Assert.ThrowsException<InvalidOperationException>(()=> errorTokenlizer.Read());
+		Assert.ThrowsException<InvalidOperationException>(()=> errorTokenlizer.Read());
+		Assert.AreEqual(Token<Calc>.GetEndOfFile(3), errorTokenlizer.Read());
 	}
 
 	/// <summary>

@@ -35,6 +35,17 @@ foreach (Token<Calc> token in reader)
 }
 ```
 
+正则表达式的定义与 [C# 正则表达式](https://docs.microsoft.com/zh-cn/dotnet/standard/base-types/regular-expression-language-quick-reference)一致，但不包含定位点、捕获、Lookaround、反向引用、替换构造和替代功能。
+
+正则表达式支持通过 `/` 指定向前看符号，支持指定匹配的上下文，并在执行动作时根据需要切换上下文。
+
+如果前缀可以与多个正则表达式匹配，那么：
+
+1. 总是选择最长的前缀。
+2. 如果最长的可能前缀与多个正则表达式匹配，总是选择先定义的正则表达式。
+
+支持启用 Reject 功能自行选择要匹配的正则表达式。
+
 还可以通过设计时定义词法分析控制器来创建词法分析器，例如下面构造一个与上面相同的的词法分析器：
 
 ```CSharp
@@ -62,11 +73,16 @@ public partial class TestCalcController : LexerController<Calc>
 }
 ```
 
-通过 nuget 引入 [Cyjb.Compilers.Design](https://www.nuget.org/packages/Cyjb.Compilers.Design/) 时，并指定 `GeneratePathProperty="true"`。
+通过 nuget 依赖运行时 [Cyjb.Compilers.Runtim](https://www.nuget.org/packages/Cyjb.Compilers.Runtime)。
+通过 nuget 依赖生成器 [Cyjb.Compilers.Design](https://www.nuget.org/packages/Cyjb.Compilers.Design)，注意请如下指定引用配置，可以正常编译项目并避免产生运行时引用。
 
 ```xml
 <ItemGroup>
-	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.0" GeneratePathProperty="true" />
+	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.0">
+		<GeneratePathProperty>True</GeneratePathProperty>
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
 </ItemGroup>
 ```
 
