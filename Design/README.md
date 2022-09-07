@@ -1,7 +1,7 @@
 Cyjb.Compilers.Design
 ====
 
-[![](https://img.shields.io/nuget/v/Cyjb.svg)](https://www.nuget.org/packages/Cyjb.Compilers.Design)
+[![](https://img.shields.io/nuget/v/Cyjb.Compilers.Design.svg)](https://www.nuget.org/packages/Cyjb.Compilers.Design)
 
 允许通过设计时 [T4 模板](https://docs.microsoft.com/zh-cn/visualstudio/modeling/code-generation-and-t4-text-templates?view=vs-2022)生成词法分析器和语法分析器的实现。
 

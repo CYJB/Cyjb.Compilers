@@ -1,7 +1,7 @@
 Cyjb.Compilers.Runtime
 ====
 
-[![](https://img.shields.io/nuget/v/Cyjb.svg)](https://www.nuget.org/packages/Cyjb.Compilers.Runtime)
+[![](https://img.shields.io/nuget/v/Cyjb.Compilers.Runtime.svg)](https://www.nuget.org/packages/Cyjb.Compilers.Runtime)
 
 提供编译相关运行时，基于 .NET 6。
 
