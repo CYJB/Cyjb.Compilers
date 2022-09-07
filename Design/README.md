@@ -13,7 +13,7 @@ Cyjb.Compilers.Design
 
 ```xml
 <ItemGroup>
-	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.0">
+	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.4">
 		<GeneratePathProperty>True</GeneratePathProperty>
 		<PrivateAssets>all</PrivateAssets>
 		<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
