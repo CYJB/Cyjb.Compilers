@@ -68,13 +68,19 @@ internal class DfaDataBuilder
 			}
 			// 找到合适的 next 空当。
 			int minIndex = transitions[0].Key;
-			BitList pattern = new(transitions[^1].Key - minIndex + 1, false);
+			int length = transitions[^1].Key + 1 - minIndex;
+			BitList pattern = new(length, false);
 			foreach (KeyValuePair<int, DfaState> pair in transitions)
 			{
 				pattern[pair.Key - minIndex] = true;
 			}
-			int index = FindSpace(pattern);
-			int restCount = index + pattern.Count - next.Count;
+			int index = spaces.FindSpace(pattern, nextSpaceIndex);
+			// 确保空白记录包含足够的空间
+			if (spaces.Count < index + length)
+			{
+				spaces.Resize(index + length);
+			}
+			int restCount = index + length - next.Count;
 			if (restCount > 0)
 			{
 				next.AddRange(Enumerable.Repeat(DfaStateData.InvalidState, restCount));
@@ -89,9 +95,10 @@ internal class DfaDataBuilder
 				check[idx] = i;
 			}
 			// 更新 nextSpaceIndex 和 lastFilledIndex
-			while (!spaces[nextSpaceIndex])
+			nextSpaceIndex = spaces.IndexOf(false, nextSpaceIndex);
+			if (nextSpaceIndex < 0)
 			{
-				nextSpaceIndex++;
+				nextSpaceIndex = spaces.Count;
 			}
 			for (int j = spaces.Count - 1; j >= lastFilledIndex; j--)
 			{
@@ -163,52 +170,6 @@ internal class DfaDataBuilder
 			}
 		}
 		return result;
-	}
-
-	/// <summary>
-	/// 寻找可以放入指定模式的最小空当索引。
-	/// </summary>
-	/// <param name="pattern">要插入的模式。</param>
-	/// <returns>最小空当索引。</returns>
-	private int FindSpace(BitList pattern)
-	{
-		// 使用扩展的 BNDM 算法。
-		int cnt = pattern.Count;
-		int pos = nextSpaceIndex;
-		// 确保空白记录包含足够的空间
-		if (spaces.Count < lastFilledIndex + cnt * 2)
-		{
-			spaces.Resize(lastFilledIndex + cnt * 2);
-		}
-		pattern.Not();
-		BitList match = new(cnt, true);
-		while (true)
-		{
-			int i = cnt;
-			int last = cnt;
-			match.FillAll(true);
-			while (!match.AllFalse())
-			{
-				if (spaces[pos + i - 1])
-				{
-					match.And(pattern);
-				}
-				i--;
-				if (match[0])
-				{
-					if (i > 0)
-					{
-						last = i;
-					}
-					else
-					{
-						return pos;
-					}
-				}
-				match.RightShift(1);
-			}
-			pos += last;
-		}
 	}
 
 	/// <summary>

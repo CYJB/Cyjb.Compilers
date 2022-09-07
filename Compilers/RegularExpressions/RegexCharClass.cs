@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Cyjb.Collections;
+using Cyjb.Globalization;
 
 namespace Cyjb.Compilers.RegularExpressions;
 
@@ -262,7 +263,7 @@ public sealed class RegexCharClass : IEquatable<RegexCharClass>
 		set.UnionWith(ranges);
 		foreach (UnicodeCategory category in categories)
 		{
-			set.UnionWith(UnicodeCategoryCharSet.GetCharSet(category));
+			set.UnionWith(category.GetChars());
 		}
 		if (negate)
 		{

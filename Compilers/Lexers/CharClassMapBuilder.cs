@@ -1,6 +1,6 @@
 using System.Globalization;
 using Cyjb.Collections;
-using Cyjb.Compilers.RegularExpressions;
+using Cyjb.Globalization;
 
 namespace Cyjb.Compilers.Lexers;
 
@@ -10,6 +10,32 @@ namespace Cyjb.Compilers.Lexers;
 internal class CharClassMapBuilder
 {
 	/// <summary>
+	/// 简化字符集合字符串表示用到的 Unicode 类别。
+	/// </summary>
+	private class UnicodeCategoryInfo
+	{
+		/// <summary>
+		/// 使用指定的 Unicode 类别和相应字符集合初始化 <see cref="UnicodeCategoryInfo"/> 类的新实例。
+		/// </summary>
+		/// <param name="chars">Unicode 类别对应的字符集合。</param>
+		/// <param name="categories">Unicode 类别。</param>
+		public UnicodeCategoryInfo(CharSet chars, params UnicodeCategory[] categories)
+		{
+			Chars = chars;
+			Categories = categories;
+		}
+
+		/// <summary>
+		/// Unicode 类别对应的字符集合。
+		/// </summary>
+		public CharSet Chars { get; }
+		/// <summary>
+		/// Unicode 类别。
+		/// </summary>
+		public UnicodeCategory[] Categories { get; }
+	}
+
+	/// <summary>
 	/// ASCII 范围的长度。
 	/// </summary>
 	private const int AsciiLength = 0x80;
@@ -18,110 +44,60 @@ internal class CharClassMapBuilder
 	/// </summary>
 	private const int MergedRangeLength = 5;
 	/// <summary>
-	/// Unicode 类别对应的字符集合。
+	/// Unicode 类别信息。
 	/// </summary>
-	private static readonly Dictionary<UnicodeCategory, CharSet> UnicodeCategories = BuildUnicodeCategories();
-	/// <summary>
-	/// 表示 UppercaseLetter &amp; LowercaseLetter 的 Unicode 类别。
-	/// </summary>
-	private const UnicodeCategory Letter = (UnicodeCategory)(-1);
-	/// <summary>
-	/// 表示 InitialQuotePunctuation &amp; FinalQuotePunctuation 的 Unicode 类别。
-	/// </summary>
-	private const UnicodeCategory QuotePunctuation = (UnicodeCategory)(-2);
-	/// <summary>
-	/// 表示 OpenPunctuation &amp; ClosePunctuation 的 Unicode 类别。
-	/// </summary>
-	private const UnicodeCategory PairPunctuation = (UnicodeCategory)(-3);
-	/// <summary>
-	/// Unicode 类别列表。
-	/// </summary>
-	/// <remarks>经过筛选的顺序，确保一次遍历就可以处理所有可能的组合。</remarks>
-	private static readonly UnicodeCategory[] UnicodeCategoryList = new[] {
-		UnicodeCategory.Control,
-		UnicodeCategory.LineSeparator,
-		UnicodeCategory.ParagraphSeparator,
-		UnicodeCategory.Surrogate,
-		UnicodeCategory.PrivateUse,
-		UnicodeCategory.EnclosingMark,
-		UnicodeCategory.SpaceSeparator,
-		UnicodeCategory.ConnectorPunctuation,
-		UnicodeCategory.LetterNumber,
-		UnicodeCategory.Format,
-		UnicodeCategory.TitlecaseLetter,
-		QuotePunctuation,
-		UnicodeCategory.FinalQuotePunctuation,
-		UnicodeCategory.InitialQuotePunctuation,
-		UnicodeCategory.DashPunctuation,
-		UnicodeCategory.CurrencySymbol,
-		UnicodeCategory.ModifierSymbol,
-		PairPunctuation,
-		UnicodeCategory.OpenPunctuation,
-		UnicodeCategory.ClosePunctuation,
-		UnicodeCategory.OtherNumber,
-		UnicodeCategory.MathSymbol,
-		UnicodeCategory.OtherSymbol,
-		UnicodeCategory.OtherPunctuation,
-		UnicodeCategory.ModifierLetter,
-		Letter,
-		UnicodeCategory.LowercaseLetter,
-		UnicodeCategory.UppercaseLetter,
-		UnicodeCategory.DecimalDigitNumber,
-		UnicodeCategory.SpacingCombiningMark,
-		UnicodeCategory.NonSpacingMark,
-		UnicodeCategory.OtherNotAssigned,
-		UnicodeCategory.OtherLetter,
-		// 以下需要重复检测一遍
-		UnicodeCategory.TitlecaseLetter,
-		UnicodeCategory.ModifierLetter,
-		UnicodeCategory.LowercaseLetter,
-		UnicodeCategory.UppercaseLetter,
-		UnicodeCategory.DecimalDigitNumber,
-		UnicodeCategory.SpacingCombiningMark,
-		UnicodeCategory.NonSpacingMark,
-		UnicodeCategory.OtherNotAssigned,
-		UnicodeCategory.OtherLetter,
-	};
+	private static readonly UnicodeCategoryInfo[] UnicodeCategoryInfos = BuildUnicodeCategories();
 
 	/// <summary>
-	/// 构造 Unicode 类别对应的字符集合。
+	/// 构造 Unicode 类别信息。
 	/// </summary>
-	/// <returns>Unicode 类别对应的字符集合。</returns>
-	private static Dictionary<UnicodeCategory, CharSet> BuildUnicodeCategories()
+	/// <returns>Unicode 类别信息。</returns>
+	private static UnicodeCategoryInfo[] BuildUnicodeCategories()
 	{
-		IReadOnlyDictionary<UnicodeCategory, CharSet> map = UnicodeCategoryCharSet.CategoryCharSets;
-		Dictionary<UnicodeCategory, CharSet> unicodeCategories = new(map.Count);
-		foreach (KeyValuePair<UnicodeCategory, CharSet> pair in map)
+		UnicodeCategory[] categories = Enum.GetValues<UnicodeCategory>();
+		UnicodeCategoryInfo[] infos = new UnicodeCategoryInfo[categories.Length + 6];
+		int i = 0;
+		for (; i < categories.Length; i++)
 		{
+			UnicodeCategory category = categories[i];
 			// 只需要 ASCII 之外的部分。
-			CharSet set = new(pair.Value);
+			CharSet set = new(category.GetChars());
 			set.Remove('\0', '\x7F');
-			// 忽略空和只包含一个字符范围的 Unicode 类别
-			if (set.Count > 0 || set.Ranges().Count() > 1)
-			{
-				unicodeCategories[pair.Key] = set;
-			}
+			infos[i] = new UnicodeCategoryInfo(set, category);
 		}
-		// 特殊定义
+		// 定制的特殊 Unicode 类别
+		CharSet lull = infos[(int)UnicodeCategory.UppercaseLetter].Chars +
+			infos[(int)UnicodeCategory.LowercaseLetter].Chars;
 		// UppercaseLetter & LowercaseLetter
-		{
-			CharSet set = new(unicodeCategories[UnicodeCategory.UppercaseLetter]);
-			set.UnionWith(unicodeCategories[UnicodeCategory.LowercaseLetter]);
-			unicodeCategories[Letter] = set;
-		}
-		// UppercaseLetter & LowercaseLetter
-		{
-			CharSet set = new(unicodeCategories[UnicodeCategory.InitialQuotePunctuation]);
-			set.UnionWith(unicodeCategories[UnicodeCategory.FinalQuotePunctuation]);
-			unicodeCategories[QuotePunctuation] = set;
-		}
+		infos[i++] = new UnicodeCategoryInfo(lull,
+			UnicodeCategory.UppercaseLetter, UnicodeCategory.LowercaseLetter
+			);
+		// UppercaseLetter & LowercaseLetter & TitlecaseLetter
+		infos[i++] = new UnicodeCategoryInfo(lull + infos[(int)UnicodeCategory.TitlecaseLetter].Chars,
+			UnicodeCategory.UppercaseLetter, UnicodeCategory.LowercaseLetter, UnicodeCategory.TitlecaseLetter
+			);
+		CharSet mn = infos[(int)UnicodeCategory.NonSpacingMark].Chars;
+		CharSet mnmc = mn + infos[(int)UnicodeCategory.SpacingCombiningMark].Chars;
+		// NonSpacingMark & SpacingCombiningMark
+		infos[i++] = new UnicodeCategoryInfo(mnmc,
+			UnicodeCategory.NonSpacingMark, UnicodeCategory.SpacingCombiningMark
+			);
+		// NonSpacingMark & SpacingCombiningMark & EnclosingMark
+		infos[i++] = new UnicodeCategoryInfo(mnmc + infos[(int)UnicodeCategory.EnclosingMark].Chars,
+			UnicodeCategory.NonSpacingMark, UnicodeCategory.SpacingCombiningMark, UnicodeCategory.EnclosingMark
+			);
+		// NonSpacingMark & EnclosingMark
+		infos[i++] = new UnicodeCategoryInfo(mn + infos[(int)UnicodeCategory.EnclosingMark].Chars,
+			UnicodeCategory.NonSpacingMark, UnicodeCategory.EnclosingMark
+			);
 		// OpenPunctuation & ClosePunctuation
-		{
-			CharSet set = new(unicodeCategories[UnicodeCategory.OpenPunctuation]);
-			set.UnionWith(unicodeCategories[UnicodeCategory.ClosePunctuation]);
-			unicodeCategories[PairPunctuation] = set;
-		}
-		return unicodeCategories;
+		infos[i++] = new UnicodeCategoryInfo(infos[(int)UnicodeCategory.OpenPunctuation].Chars +
+			infos[(int)UnicodeCategory.ClosePunctuation].Chars,
+			UnicodeCategory.OpenPunctuation, UnicodeCategory.ClosePunctuation
+			);
+		// 按字符个数从小到大排序。
+		Array.Sort(infos, (left, right) => left.Chars.Count - right.Chars.Count);
+		return infos;
 	}
 
 	/// <summary>
@@ -218,93 +194,94 @@ internal class CharClassMapBuilder
 		}
 		// 计算所有被用到的字符，并筛选需要检查的字符集合。
 		List<int> rangeCount = new(cnt);
-		CharSet usedChars = new();
-		for (int i = 0; i < cnt; i++)
+		CharSet fullChars = new();
+		foreach (CharClassItem item in items)
 		{
-			CharSet set = items[i].Chars;
-			usedChars.UnionWith(set);
-			rangeCount.Add(set.Ranges().Count());
+			CharSet set = item.Chars;
+			fullChars.UnionWith(set);
+			rangeCount.Add(set.RangeCount());
 		}
-		CharSet extraChars = new();
+		CharSet negateChars = new();
 		// 检查每个 Unicode 类别，找到最适合的简化。
-		foreach (UnicodeCategory category in UnicodeCategoryList)
+		List<UnicodeCategoryInfo> infos = new(UnicodeCategoryInfos);
+		List<UnicodeCategoryInfo> nextInfos = new();
+		bool changed = true;
+		while (changed)
 		{
-			CharSet categoryChars = UnicodeCategories[category];
-			int maxCharCount = -1;
-			int index = -1;
-			CharSet extra = new();
-			for (int j = 0; j < cnt; j++)
+			changed = false;
+			foreach (UnicodeCategoryInfo info in infos)
 			{
-				CharSet set = items[j].Chars;
-				if (!set.Overlaps(categoryChars))
+				CharSet catChars = info.Chars;
+				CharSet usedCatChars = catChars & fullChars;
+				if (usedCatChars.Count == 0)
 				{
 					continue;
 				}
-				// 确保应用 Unicode 类别后能够减少范围和字符个数。
-				CharSet usedSet = new(usedChars);
-				usedSet.IntersectWith(categoryChars);
-				CharSet appliedSet = new(set);
-				appliedSet.UnionWith(categoryChars);
-				appliedSet.ExceptWith(usedSet);
-				if (appliedSet.Ranges().Count() > rangeCount[j] ||
-					appliedSet.Count > set.Count)
+				int maxCharCount = -1;
+				int index = -1;
+				CharSet curNegateChars = new();
+				for (int i = 0; i < cnt; i++)
 				{
+					CharSet curChars = items[i].Chars;
+					// 允许最多尝试 10% 的排除字符。
+					if (!curChars.Overlaps(catChars) || 1.1 * curChars.Count < catChars.Count)
+					{
+						continue;
+					}
+					// 确保应用 Unicode 类别后能够减少范围和字符个数。
+					CharSet appliedChars = new(curChars);
+					appliedChars.UnionWith(catChars);
+					appliedChars.ExceptWith(usedCatChars);
+					if (appliedChars.RangeCount() > rangeCount[i] || appliedChars.Count > curChars.Count)
+					{
+						continue;
+					}
+					// 找到简化字符个数最多的字符类。
+					CharSet coveredChars = curChars & catChars;
+					if (coveredChars.Count > maxCharCount)
+					{
+						index = i;
+						maxCharCount = coveredChars.Count;
+						curNegateChars = appliedChars;
+					}
+				}
+				if (index == -1)
+				{
+					// 没有找到可以化简的字符类，需要在后面重复检测，避免遗漏。
+					nextInfos.Add(info);
 					continue;
 				}
-				// 找到简化字符个数最多的字符类。
-				CharSet coveredChars = new(set);
-				coveredChars.IntersectWith(categoryChars);
-				if (coveredChars.Count > maxCharCount)
+				// 简化字符类。
+				int charClassIndex = items[index].Index;
+				foreach (UnicodeCategory category in info.Categories)
 				{
-					index = j;
-					maxCharCount = coveredChars.Count;
-					extra = usedSet;
-					extra.SymmetricExceptWith(categoryChars);
-				}
-			}
-			if (index == -1)
-			{
-				// 没有找到可以化简的字符类。
-				continue;
-			}
-			// 简化字符类。
-			int charClassIndex = items[index].Index;
-			switch (category)
-			{
-				case Letter:
-					categories[UnicodeCategory.UppercaseLetter] = charClassIndex;
-					categories[UnicodeCategory.LowercaseLetter] = charClassIndex;
-					break;
-				case QuotePunctuation:
-					categories[UnicodeCategory.InitialQuotePunctuation] = charClassIndex;
-					categories[UnicodeCategory.FinalQuotePunctuation] = charClassIndex;
-					break;
-				case PairPunctuation:
-					categories[UnicodeCategory.OpenPunctuation] = charClassIndex;
-					categories[UnicodeCategory.ClosePunctuation] = charClassIndex;
-					break;
-				default:
 					categories[category] = charClassIndex;
-					break;
+				}
+				CharSet targetChars = items[index].Chars;
+				targetChars.ExceptWith(catChars);
+				if (targetChars.Count == 0)
+				{
+					items.RemoveAt(index);
+					rangeCount.RemoveAt(index);
+					cnt--;
+				}
+				else
+				{
+					rangeCount[index] = targetChars.Ranges().Count();
+				}
+				negateChars.UnionWith(curNegateChars);
+				changed = true;
 			}
-			CharSet targetChars = items[index].Chars;
-			targetChars.ExceptWith(categoryChars);
-			if (targetChars.Count == 0)
-			{
-				items.RemoveAt(index);
-				rangeCount.RemoveAt(index);
-				cnt--;
-			}
-			else
-			{
-				rangeCount[index] = targetChars.Ranges().Count();
-			}
-			extraChars.UnionWith(extra);
+			var temp = infos;
+			infos = nextInfos;
+			nextInfos = temp;
+			nextInfos.Clear();
 		}
-		if (extraChars.Count > 0)
+		negateChars.ExceptWith(fullChars);
+		if (negateChars.Count > 0)
 		{
 			// 添加需要被额外指定为 -1（不存在）的字符
-			items.Add(new CharClassItem(-1, extraChars));
+			items.Add(new CharClassItem(-1, negateChars));
 		}
 	}
 

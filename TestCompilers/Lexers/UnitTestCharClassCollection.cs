@@ -4,6 +4,7 @@ using System.Globalization;
 using Cyjb;
 using Cyjb.Collections;
 using Cyjb.Compilers.Lexers;
+using Cyjb.Globalization;
 using Cyjb.Test;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -41,21 +42,8 @@ public class UnitTestCharClassCollection
 		charClassCollection.Invoke("GetCharClassSet", new CharSet("\u0281\u0284\u0288"));
 		charClassCollection.Invoke("GetCharClassSet", new CharSet("\u0283\u0287"));
 		charClassCollection.Invoke("GetCharClassSet", new CharSet("\u028A"));
-		CharSet upperSet = new();
-		CharSet lowerSet = new();
-		for (int i = 0; i < char.MaxValue; i++)
-		{
-			char ch = (char)i;
-			switch (char.GetUnicodeCategory(ch))
-			{
-				case UnicodeCategory.UppercaseLetter:
-					upperSet.Add(ch);
-					break;
-				case UnicodeCategory.LowercaseLetter:
-					lowerSet.Add(ch);
-					break;
-			}
-		}
+		CharSet upperSet = new(UnicodeCategory.UppercaseLetter.GetChars());
+		CharSet lowerSet = new(UnicodeCategory.LowercaseLetter.GetChars());
 		upperSet.Remove('\0', '\x7F');
 		upperSet.Remove('\u03AA', '\u03AD');
 		lowerSet.Remove('\0', '\x7F');
