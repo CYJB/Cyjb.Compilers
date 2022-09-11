@@ -7,7 +7,7 @@ Cyjb.Compilers.Design
 
 使用方式：
 
-1. 通过 nuget 依赖运行时 [Cyjb.Compilers.Runtim](https://www.nuget.org/packages/Cyjb.Compilers.Runtime)。
+1. 通过 nuget 依赖运行时 [Cyjb.Compilers.Runtime](https://www.nuget.org/packages/Cyjb.Compilers.Runtime)。
 
 2. 通过 nuget 依赖生成器 [Cyjb.Compilers.Design](https://www.nuget.org/packages/Cyjb.Compilers.Design)，注意请如下指定引用配置，可以正常编译项目并避免产生运行时引用。
 
