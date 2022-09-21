@@ -4,7 +4,6 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析中上下文的数据。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-[Serializable]
 public sealed class ContextData<T>
 	where T : struct
 {

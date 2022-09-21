@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Cyjb.Collections.ObjectModel;
 
 namespace Cyjb.Compilers.Lexers;
@@ -175,6 +176,30 @@ public sealed class DfaState : ReadOnlyCollectionBase<DfaState>
 		foreach (CharClass charClass in list)
 		{
 			transitions.Remove(charClass);
+		}
+	}
+
+	/// <summary>
+	/// 返回符号信息。
+	/// </summary>
+	/// <returns>符号信息。</returns>
+	public string GetSymbolInfo()
+	{
+		// 输出对应的符号索引。
+		if (Symbols.Length > 0)
+		{
+			StringBuilder result = new();
+			result.Append(string.Join(", ", Symbols));
+			if (ConflictedSymbols.Length > 0)
+			{
+				result.Append(" conflict ");
+				result.Append(string.Join(", ", ConflictedSymbols));
+			}
+			return result.ToString();
+		}
+		else
+		{
+			return string.Empty;
 		}
 	}
 

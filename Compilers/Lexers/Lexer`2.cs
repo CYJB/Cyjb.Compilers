@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
 using Cyjb.Compilers.RegularExpressions;
 
@@ -81,9 +80,9 @@ public class Lexer<T, TController>
 	/// </summary>
 	private bool containsBeginningOfLine = false;
 	/// <summary>
-	/// 最近一次构造的 DFA。
+	/// 最近构造的 DFA。
 	/// </summary>
-	private Dfa? lastDfa;
+	private Dfa? dfa;
 
 	/// <summary>
 	/// 初始化 <see cref="Lexer{T,TController}"/> 类的新实例。
@@ -239,8 +238,7 @@ public class Lexer<T, TController>
 		{
 			headCount *= 2;
 		}
-		Dfa dfa = nfa.BuildDFA(headCount, rejectable);
-		lastDfa = dfa;
+		dfa = nfa.BuildDFA(headCount, rejectable);
 		TerminalData<T>[] terminals = this.terminals.Select(t => t.GetData()).ToArray();
 		DfaData data = dfa.GetData();
 		return new LexerData<T>(contexts, terminals, dfa.GetCharClassMap(), data.States, data.Next, data.Check,
@@ -264,11 +262,11 @@ public class Lexer<T, TController>
 	/// <returns>最近一次构造的 DFA 的字符类描述信息。</returns>
 	public string GetCharClassDescription()
 	{
-		if (lastDfa == null)
+		if (dfa == null)
 		{
 			return string.Empty;
 		}
-		return lastDfa.GetCharClassDescription();
+		return dfa.GetCharClassDescription();
 	}
 
 	/// <summary>
@@ -277,11 +275,11 @@ public class Lexer<T, TController>
 	/// <returns>最近一次构造的 DFA 的状态描述信息。</returns>
 	public string GetStateDescription()
 	{
-		if (lastDfa == null)
+		if (dfa == null)
 		{
 			return string.Empty;
 		}
-		return lastDfa.GetStateDescription();
+		return dfa.GetStateDescription();
 	}
 
 	/// <summary>

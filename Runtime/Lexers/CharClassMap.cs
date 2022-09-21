@@ -5,7 +5,6 @@ namespace Cyjb.Compilers.Lexers;
 /// <summary>
 /// 表示字符类的映射。
 /// </summary>
-[Serializable]
 public sealed class CharClassMap
 {
 	/// <summary>

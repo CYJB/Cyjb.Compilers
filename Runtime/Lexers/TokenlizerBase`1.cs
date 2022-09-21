@@ -103,7 +103,7 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 					Source.Read();
 					text = Source.Accept();
 				}
-				throw new InvalidOperationException(Resources.UnrecognizedToken(text, Start));
+				throw new TokenlizerException(text, Start);
 			}
 		}
 	}
@@ -123,30 +123,6 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 	protected int NextState(int state)
 	{
 		char ch = Source.Read();
-		if (ch == SourceReader.InvalidCharacter)
-		{
-			return DfaStateData.InvalidState;
-		}
-		int charClass = data.CharClasses.GetCharClass(ch);
-		DfaStateData stateData;
-		int len = data.Check.Length;
-		while (state >= 0)
-		{
-			stateData = data.States[state];
-			int idx = stateData.BaseIndex + charClass;
-			if (idx < 0 || idx >= len)
-			{
-				return DfaStateData.InvalidState;
-			}
-			if (data.Check[idx] == state)
-			{
-				return data.Next[idx];
-			}
-			else
-			{
-				state = stateData.DefaultState;
-			}
-		}
-		return DfaStateData.InvalidState;
+		return data.NextState(state, ch);
 	}
 }

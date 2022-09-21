@@ -31,6 +31,7 @@ public abstract class Tokenlizer<T> : IDisposable, IEnumerable<Token<T>>
 	/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
 	/// </summary>
 	/// <returns>输入流中的下一个词法单元。</returns>
+	/// <exception cref="TokenlizerException">发现了未识别的字符。</exception>
 	public abstract Token<T> Read();
 
 	#region IDisposable 成员

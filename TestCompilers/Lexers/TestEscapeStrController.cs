@@ -10,7 +10,6 @@ namespace TestCompilers.Lexers;
 /// </summary>
 [LexerContext("str")]
 [LexerContext("vstr")]
-
 public partial class TestEscapeStrController : LexerController<Str>
 {
 	private const string CtxStr = "str";

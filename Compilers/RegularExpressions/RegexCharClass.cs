@@ -9,7 +9,6 @@ namespace Cyjb.Compilers.RegularExpressions;
 /// <summary>
 /// 表示正则表达式的字符类。
 /// </summary>
-[Serializable]
 public sealed class RegexCharClass : IEquatable<RegexCharClass>
 {
 

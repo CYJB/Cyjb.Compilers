@@ -347,7 +347,7 @@ public sealed class Dfa : ReadOnlyListBase<DfaState>
 	{
 		StringBuilder text = new();
 		int charClassCount = charClasses.Count;
-		int width = Utils.GetIndexWidth(charClassCount);
+		int width = Output.GetIndexWidth(charClassCount);
 		for (int i = 0; i < charClassCount; i++)
 		{
 			text.AppendFormat("{0}: {1}", i.ToString().PadLeft(width), charClasses[i]);
@@ -363,47 +363,39 @@ public sealed class Dfa : ReadOnlyListBase<DfaState>
 	public string GetStateDescription()
 	{
 		StringBuilder text = new();
-		int stateCount = states.Count;
-		int stateIndexWidth = Utils.GetIndexWidth(stateCount);
-		text.Append(new string(' ', stateIndexWidth));
-		// 状态转移之间使用两个空格分割。
+		List<OutputTableColumn> columns = new();
 		int charClassCount = charClasses.Count;
-		int width = Math.Max(Utils.GetIndexWidth(charClassCount), stateIndexWidth) + 2;
 		for (int i = 0; i < charClassCount; i++)
 		{
-			text.AppendFormat(i.ToString().PadLeft(width));
+			columns.Add(new OutputTableColumn(i.ToString()));
 		}
-		text.AppendLine(" -> Symbols");
-		for (int j = 0; j < stateCount; j++)
+		columns.Add(new OutputTableColumn(" -> Symbols", false));
+		List<string[]> table = new();
+		List<string> row = new();
+		foreach(DfaState state in states)
 		{
-			text.AppendFormat(j.ToString().PadLeft(stateIndexWidth));
-			DfaState state = states[j];
-			for (int i = 0; i < charClassCount; i++)
+			row.Clear();
+			for (int j = 0; j < charClassCount; j++)
 			{
-				// 状态转移之间使用两个空格分割。
-				DfaState? nextState = state[charClasses[i]];
+				DfaState? nextState = state[charClasses[j]];
 				if (nextState == null)
 				{
-					text.Append(new string(' ', width));
+					row.Add(string.Empty);
 				}
 				else
 				{
-					text.AppendFormat(nextState.Index.ToString().PadLeft(width));
+					row.Add(nextState.Index.ToString());
 				}
 			}
-			// 输出对应的符号索引。
-			if (state.Symbols.Length > 0)
+			string symbolInfo = state.GetSymbolInfo();
+			if (!symbolInfo.IsNullOrEmpty())
 			{
-				text.Append(" -> ");
-				text.Append(string.Join(", ", state.Symbols));
-				if (state.ConflictedSymbols.Length > 0)
-				{
-					text.Append(" conflict ");
-					text.Append(string.Join(", ", state.ConflictedSymbols));
-				}
+				symbolInfo = " -> " + symbolInfo;
 			}
-			text.AppendLine();
+			row.Add(symbolInfo);
+			table.Add(row.ToArray());
 		}
+		Output.AppendTable(text, columns, table);
 		return text.ToString();
 	}
 }

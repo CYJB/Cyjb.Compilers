@@ -9,14 +9,11 @@ namespace Cyjb.Compilers.Lexers;
 public class LexerController<T>
 	where T : struct
 {
+
 	/// <summary>
 	/// 当前词法分析的上下文。
 	/// </summary>
 	private IReadOnlyDictionary<string, ContextData<T>> contexts;
-	/// <summary>
-	/// 上下文的堆栈。
-	/// </summary>
-	private readonly Stack<ContextData<T>> contextStack = new();
 	/// <summary>
 	/// 当前的上下文。
 	/// </summary>
@@ -24,7 +21,11 @@ public class LexerController<T>
 	/// <summary>
 	/// 动作的处理器。
 	/// </summary>
-	private Action<Delegate> actionHandler;
+	private Action<Delegate, LexerController<T>> actionHandler;
+	/// <summary>
+	/// 上下文的堆栈。
+	/// </summary>
+	private readonly Stack<ContextData<T>> contextStack = new();
 	/// <summary>
 	/// 是否允许 Reject 动作。
 	/// </summary>
@@ -39,22 +40,19 @@ public class LexerController<T>
 	/// <summary>
 	/// 初始化 <see cref="LexerController{T}"/> 类的新实例。
 	/// </summary>
-	public LexerController()
-	{
-		Text = string.Empty;
-	}
+	public LexerController() { }
 
 #pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
 	/// <summary>
-	/// 设置指定的词法单元读信息。
+	/// 设置指定的词法分析控制器信息。
 	/// </summary>
 	/// <param name="source">源文件读取器。</param>
 	/// <param name="contexts">词法分析的上下文。</param>
 	/// <param name="actionHandler">动作的处理器。</param>
 	/// <param name="rejectable">是否允许 Reject 动作。</param>
 	internal void Init(SourceReader source, IReadOnlyDictionary<string, ContextData<T>> contexts,
-		Action<Delegate> actionHandler, bool rejectable)
+		Action<Delegate, LexerController<T>> actionHandler, bool rejectable)
 	{
 		this.contexts = contexts;
 		context = contexts[ContextData.Initial];
@@ -80,7 +78,7 @@ public class LexerController<T>
 	/// <summary>
 	/// 获取或设置当前词法单元的文本。
 	/// </summary>
-	public string Text { get; set; }
+	public string Text { get; set; } = string.Empty;
 	/// <summary>
 	/// 获取或设置当前词法单元的起始索引。
 	/// </summary>
@@ -115,16 +113,22 @@ public class LexerController<T>
 	/// <param name="action">当前要执行的动作。</param>
 	internal void DoAction(int start, T? kind, Delegate? action)
 	{
-		userAccepted = false;
-		IsReject = false;
-		IsMore = false;
 		Kind = kind;
 		Text = Source.ReadedText();
 		Start = start;
 		Value = null;
-		if (action != null)
+		if (action == null)
 		{
-			actionHandler(action);
+			userAccepted = true;
+			IsReject = false;
+			IsMore = false;
+		}
+		else
+		{
+			userAccepted = false;
+			IsReject = false;
+			IsMore = false;
+			actionHandler(action, this);
 		}
 	}
 

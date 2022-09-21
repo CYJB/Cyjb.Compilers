@@ -10,9 +10,10 @@ public struct Token<T> : IEquatable<Token<T>>
 	where T : struct
 {
 	/// <summary>
-	/// 表示文件结束的值。
+	/// 表示文件结束的词法单元标识符。
 	/// </summary>
-	private static readonly object EndOfFileValue = new();
+	/// <remarks>其值为 <c>-1</c>。</remarks>
+	public static readonly T EndOfFile = GenericConvert.ChangeType<int, T>(-1);
 
 	/// <summary>
 	/// 返回表示文件结束的词法单元。
@@ -21,7 +22,7 @@ public struct Token<T> : IEquatable<Token<T>>
 	/// <returns>表示文件结束的词法单元。</returns>
 	public static Token<T> GetEndOfFile(int index)
 	{
-		return new Token<T>(default, string.Empty, new TextSpan(index, index), EndOfFileValue);
+		return new Token<T>(EndOfFile, string.Empty, new TextSpan(index, index));
 	}
 
 	/// <summary>
@@ -105,7 +106,7 @@ public struct Token<T> : IEquatable<Token<T>>
 	/// <summary>
 	/// 获取当前是否是表示文件结束的词法单元。
 	/// </summary>
-	public bool IsEndOfFile => Value == EndOfFileValue;
+	public bool IsEndOfFile => EqualityComparer<T>.Default.Equals(Kind, EndOfFile);
 
 	#region IEquatable<Token> 成员
 

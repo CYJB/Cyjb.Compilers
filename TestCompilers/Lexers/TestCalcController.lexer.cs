@@ -25,11 +25,6 @@ public partial class TestCalcController
 	[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
 	private static ILexerFactory<Calc> CreateLexerFactory()
 	{
-		// 上下文数据
-		Dictionary<string, ContextData<Calc>> contexts = new()
-		{
-			 { "Initial", new ContextData<Calc>(0, "Initial") }
-		};
 		// 终结符数据
 		TerminalData<Calc>[] terminals = new[]
 		{
@@ -60,7 +55,7 @@ public partial class TestCalcController
 		// 4: [^]
 		// 5: [(]
 		// 6: [)]
-		// 7: [\t-\r \u0085\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]
+		// 7: [\t-\r\u0085\p{Zs}\p{Zl}\p{Zp}]
 		// 8: [0-9]
 		// 字符类索引
 		int[] indexes = new[]
@@ -121,7 +116,7 @@ public partial class TestCalcController
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 9
 		};
 		// 词法分析器的数据
-		LexerData<Calc> lexerData = new(contexts,
+		LexerData<Calc> lexerData = new(null,
 			terminals,
 			new CharClassMap(indexes, classes, categories),
 			states,
