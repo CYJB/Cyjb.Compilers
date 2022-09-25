@@ -17,37 +17,45 @@ public class LexerData<T>
 	where T : struct
 {
 	/// <summary>
+	/// 默认的词法分析上下文。
+	/// </summary>
+	private readonly static Dictionary<string, ContextData<T>> defaultContexts = new()
+	{
+		 { ContextData.Initial, new ContextData<T>(0, ContextData.Initial) }
+	};
+
+	/// <summary>
 	/// 词法分析的上下文数据。
 	/// </summary>
-	private readonly IReadOnlyDictionary<string, ContextData<T>> contexts ;
+	private readonly IReadOnlyDictionary<string, ContextData<T>> contexts;
 	/// <summary>
 	/// 词法分析的终结符列表。
 	/// </summary>
-	private readonly TerminalData<T>[] terminals ;
+	private readonly TerminalData<T>[] terminals;
 	/// <summary>
 	/// 词法分析的字符类映射。
 	/// </summary>
-	private readonly CharClassMap charClasses ;
+	private readonly CharClassMap charClasses;
 	/// <summary>
 	/// DFA 的状态列表。
 	/// </summary>
-	private readonly DfaStateData[] states ;
+	private readonly DfaStateData[] states;
 	/// <summary>
 	/// 下一状态列表。
 	/// </summary>
-	private readonly int[] next ;
+	private readonly int[] next;
 	/// <summary>
 	/// 状态检查。
 	/// </summary>
-	private readonly int[] check ;
+	private readonly int[] check;
 	/// <summary>
 	/// 词法分析的向前看符号的类型。
 	/// </summary>
-	private readonly TrailingType trailingType ;
+	private readonly TrailingType trailingType;
 	/// <summary>
 	/// 词法分析中是否包含与行首匹配对应的头节点。
 	/// </summary>
-	private readonly bool containsBeginningOfLine ;
+	private readonly bool containsBeginningOfLine;
 	/// <summary>
 	/// 是否用到了 Reject 动作。
 	/// </summary>
@@ -74,18 +82,7 @@ public class LexerData<T>
 		CharClassMap charClasses, DfaStateData[] states, int[] next, int[] check,
 		TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
 	{
-		if (contexts == null)
-		{
-			// 使用默认上下文。
-			this.contexts = new Dictionary<string, ContextData<T>>()
-			{
-				 { ContextData.Initial, new ContextData<T>(0, ContextData.Initial) }
-			};
-		}
-		else
-		{
-			this.contexts = contexts;
-		}
+		this.contexts = contexts ?? defaultContexts;
 		this.terminals = terminals;
 		this.charClasses = charClasses;
 		this.states = states;

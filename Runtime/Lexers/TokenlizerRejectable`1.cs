@@ -44,7 +44,7 @@ internal sealed class TokenlizerRejectable<T> : TokenlizerBase<T>
 			if (symbols.Length > 0)
 			{
 				// 将接受状态记录在堆栈中。
-				stateStack.Push(new AcceptState(symbols, Source.Index));
+				stateStack.Push(new AcceptState(symbols, source.Index));
 			}
 		}
 		// 遍历终结状态，执行相应动作。
@@ -55,7 +55,7 @@ internal sealed class TokenlizerRejectable<T> : TokenlizerBase<T>
 			foreach (int acceptState in candidate.Symbols)
 			{
 				// 将文本和流调整到与接受状态匹配的状态。
-				Source.Index = index;
+				source.Index = index;
 				TerminalData<T> terminal = Data.Terminals[acceptState];
 				Controller.DoAction(Start, terminal.Kind, terminal.Action);
 				if (!Controller.IsReject)

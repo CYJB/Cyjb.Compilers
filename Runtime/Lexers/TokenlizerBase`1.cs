@@ -1,3 +1,4 @@
+using System.Collections;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -6,7 +7,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析器的基类。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal abstract class TokenlizerBase<T> : Tokenlizer<T>
+internal abstract class TokenlizerBase<T> : ITokenlizer<T>
 	where T : struct
 {
 	/// <summary>
@@ -17,6 +18,10 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 	/// 当前词法分析器的控制器。
 	/// </summary>
 	private readonly LexerController<T> controller;
+	/// <summary>
+	/// 源码读取器。
+	/// </summary>
+	protected readonly SourceReader source;
 
 	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenlizerBase{T}"/> 类的新实例。
@@ -25,10 +30,10 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 	/// <param name="controller">词法分析控制器。</param>
 	/// <param name="source">要使用的源文件读取器。</param>
 	protected TokenlizerBase(LexerData<T> data, LexerController<T> controller, SourceReader source)
-		: base(source)
 	{
 		this.data = data;
 		this.controller = controller;
+		this.source = source;
 	}
 
 	/// <summary>
@@ -49,30 +54,30 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 	/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
 	/// </summary>
 	/// <returns>输入流中的下一个词法单元。</returns>
-	public override Token<T> Read()
+	public Token<T> Read()
 	{
 		while (true)
 		{
 			ContextData<T> context = controller.CurrentContext;
-			if (Source.Peek() == SourceReader.InvalidCharacter)
+			if (source.Peek() == SourceReader.InvalidCharacter)
 			{
 				// 到达了流的结尾。
 				if (context.EofAction != null)
 				{
-					controller.DoAction(Source.Index, null, context.EofAction);
+					controller.DoAction(source.Index, null, context.EofAction);
 					if (controller.IsAccept)
 					{
 						return controller.CreateToken();
 					}
 				}
-				return Token<T>.GetEndOfFile(Source.Index);
+				return Token<T>.GetEndOfFile(source.Index);
 			}
 			// 起始状态与当前上下文相关。
 			int state = context.Index;
 			if (data.ContainsBeginningOfLine)
 			{
 				state *= 2;
-				if (Source.IsLineStart)
+				if (source.IsLineStart)
 				{
 					// 行首规则。
 					state++;
@@ -80,13 +85,13 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 			}
 			if (!controller.IsMore)
 			{
-				Start = Source.Index;
+				Start = source.Index;
 			}
 			if (NextToken(state))
 			{
 				if (!controller.IsMore && !controller.IsReject)
 				{
-					Source.Drop();
+					source.Drop();
 				}
 				if (controller.IsAccept)
 				{
@@ -96,12 +101,12 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 			else
 			{
 				// 到达死状态。
-				string text = Source.Accept();
+				string text = source.Accept();
 				if (text.Length == 0)
 				{
 					// 如果没有匹配任何字符，强制读入一个字符，可以防止死循环出现。
-					Source.Read();
-					text = Source.Accept();
+					source.Read();
+					text = source.Accept();
 				}
 				throw new TokenlizerException(text, Start);
 			}
@@ -122,7 +127,71 @@ internal abstract class TokenlizerBase<T> : Tokenlizer<T>
 	/// <returns>转以后的状态，使用 <c>-1</c> 表示没有找到合适的状态。</returns>
 	protected int NextState(int state)
 	{
-		char ch = Source.Read();
+		char ch = source.Read();
 		return data.NextState(state, ch);
 	}
+
+	#region IDisposable 成员
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <overloads>
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// </overloads>
+	public void Dispose()
+	{
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <param name="disposing">是否释放托管资源。</param>
+	protected virtual void Dispose(bool disposing)
+	{
+		if (disposing)
+		{
+			source.Dispose();
+		}
+	}
+
+	#endregion // IDisposable 成员
+
+	#region IEnumerable<Token<T>> 成员
+
+	/// <summary>
+	/// 返回一个循环访问集合的枚举器。
+	/// </summary>
+	/// <returns>可用于循环访问集合的 <see cref="IEnumerator{T}"/>。</returns>
+	/// <remarks>在枚举的时候，<see cref="ITokenlizer{T}"/> 会不断的读出词法单元，
+	/// 应当总是只使用一个枚举器。在使用多个枚举器时，他们之间会相互干扰，导致枚举值与期望的不同。
+	/// 如果需要多次枚举，必须将词法单元缓存到数组中，再进行枚举。</remarks>
+	public IEnumerator<Token<T>> GetEnumerator()
+	{
+		while (true)
+		{
+			Token<T> token = Read();
+			yield return token;
+			if (token.IsEndOfFile)
+			{
+				break;
+			}
+		}
+	}
+
+	/// <summary>
+	/// 返回一个循环访问集合的枚举器。
+	/// </summary>
+	/// <returns>可用于循环访问集合的 <see cref="IEnumerator"/>。</returns>
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return GetEnumerator();
+	}
+
+	#endregion // IEnumerable<Token<T>> 成员
+
 }

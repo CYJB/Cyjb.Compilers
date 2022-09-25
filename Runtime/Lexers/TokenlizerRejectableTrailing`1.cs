@@ -32,7 +32,7 @@ internal sealed class TokenlizerRejectableTrailing<T> : TokenlizerBase<T>
 	protected override bool NextToken(int state)
 	{
 		states.Clear();
-		int startIndex = Source.Index;
+		int startIndex = source.Index;
 		while (true)
 		{
 			state = NextState(state);
@@ -45,7 +45,7 @@ internal sealed class TokenlizerRejectableTrailing<T> : TokenlizerBase<T>
 			if (symbols.Length > 0)
 			{
 				// 将接受状态记录在堆栈中。
-				states.Add(new AcceptState(symbols, Source.Index));
+				states.Add(new AcceptState(symbols, source.Index));
 			}
 		}
 		// 遍历终结状态，执行相应动作。
@@ -91,7 +91,7 @@ internal sealed class TokenlizerRejectableTrailing<T> : TokenlizerBase<T>
 					}
 				}
 				// 将文本和流调整到与接受状态匹配的状态。
-				Source.Index = lastIndex;
+				source.Index = lastIndex;
 				Controller.DoAction(Start, terminal.Kind, terminal.Action);
 				if (!Controller.IsReject)
 				{

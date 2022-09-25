@@ -27,7 +27,7 @@ internal sealed class TokenlizerFixedTrailing<T> : TokenlizerBase<T>
 	protected override bool NextToken(int state)
 	{
 		// 最后一次匹配的符号和文本索引。
-		int lastAccept = -1, lastIndex = Source.Index;
+		int lastAccept = -1, lastIndex = source.Index;
 		while (true)
 		{
 			state = NextState(state);
@@ -41,7 +41,7 @@ internal sealed class TokenlizerFixedTrailing<T> : TokenlizerBase<T>
 			if (symbols.Length > 0 && symbols[0] >= 0)
 			{
 				lastAccept = symbols[0];
-				lastIndex = Source.Index;
+				lastIndex = source.Index;
 			}
 		}
 		if (lastAccept >= 0)
@@ -64,7 +64,7 @@ internal sealed class TokenlizerFixedTrailing<T> : TokenlizerBase<T>
 				}
 			}
 			// 将流调整到与接受状态匹配的状态。
-			Source.Index = lastIndex;
+			source.Index = lastIndex;
 			Controller.DoAction(Start, terminal.Kind, terminal.Action);
 			return true;
 		}
