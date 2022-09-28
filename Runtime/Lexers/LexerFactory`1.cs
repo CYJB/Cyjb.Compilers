@@ -48,10 +48,10 @@ public sealed class LexerFactory<T> : ILexerFactory<T>
 	/// 创建分析指定源文件的词法分析器。
 	/// </summary>
 	/// </overloads>
-	public ITokenlizer<T> CreateTokenlizer(string source)
+	public ITokenizer<T> CreateTokenizer(string source)
 	{
 		ArgumentNullException.ThrowIfNull(source);
-		return CreateTokenlizer(new SourceReader(new StringReader(source)));
+		return CreateTokenizer(new SourceReader(new StringReader(source)));
 	}
 
 	/// <summary>
@@ -60,7 +60,7 @@ public sealed class LexerFactory<T> : ILexerFactory<T>
 	/// <param name="source">要读取的源文件。</param>
 	/// <returns>指定源文件的词法分析器。</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-	public ITokenlizer<T> CreateTokenlizer(SourceReader source)
+	public ITokenizer<T> CreateTokenizer(SourceReader source)
 	{
 		ArgumentNullException.ThrowIfNull(source);
 		LexerController<T> controller = new();

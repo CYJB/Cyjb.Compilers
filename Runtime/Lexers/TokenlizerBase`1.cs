@@ -7,7 +7,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析器的基类。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal abstract class TokenlizerBase<T> : ITokenlizer<T>
+internal abstract class TokenlizerBase<T> : ITokenizer<T>
 	where T : struct
 {
 	/// <summary>
@@ -26,7 +26,7 @@ internal abstract class TokenlizerBase<T> : ITokenlizer<T>
 	/// <summary>
 	/// 词法分析错误的事件。
 	/// </summary>
-	public event Action<TokenlizerError>? TokenlizerError;
+	public event Action<TokenizeError>? TokenizeError;
 
 	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenlizerBase{T}"/> 类的新实例。
@@ -113,9 +113,9 @@ internal abstract class TokenlizerBase<T> : ITokenlizer<T>
 					source.Read();
 					text = source.Accept();
 				}
-				if (TokenlizerError != null)
+				if (TokenizeError != null)
 				{
-					controller.EmitTokenlizerError(text, new TextSpan(Start, source.Index), TokenlizerError);
+					controller.EmitTokenlizerError(text, new TextSpan(Start, source.Index), TokenizeError);
 				}
 			}
 		}
@@ -175,7 +175,7 @@ internal abstract class TokenlizerBase<T> : ITokenlizer<T>
 	/// 返回一个循环访问集合的枚举器。
 	/// </summary>
 	/// <returns>可用于循环访问集合的 <see cref="IEnumerator{T}"/>。</returns>
-	/// <remarks>在枚举的时候，<see cref="ITokenlizer{T}"/> 会不断的读出词法单元，
+	/// <remarks>在枚举的时候，<see cref="ITokenizer{T}"/> 会不断的读出词法单元，
 	/// 应当总是只使用一个枚举器。在使用多个枚举器时，他们之间会相互干扰，导致枚举值与期望的不同。
 	/// 如果需要多次枚举，必须将词法单元缓存到数组中，再进行枚举。</remarks>
 	public IEnumerator<Token<T>> GetEnumerator()

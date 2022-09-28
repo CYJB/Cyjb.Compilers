@@ -55,27 +55,39 @@ public class UnitTestLexer
 	private static void TestCalc(ILexerFactory<Calc> factory)
 	{
 		string source = "1 + 20 * 3 / 4*(5+6)";
-		Tokenlizer<Calc> tokenlizer = factory.CreateTokenlizer(source);
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(7, 8)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "3", new TextSpan(9, 10), 3), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Div, "/", new TextSpan(11, 12)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "4", new TextSpan(13, 14), 4), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(14, 15)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.LBrace, "(", new TextSpan(15, 16)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "5", new TextSpan(16, 17), 5), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(17, 18)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), tokenlizer.Read());
-		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), tokenlizer.Read());
-		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), tokenlizer.Read());
-		
-		Tokenlizer<Calc> errorTokenlizer = factory.CreateTokenlizer("1ss");
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), errorTokenlizer.Read());
-		Assert.ThrowsException<InvalidOperationException>(()=> errorTokenlizer.Read());
-		Assert.ThrowsException<InvalidOperationException>(()=> errorTokenlizer.Read());
-		Assert.AreEqual(Token<Calc>.GetEndOfFile(3), errorTokenlizer.Read());
+		ITokenizer<Calc> tokenizer = factory.CreateTokenizer(source);
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(7, 8)), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "3", new TextSpan(9, 10), 3), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Div, "/", new TextSpan(11, 12)), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "4", new TextSpan(13, 14), 4), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Mul, "*", new TextSpan(14, 15)), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.LBrace, "(", new TextSpan(15, 16)), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "5", new TextSpan(16, 17), 5), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(17, 18)), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), tokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), tokenizer.Read());
+		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), tokenizer.Read());
+
+		ITokenizer<Calc> errorTokenizer = factory.CreateTokenizer("1ss");
+		int errorIndex = 0;
+		errorTokenizer.TokenizeError += (error) =>
+		{
+			if (errorIndex == 0)
+			{
+				Assert.AreEqual(new TokenizeError("s", new TextSpan(1, 2), null), error);
+			}
+			else
+			{
+				Assert.AreEqual(new TokenizeError("s", new TextSpan(2, 3), null), error);
+			}
+			errorIndex++;
+		};
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), errorTokenizer.Read());
+		Assert.AreEqual(Token<Calc>.GetEndOfFile(3), errorTokenizer.Read());
+		Assert.AreEqual(2, errorIndex);
 	}
 
 	/// <summary>
@@ -111,12 +123,12 @@ public class UnitTestLexer
 	private static void TestString(ILexerFactory<Str> factory)
 	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		Tokenlizer<Str> tokenlizer = factory.CreateTokenlizer(source);
-		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"@""aabb\""""ccd\u0045\x47""", new TextSpan(42, 65)), tokenlizer.Read());
-		Assert.AreEqual(Token<Str>.GetEndOfFile(65), tokenlizer.Read());
+		ITokenizer<Str> tokenizer = factory.CreateTokenizer(source);
+		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), tokenizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), tokenizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), tokenizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"@""aabb\""""ccd\u0045\x47""", new TextSpan(42, 65)), tokenizer.Read());
+		Assert.AreEqual(Token<Str>.GetEndOfFile(65), tokenizer.Read());
 	}
 
 	private class EscapeStrController : LexerController<Str>
@@ -220,12 +232,12 @@ public class UnitTestLexer
 	private static void TestEscapeString(ILexerFactory<Str> factory)
 	{
 		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		Tokenlizer<Str> tokenlizer = factory.CreateTokenlizer(source);
-		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), tokenlizer.Read());
-		Assert.AreEqual(new Token<Str>(Str.Str, @"aabb\""ccd\u0045\x47", new TextSpan(42, 65)), tokenlizer.Read());
-		Assert.AreEqual(Token<Str>.GetEndOfFile(65), tokenlizer.Read());
+		ITokenizer<Str> tokenizer = factory.CreateTokenizer(source);
+		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), tokenizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), tokenizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), tokenizer.Read());
+		Assert.AreEqual(new Token<Str>(Str.Str, @"aabb\""ccd\u0045\x47", new TextSpan(42, 65)), tokenizer.Read());
+		Assert.AreEqual(Token<Str>.GetEndOfFile(65), tokenizer.Read());
 	}
 
 	/// <summary>
@@ -264,19 +276,19 @@ public class UnitTestLexer
 	private static void TestProuction(ILexerFactory<ProductionKind> factory)
 	{
 		string source = "A B21 381 D  * E+(F G2)* ";
-		Tokenlizer<ProductionKind> tokenlizer = factory.CreateTokenlizer(source);
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "A", new TextSpan(0, 1)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "B21", new TextSpan(2, 5)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "381", new TextSpan(6, 9)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "D", new TextSpan(10, 11)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Star, "*", new TextSpan(13, 14)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "E", new TextSpan(15, 16)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Plus, "+", new TextSpan(16, 17)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.LBrace, "(", new TextSpan(17, 18)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "F", new TextSpan(18, 19)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "G2", new TextSpan(20, 22)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.RBrace, ")", new TextSpan(22, 23)), tokenlizer.Read());
-		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Star, "*", new TextSpan(23, 24)), tokenlizer.Read());
-		Assert.AreEqual(Token<ProductionKind>.GetEndOfFile(25), tokenlizer.Read());
+		ITokenizer<ProductionKind> tokenizer = factory.CreateTokenizer(source);
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "A", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "B21", new TextSpan(2, 5)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "381", new TextSpan(6, 9)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "D", new TextSpan(10, 11)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Star, "*", new TextSpan(13, 14)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "E", new TextSpan(15, 16)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Plus, "+", new TextSpan(16, 17)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.LBrace, "(", new TextSpan(17, 18)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "F", new TextSpan(18, 19)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "G2", new TextSpan(20, 22)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.RBrace, ")", new TextSpan(22, 23)), tokenizer.Read());
+		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Star, "*", new TextSpan(23, 24)), tokenizer.Read());
+		Assert.AreEqual(Token<ProductionKind>.GetEndOfFile(25), tokenizer.Read());
 	}
 }

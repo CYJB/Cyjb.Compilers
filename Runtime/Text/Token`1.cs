@@ -9,6 +9,12 @@ public struct Token<T> : IEquatable<Token<T>>
 	where T : struct
 {
 	/// <summary>
+	/// 词法单元的位置比较器。
+	/// </summary>
+	/// <remarks>只比较 <see cref="Span"/>，忽略其它值。</remarks>
+	public static readonly IComparer<Token<T>> SpanComparer = TokenSpanComparer<T>.Instance;
+
+	/// <summary>
 	/// 表示文件结束的词法单元标识符。
 	/// </summary>
 	/// <remarks>其值为 <c>-1</c>。</remarks>

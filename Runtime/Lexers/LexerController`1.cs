@@ -153,9 +153,9 @@ public class LexerController<T>
 	/// <param name="text">未识别的字符串。</param>
 	/// <param name="span">未识别的字符串范围。</param>
 	/// <param name="eventHandler">事件处理器。</param>
-	internal protected virtual void EmitTokenlizerError(string text, TextSpan span, Action<TokenlizerError> eventHandler)
+	internal protected virtual void EmitTokenlizerError(string text, TextSpan span, Action<TokenizeError> eventHandler)
 	{
-		TokenlizerError error = new(text, span, source.Locator);
+		TokenizeError error = new(text, span, source.Locator);
 		eventHandler(error);
 	}
 
