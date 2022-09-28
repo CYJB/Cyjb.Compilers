@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -9,7 +10,11 @@ namespace Cyjb.Compilers.Lexers;
 public class LexerController<T>
 	where T : struct
 {
-
+	/// <summary>
+	/// 要扫描的源文件。
+	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private SourceReader source;
 	/// <summary>
 	/// 当前词法分析的上下文。
 	/// </summary>
@@ -21,6 +26,7 @@ public class LexerController<T>
 	/// <summary>
 	/// 动作的处理器。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private Action<Delegate, LexerController<T>> actionHandler;
 	/// <summary>
 	/// 上下文的堆栈。
@@ -54,11 +60,11 @@ public class LexerController<T>
 	internal void Init(SourceReader source, IReadOnlyDictionary<string, ContextData<T>> contexts,
 		Action<Delegate, LexerController<T>> actionHandler, bool rejectable)
 	{
+		this.source = source;
 		this.contexts = contexts;
 		context = contexts[ContextData.Initial];
 		this.actionHandler = actionHandler;
 		this.rejectable = rejectable;
-		Source = source;
 	}
 
 	/// <summary>
@@ -70,7 +76,7 @@ public class LexerController<T>
 	/// 获取要扫描的源文件。
 	/// </summary>
 	/// <value>要扫描的源文件。</value>
-	public SourceReader Source { get; private set; }
+	public SourceReader Source => source;
 	/// <summary>
 	/// 获取当前词法单元的标识符。
 	/// </summary>
@@ -114,7 +120,7 @@ public class LexerController<T>
 	internal void DoAction(int start, T? kind, Delegate? action)
 	{
 		Kind = kind;
-		Text = Source.ReadedText();
+		Text = source.ReadedText();
 		Start = start;
 		Value = null;
 		if (action == null)
@@ -138,7 +144,19 @@ public class LexerController<T>
 	/// <returns><see cref="Token{T}"/> 的新实例。</returns>
 	internal Token<T> CreateToken()
 	{
-		return new Token<T>(Kind!.Value, Text, new TextSpan(Start, Source.Index), Source.Locator, Value);
+		return new Token<T>(Kind!.Value, Text, new TextSpan(Start, source.Index), source.Locator, Value);
+	}
+
+	/// <summary>
+	/// 触发词法分析错误的事件。
+	/// </summary>
+	/// <param name="text">未识别的字符串。</param>
+	/// <param name="span">未识别的字符串范围。</param>
+	/// <param name="eventHandler">事件处理器。</param>
+	internal protected virtual void EmitTokenlizerError(string text, TextSpan span, Action<TokenlizerError> eventHandler)
+	{
+		TokenlizerError error = new(text, span, source.Locator);
+		eventHandler(error);
 	}
 
 	/// <summary>

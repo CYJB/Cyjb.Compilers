@@ -24,6 +24,11 @@ internal abstract class TokenlizerBase<T> : ITokenlizer<T>
 	protected readonly SourceReader source;
 
 	/// <summary>
+	/// 词法分析错误的事件。
+	/// </summary>
+	public event Action<TokenlizerError>? TokenlizerError;
+
+	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenlizerBase{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="data">要使用的词法分析器数据。</param>
@@ -108,7 +113,10 @@ internal abstract class TokenlizerBase<T> : ITokenlizer<T>
 					source.Read();
 					text = source.Accept();
 				}
-				throw new TokenlizerException(text, Start);
+				if (TokenlizerError != null)
+				{
+					controller.EmitTokenlizerError(text, new TextSpan(Start, source.Index), TokenlizerError);
+				}
 			}
 		}
 	}
