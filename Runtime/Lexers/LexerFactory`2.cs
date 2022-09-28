@@ -71,20 +71,20 @@ public sealed class LexerFactory<T, TController> : ILexerFactory<T>
 		{
 			if (lexerData.TrailingType == TrailingType.None)
 			{
-				return new TokenlizerRejectable<T>(lexerData, controller, source);
+				return new TokenizerRejectable<T>(lexerData, controller, source);
 			}
 		}
 		else
 		{
 			if (lexerData.TrailingType == TrailingType.None)
 			{
-				return new TokenlizerSimpler<T>(lexerData, controller, source);
+				return new TokenizerSimpler<T>(lexerData, controller, source);
 			}
 			else if (lexerData.TrailingType == TrailingType.Fixed)
 			{
-				return new TokenlizerFixedTrailing<T>(lexerData, controller, source);
+				return new TokenizerFixedTrailing<T>(lexerData, controller, source);
 			}
 		}
-		return new TokenlizerRejectableTrailing<T>(lexerData, controller, source);
+		return new TokenizerRejectableTrailing<T>(lexerData, controller, source);
 	}
 }

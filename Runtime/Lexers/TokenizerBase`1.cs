@@ -7,7 +7,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析器的基类。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal abstract class TokenlizerBase<T> : ITokenizer<T>
+internal abstract class TokenizerBase<T> : ITokenizer<T>
 	where T : struct
 {
 	/// <summary>
@@ -29,12 +29,12 @@ internal abstract class TokenlizerBase<T> : ITokenizer<T>
 	public event Action<TokenizeError>? TokenizeError;
 
 	/// <summary>
-	/// 使用给定的词法分析器信息初始化 <see cref="TokenlizerBase{T}"/> 类的新实例。
+	/// 使用给定的词法分析器信息初始化 <see cref="TokenizerBase{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="data">要使用的词法分析器数据。</param>
 	/// <param name="controller">词法分析控制器。</param>
 	/// <param name="source">要使用的源文件读取器。</param>
-	protected TokenlizerBase(LexerData<T> data, LexerController<T> controller, SourceReader source)
+	protected TokenizerBase(LexerData<T> data, LexerController<T> controller, SourceReader source)
 	{
 		this.data = data;
 		this.controller = controller;
@@ -115,7 +115,7 @@ internal abstract class TokenlizerBase<T> : ITokenizer<T>
 				}
 				if (TokenizeError != null)
 				{
-					controller.EmitTokenlizerError(text, new TextSpan(Start, source.Index), TokenizeError);
+					controller.EmitTokenizeError(text, new TextSpan(Start, source.Index), TokenizeError);
 				}
 			}
 		}
