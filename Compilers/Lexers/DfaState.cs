@@ -125,7 +125,7 @@ public sealed class DfaState : ReadOnlyCollectionBase<DfaState>
 	/// </summary>
 	/// <param name="defaultState">默认状态。</param>
 	/// <returns>转移列表。</returns>
-	internal KeyValuePair<int, DfaState>[] GetTransitions(DfaState? defaultState)
+	internal KeyValuePair<int, int>[] GetTransitions(DfaState? defaultState)
 	{
 		IEnumerable<KeyValuePair<CharClass, DfaState>> transitions = this.transitions;
 		if (defaultState != null)
@@ -142,7 +142,7 @@ public sealed class DfaState : ReadOnlyCollectionBase<DfaState>
 				}
 			});
 		}
-		return transitions.Select(pair => new KeyValuePair<int, DfaState>(pair.Key.Index, pair.Value))
+		return transitions.Select(pair => new KeyValuePair<int, int>(pair.Key.Index, pair.Value.Index))
 			.OrderBy(pair => pair.Key)
 			.ToArray();
 	}

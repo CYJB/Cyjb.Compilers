@@ -5,7 +5,7 @@ namespace Cyjb.Text;
 /// <summary>
 /// 表示词法分析错误。
 /// </summary>
-public sealed class TokenizeError
+public class TokenizeError
 {
 	/// <summary>
 	/// 行定位器。

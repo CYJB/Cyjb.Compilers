@@ -231,7 +231,7 @@ internal sealed class RegexParser
 				case '/':
 					if (inTrailing)
 					{
-						throw CreateException(RegexParseError.Unknown, Resources.NestedTrailing);
+						throw CreateException(RegexParseError.Unknown, Resources.NestedTrailingInner);
 					}
 					readTrailing = true;
 					goto BreakOuterScan;

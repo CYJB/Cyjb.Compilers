@@ -138,7 +138,7 @@ public class LexerData<T>
 	public Type ControllerType => controllerType;
 
 	/// <summary>
-	/// 返回指定状态使用注定字符转移后的状态。
+	/// 返回指定状态使用指定字符转移后的状态。
 	/// </summary>
 	/// <param name="state">当前状态索引。</param>
 	/// <param name="ch">转移的字符。</param>

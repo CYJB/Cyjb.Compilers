@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Cyjb.Compilers;
 
 /// <summary>
@@ -18,24 +16,12 @@ internal static class CompilerExceptions
 	}
 
 	/// <summary>
-	/// 返回重复的符号标识符的异常。
+	/// 返回产生式的优先级必须是一个终结符的异常。
 	/// </summary>
-	/// <param name="id">重复的符号标识符。</param>
-	/// <param name="paramName">产生异常的参数名称。</param>
-	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException DuplicatedSymbolId(string id, [CallerArgumentExpression("id")] string? paramName = null)
+	/// <param name="name">异常的符号名称。</param>
+	/// <returns><see cref="InvalidOperationException"/> 对象。</returns>
+	public static InvalidOperationException PrecedenceMustBeTerminal(string name)
 	{
-		return new ArgumentException(Resources.DuplicatedSymbolId(id), paramName);
-	}
-
-	/// <summary>
-	/// 返回无效的符号标识符的异常。
-	/// </summary>
-	/// <param name="id">无效的符号标识符。</param>
-	/// <param name="paramName">产生异常的参数名称。</param>
-	/// <returns><see cref="ArgumentException"/> 对象。</returns>
-	public static ArgumentException InvalidSymbolId(string id, [CallerArgumentExpression("id")] string? paramName = null)
-	{
-		return new ArgumentException(Resources.InvalidSymbolId(id), paramName);
+		return new InvalidOperationException(Resources.PrecedenceMustBeTerminal(name));
 	}
 }

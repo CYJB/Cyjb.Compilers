@@ -1,8 +1,6 @@
 using Cyjb.Compilers.Lexers;
 
-namespace TestCompilers.Lexers;
-
-public enum Calc { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace }
+namespace TestCompilers;
 
 /// <summary>
 /// 用于单元测试的计算器控制器。
@@ -15,7 +13,7 @@ public enum Calc { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace }
 [LexerSymbol("\\(", Kind = Calc.LBrace)]
 [LexerSymbol("\\)", Kind = Calc.RBrace)]
 [LexerSymbol("\\s")]
-public partial class TestCalcController : LexerController<Calc>
+public partial class TestCalcLexer : LexerController<Calc>
 {
 	/// <summary>
 	/// 数字的终结符定义。
@@ -23,7 +21,7 @@ public partial class TestCalcController : LexerController<Calc>
 	[LexerSymbol("[0-9]+", Kind = Calc.Id)]
 	public void DigitAction()
 	{
-		Value = int.Parse(Text);
+		Value = double.Parse(Text);
 		Accept();
 	}
 }

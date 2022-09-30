@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -13,20 +14,32 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// <summary>
 	/// 词法分析器的数据。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly LexerData<T> data;
 	/// <summary>
 	/// 当前词法分析器的控制器。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly LexerController<T> controller;
 	/// <summary>
 	/// 源码读取器。
 	/// </summary>
 	protected readonly SourceReader source;
+	/// <summary>
+	/// 解析状态。
+	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private ParseStatus status = ParseStatus.Ready;
+	/// <summary>
+	/// 当前词法单元的起始位置。
+	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private int start;
 
 	/// <summary>
 	/// 词法分析错误的事件。
 	/// </summary>
-	public event Action<TokenizeError>? TokenizeError;
+	public event Action<ITokenizer<T>, TokenizeError>? TokenizeError;
 
 	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenizerBase{T}"/> 类的新实例。
@@ -39,7 +52,18 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 		this.data = data;
 		this.controller = controller;
 		this.source = source;
+		controller.Tokenizer = this;
 	}
+
+	/// <summary>
+	/// 获取词法分析器的解析状态。
+	/// </summary>
+	public ParseStatus Status => status;
+	/// <summary>
+	/// 获取或设置共享的上下文对象。
+	/// </summary>
+	/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
+	public object? SharedContext { get; set; }
 
 	/// <summary>
 	/// 获取词法分析器数据。
@@ -53,7 +77,7 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// 获取当前词法单元的起始位置。
 	/// </summary>
 	/// <value>当前词法单元的起始位置。</value>
-	protected int Start { get; private set; }
+	protected int Start => start;
 
 	/// <summary>
 	/// 读取输入流中的下一个词法单元并提升输入流的字符位置。
@@ -61,6 +85,10 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// <returns>输入流中的下一个词法单元。</returns>
 	public Token<T> Read()
 	{
+		if (status != ParseStatus.Ready)
+		{
+			return Token<T>.GetEndOfFile(source.Index);
+		}
 		while (true)
 		{
 			ContextData<T> context = controller.CurrentContext;
@@ -75,6 +103,7 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 						return controller.CreateToken();
 					}
 				}
+				status = ParseStatus.Finished;
 				return Token<T>.GetEndOfFile(source.Index);
 			}
 			// 起始状态与当前上下文相关。
@@ -90,7 +119,7 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 			}
 			if (!controller.IsMore)
 			{
-				Start = source.Index;
+				start = source.Index;
 			}
 			if (NextToken(state))
 			{
@@ -113,10 +142,7 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 					source.Read();
 					text = source.Accept();
 				}
-				if (TokenizeError != null)
-				{
-					controller.EmitTokenizeError(text, new TextSpan(Start, source.Index), TokenizeError);
-				}
+				controller.EmitTokenizeError(text, new TextSpan(start, source.Index));
 			}
 		}
 	}
@@ -137,6 +163,26 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	{
 		char ch = source.Read();
 		return data.NextState(state, ch);
+	}
+
+	/// <summary>
+	/// 上报词法分析错误。
+	/// </summary>
+	/// <param name="error">词法分析错误。</param>
+	internal void ReportTokenizeError(TokenizeError error)
+	{
+		TokenizeError?.Invoke(this, error);
+	}
+
+	/// <summary>
+	/// 取消后续词法分析。
+	/// </summary>
+	public void Cancel()
+	{
+		if (status == ParseStatus.Ready)
+		{
+			status = ParseStatus.Cancelled;
+		}
 	}
 
 	#region IDisposable 成员

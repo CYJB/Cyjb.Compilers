@@ -11,8 +11,8 @@ using Cyjb.Compilers.Lexers;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace TestCompilers.Lexers;
-public partial class TestCalcController 
+namespace TestCompilers;
+public partial class TestCalcLexer 
 {
 	/// <summary>
 	/// 词法分析器的工厂。
@@ -45,7 +45,7 @@ public partial class TestCalcController
 			// 7: \s
 			new TerminalData<Calc>(),
 			// 8: [0-9]+
-			new TerminalData<Calc>(Calc.Id, (TestCalcController c) => c.DigitAction())
+			new TerminalData<Calc>(Calc.Id, (TestCalcLexer c) => c.DigitAction())
 		};
 		// 字符类信息
 		// 0: [+]
@@ -125,8 +125,8 @@ public partial class TestCalcController
 			TrailingType.None,
 			false,
 			false,
-			typeof(TestCalcController));
-		return new LexerFactory<Calc, TestCalcController>(lexerData);
+			typeof(TestCalcLexer));
+		return new LexerFactory<Calc, TestCalcLexer>(lexerData);
 	}
 }
 

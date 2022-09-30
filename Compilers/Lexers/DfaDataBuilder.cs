@@ -16,26 +16,6 @@ internal class DfaDataBuilder
 	/// </summary>
 	private readonly List<DfaStateData> stateDataList = new();
 	/// <summary>
-	/// 下一状态列表。
-	/// </summary>
-	private readonly List<int> next = new();
-	/// <summary>
-	/// 状态检查。
-	/// </summary>
-	private readonly List<int> check = new();
-	/// <summary>
-	/// 下一状态列表的可用空当列表。
-	/// </summary>
-	private readonly BitList spaces = new();
-	/// <summary>
-	/// 下一个可用的 next 空当。
-	/// </summary>
-	private int nextSpaceIndex = 0;
-	/// <summary>
-	/// 最后一个被填充的位置。
-	/// </summary>
-	private int lastFilledIndex = 0;
-	/// <summary>
 	/// 状态对应的默认状态。
 	/// </summary>
 	private readonly Dictionary<DfaState, DefaultState> defaults = new();
@@ -55,11 +35,12 @@ internal class DfaDataBuilder
 	/// <returns>DFA 数据。</returns>
 	public DfaData Build()
 	{
+		ArrayCompress<int> compress = new(DfaStateData.InvalidState, DfaStateData.InvalidState);
 		for (int i = 0; i < states.Count; i++)
 		{
 			DfaState state = states[i];
 			DfaState? defaultState = GetDefaultState(i);
-			KeyValuePair<int, DfaState>[] transitions = state.GetTransitions(defaultState);
+			KeyValuePair<int, int>[] transitions = state.GetTransitions(defaultState);
 			if (transitions.Length == 0)
 			{
 				// 无有效转移。
@@ -67,50 +48,10 @@ internal class DfaDataBuilder
 				continue;
 			}
 			// 找到合适的 next 空当。
-			int minIndex = transitions[0].Key;
-			int length = transitions[^1].Key + 1 - minIndex;
-			BitList pattern = new(length, false);
-			foreach (KeyValuePair<int, DfaState> pair in transitions)
-			{
-				pattern[pair.Key - minIndex] = true;
-			}
-			int index = spaces.FindSpace(pattern, nextSpaceIndex);
-			// 确保空白记录包含足够的空间
-			if (spaces.Count < index + length)
-			{
-				spaces.Resize(index + length);
-			}
-			int restCount = index + length - next.Count;
-			if (restCount > 0)
-			{
-				next.AddRange(Enumerable.Repeat(DfaStateData.InvalidState, restCount));
-				check.AddRange(Enumerable.Repeat(DfaStateData.InvalidState, restCount));
-			}
-			index -= minIndex;
-			foreach (KeyValuePair<int, DfaState> pair in transitions)
-			{
-				int idx = pair.Key + index;
-				spaces[idx] = true;
-				next[idx] = pair.Value.Index;
-				check[idx] = i;
-			}
-			// 更新 nextSpaceIndex 和 lastFilledIndex
-			nextSpaceIndex = spaces.IndexOf(false, nextSpaceIndex);
-			if (nextSpaceIndex < 0)
-			{
-				nextSpaceIndex = spaces.Count;
-			}
-			for (int j = spaces.Count - 1; j >= lastFilledIndex; j--)
-			{
-				if (spaces[j])
-				{
-					lastFilledIndex = j;
-					break;
-				}
-			}
-			stateDataList.Add(new DfaStateData(index, defaultState?.Index ?? DfaStateData.InvalidState, state.Symbols));
+			int baseIndex = compress.AddTransition(i, transitions);
+			stateDataList.Add(new DfaStateData(baseIndex, defaultState?.Index ?? DfaStateData.InvalidState, state.Symbols));
 		}
-		return new DfaData(stateDataList.ToArray(), next.ToArray(), check.ToArray());
+		return new DfaData(stateDataList.ToArray(), compress.GetNext(), compress.GetCheck());
 	}
 
 	/// <summary>

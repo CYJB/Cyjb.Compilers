@@ -45,7 +45,7 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignCalc()
 	{
-		TestCalc(TestCalcController.Factory);
+		TestCalc(TestCalcLexer.Factory);
 	}
 
 	/// <summary>
@@ -73,7 +73,7 @@ public class UnitTestLexer
 
 		ITokenizer<Calc> errorTokenizer = factory.CreateTokenizer("1ss");
 		int errorIndex = 0;
-		errorTokenizer.TokenizeError += (error) =>
+		errorTokenizer.TokenizeError += (tokenizer, error) =>
 		{
 			if (errorIndex == 0)
 			{

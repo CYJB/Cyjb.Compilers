@@ -78,6 +78,11 @@ public class LexerController<T>
 	/// <value>要扫描的源文件。</value>
 	public SourceReader Source => source;
 	/// <summary>
+	/// 获取共享的上下文对象。
+	/// </summary>
+	/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
+	public object? SharedContext => Tokenizer.SharedContext;
+	/// <summary>
 	/// 获取当前词法单元的标识符。
 	/// </summary>
 	public T? Kind { get; private set; }
@@ -94,6 +99,10 @@ public class LexerController<T>
 	/// </summary>
 	public object? Value { get; set; }
 
+	/// <summary>
+	/// 获取或设置关联到的词法分析器。
+	/// </summary>
+	internal TokenizerBase<T> Tokenizer { get; set; }
 	/// <summary>
 	/// 获取当前的上下文数据。
 	/// </summary>
@@ -152,11 +161,9 @@ public class LexerController<T>
 	/// </summary>
 	/// <param name="text">未识别的字符串。</param>
 	/// <param name="span">未识别的字符串范围。</param>
-	/// <param name="eventHandler">事件处理器。</param>
-	internal protected virtual void EmitTokenizeError(string text, TextSpan span, Action<TokenizeError> eventHandler)
+	internal protected virtual void EmitTokenizeError(string text, TextSpan span)
 	{
-		TokenizeError error = new(text, span, source.Locator);
-		eventHandler(error);
+		Tokenizer.ReportTokenizeError(new TokenizeError(text, span, source.Locator));
 	}
 
 	/// <summary>

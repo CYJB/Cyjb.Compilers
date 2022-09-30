@@ -69,14 +69,6 @@ internal partial class Resources
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Symbol identifier '{0}' is already exists.</c> 的本地化字符串。
-	/// </summary>
-	internal static string DuplicatedSymbolId(object? arg0)
-	{
-		return string.Format(resourceCulture, ResourceManager.GetString("DuplicatedSymbolId", resourceCulture)!, Format(arg0));
-	}
-	
-	/// <summary>
 	/// 返回类似 <c>Duplicate lexer context '{0}'.</c> 的本地化字符串。
 	/// </summary>
 	internal static string DuplicateLexerContext(object? arg0)
@@ -85,22 +77,12 @@ internal partial class Resources
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Empty regex</c> 的本地化字符串。
-	/// </summary>
-	internal static string EmptyRegex => ResourceManager.GetString("EmptyRegex", resourceCulture)!;
-	
-	/// <summary>
-	/// 返回类似 <c>Illegal \ at end of pattern.</c> 的本地化字符串。
+	/// 返回类似 <c>Illegal \ at end of pattern</c> 的本地化字符串。
 	/// </summary>
 	internal static string IllegalEndEscape => ResourceManager.GetString("IllegalEndEscape", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Incomplete lexer context.</c> 的本地化字符串。
-	/// </summary>
-	internal static string IncompleteLexerContext => ResourceManager.GetString("IncompleteLexerContext", resourceCulture)!;
-	
-	/// <summary>
-	/// 返回类似 <c>Incomplete regex reference.</c> 的本地化字符串。
+	/// 返回类似 <c>Incomplete regex reference</c> 的本地化字符串。
 	/// </summary>
 	internal static string IncompleteRegexReference => ResourceManager.GetString("IncompleteRegexReference", resourceCulture)!;
 	
@@ -121,19 +103,6 @@ internal partial class Resources
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Invalid lexer symbol action '{0}', parameter must empty or optional.</c> 的本地化字符串。
-	/// </summary>
-	internal static string InvalidLexerSymbolAction(object? arg0)
-	{
-		return string.Format(resourceCulture, ResourceManager.GetString("InvalidLexerSymbolAction", resourceCulture)!, Format(arg0));
-	}
-	
-	/// <summary>
-	/// 返回类似 <c>Invalid regex options</c> 的本地化字符串。
-	/// </summary>
-	internal static string InvalidRegexOptions => ResourceManager.GetString("InvalidRegexOptions", resourceCulture)!;
-	
-	/// <summary>
 	/// 返回类似 <c>Invalid regular expression pattern '{0}' at offset {1}: {2}.</c> 的本地化字符串。
 	/// </summary>
 	internal static string InvalidRegexPattern(object? arg0, object? arg1, object? arg2)
@@ -142,30 +111,22 @@ internal partial class Resources
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Invalid symbol identifier '{0}'.</c> 的本地化字符串。
-	/// </summary>
-	internal static string InvalidSymbolId(object? arg0)
-	{
-		return string.Format(resourceCulture, ResourceManager.GetString("InvalidSymbolId", resourceCulture)!, Format(arg0));
-	}
-	
-	/// <summary>
 	/// 返回类似 <c>Invalid symbol kind</c> 的本地化字符串。
 	/// </summary>
 	internal static string InvalidSymbolKind => ResourceManager.GetString("InvalidSymbolKind", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Incomplete \p{X} character escape.</c> 的本地化字符串。
+	/// 返回类似 <c>Incomplete \p{X} character escape</c> 的本地化字符串。
 	/// </summary>
 	internal static string InvalidUnicodePropertyEscape => ResourceManager.GetString("InvalidUnicodePropertyEscape", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Malformed \p{X} character escape.</c> 的本地化字符串。
+	/// 返回类似 <c>Malformed \p{X} character escape</c> 的本地化字符串。
 	/// </summary>
 	internal static string MalformedUnicodePropertyEscape => ResourceManager.GetString("MalformedUnicodePropertyEscape", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Missing control character.</c> 的本地化字符串。
+	/// 返回类似 <c>Missing control character</c> 的本地化字符串。
 	/// </summary>
 	internal static string MissingControl => ResourceManager.GetString("MissingControl", resourceCulture)!;
 	
@@ -193,55 +154,60 @@ internal partial class Resources
 	internal static string NestedTrailing => ResourceManager.GetString("NestedTrailing", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Not enough )'s.</c> 的本地化字符串。
+	/// 返回类似 <c>Nested trailing regex</c> 的本地化字符串。
+	/// </summary>
+	internal static string NestedTrailingInner => ResourceManager.GetString("NestedTrailing_Inner", resourceCulture)!;
+	
+	/// <summary>
+	/// 返回类似 <c>Not enough )'s</c> 的本地化字符串。
 	/// </summary>
 	internal static string NotEnoughParens => ResourceManager.GetString("NotEnoughParens", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>'{0}' not extends LexerController&lt;T&gt;.</c> 的本地化字符串。
+	/// 返回类似 <c>Precedence '{0}' of production must be terminal symbol.</c> 的本地化字符串。
 	/// </summary>
-	internal static string NotExtendsLexerController(object? arg0)
+	internal static string PrecedenceMustBeTerminal(object? arg0)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("NotExtendsLexerController", resourceCulture)!, Format(arg0));
+		return string.Format(resourceCulture, ResourceManager.GetString("PrecedenceMustBeTerminal", resourceCulture)!, Format(arg0));
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Quantifier must be less than or equal to Int32.MaxValue.</c> 的本地化字符串。
+	/// 返回类似 <c>Quantifier must be less than or equal to Int32.MaxValue</c> 的本地化字符串。
 	/// </summary>
 	internal static string QuantifierOutOfRange => ResourceManager.GetString("QuantifierOutOfRange", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Quantifier {x,y} following nothing.</c> 的本地化字符串。
+	/// 返回类似 <c>Quantifier {x,y} following nothing</c> 的本地化字符串。
 	/// </summary>
 	internal static string QuantifyAfterNothing => ResourceManager.GetString("QuantifyAfterNothing", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>[x-y] range in reverse order.</c> 的本地化字符串。
+	/// 返回类似 <c>[x-y] range in reverse order</c> 的本地化字符串。
 	/// </summary>
 	internal static string ReversedCharRange => ResourceManager.GetString("ReversedCharRange", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Illegal {x,y} with x &gt; y.</c> 的本地化字符串。
+	/// 返回类似 <c>Illegal {x,y} with x &gt; y</c> 的本地化字符串。
 	/// </summary>
 	internal static string ReversedQuantifierRange => ResourceManager.GetString("ReversedQuantifierRange", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>A subtraction must be the last element in a character class.</c> 的本地化字符串。
+	/// 返回类似 <c>A subtraction must be the last element in a character class</c> 的本地化字符串。
 	/// </summary>
 	internal static string SubtractionMustBeLast => ResourceManager.GetString("SubtractionMustBeLast", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Insufficient hexadecimal digits.</c> 的本地化字符串。
+	/// 返回类似 <c>Insufficient hexadecimal digits</c> 的本地化字符串。
 	/// </summary>
 	internal static string TooFewHex => ResourceManager.GetString("TooFewHex", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Too many )'s.</c> 的本地化字符串。
+	/// 返回类似 <c>Too many )'s</c> 的本地化字符串。
 	/// </summary>
 	internal static string TooManyParens => ResourceManager.GetString("TooManyParens", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Undefined regex '{0}'.</c> 的本地化字符串。
+	/// 返回类似 <c>Undefined regex '{0}'</c> 的本地化字符串。
 	/// </summary>
 	internal static string UndefinedRegex(object? arg0)
 	{
@@ -249,12 +215,12 @@ internal partial class Resources
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Unrecognized control character.</c> 的本地化字符串。
+	/// 返回类似 <c>Unrecognized control character</c> 的本地化字符串。
 	/// </summary>
 	internal static string UnrecognizedControl => ResourceManager.GetString("UnrecognizedControl", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Unrecognized escape sequence \{0}.</c> 的本地化字符串。
+	/// 返回类似 <c>Unrecognized escape sequence \{0}</c> 的本地化字符串。
 	/// </summary>
 	internal static string UnrecognizedEscape(object? arg0)
 	{
@@ -262,12 +228,12 @@ internal partial class Resources
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Unrecognized grouping construct.</c> 的本地化字符串。
+	/// 返回类似 <c>Unrecognized grouping construct</c> 的本地化字符串。
 	/// </summary>
 	internal static string UnrecognizedGrouping => ResourceManager.GetString("UnrecognizedGrouping", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Unknown Unicode property '{0}'.</c> 的本地化字符串。
+	/// 返回类似 <c>Unknown Unicode property '{0}'</c> 的本地化字符串。
 	/// </summary>
 	internal static string UnrecognizedUnicodeProperty(object? arg0)
 	{
@@ -275,12 +241,12 @@ internal partial class Resources
 	}
 	
 	/// <summary>
-	/// 返回类似 <c>Unterminated [] set.</c> 的本地化字符串。
+	/// 返回类似 <c>Unterminated [] set</c> 的本地化字符串。
 	/// </summary>
 	internal static string UnterminatedBracket => ResourceManager.GetString("UnterminatedBracket", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Unterminated (?#...) comment.</c> 的本地化字符串。
+	/// 返回类似 <c>Unterminated (?#...) comment</c> 的本地化字符串。
 	/// </summary>
 	internal static string UnterminatedComment => ResourceManager.GetString("UnterminatedComment", resourceCulture)!;
 	
