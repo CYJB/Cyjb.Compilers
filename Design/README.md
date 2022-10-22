@@ -57,7 +57,7 @@ public partial class TestCalcController : LexerController<Calc>
 <#@ include file="$(PkgCyjb_Compilers_Design)\content\CompilerTemplate.t4" #>
 ```
 
-运行 T4 模板后即可生成同名的 `.lexer.cs` 文件，包含了词法分析器的实现。
+运行 T4 模板后即可生成同名的 `.designed.cs` 文件，包含了词法或语法分析器的实现。
 
 正则表达式的定义与 [C# 正则表达式](https://docs.microsoft.com/zh-cn/dotnet/standard/base-types/regular-expression-language-quick-reference)一致，但不包含定位点、捕获、Lookaround、反向引用、替换构造和替代功能。
 

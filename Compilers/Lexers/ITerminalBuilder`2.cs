@@ -24,6 +24,13 @@ public interface ITerminalBuilder<T, TController>
 	ITerminalBuilder<T, TController> Kind(T kind);
 
 	/// <summary>
+	/// 设置终结符的值。
+	/// </summary>
+	/// <param name="value">词法单元的值。</param>
+	/// <returns>终结符的构造器。</returns>
+	ITerminalBuilder<T, TController> Value(object? value);
+
+	/// <summary>
 	/// 设置终结符的动作。
 	/// </summary>
 	/// <param name="action">终结符的动作。</param>

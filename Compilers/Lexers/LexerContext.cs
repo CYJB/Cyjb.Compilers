@@ -46,18 +46,20 @@ internal sealed class LexerContext
 	/// </summary>
 	public LexerContextType Type { get; }
 	/// <summary>
-	/// 上下文的 EOF 操作。
+	/// 上下文的 EOF 动作。
 	/// </summary>
 	public Delegate? EofAction { get; set; }
+	/// <summary>
+	/// 上下文的 EOF 动作的值。
+	/// </summary>
+	public object? EofValue { get; set; }
 
 	/// <summary>
 	/// 返回词法分析器的上下文数据。
 	/// </summary>
-	///  <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 	/// <returns>词法分析器的上下文数据。</returns>
-	public ContextData<T> GetData<T>()
-		where T : struct
+	public ContextData GetData()
 	{
-		return new ContextData<T>(Index, Label, (Action<LexerController<T>>?)EofAction);
+		return new ContextData(Index, Label, EofAction, EofValue);
 	}
 }

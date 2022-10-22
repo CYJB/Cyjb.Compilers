@@ -44,4 +44,8 @@
     <Content Include="CompilerTemplate.t4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Runtime\Cyjb.Compilers.Runtime.csproj" />
+  </ItemGroup>
+
 </Project>

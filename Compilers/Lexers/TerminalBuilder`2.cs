@@ -58,6 +58,17 @@ internal sealed class TerminalBuilder<T, TController> : ITerminalBuilder<T, TCon
 	}
 
 	/// <summary>
+	/// 设置终结符的值。
+	/// </summary>
+	/// <param name="value">词法单元的值。</param>
+	/// <returns>终结符的构造器。</returns>
+	public ITerminalBuilder<T, TController> Value(object? value)
+	{
+		terminal.Value = value;
+		return this;
+	}
+
+	/// <summary>
 	/// 添加正则表达式对应的词法单元动作。
 	/// </summary>
 	/// <param name="action">词法单元的动作。</param>

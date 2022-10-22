@@ -89,16 +89,32 @@ internal partial class Resources
 	internal static string InvalidLexerKind => ResourceManager.GetString("InvalidLexerKind", resourceCulture)!;
 	
 	/// <summary>
+	/// 返回类似 <c>Missing token '{0}' at {1}.</c> 的本地化字符串。
+	/// </summary>
+	internal static string MissingToken(object? arg0, object? arg1)
+	{
+		return string.Format(resourceCulture, ResourceManager.GetString("MissingToken", resourceCulture)!, Format(arg0), Format(arg1));
+	}
+	
+	/// <summary>
 	/// 返回类似 <c>Reject action is not supported by current TokenReader&lt;T&gt;.</c> 的本地化字符串。
 	/// </summary>
 	internal static string NotRejectable => ResourceManager.GetString("NotRejectable", resourceCulture)!;
 	
 	/// <summary>
-	/// 返回类似 <c>Unrecognized token '{0}' at {1}.</c> 的本地化字符串。
+	/// 返回类似 <c>Unexpected token '{0}' at {1}, expecting one of '{2}'.</c> 的本地化字符串。
 	/// </summary>
-	internal static string UnrecognizedToken(object? arg0, object? arg1)
+	internal static string UnexpectedToken(object? arg0, object? arg1, object? arg2)
 	{
-		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedToken", resourceCulture)!, Format(arg0), Format(arg1));
+		return string.Format(resourceCulture, ResourceManager.GetString("UnexpectedToken", resourceCulture)!, Format(arg0), Format(arg1), Format(arg2));
+	}
+	
+	/// <summary>
+	/// 返回类似 <c>Unrecognized text '{0}' at {1}.</c> 的本地化字符串。
+	/// </summary>
+	internal static string UnrecognizedText(object? arg0, object? arg1)
+	{
+		return string.Format(resourceCulture, ResourceManager.GetString("UnrecognizedText", resourceCulture)!, Format(arg0), Format(arg1));
 	}
 	
 	/// <summary>
@@ -117,4 +133,5 @@ internal partial class Resources
 	#nullable restore
 
 }
+
 

@@ -86,4 +86,3 @@ public partial class TestEscapeStrController : LexerController<Str>
 		decodedText.Append('"');
 	}
 }
-

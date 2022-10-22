@@ -5,7 +5,7 @@ namespace Cyjb.Text;
 /// <summary>
 /// 表示词法分析错误。
 /// </summary>
-public class TokenizeError
+public class TokenizeError : IEquatable<TokenizeError>
 {
 	/// <summary>
 	/// 行定位器。
@@ -56,15 +56,19 @@ public class TokenizeError
 		}
 	}
 
-	#region IEquatable<Token> 成员
+	#region IEquatable<TokenizeError> 成员
 
 	/// <summary>
 	/// 返回当前对象是否等于同一类型的另一对象。
 	/// </summary>
 	/// <param name="other">要比较的对象。</param>
 	/// <returns>如果当前对象等于 <paramref name="other"/>，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	public bool Equals(TokenizeError other)
+	public bool Equals(TokenizeError? other)
 	{
+		if (other is null)
+		{
+			return false;
+		}
 		return Text == other.Text && Span == other.Span;
 	}
 
@@ -92,28 +96,44 @@ public class TokenizeError
 	}
 
 	/// <summary>
-	/// 返回指定的 <see cref="Token{T}"/> 是否相等。
+	/// 返回指定的 <see cref="TokenizeError"/> 是否相等。
 	/// </summary>
 	/// <param name="left">要比较的第一个对象。</param>
 	/// <param name="right">要比较的第二个对象。</param>
 	/// <returns>如果 <paramref name="left"/> 等于 <paramref name="right"/>，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	public static bool operator ==(TokenizeError left, TokenizeError right)
+	public static bool operator ==(TokenizeError? left, TokenizeError? right)
 	{
+		if (ReferenceEquals(left, right))
+		{
+			return true;
+		}
+		if (left is null)
+		{
+			return false;
+		}
 		return left.Equals(right);
 	}
 
 	/// <summary>
-	/// 返回指定的 <see cref="Token{T}"/> 是否不相等。
+	/// 返回指定的 <see cref="TokenizeError"/> 是否不相等。
 	/// </summary>
 	/// <param name="left">要比较的第一个对象。</param>
 	/// <param name="right">要比较的第二个对象。</param>
 	/// <returns>如果 <paramref name="left"/> 等于 <paramref name="right"/>，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	public static bool operator !=(TokenizeError left, TokenizeError right)
+	public static bool operator !=(TokenizeError? left, TokenizeError? right)
 	{
+		if (ReferenceEquals(left, right))
+		{
+			return false;
+		}
+		if (left is null)
+		{
+			return true;
+		}
 		return !left.Equals(right);
 	}
 
-	#endregion // IEquatable<Token> 成员
+	#endregion // IEquatable<TokenizeError> 成员
 
 	/// <summary>
 	/// 返回当前对象的字符串表示形式。
@@ -121,6 +141,6 @@ public class TokenizeError
 	/// <returns>当前对象的字符串表示形式。</returns>
 	public override string ToString()
 	{
-		return Resources.UnrecognizedToken(Text.UnicodeEscape(false), Span);
+		return Resources.UnrecognizedText(Text.UnicodeEscape(false), Span);
 	}
 }

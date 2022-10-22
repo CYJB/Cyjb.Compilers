@@ -137,12 +137,20 @@
     <value>Invalid lexer kind.</value>
     <comment>无效的词法分析类型。</comment>
   </data>
+  <data name="MissingToken" xml:space="preserve">
+    <value>Missing token '{0}' at {1}.</value>
+    <comment>缺失的词法单元。</comment>
+  </data>
   <data name="NotRejectable" xml:space="preserve">
     <value>Reject action is not supported by current TokenReader&lt;T&gt;.</value>
     <comment>不允许拒绝动作。</comment>
   </data>
-  <data name="UnrecognizedToken" xml:space="preserve">
-    <value>Unrecognized token '{0}' at {1}.</value>
-    <comment>未识别的词法单元异常。</comment>
+  <data name="UnexpectedToken" xml:space="preserve">
+    <value>Unexpected token '{0}' at {1}, expecting one of '{2}'.</value>
+    <comment>非预期的词法单元。</comment>
+  </data>
+  <data name="UnrecognizedText" xml:space="preserve">
+    <value>Unrecognized text '{0}' at {1}.</value>
+    <comment>未识别的文本异常。</comment>
   </data>
 </root>

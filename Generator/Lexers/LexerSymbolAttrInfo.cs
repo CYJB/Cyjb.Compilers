@@ -13,7 +13,7 @@ internal class LexerSymbolAttrInfo
 	/// <summary>
 	/// <see cref="LexerSymbolAttribute"/> 的模型。
 	/// </summary>
-	private static readonly AttributeModel SymbolAttrModel = AttributeModel.FromType(typeof(LexerSymbolAttribute));
+	private static readonly AttributeModel SymbolAttrModel = AttributeModel.From<LexerSymbolAttribute>();
 
 	/// <summary>
 	/// 从指定的特性节点和终结符类型解析终结符信息。
@@ -34,11 +34,18 @@ internal class LexerSymbolAttrInfo
 				info = null;
 				return false;
 			}
-			info = new(attr, regex)
+			info = new(attr, regex);
+			ExpressionSyntax? exp = args["Kind"];
+			if (exp != null)
 			{
-				Kind = args["Kind"]
-			};
-			ExpressionSyntax? exp = args["options"];
+				info.Kind = SymbolKind.GetKind(exp);
+			}
+			exp = args["Value"];
+			if (exp != null)
+			{
+				info.Value = exp;
+			}
+			exp = args["options"];
 			if (exp != null)
 			{
 				info.RegexOptions = exp.GetEnumValue<RegexOptions>();
@@ -77,9 +84,13 @@ internal class LexerSymbolAttrInfo
 	/// </summary>
 	public RegexOptions RegexOptions { get; set; }
 	/// <summary>
-	/// 获取或设置正则表达式的类型。
+	/// 获取或设置词法单元的类型。
 	/// </summary>
-	public ExpressionSyntax? Kind { get; set; }
+	public SymbolKind? Kind { get; set; }
+	/// <summary>
+	/// 获取或设置词法单元的值。
+	/// </summary>
+	public ExpressionSyntax? Value { get; set; }
 	/// <summary>
 	/// 获取或设置关联到的方法名称。
 	/// </summary>

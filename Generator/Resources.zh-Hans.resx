@@ -149,4 +149,12 @@
     <value>无效的正则表达式“{0}”：{1}。</value>
     <comment>无效的正则表达式。</comment>
   </data>
+  <data name="NoParserProductionHead" xml:space="preserve">
+    <value>缺少语法分析产生式的头符号。</value>
+    <comment>缺少语法分析产生式的头符号。</comment>
+  </data>
+  <data name="NoParserStart" xml:space="preserve">
+    <value>缺少语法分析起始符号。</value>
+    <comment>缺少语法分析起始符号。</comment>
+  </data>
 </root>

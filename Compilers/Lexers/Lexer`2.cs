@@ -226,10 +226,10 @@ public class Lexer<T, TController>
 				terminal.Context.UnionWith(inclusiveContexts);
 			}
 		}
-		Dictionary<string, ContextData<T>> contexts = new();
-		foreach (KeyValuePair<string, LexerContext> pair in this.contexts)
+		Dictionary<string, ContextData> contexts = new();
+		foreach (var (label, context) in this.contexts)
 		{
-			contexts.Add(pair.Key, pair.Value.GetData<T>());
+			contexts.Add(label, context.GetData());
 		}
 		// 构造 DFA。
 		Nfa nfa = BuildNfa();

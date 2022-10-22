@@ -14,6 +14,10 @@ internal class Output
 	/// <returns>索引位置的宽度。</returns>
 	public static int GetIndexWidth(int count)
 	{
+		if (count <= 10)
+		{
+			return 1;
+		}
 		return (int)Math.Log10(count - 1) + 1;
 	}
 

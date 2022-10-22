@@ -116,6 +116,16 @@ internal partial class Resources
 	}
 	
 	/// <summary>
+	/// 返回类似 <c>No head symbol for parser production.</c> 的本地化字符串。
+	/// </summary>
+	internal static string NoParserProductionHead => ResourceManager.GetString("NoParserProductionHead", resourceCulture)!;
+	
+	/// <summary>
+	/// 返回类似 <c>No parser start symbol.</c> 的本地化字符串。
+	/// </summary>
+	internal static string NoParserStart => ResourceManager.GetString("NoParserStart", resourceCulture)!;
+	
+	/// <summary>
 	/// 将指定对象格式化为字符串。
 	/// </summary>
 	/// <param name="value">要格式化的对象。</param>
@@ -131,4 +141,5 @@ internal partial class Resources
 	#nullable restore
 
 }
+
 

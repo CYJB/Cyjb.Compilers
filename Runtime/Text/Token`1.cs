@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Cyjb.Text;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace Cyjb.Text;
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 /// <remarks>使用 <typeparamref name="T"/> 的特殊值 <c>-1</c> 用于表示文件结束。</remarks>
-public struct Token<T> : IEquatable<Token<T>>
+public partial struct Token<T> : IEquatable<Token<T>>
 	where T : struct
 {
 	/// <summary>
@@ -33,6 +35,7 @@ public struct Token<T> : IEquatable<Token<T>>
 	/// <summary>
 	/// 行定位器。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly LineLocator? locator;
 
 	/// <summary>
@@ -47,6 +50,21 @@ public struct Token<T> : IEquatable<Token<T>>
 		Kind = kind;
 		Text = text;
 		Span = span;
+		Value = value;
+		locator = null;
+	}
+
+	/// <summary>
+	/// 使用词法单元的相关信息初始化 <see cref="Token{T}"/> 类的新实例。
+	/// </summary>
+	/// <param name="kind">词法单元的类型。</param>
+	/// <param name="text">词法单元的文本。</param>
+	/// <param name="value">词法单元的值。</param>
+	public Token(T kind, string text, object? value = null)
+	{
+		Kind = kind;
+		Text = text;
+		Span = new TextSpan(0, 0);
 		Value = value;
 		locator = null;
 	}
@@ -72,46 +90,35 @@ public struct Token<T> : IEquatable<Token<T>>
 	/// 获取词法单元的类型。
 	/// </summary>
 	/// <value>词法单元的类型。</value>
-	public T Kind { get; }
+	public T Kind { get; init; }
 	/// <summary>
 	/// 获取词法单元的文本。
 	/// </summary>
 	/// <value>词法单元的文本。</value>
-	public string Text { get; }
+	public string Text { get; init; }
 	/// <summary>
 	/// 获取词法单元的范围。
 	/// </summary>
 	/// <value>词法单元的范围。</value>
-	public TextSpan Span { get; }
+	public TextSpan Span { get; init; }
 	/// <summary>
 	/// 获取词法单元的行列位置范围。
 	/// </summary>
 	/// <value>词法单元的行列位置范围。</value>
-	public LinePositionSpan LinePositionSpan
-	{
-		get
-		{
-			int start = Span.Start;
-			int end = Span.End;
-			if (locator == null)
-			{
-				return new LinePositionSpan(new LinePosition(1, start), new LinePosition(1, end));
-			}
-			else
-			{
-				return new LinePositionSpan(locator.GetPosition(start), locator.GetPosition(end));
-			}
-		}
-	}
+	public LinePositionSpan LinePositionSpan => locator.GetSpan(Span);
 	/// <summary>
 	/// 获取词法单元的值。
 	/// </summary>
 	/// <value>词法单元的值。</value>
-	public object? Value { get; }
+	public object? Value { get; init; }
 	/// <summary>
 	/// 获取当前是否是表示文件结束的词法单元。
 	/// </summary>
 	public bool IsEndOfFile => EqualityComparer<T>.Default.Equals(Kind, EndOfFile);
+	/// <summary>
+	/// 获取关联到的行定位器。
+	/// </summary>
+	public LineLocator? Locator => locator;
 
 	#region IEquatable<Token> 成员
 

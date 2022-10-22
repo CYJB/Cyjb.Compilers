@@ -1,4 +1,5 @@
 using Cyjb.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Cyjb.Compilers.Lexers;
 
@@ -10,14 +11,14 @@ internal sealed partial class LexerController
 	/// <param name="data">词法分析器数据。</param>
 	/// <param name="symbols">符号信息列表。</param>
 	/// <returns>终结符数据。</returns>
-	public ExpressionBuilder TerminalsValue(LexerData<int> data, List<LexerSymbolAttrInfo> symbols)
+	private ExpressionBuilder TerminalsValue(LexerData<SymbolKind> data, List<LexerSymbolAttrInfo> symbols)
 	{
-		TypeBuilder terminalType = $"TerminalData<{kindType}>";
-		var builder = SyntaxBuilder.ArrayCreationExpression().InitializerWrap(1);
+		TypeBuilder terminalType = SyntaxBuilder.Type($"TerminalData<{KindType}>");
+		var builder = SyntaxBuilder.CreateArray().InitializerWrap(1);
 		for (int i = 0; i < symbols.Count; i++)
 		{
-			TerminalData<int> terminal = data.Terminals[i];
-			var terminalBuilder = SyntaxBuilder.ObjectCreationExpression().Type(terminalType);
+			TerminalData<SymbolKind> terminal = data.Terminals[i];
+			var terminalBuilder = SyntaxBuilder.CreateObject().Type(terminalType);
 			builder.Initializer(terminalBuilder);
 			terminalBuilder.Comment($"{i}: {symbols[i].Regex}");
 			bool argContinues = true;
@@ -27,7 +28,22 @@ internal sealed partial class LexerController
 			}
 			else
 			{
-				terminalBuilder.Argument(symbolInfos[terminal.Kind.Value].Kind!);
+				terminalBuilder.Argument(terminal.Kind.Value.Syntax);
+			}
+			if (terminal.Value is ExpressionSyntax value)
+			{
+				if (argContinues)
+				{
+					terminalBuilder.Argument(value);
+				}
+				else
+				{
+					terminalBuilder.Argument(value, "value");
+				}
+			}
+			else
+			{
+				argContinues = false;
 			}
 			if (terminal.Action == null)
 			{
@@ -35,9 +51,9 @@ internal sealed partial class LexerController
 			}
 			else
 			{
-				var action = SyntaxBuilder.LambdaExpression()
-					.Parameter("c", controllerType)
-					.Body(SyntaxBuilder.IdentifierName("c").Access(actionMap[terminal.Action]).Invoke());
+				var action = SyntaxBuilder.Lambda()
+					.Parameter("c", SyntaxBuilder.Name(Name))
+					.Body(SyntaxBuilder.Name("c").AccessMember(actionMap[terminal.Action]).Invoke());
 				if (argContinues)
 				{
 					terminalBuilder.Argument(action);
@@ -49,7 +65,7 @@ internal sealed partial class LexerController
 			}
 			if (terminal.Trailing != null)
 			{
-				var trailing = SyntaxBuilder.LiteralExpression(terminal.Trailing.Value);
+				var trailing = SyntaxBuilder.Literal(terminal.Trailing.Value);
 				if (argContinues)
 				{
 					terminalBuilder.Argument(trailing);

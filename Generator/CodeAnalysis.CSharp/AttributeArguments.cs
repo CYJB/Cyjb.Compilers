@@ -13,12 +13,6 @@ internal class AttributeArguments
 	private readonly Dictionary<string, ExpressionSyntax> arguments;
 
 	/// <summary>
-	/// 初始化 <see cref="AttributeArguments"/> 类的新实例。
-	/// </summary>
-	public AttributeArguments()
-		: this(new Dictionary<string, ExpressionSyntax>(), Array.Empty<ExpressionSyntax>())
-	{ }
-	/// <summary>
 	/// 使用特性的参数信息初始化 <see cref="AttributeArguments"/> 类的新实例。
 	/// </summary>
 	/// <param name="arguments">参数值的字典。</param>

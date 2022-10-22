@@ -56,8 +56,7 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 			{
 				// 将文本和流调整到与接受状态匹配的状态。
 				source.Index = index;
-				TerminalData<T> terminal = Data.Terminals[acceptState];
-				Controller.DoAction(Start, terminal.Kind, terminal.Action);
+				Controller.DoAction(Start, Data.Terminals[acceptState]);
 				if (!Controller.IsReject)
 				{
 					return true;

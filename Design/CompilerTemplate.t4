@@ -4,7 +4,7 @@
  */
 #>
 <#@ template language="C#" hostspecific="true" #>
-<#@output extension=".lexer.cs"#>
+<#@output extension=".designed.cs" encoding="UTF-8"#>
 <#@ assembly name="System.Core" #>
 <#@ assembly name="System.Runtime" #>
 <#@ assembly name="EnvDTE" #>
@@ -26,6 +26,7 @@
 		using System.Diagnostics.Process myProcess = new();
 		myProcess.StartInfo.UseShellExecute = false;
 		myProcess.StartInfo.RedirectStandardOutput = true;
+		myProcess.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
 		myProcess.StartInfo.FileName = toolPath;
 		myProcess.StartInfo.Arguments = Path.GetFullPath(filePath);
 		myProcess.StartInfo.CreateNoWindow = true;

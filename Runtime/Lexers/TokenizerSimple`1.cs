@@ -47,8 +47,7 @@ internal sealed class TokenizerSimpler<T> : TokenizerBase<T>
 		{
 			// 将流调整到与接受状态匹配的状态。
 			source.Index = lastIndex;
-			TerminalData<T> terminal = Data.Terminals[lastAccept];
-			Controller.DoAction(Start, terminal.Kind, terminal.Action);
+			Controller.DoAction(Start, Data.Terminals[lastAccept]);
 			return true;
 		}
 		return false;

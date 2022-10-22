@@ -9,17 +9,15 @@ namespace Cyjb.Compilers.Lexers;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class LexerContextAttribute : Attribute
 {
+
+#pragma warning disable IDE0060 // 删除未使用的参数
+
 	/// <summary>
 	/// 使用指定的上下文标签初始化 <see cref="LexerContextAttribute"/> 类的新实例。
 	/// </summary>
 	/// <param name="label">上下文的标签。</param>
-	public LexerContextAttribute(string label)
-	{
-		Label = label;
-	}
+	public LexerContextAttribute(string label) { }
 
-	/// <summary>
-	/// 获取上下文的标签。
-	/// </summary>
-	public string Label { get; }
+#pragma warning restore IDE0060 // 删除未使用的参数
+
 }

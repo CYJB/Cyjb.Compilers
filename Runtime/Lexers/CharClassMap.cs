@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Cyjb.Compilers.Lexers;
@@ -11,16 +12,19 @@ public sealed class CharClassMap
 	/// 范围索引。
 	/// </summary>
 	/// <remarks>索引的高 16 位表示起始字符（包含），低 16 位表示结束字符（包含）</remarks>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly int[] indexes;
 	/// <summary>
 	/// 字符类。
 	/// </summary>
 	/// <remarks>前 128 个位置表示 ASCII 范围内的字符类，之后为范围索引对应的字符类。</remarks>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly int[] charClasses;
 	/// <summary>
 	/// Unicode 类别对应的字符类。
 	/// </summary>
-	private readonly Dictionary<UnicodeCategory, int>? categories;
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private readonly IReadOnlyDictionary<UnicodeCategory, int>? categories;
 
 	/// <summary>
 	/// 使用指定的范围索引和字符类初始化。
@@ -28,7 +32,8 @@ public sealed class CharClassMap
 	/// <param name="indexes">范围索引。</param>
 	/// <param name="charClasses">字符类。</param>
 	/// <param name="categories">Unicode 类别对应的字符类。</param>
-	public CharClassMap(int[] indexes, int[] charClasses, Dictionary<UnicodeCategory, int>? categories = null)
+	public CharClassMap(int[] indexes, int[] charClasses, 
+		IReadOnlyDictionary<UnicodeCategory, int>? categories = null)
 	{
 		this.indexes = indexes;
 		this.charClasses = charClasses;
@@ -51,7 +56,7 @@ public sealed class CharClassMap
 	/// <summary>
 	/// 获取 Unicode 类别对应的字符类。
 	/// </summary>
-	public Dictionary<UnicodeCategory, int>? Categories => categories;
+	public IReadOnlyDictionary<UnicodeCategory, int>? Categories => categories;
 
 	/// <summary>
 	/// 返回指定字符所属的字符类。

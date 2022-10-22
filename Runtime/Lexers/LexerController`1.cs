@@ -11,6 +11,10 @@ public class LexerController<T>
 	where T : struct
 {
 	/// <summary>
+	/// 关联到的词法分析器。
+	/// </summary>
+	private TokenizerBase<T> tokenizer;
+	/// <summary>
 	/// 要扫描的源文件。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -18,11 +22,12 @@ public class LexerController<T>
 	/// <summary>
 	/// 当前词法分析的上下文。
 	/// </summary>
-	private IReadOnlyDictionary<string, ContextData<T>> contexts;
+	private IReadOnlyDictionary<string, ContextData> contexts;
 	/// <summary>
 	/// 当前的上下文。
 	/// </summary>
-	private ContextData<T> context;
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private ContextData context;
 	/// <summary>
 	/// 动作的处理器。
 	/// </summary>
@@ -31,7 +36,7 @@ public class LexerController<T>
 	/// <summary>
 	/// 上下文的堆栈。
 	/// </summary>
-	private readonly Stack<ContextData<T>> contextStack = new();
+	private readonly Stack<ContextData> contextStack = new();
 	/// <summary>
 	/// 是否允许 Reject 动作。
 	/// </summary>
@@ -57,7 +62,7 @@ public class LexerController<T>
 	/// <param name="contexts">词法分析的上下文。</param>
 	/// <param name="actionHandler">动作的处理器。</param>
 	/// <param name="rejectable">是否允许 Reject 动作。</param>
-	internal void Init(SourceReader source, IReadOnlyDictionary<string, ContextData<T>> contexts,
+	internal void Init(SourceReader source, IReadOnlyDictionary<string, ContextData> contexts,
 		Action<Delegate, LexerController<T>> actionHandler, bool rejectable)
 	{
 		this.source = source;
@@ -81,7 +86,7 @@ public class LexerController<T>
 	/// 获取共享的上下文对象。
 	/// </summary>
 	/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
-	public object? SharedContext => Tokenizer.SharedContext;
+	public object? SharedContext => tokenizer.SharedContext;
 	/// <summary>
 	/// 获取当前词法单元的标识符。
 	/// </summary>
@@ -100,13 +105,9 @@ public class LexerController<T>
 	public object? Value { get; set; }
 
 	/// <summary>
-	/// 获取或设置关联到的词法分析器。
-	/// </summary>
-	internal TokenizerBase<T> Tokenizer { get; set; }
-	/// <summary>
 	/// 获取当前的上下文数据。
 	/// </summary>
-	internal ContextData<T> CurrentContext => context;
+	internal ContextData CurrentContext => context;
 	/// <summary>
 	/// 获取是否接受了当前的词法单元。
 	/// </summary>
@@ -121,17 +122,52 @@ public class LexerController<T>
 	internal bool IsMore { get; private set; }
 
 	/// <summary>
+	/// 设置关联到的词法分析器。
+	/// </summary>
+	/// <param name="tokenizer">关联到的词法分析器。</param>
+	internal void SetTokenizer(TokenizerBase<T> tokenizer)
+	{
+		this.tokenizer = tokenizer;
+	}
+
+	/// <summary>
 	/// 开始一个新的词法分析环境。
 	/// </summary>
 	/// <param name="start">当前词法单元的起始索引。</param>
-	/// <param name="kind">当前匹配的词法单元标识符。</param>
-	/// <param name="action">当前要执行的动作。</param>
-	internal void DoAction(int start, T? kind, Delegate? action)
+	/// <param name="terminal">当前词法单元的终结符数据。</param>
+	internal void DoAction(int start, TerminalData<T> terminal)
 	{
-		Kind = kind;
+		Kind = terminal.Kind;
 		Text = source.ReadedText();
 		Start = start;
-		Value = null;
+		Value = terminal.Value;
+		if (terminal.Action == null)
+		{
+			userAccepted = true;
+			IsReject = false;
+			IsMore = false;
+		}
+		else
+		{
+			userAccepted = false;
+			IsReject = false;
+			IsMore = false;
+			actionHandler(terminal.Action, this);
+		}
+	}
+
+	/// <summary>
+	/// 开始 EndOfFile 词法分析环境。
+	/// </summary>
+	/// <param name="start">当前词法单元的起始索引。</param>
+	/// <param name="value">当前词法单元的值。</param>
+	/// <param name="action">当前要执行的动作。</param>
+	internal void DoEofAction(int start, object? value, Delegate? action)
+	{
+		Kind = Token<T>.EndOfFile;
+		Text = source.ReadedText();
+		Start = start;
+		Value = value;
 		if (action == null)
 		{
 			userAccepted = true;
@@ -163,18 +199,19 @@ public class LexerController<T>
 	/// <param name="span">未识别的字符串范围。</param>
 	internal protected virtual void EmitTokenizeError(string text, TextSpan span)
 	{
-		Tokenizer.ReportTokenizeError(new TokenizeError(text, span, source.Locator));
+		tokenizer.ReportTokenizeError(new TokenizeError(text, span, source.Locator));
 	}
 
 	/// <summary>
 	/// 接受当前的匹配。
 	/// </summary>
+	/// <param name="value">词法单元的值。</param>
 	/// <overloads>
 	/// <summary>
 	/// 接受当前的匹配。
 	/// </summary>
 	/// </overloads>
-	public void Accept()
+	public void Accept(object? value = null)
 	{
 		if (IsReject)
 		{
@@ -185,13 +222,15 @@ public class LexerController<T>
 			throw new InvalidOperationException(Resources.InvalidLexerKind);
 		}
 		userAccepted = true;
+		Value = value;
 	}
 
 	/// <summary>
 	/// 接受当前的匹配，使用指定的标识符。
 	/// </summary>
 	/// <param name="kind">匹配的标识符。</param>
-	public void Accept(T kind)
+	/// <param name="value">词法单元的值。</param>
+	public void Accept(T kind, object? value = null)
 	{
 		if (IsReject)
 		{
@@ -199,6 +238,7 @@ public class LexerController<T>
 		}
 		userAccepted = true;
 		Kind = kind;
+		Value = value;
 	}
 
 	/// <summary>
@@ -267,9 +307,9 @@ public class LexerController<T>
 	/// </summary>
 	/// <param name="label">要获取的词法分析器上下文的标签。</param>
 	/// <returns>有效的词法分析器上下文。</returns>
-	private ContextData<T> GetContext(string label)
+	private ContextData GetContext(string label)
 	{
-		if (contexts.TryGetValue(label, out ContextData<T>? context))
+		if (contexts.TryGetValue(label, out ContextData? context))
 		{
 			return context;
 		}

@@ -11,7 +11,7 @@ namespace TestCompilers.Lexers;
 /// <see cref="Lexer"/> 类的单元测试。
 /// </summary>
 [TestClass]
-public class UnitTestLexer
+public partial class UnitTestLexer
 {
 	/// <summary>
 	/// 对计算器词法分析进行测试。
@@ -56,6 +56,7 @@ public class UnitTestLexer
 	{
 		string source = "1 + 20 * 3 / 4*(5+6)";
 		ITokenizer<Calc> tokenizer = factory.CreateTokenizer(source);
+		Assert.AreEqual(ParseStatus.Ready, tokenizer.Status);
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), tokenizer.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), tokenizer.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(4, 6), 20), tokenizer.Read());
@@ -70,6 +71,7 @@ public class UnitTestLexer
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "6", new TextSpan(18, 19), 6), tokenizer.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.RBrace, ")", new TextSpan(19, 20)), tokenizer.Read());
 		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), tokenizer.Read());
+		Assert.AreEqual(ParseStatus.Finished, tokenizer.Status);
 
 		ITokenizer<Calc> errorTokenizer = factory.CreateTokenizer("1ss");
 		int errorIndex = 0;
@@ -88,6 +90,45 @@ public class UnitTestLexer
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), errorTokenizer.Read());
 		Assert.AreEqual(Token<Calc>.GetEndOfFile(3), errorTokenizer.Read());
 		Assert.AreEqual(2, errorIndex);
+	}
+
+	/// <summary>
+	/// 对词法单元的值进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestDefineSymbolValue()
+	{
+		Lexer<Calc> lexer = new();
+		lexer.DefineSymbol("[0-9]+").Kind(Calc.Id).Value(101).Action(c =>
+		{
+			Assert.AreEqual(101, c.Value);
+			c.Accept((int)c.Value! + 10);
+		});
+
+		TestSymbolValue(lexer.GetFactory());
+	}
+
+	/// <summary>
+	/// 对设计时词法单元的值进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestInDesignSymbolValue()
+	{
+		TestSymbolValue(TestSymbolValueLexer.Factory);
+	}
+
+	/// <summary>
+	/// 测试词法单元的值。
+	/// </summary>
+	/// <param name="factory">词法分析器的工厂。</param>
+	private static void TestSymbolValue(ILexerFactory<Calc> factory)
+	{
+		string source = "20";
+		ITokenizer<Calc> tokenizer = factory.CreateTokenizer(source);
+		Assert.AreEqual(ParseStatus.Ready, tokenizer.Status);
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(0, 2), 111), tokenizer.Read());
+		Assert.AreEqual(Token<Calc>.GetEndOfFile(2), tokenizer.Read());
+		Assert.AreEqual(ParseStatus.Finished, tokenizer.Status);
 	}
 
 	/// <summary>
@@ -113,7 +154,7 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignString()
 	{
-		TestString(TestStrController.Factory);
+		TestString(TestStrLexer.Factory);
 	}
 
 	/// <summary>
@@ -222,7 +263,7 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignEscapeString()
 	{
-		TestEscapeString(TestEscapeStrController.Factory);
+		TestEscapeString(TestEscapeStrLexer.Factory);
 	}
 
 	/// <summary>
@@ -266,7 +307,7 @@ public class UnitTestLexer
 	[TestMethod]
 	public void TestInDesignProuction()
 	{
-		TestProuction(TestProductionController.Factory);
+		TestProuction(TestProductionLexer.Factory);
 	}
 
 	/// <summary>

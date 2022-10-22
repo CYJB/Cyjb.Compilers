@@ -7,7 +7,6 @@ namespace Cyjb.CodeAnalysis.CSharp;
 /// </summary>
 internal static class SyntaxTokenUtils
 {
-
 	/// <summary>
 	/// 插入指定的前置琐事。
 	/// </summary>

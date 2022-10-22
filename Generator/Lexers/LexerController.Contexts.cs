@@ -10,22 +10,20 @@ internal sealed partial class LexerController
 	/// </summary>
 	/// <param name="data">词法分析器数据</param>
 	/// <returns>上下文数据。</returns>
-	public ExpressionBuilder ContextsValue(LexerData<int> data)
+	private ExpressionBuilder ContextsValue(LexerData<SymbolKind> data)
 	{
-		TypeBuilder contextType = $"ContextData<{kindType}>";
-		var builder = SyntaxBuilder.ObjectCreationExpression().InitializerWrap(1);
+		var builder = SyntaxBuilder.CreateObject().InitializerWrap(1);
 		// 按照索引顺序生成上下文
 		foreach (var pair in data.Contexts.OrderBy(pair => pair.Value.Index))
 		{
-			var contextBuilder = SyntaxBuilder.ObjectCreationExpression()
-				.Type(contextType)
-				.Argument(SyntaxBuilder.LiteralExpression(pair.Value.Index))
+			var contextBuilder = SyntaxBuilder.CreateObject<ContextData>()
+				.Argument(SyntaxBuilder.Literal(pair.Value.Index))
 				.Argument(GetContextKey(pair.Value.Label));
 			if (pair.Value.EofAction != null)
 			{
-				contextBuilder.Argument(SyntaxBuilder.LambdaExpression()
-					.Parameter("c", controllerType)
-					.Body(SyntaxBuilder.IdentifierName("c").Access(actionMap[pair.Value.EofAction]).Invoke())
+				contextBuilder.Argument(SyntaxBuilder.Lambda()
+					.Parameter("c", SyntaxBuilder.Name(Name))
+					.Body(SyntaxBuilder.Name("c").AccessMember(actionMap[pair.Value.EofAction]).Invoke())
 				);
 			}
 			builder.Initializer(SyntaxBuilder.InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
@@ -44,11 +42,11 @@ internal sealed partial class LexerController
 	{
 		if (key == ContextData.Initial)
 		{
-			return SyntaxBuilder.IdentifierName("ContextData").Access("Initial");
+			return SyntaxBuilder.Type<ContextData>().AccessMember("Initial");
 		}
 		else
 		{
-			return SyntaxBuilder.LiteralExpression(key);
+			return SyntaxBuilder.Literal(key);
 		}
 	}
 }

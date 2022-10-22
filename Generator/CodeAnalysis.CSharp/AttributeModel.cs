@@ -17,13 +17,18 @@ internal sealed class AttributeModel
 	/// <summary>
 	/// 通过指定的特性类型构造其模型。
 	/// </summary>
+	/// <typeparam name="T">特性类型。</typeparam>
 	/// <remarks>只支持单个构造函数。</remarks>
-	/// <param name="attributeType">特性类型。</param>
 	/// <returns>特性的模型。</returns>
-	public static AttributeModel FromType(Type attributeType)
+	public static AttributeModel From<T>()
 	{
+		Type attributeType = typeof(T);
 		StringBuilder signature = new($"{attributeType.Name}.{attributeType.Name}(");
-		ParameterInfo[] parameters = attributeType.GetConstructors().Single().GetParametersNoCopy();
+		// 选择参数最多的构造函数。
+		ParameterInfo[] parameters = attributeType.GetConstructors()
+			.OrderByDescending((ctor) => ctor.GetParametersNoCopy().Length)
+			.First()
+			.GetParametersNoCopy();
 		AttributeParameterInfo[] ctorParams = new AttributeParameterInfo[parameters.Length];
 		for (int i = 0; i < parameters.Length; i++)
 		{

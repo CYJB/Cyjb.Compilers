@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Lexers\UnitTestTemplateDiagnostics.template.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Lexers\UnitTestTemplateDiagnostics.template.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.4">
 	  <GeneratePathProperty>True</GeneratePathProperty>
 	  <PrivateAssets>all</PrivateAssets>
@@ -24,47 +32,74 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestCalcLexer.tt">
+    <None Update="Lexers\TestCalcLexer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TestCalcLexer.lexer.cs</LastGenOutput>
+      <LastGenOutput>TestCalcLexer.designed.cs</LastGenOutput>
     </None>
-    <None Update="Lexers\TestEscapeStrController.tt">
+    <None Update="Lexers\TestEscapeStrLexer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TestEscapeStrController.lexer.cs</LastGenOutput>
+      <LastGenOutput>TestEscapeStrLexer.designed.cs</LastGenOutput>
     </None>
-    <None Update="Lexers\TestProductionController.tt">
+    <None Update="Lexers\TestProductionLexer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TestProductionController.lexer.cs</LastGenOutput>
+      <LastGenOutput>TestProductionLexer.designed.cs</LastGenOutput>
     </None>
-    <None Update="Lexers\TestStrController.tt">
+    <None Update="Lexers\TestStrLexer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TestStrController.lexer.cs</LastGenOutput>
+      <LastGenOutput>TestStrLexer.designed.cs</LastGenOutput>
     </None>
-    <None Update="Lexers\UnitTestTemplateDiagnostics.txt">
+    <None Update="Lexers\TestSymbolValueLexer.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestSymbolValueLexer.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\UnitTestTemplateDiagnostics.template.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Parsers\TestCalcParser.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestCalcParser.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Parsers\TestProductionParser.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestProductionParser.designed.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Lexers\TestEscapeStrController.lexer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TestEscapeStrController.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Lexers\TestProductionController.lexer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TestProductionController.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Lexers\TestStrController.lexer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TestStrController.tt</DependentUpon>
-    </Compile>
-    <Compile Update="TestCalcLexer.lexer.cs">
+    <Compile Update="Lexers\TestCalcLexer.designed.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TestCalcLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestEscapeStrLexer.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestEscapeStrLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestProductionLexer.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestProductionLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestStrLexer.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestStrLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestSymbolValueLexer.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestSymbolValueLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Parsers\TestCalcParser.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestCalcParser.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Parsers\TestProductionParser.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestProductionParser.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 

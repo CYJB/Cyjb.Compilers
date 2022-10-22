@@ -11,11 +11,13 @@ public sealed class TerminalData<T>
 	/// 使用指定的终结符信息初始化 <see cref="TerminalData{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="kind">终结符的类型。</param>
+	/// <param name="value">终结符的值。</param>
 	/// <param name="action">终结符的动作。</param>
 	/// <param name="trailing">向前看信息。</param>
-	public TerminalData(T? kind = null, Delegate? action = null, int? trailing = null)
+	public TerminalData(T? kind = null, object? value = null, Delegate? action = null, int? trailing = null)
 	{
 		Kind = kind;
+		Value = value;
 		Action = action;
 		Trailing = trailing;
 	}
@@ -24,6 +26,10 @@ public sealed class TerminalData<T>
 	/// 终结符的类型。
 	/// </summary>
 	public T? Kind { get; }
+	/// <summary>
+	/// 终结符的值。
+	/// </summary>
+	public object? Value { get; }
 	/// <summary>
 	/// 终结符的动作。
 	/// </summary>

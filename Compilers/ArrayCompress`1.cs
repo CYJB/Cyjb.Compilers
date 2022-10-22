@@ -3,7 +3,7 @@ using Cyjb.Collections;
 namespace Cyjb.Compilers;
 
 /// <summary>
-/// 提供四数组压缩的能力。
+/// 提供三数组压缩的能力。
 /// </summary>
 /// <typeparam name="T">状态的类型。</typeparam>
 internal class ArrayCompress<T>
@@ -56,6 +56,10 @@ internal class ArrayCompress<T>
 	/// <returns>指定转移的基线索引。</returns>
 	public int AddTransition(T currentState, IList<KeyValuePair<int, int>> transition)
 	{
+		if (transition.Count == 0)
+		{
+			return int.MinValue;
+		}
 		int minIndex = transition[0].Key;
 		int length = transition[^1].Key + 1 - minIndex;
 		BitList pattern = new(length, false);

@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using Cyjb.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -9,37 +8,21 @@ namespace Cyjb.Compilers.Lexers;
 /// <summary>
 /// 表示 <see cref="LexerController{T}"/> 的子类定义。
 /// </summary>
-internal sealed partial class LexerController
+internal sealed partial class LexerController : Controller
 {
 	/// <summary>
 	/// <see cref="LexerContextAttribute"/> 的模型。
 	/// </summary>
-	private static readonly AttributeModel ContextAttrModel = AttributeModel.FromType(typeof(LexerContextAttribute));
+	private static readonly AttributeModel ContextAttrModel = AttributeModel.From<LexerContextAttribute>();
 	/// <summary>
 	/// <see cref="LexerInclusiveContextAttribute"/> 的模型。
 	/// </summary>
-	private static readonly AttributeModel InclusiveContextAttrModel = AttributeModel.FromType(typeof(LexerInclusiveContextAttribute));
+	private static readonly AttributeModel InclusiveContextAttrModel = AttributeModel.From<LexerInclusiveContextAttribute>();
 	/// <summary>
 	/// <see cref="LexerRegexAttribute"/> 的模型。
 	/// </summary>
-	private static readonly AttributeModel RegexAttrModel = AttributeModel.FromType(typeof(LexerRegexAttribute));
+	private static readonly AttributeModel RegexAttrModel = AttributeModel.From<LexerRegexAttribute>();
 
-	/// <summary>
-	/// 模板上下文。
-	/// </summary>
-	private readonly TransformationContext context;
-	/// <summary>
-	/// 控制器节点。
-	/// </summary>
-	private readonly ClassDeclarationSyntax controllerSyntax;
-	/// <summary>
-	/// 控制器的类型。
-	/// </summary>
-	private readonly TypeBuilder controllerType;
-	/// <summary>
-	/// 标识符类型。
-	/// </summary>
-	private readonly string kindType;
 	/// <summary>
 	/// 词法分析是否用到了 Reject 动作。
 	/// </summary>
@@ -47,7 +30,7 @@ internal sealed partial class LexerController
 	/// <summary>
 	/// 词法分析器。
 	/// </summary>
-	private readonly Lexer<int> lexer = new();
+	private readonly Lexer<SymbolKind> lexer = new();
 	/// <summary>
 	/// 终结符信息。
 	/// </summary>
@@ -58,32 +41,263 @@ internal sealed partial class LexerController
 	private readonly Dictionary<Delegate, string> actionMap = new();
 
 	/// <summary>
-	/// 使用指定的控制器类型和标识符类型初始化。
+	/// 使用指定的控制器名称和标识符类型初始化 <see cref="LexerController"/> 类的新实例。
 	/// </summary>
 	/// <param name="context">模板上下文。</param>
-	/// <param name="controllerSyntax">控制器节点。</param>
+	/// <param name="syntax">控制器语法节点。</param>
 	/// <param name="kindType">标识符类型。</param>
-	public LexerController(TransformationContext context, ClassDeclarationSyntax controllerSyntax, TypeSyntax kindType)
+	public LexerController(TransformationContext context, ClassDeclarationSyntax syntax, string kindType)
+		: base(context, syntax, kindType)
+	{ }
+
+	/// <summary>
+	/// 解析控制器语法节点。
+	/// </summary>
+	/// <param name="controllerSyntax">控制器语法节点。</param>
+	public override void Parse(ClassDeclarationSyntax controllerSyntax)
 	{
-		this.context = context;
-		this.controllerSyntax = controllerSyntax;
-		controllerType = SyntaxFactory.IdentifierName(controllerSyntax.Identifier.WithoutTrivia());
-		this.kindType = kindType.ToString();
+		ParseClassAttributes(controllerSyntax);
+		ParseActions(controllerSyntax);
 	}
 
 	/// <summary>
-	/// 获取控制器节点。
+	/// 解析类特性。
 	/// </summary>
-	public ClassDeclarationSyntax ControllerSyntax => controllerSyntax;
+	/// <param name="controllerSyntax">控制器语法节点。</param>
+	/// <returns>如果解析成功，则为 <c>true</c>；否则为 <c>false</c>。</returns>
+	private void ParseClassAttributes(ClassDeclarationSyntax controllerSyntax)
+	{
+		foreach (AttributeSyntax attr in controllerSyntax.AttributeLists.GetAttributes())
+		{
+			try
+			{
+				switch (attr.GetFullName())
+				{
+					case "LexerRejectableAttribute":
+						rejectable = true;
+						break;
+					case "LexerContextAttribute":
+						{
+							AttributeArguments args = attr.GetArguments(ContextAttrModel);
+							ExpressionSyntax labelExp = args["label"]!;
+							string? label = labelExp.GetStringLiteral();
+							if (label.IsNullOrEmpty())
+							{
+								Context.AddError(Resources.InvalidLexerContext(label), labelExp);
+							}
+							else
+							{
+								lexer.DefineContext(label);
+							}
+							break;
+						}
+					case "LexerInclusiveContextAttribute":
+						{
+							AttributeArguments args = attr.GetArguments(InclusiveContextAttrModel);
+							ExpressionSyntax labelExp = args["label"]!;
+							string? label = labelExp.GetStringLiteral();
+							if (label.IsNullOrEmpty())
+							{
+								Context.AddError(Resources.InvalidLexerContext(label), labelExp);
+							}
+							else
+							{
+								lexer.DefineInclusiveContext(label);
+							}
+							break;
+						}
+					case "LexerRegexAttribute":
+						{
+							AttributeArguments args = attr.GetArguments(RegexAttrModel);
+							string? name = args["name"]!.GetStringLiteral();
+							if (name.IsNullOrEmpty())
+							{
+								Context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegexName), attr);
+								break;
+							}
+							string? regex = args["regex"]!.GetStringLiteral();
+							if (regex.IsNullOrEmpty())
+							{
+								Context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegex), attr);
+								break;
+							}
+							RegexOptions regexOptions = RegexOptions.None;
+							ExpressionSyntax? exp = args["options"];
+							if (exp != null)
+							{
+								regexOptions = exp.GetEnumValue<RegexOptions>();
+							}
+							try
+							{
+								lexer.DefineRegex(name, regex, regexOptions);
+							}
+							catch (RegexParseException ex)
+							{
+								Context.AddError(Resources.InvalidRegex(regex, ex.Message), attr);
+							}
+							break;
+						}
+					case "LexerSymbolAttribute":
+						{
+							if (LexerSymbolAttrInfo.TryParse(Context, attr, out var info))
+							{
+								symbolInfos.Add(info);
+							}
+							break;
+						}
+				}
+			}
+			catch (CSharpException ex)
+			{
+				Context.AddError(ex.ToString(), ex.Location);
+			}
+		}
+	}
 
 	/// <summary>
-	/// 解析词法分析相关成员。
+	/// 解析终结符动作。
 	/// </summary>
-	public void Parse()
+	/// <param name="controllerSyntax">控制器语法节点。</param>
+	private void ParseActions(ClassDeclarationSyntax controllerSyntax)
 	{
-		ParseClassAttributes();
-		ParseActions();
-		// 添加终结符定义
+		foreach (MemberDeclarationSyntax member in controllerSyntax.Members)
+		{
+			if (member is not MethodDeclarationSyntax method)
+			{
+				continue;
+			}
+			foreach (AttributeSyntax attr in member.AttributeLists.GetAttributes())
+			{
+				if (attr.GetFullName() != "LexerSymbolAttribute")
+				{
+					continue;
+				}
+				if (!LexerSymbolAttrInfo.TryParse(Context, attr, out var info))
+				{
+					continue;
+				}
+				// 检查是否是可选或 params 参数
+				string methodName = method.Identifier.Text;
+				bool isValidAction = true;
+				foreach (ParameterSyntax param in method.ParameterList.Parameters)
+				{
+					if (param.Default == null && !param.IsParamsArray())
+					{
+						isValidAction = false;
+						Context.AddError(Resources.InvalidLexerSymbolAction(methodName), method);
+						break;
+					}
+				}
+				if (isValidAction)
+				{
+					info.MethodName = methodName;
+					symbolInfos.Add(info);
+				}
+			}
+		}
+	}
+
+	/// <summary>
+	/// <c>CreateLexerFactory</c> 方法的名称。
+	/// </summary>
+	private static readonly string CreateLexerFactoryName = "CreateLexerFactory";
+
+	/// <summary>
+	/// 生成控制器的成员。
+	/// </summary>
+	/// <returns>控制器的成员。</returns>
+	public override IEnumerable<MemberDeclarationSyntax> Generate()
+	{
+		AddSymbols();
+		LexerData<SymbolKind> data = lexer.GetData();
+		TypeBuilder factoryInterfaceType = new NameBuilder("ILexerFactory").Qualifier("Cyjb.Compilers.Lexers")
+			.TypeArgument(KindType);
+		// 工厂成员声明
+		yield return SyntaxBuilder.DeclareField(factoryInterfaceType, "Factory")
+				.Modifier(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword, SyntaxKind.ReadOnlyKeyword)
+				.Comment("词法分析器的工厂。")
+				.Value(SyntaxBuilder.Name(CreateLexerFactoryName).Invoke())
+				.GetSyntax(Format)
+				.AddTrailingTrivia(Format.EndOfLine);
+
+		// 工厂方法
+		var factoryMethod = SyntaxBuilder.DeclareMethod(factoryInterfaceType, CreateLexerFactoryName)
+			.Comment("创建词法分析器的工厂。")
+			.Attribute(SyntaxBuilder.Attribute("System.Runtime.CompilerServices.CompilerGeneratedAttribute"))
+			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
+		// 如果只包含默认上下文，那么不需要创建 contexts 变量。
+		bool hasOtherContext = data.Contexts.Count > 1;
+		if (hasOtherContext)
+		{
+			factoryMethod.Statement(SyntaxBuilder
+				.DeclareLocal<Dictionary<string, ContextData>>("contexts")
+				.Comment("上下文数据")
+				.Value(ContextsValue(data))
+			);
+		}
+		factoryMethod
+			.Statement(SyntaxBuilder.DeclareLocal($"TerminalData<{KindType}>[]", "terminals")
+				.Comment("终结符数据")
+				.Value(TerminalsValue(data, symbolInfos))
+			)
+			.Statement(SyntaxBuilder.DeclareLocal<int[]>("indexes")
+				.Comment("字符类信息")
+				.Comment(lexer.GetCharClassDescription())
+				.Comment("字符类索引")
+				.Value(SyntaxBuilder.LiteralArray(data.CharClasses.Indexes, 8))
+			)
+			.Statement(SyntaxBuilder.DeclareLocal<int[]>("classes")
+				.Comment("字符类列表")
+				.Value(SyntaxBuilder.LiteralArray(data.CharClasses.CharClasses, 24))
+			)
+			.DefineCharClassCategories(data)
+			.Statement(SyntaxBuilder.DeclareLocal<DfaStateData[]>("states")
+				.Comment("状态转移")
+				.Comment(lexer.GetStateDescription())
+				.Comment("状态列表")
+				.Value(StatesValue(data))
+			)
+			.Statement(SyntaxBuilder.DeclareLocal<int[]>("next")
+				.Comment("后继状态列表")
+				.Value(SyntaxBuilder.LiteralArray(data.Next, 24))
+			)
+			.Statement(SyntaxBuilder.DeclareLocal<int[]>("check")
+				.Comment("状态检查列表")
+				.Value(SyntaxBuilder.LiteralArray(data.Check, 24))
+			);
+
+		var charClassBuilder = SyntaxBuilder.CreateObject<CharClassMap>()
+			.Argument(SyntaxBuilder.Name("indexes"))
+			.Argument(SyntaxBuilder.Name("classes"));
+		if (data.CharClasses.Categories != null)
+		{
+			charClassBuilder.Argument(SyntaxBuilder.Name(LexerControllerCharClass.CategoriesVarName));
+		}
+		factoryMethod.Statement(SyntaxBuilder.DeclareLocal($"LexerData<{KindType}>", "lexerData")
+			.Comment("词法分析器的数据")
+			.Value(SyntaxBuilder.CreateObject().ArgumentWrap(1)
+				.Argument(hasOtherContext ? SyntaxBuilder.Name("contexts") : SyntaxBuilder.Literal(null))
+				.Argument(SyntaxBuilder.Name("terminals"))
+				.Argument(charClassBuilder)
+				.Argument(SyntaxBuilder.Name("states"))
+				.Argument(SyntaxBuilder.Name("next"))
+				.Argument(SyntaxBuilder.Name("check"))
+				.Argument(SyntaxBuilder.Name("TrailingType").AccessMember(data.TrailingType.ToString()))
+				.Argument(SyntaxBuilder.Literal(data.ContainsBeginningOfLine))
+				.Argument(SyntaxBuilder.Literal(rejectable))
+				.Argument(SyntaxBuilder.TypeOf(SyntaxBuilder.Name(Name)))
+			))
+			.Statement(SyntaxBuilder.Return(
+				SyntaxBuilder.CreateObject().Type($"LexerFactory<{KindType}, {Name}>")
+					.Argument(SyntaxBuilder.Name("lexerData"))));
+		yield return factoryMethod.GetSyntax(Format);
+	}
+
+	/// <summary>
+	/// 添加终结符定义。
+	/// </summary>
+	private void AddSymbols()
+	{
 		for (int i = 0; i < symbolInfos.Count; i++)
 		{
 			LexerSymbolAttrInfo info = symbolInfos[i];
@@ -96,7 +310,7 @@ internal sealed partial class LexerController
 				int idx = regex.IndexOf('>');
 				if (idx == -1)
 				{
-					this.context.AddError(Resources.IncompleteLexerContext, info.Syntax);
+					Context.AddError(Resources.IncompleteLexerContext, info.Syntax);
 					continue;
 				}
 				string context = regex[1..idx];
@@ -118,11 +332,12 @@ internal sealed partial class LexerController
 			if (info.Kind != null)
 			{
 				// Kind 本身是 ExpressionSyntax，这里临时符号索引代替，后续生成代码时再替换。
-				builder.Kind(i);
+				builder.Kind(info.Kind.Value);
 			}
+			builder.Value(info.Value);
 			if (info.MethodName != null)
 			{
-				void action(LexerController<int> c)
+				void action(LexerController<SymbolKind> c)
 				{
 					c.Text = info.MethodName;
 				}
@@ -130,260 +345,5 @@ internal sealed partial class LexerController
 				builder.Action(action);
 			}
 		}
-	}
-
-	/// <summary>
-	/// 解析类特性。
-	/// </summary>
-	/// <returns>如果解析成功，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	private void ParseClassAttributes()
-	{
-		foreach (AttributeSyntax attr in controllerSyntax.AttributeLists.GetAttributes())
-		{
-			try
-			{
-				switch (attr.GetFullName())
-				{
-					case "LexerRejectableAttribute":
-						rejectable = true;
-						break;
-					case "LexerContextAttribute":
-						{
-							AttributeArguments args = attr.GetArguments(ContextAttrModel);
-							ExpressionSyntax labelExp = args["label"]!;
-							string? label = labelExp.GetStringLiteral();
-							if (label.IsNullOrEmpty())
-							{
-								context.AddError(Resources.InvalidLexerContext(label), labelExp);
-							}
-							else
-							{
-								lexer.DefineContext(label);
-							}
-							break;
-						}
-					case "LexerInclusiveContextAttribute":
-						{
-							AttributeArguments args = attr.GetArguments(InclusiveContextAttrModel);
-							ExpressionSyntax labelExp = args["label"]!;
-							string? label = labelExp.GetStringLiteral();
-							if (label.IsNullOrEmpty())
-							{
-								context.AddError(Resources.InvalidLexerContext(label), labelExp);
-							}
-							else
-							{
-								lexer.DefineInclusiveContext(label);
-							}
-							break;
-						}
-					case "LexerRegexAttribute":
-						{
-							AttributeArguments args = attr.GetArguments(RegexAttrModel);
-							string? name = args["name"]!.GetStringLiteral();
-							if (name.IsNullOrEmpty())
-							{
-								context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegexName), attr);
-								break;
-							}
-							string? regex = args["regex"]!.GetStringLiteral();
-							if (regex.IsNullOrEmpty())
-							{
-								context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegex), attr);
-								break;
-							}
-							RegexOptions regexOptions = RegexOptions.None;
-							ExpressionSyntax? exp = args["options"];
-							if (exp != null)
-							{
-								regexOptions = exp.GetEnumValue<RegexOptions>();
-							}
-							try
-							{
-								lexer.DefineRegex(name, regex, regexOptions);
-							}
-							catch (RegexParseException ex)
-							{
-								context.AddError(Resources.InvalidRegex(regex, ex.Message), attr);
-							}
-							break;
-						}
-					case "LexerSymbolAttribute":
-						{
-							if (LexerSymbolAttrInfo.TryParse(context, attr, out var info))
-							{
-								symbolInfos.Add(info);
-							}
-							break;
-						}
-				}
-			}
-			catch (CSharpException ex)
-			{
-				context.AddError(ex.ToString(), ex.Location);
-			}
-		}
-	}
-
-	/// <summary>
-	/// 解析终结符动作。
-	/// </summary>
-	private void ParseActions()
-	{
-		foreach (MemberDeclarationSyntax member in controllerSyntax.Members)
-		{
-			if (member is not MethodDeclarationSyntax method)
-			{
-				continue;
-			}
-			foreach (AttributeSyntax attr in member.AttributeLists.GetAttributes())
-			{
-				if (attr.GetFullName() != "LexerSymbolAttribute")
-				{
-					continue;
-				}
-				if (!LexerSymbolAttrInfo.TryParse(context, attr, out var info))
-				{
-					continue;
-				}
-				// 检查是否是可选或 params 参数
-				string methodName = method.Identifier.Text;
-				bool isValidAction = true;
-				foreach (ParameterSyntax param in method.ParameterList.Parameters)
-				{
-					if (param.Default == null && !param.IsParamsArray())
-					{
-						isValidAction = false;
-						context.AddError(Resources.InvalidLexerSymbolAction(methodName), method);
-						break;
-					}
-				}
-				if (isValidAction)
-				{
-					info.MethodName = methodName;
-					symbolInfos.Add(info);
-				}
-			}
-		}
-	}
-
-	/// <summary>
-	/// 生成词法分析器。
-	/// </summary>
-	/// <returns>词法分析器的类型定义。</returns>
-	public ClassDeclarationSyntax Generate()
-	{
-		LexerData<int> data = lexer.GetData();
-		SyntaxFormat format = new SyntaxFormat(controllerSyntax).IncDepth();
-		// 工厂方法
-		TypeBuilder factoryInterfaceType = $"ILexerFactory<{kindType}>";
-		TypeBuilder factoryType = $"LexerFactory<{kindType}, {controllerSyntax.Identifier}>";
-		// 如果只包含默认上下文，那么不需要创建 contexts 变量。
-		bool hasOtherContext = data.Contexts.Count > 1;
-		var factoryMethod = SyntaxBuilder.MethodDeclaration(factoryInterfaceType, "CreateLexerFactory")
-			.Comment("创建词法分析器的工厂。")
-			.Attribute(SyntaxBuilder.Attribute("global::System.Runtime.CompilerServices.CompilerGeneratedAttribute"))
-			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
-		if (hasOtherContext)
-		{
-			factoryMethod
-				.Statement(SyntaxBuilder
-				.LocalDeclarationStatement($"Dictionary<string, ContextData<{kindType}>>", "contexts")
-				.Comment("上下文数据")
-				.Value(ContextsValue(data))
-			);
-		}
-		factoryMethod
-			.Statement(SyntaxBuilder.LocalDeclarationStatement($"TerminalData<{kindType}>[]", "terminals")
-				.Comment("终结符数据")
-				.Value(TerminalsValue(data, symbolInfos))
-			)
-			.Statement(SyntaxBuilder.LocalDeclarationStatement("int[]", "indexes")
-				.Comment("字符类信息")
-				.Comment(lexer.GetCharClassDescription())
-				.Comment("字符类索引")
-				.Value(CharClassIndexes(data))
-			)
-			.Statement(SyntaxBuilder.LocalDeclarationStatement("int[]", "classes")
-				.Comment("字符类列表")
-				.Value(CharClassClasses(data))
-			);
-		if (data.CharClasses.Categories != null)
-		{
-			factoryMethod.Statement(SyntaxBuilder
-				.LocalDeclarationStatement("Dictionary<UnicodeCategory, int>", "categories")
-				.Comment("字符类 Unicode 类别")
-				.Value(CharClassCategories(data))
-			);
-		}
-		factoryMethod
-			.Statement(SyntaxBuilder.LocalDeclarationStatement("DfaStateData[]", "states")
-				.Comment("状态转移")
-				.Comment(lexer.GetStateDescription())
-				.Comment("状态列表")
-				.Value(StatesValue(data))
-			)
-			.Statement(SyntaxBuilder.LocalDeclarationStatement("int[]", "next")
-				.Comment("后继状态列表")
-				.Value(NextValue(data))
-			)
-			.Statement(SyntaxBuilder.LocalDeclarationStatement("int[]", "check")
-				.Comment("状态检查列表")
-				.Value(CheckValue(data))
-			);
-
-		var charClassBuilder = SyntaxBuilder.ObjectCreationExpression().Type("CharClassMap")
-			.Argument(SyntaxBuilder.IdentifierName("indexes"))
-			.Argument(SyntaxBuilder.IdentifierName("classes"));
-		if (data.CharClasses.Categories != null)
-		{
-			charClassBuilder.Argument(SyntaxBuilder.IdentifierName("categories"));
-		}
-		factoryMethod.Statement(SyntaxBuilder.LocalDeclarationStatement($"LexerData<{kindType}>", "lexerData")
-			.Comment("词法分析器的数据")
-			.Value(SyntaxBuilder.ObjectCreationExpression().ArgumentWrap(1)
-				.Argument(hasOtherContext ? SyntaxBuilder.IdentifierName("contexts") : SyntaxBuilder.LiteralExpression(null))
-				.Argument(SyntaxBuilder.IdentifierName("terminals"))
-				.Argument(charClassBuilder)
-				.Argument(SyntaxBuilder.IdentifierName("states"))
-				.Argument(SyntaxBuilder.IdentifierName("next"))
-				.Argument(SyntaxBuilder.IdentifierName("check"))
-				.Argument(SyntaxBuilder.IdentifierName("TrailingType").Access(data.TrailingType.ToString()))
-				.Argument(SyntaxBuilder.LiteralExpression(data.ContainsBeginningOfLine))
-				.Argument(SyntaxBuilder.LiteralExpression(rejectable))
-				.Argument(SyntaxBuilder.TypeOfExpression(controllerType))
-			))
-			.Statement(SyntaxBuilder.ReturnStatement(
-				SyntaxBuilder.ObjectCreationExpression().Type(factoryType)
-					.Argument(SyntaxBuilder.IdentifierName("lexerData"))));
-
-		// 成员声明
-		List<MemberDeclarationSyntax> members = new()
-		{
-			SyntaxBuilder.FieldDeclaration(factoryInterfaceType, "Factory")
-				.Modifier(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword, SyntaxKind.ReadOnlyKeyword)
-				.Comment("词法分析器的工厂。")
-				.Value(SyntaxBuilder.IdentifierName("CreateLexerFactory").Invoke())
-				.GetSyntax(format)
-				.AddTrailingTrivia(format.EndOfLine),
-			factoryMethod.GetSyntax(format),
-		};
-
-		// 将 BaseList 的 TrailingTrivia 添加到 openBraceToken 之前，避免丢失换行符。
-		SyntaxToken openBraceToken = controllerSyntax.OpenBraceToken.InsertLeadingTrivia(0,
-			controllerSyntax.BaseList!.GetTrailingTrivia());
-
-		return SyntaxFactory.ClassDeclaration(
-			SyntaxFactory.List<AttributeListSyntax>(),
-			controllerSyntax.Modifiers,
-			controllerSyntax.Keyword,
-			controllerSyntax.Identifier,
-			controllerSyntax.TypeParameterList,
-			null,
-			SyntaxFactory.List<TypeParameterConstraintClauseSyntax>(),
-			openBraceToken,
-			SyntaxFactory.List(members),
-			controllerSyntax.CloseBraceToken,
-			controllerSyntax.SemicolonToken);
 	}
 }

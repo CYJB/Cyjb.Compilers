@@ -13,6 +13,10 @@ Cyjb.Compilers.Generator
 
 - `<file>` 已声明的词法/语法分析控制器文件。
 
+输出：
+
+生成的词法/语法分析器代码。
+
 欢迎访问我的[博客](http://www.cnblogs.com/cyjb/)获取更多信息。
 
 C# 词法分析器系列博文

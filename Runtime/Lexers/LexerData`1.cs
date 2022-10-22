@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -17,52 +18,54 @@ public class LexerData<T>
 	where T : struct
 {
 	/// <summary>
-	/// 默认的词法分析上下文。
-	/// </summary>
-	private readonly static Dictionary<string, ContextData<T>> defaultContexts = new()
-	{
-		 { ContextData.Initial, new ContextData<T>(0, ContextData.Initial) }
-	};
-
-	/// <summary>
 	/// 词法分析的上下文数据。
 	/// </summary>
-	private readonly IReadOnlyDictionary<string, ContextData<T>> contexts;
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private readonly IReadOnlyDictionary<string, ContextData> contexts;
 	/// <summary>
 	/// 词法分析的终结符列表。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly TerminalData<T>[] terminals;
 	/// <summary>
 	/// 词法分析的字符类映射。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly CharClassMap charClasses;
 	/// <summary>
 	/// DFA 的状态列表。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly DfaStateData[] states;
 	/// <summary>
 	/// 下一状态列表。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly int[] next;
 	/// <summary>
 	/// 状态检查。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly int[] check;
 	/// <summary>
 	/// 词法分析的向前看符号的类型。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly TrailingType trailingType;
 	/// <summary>
 	/// 词法分析中是否包含与行首匹配对应的头节点。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly bool containsBeginningOfLine;
 	/// <summary>
 	/// 是否用到了 Reject 动作。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly bool rejectable;
 	/// <summary>
 	/// 词法分析控制器的类型。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly Type controllerType;
 
 	/// <summary>
@@ -78,11 +81,11 @@ public class LexerData<T>
 	/// <param name="containsBeginningOfLine">是否包含行首匹配的规则。</param>
 	/// <param name="rejectable">是否用到了 Reject 动作。</param>
 	/// <param name="controllerType">词法分析控制器的类型。</param>
-	public LexerData(Dictionary<string, ContextData<T>>? contexts, TerminalData<T>[] terminals,
+	public LexerData(IReadOnlyDictionary<string, ContextData>? contexts, TerminalData<T>[] terminals,
 		CharClassMap charClasses, DfaStateData[] states, int[] next, int[] check,
 		TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
 	{
-		this.contexts = contexts ?? defaultContexts;
+		this.contexts = contexts ?? ContextData.Default;
 		this.terminals = terminals;
 		this.charClasses = charClasses;
 		this.states = states;
@@ -97,7 +100,7 @@ public class LexerData<T>
 	/// <summary>
 	/// 获取词法分析的上下文数据。
 	/// </summary>
-	public IReadOnlyDictionary<string, ContextData<T>> Contexts => contexts;
+	public IReadOnlyDictionary<string, ContextData> Contexts => contexts;
 	/// <summary>
 	/// 获取词法分析的终结符列表。
 	/// </summary>

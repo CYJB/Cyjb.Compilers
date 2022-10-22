@@ -56,6 +56,28 @@ internal sealed class EofBuilder<T, TController> : ITerminalBuilder<T, TControll
 	}
 
 	/// <summary>
+	/// 设置终结符的值。
+	/// </summary>
+	/// <param name="value">词法单元的值。</param>
+	/// <returns>终结符的构造器。</returns>
+	public ITerminalBuilder<T, TController> Value(object? value)
+	{
+		if (contexts.Count == 0)
+		{
+			// 未指定任何上下文时，设置到初始状态。
+			lexer.GetContext(ContextData.Initial).EofValue = value;
+		}
+		else
+		{
+			foreach (LexerContext context in contexts)
+			{
+				context.EofValue = value;
+			}
+		}
+		return this;
+	}
+
+	/// <summary>
 	/// 添加正则表达式对应的词法单元动作。
 	/// </summary>
 	/// <param name="action">词法单元的动作。</param>

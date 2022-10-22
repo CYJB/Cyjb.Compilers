@@ -137,12 +137,20 @@
     <value>无效的词法分析类型。</value>
     <comment>无效的词法分析类型。</comment>
   </data>
+  <data name="MissingToken" xml:space="preserve">
+    <value>缺失的词法单元“{0}”位于 {1}。</value>
+    <comment>缺失的词法单元。</comment>
+  </data>
   <data name="NotRejectable" xml:space="preserve">
     <value>当前的 TokenReader&lt;T&gt; 不支持拒绝动作。</value>
     <comment>不允许拒绝动作。</comment>
   </data>
-  <data name="UnrecognizedToken" xml:space="preserve">
-    <value>无法识别的词法单元“{0}”，位于 {1}。</value>
-    <comment>未识别的词法单元异常。</comment>
+  <data name="UnexpectedToken" xml:space="preserve">
+    <value>非预期的词法单元“{0}”位于 {1}，预期为“{2}”之一。</value>
+    <comment>非预期的词法单元。</comment>
+  </data>
+  <data name="UnrecognizedText" xml:space="preserve">
+    <value>无法识别的文本“{0}”位于 {1}。</value>
+    <comment>未识别的文本异常。</comment>
   </data>
 </root>

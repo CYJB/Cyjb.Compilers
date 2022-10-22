@@ -52,7 +52,7 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 		this.data = data;
 		this.controller = controller;
 		this.source = source;
-		controller.Tokenizer = this;
+		controller.SetTokenizer(this);
 	}
 
 	/// <summary>
@@ -91,13 +91,13 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 		}
 		while (true)
 		{
-			ContextData<T> context = controller.CurrentContext;
+			ContextData context = controller.CurrentContext;
 			if (source.Peek() == SourceReader.InvalidCharacter)
 			{
 				// 到达了流的结尾。
 				if (context.EofAction != null)
 				{
-					controller.DoAction(source.Index, null, context.EofAction);
+					controller.DoEofAction(source.Index, context.EofValue, context.EofAction);
 					if (controller.IsAccept)
 					{
 						return controller.CreateToken();

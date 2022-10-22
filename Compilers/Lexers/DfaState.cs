@@ -101,12 +101,12 @@ public sealed class DfaState : ReadOnlyCollectionBase<DfaState>
 	{
 		int coverCount = 0;
 		int sameCount = 0;
-		foreach (KeyValuePair<CharClass, DfaState> pair in transitions)
+		foreach (var (charClass, nextState) in transitions)
 		{
-			if (state.transitions.TryGetValue(pair.Key, out DfaState? target))
+			if (state.transitions.TryGetValue(charClass, out DfaState? target))
 			{
 				coverCount++;
-				if (target == pair.Value)
+				if (target == nextState)
 				{
 					sameCount++;
 				}

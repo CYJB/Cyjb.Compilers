@@ -24,10 +24,31 @@
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="Cyjb" Version="1.0.10">
+	  <GeneratePathProperty>True</GeneratePathProperty>
+	</PackageReference>
+	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.4">
+	  <GeneratePathProperty>True</GeneratePathProperty>
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Runtime\Cyjb.Compilers.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Parsers\Production\ProductionLexer.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ProductionLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Parsers\Production\ProductionParser.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ProductionParser.tt</DependentUpon>
+    </Compile>
     <Compile Update="Resources.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -36,6 +57,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Parsers\Production\ProductionLexer.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ProductionLexer.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Parsers\Production\ProductionParser.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ProductionParser.designed.cs</LastGenOutput>
+    </None>
     <None Update="Resources.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Resources.cs</LastGenOutput>

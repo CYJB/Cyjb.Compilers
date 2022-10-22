@@ -40,6 +40,10 @@ internal sealed class Terminal<T>
 	/// </summary>
 	public T? Kind { get; set; }
 	/// <summary>
+	/// 获取或设置当前终结符的值。
+	/// </summary>
+	public object? Value { get; set; }
+	/// <summary>
 	/// 获取或设置当前终结符的动作。
 	/// </summary>
 	/// <value>当前终结符的动作。</value>
@@ -57,6 +61,6 @@ internal sealed class Terminal<T>
 	/// <returns>词法分析器的终结符数据。</returns>
 	public TerminalData<T> GetData()
 	{
-		return new TerminalData<T>(Kind, Action, Trailing);
+		return new TerminalData<T>(Kind, Value, Action, Trailing);
 	}
 }

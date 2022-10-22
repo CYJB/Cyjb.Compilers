@@ -81,7 +81,7 @@ internal static class ExpressionSyntaxUtil
 	/// <param name="value">字符串的值。</param>
 	/// <returns>如果 <paramref name="exp"/> 是 <see cref="SyntaxKind.StringLiteralExpression"/>，
 	/// 则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	public static bool TryGetStringLiteral(this ExpressionSyntax exp, out string? value)
+	public static bool TryGetStringLiteral(this ExpressionSyntax exp, [NotNullWhen(true)] out string? value)
 	{
 		if (exp.IsKind(SyntaxKind.StringLiteralExpression))
 		{

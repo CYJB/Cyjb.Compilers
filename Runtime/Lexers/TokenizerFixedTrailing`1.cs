@@ -65,7 +65,7 @@ internal sealed class TokenizerFixedTrailing<T> : TokenizerBase<T>
 			}
 			// 将流调整到与接受状态匹配的状态。
 			source.Index = lastIndex;
-			Controller.DoAction(Start, terminal.Kind, terminal.Action);
+			Controller.DoAction(Start, terminal);
 			return true;
 		}
 		return false;
