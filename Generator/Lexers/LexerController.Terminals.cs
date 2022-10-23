@@ -13,12 +13,12 @@ internal sealed partial class LexerController
 	/// <returns>终结符数据。</returns>
 	private ExpressionBuilder TerminalsValue(LexerData<SymbolKind> data, List<LexerSymbolAttrInfo> symbols)
 	{
-		TypeBuilder terminalType = SyntaxBuilder.Type($"TerminalData<{KindType}>");
+		TypeBuilder terminalType = SyntaxBuilder.Name(typeof(TerminalData<>)).TypeArgument(KindType);
 		var builder = SyntaxBuilder.CreateArray().InitializerWrap(1);
 		for (int i = 0; i < symbols.Count; i++)
 		{
 			TerminalData<SymbolKind> terminal = data.Terminals[i];
-			var terminalBuilder = SyntaxBuilder.CreateObject().Type(terminalType);
+			var terminalBuilder = SyntaxBuilder.CreateObject(terminalType);
 			builder.Initializer(terminalBuilder);
 			terminalBuilder.Comment($"{i}: {symbols[i].Regex}");
 			bool argContinues = true;

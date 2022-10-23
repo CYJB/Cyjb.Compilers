@@ -11,7 +11,7 @@ internal sealed class AttributeBuilder
 	/// <summary>
 	/// 特性的名称。
 	/// </summary>
-	private readonly string name;
+	private readonly NameBuilder name;
 	/// <summary>
 	/// 特性的参数。
 	/// </summary>
@@ -21,7 +21,7 @@ internal sealed class AttributeBuilder
 	/// 使用指定的名称初始化 <see cref="AttributeBuilder"/> 类的新实例。
 	/// </summary>
 	/// <param name="name">特性的名称。</param>
-	public AttributeBuilder(string name)
+	public AttributeBuilder(NameBuilder name)
 	{
 		this.name = name;
 	}
@@ -57,7 +57,7 @@ internal sealed class AttributeBuilder
 	/// <returns>特性语法节点。</returns>
 	public AttributeSyntax GetSyntax(SyntaxFormat format)
 	{
-		var syntax = SyntaxFactory.Attribute(SyntaxFactory.ParseName(name));
+		var syntax = SyntaxFactory.Attribute(name.GetSyntax(format));
 		if (arguments.Count > 0)
 		{
 			syntax = syntax.WithArgumentList(arguments.GetSyntax(format));

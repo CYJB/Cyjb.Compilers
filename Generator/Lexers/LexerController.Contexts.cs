@@ -22,7 +22,7 @@ internal sealed partial class LexerController
 			if (pair.Value.EofAction != null)
 			{
 				contextBuilder.Argument(SyntaxBuilder.Lambda()
-					.Parameter("c", SyntaxBuilder.Name(Name))
+					.Parameter("c", Name)
 					.Body(SyntaxBuilder.Name("c").AccessMember(actionMap[pair.Value.EofAction]).Invoke())
 				);
 			}

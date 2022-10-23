@@ -12,7 +12,7 @@ internal sealed class ObjectCreationExpressionBuilder : ExpressionBuilder
 	/// <summary>
 	/// 对象的类型。
 	/// </summary>
-	private TypeBuilder? type;
+	private readonly TypeBuilder? type;
 	/// <summary>
 	/// 对象的构造参数构造器。
 	/// </summary>
@@ -27,46 +27,40 @@ internal sealed class ObjectCreationExpressionBuilder : ExpressionBuilder
 	private readonly List<string> comments = new();
 
 	/// <summary>
-	/// 设置对象的类型。
+	/// 使用指定的对象类型初始化 <see cref="ObjectCreationExpressionBuilder"/> 类的新实例。
 	/// </summary>
-	/// <param name="type">对象类型。</param>
-	/// <returns>当前对象创建表达式构造器。</returns>
-	public ObjectCreationExpressionBuilder Type(TypeBuilder type)
+	/// <param name="type">对象的类型。</param>
+	public ObjectCreationExpressionBuilder(TypeBuilder? type)
 	{
 		this.type = type;
-		return this;
 	}
 
 	/// <summary>
-	/// 设置对象的类型。
+	/// 添加对象的构造参数。
 	/// </summary>
-	/// <param name="type">对象类型。</param>
+	/// <param name="argument">对象的参数表达式。</param>
 	/// <returns>当前对象创建表达式构造器。</returns>
-	public ObjectCreationExpressionBuilder Type(string type)
+	public ObjectCreationExpressionBuilder Argument(ExpressionBuilder argument)
 	{
-		this.type = SyntaxBuilder.Type(type);
-		return this;
-	}
-
-	/// <summary>
-	/// 设置对象的类型。
-	/// </summary>
-	/// <typeparam name="T">对象的类型。</typeparam>
-	/// <returns>当前对象创建表达式构造器。</returns>
-	public ObjectCreationExpressionBuilder Type<T>()
-	{
-		type = SyntaxBuilder.Type<T>();
+		arguments.Add(argument);
 		return this;
 	}
 
 	/// <summary>
 	/// 添加对象的构造参数。
 	/// </summary>
-	/// <param name="argument">对象的构造参数。</param>
+	/// <param name="variable">变量引用。</param>
 	/// <returns>当前对象创建表达式构造器。</returns>
-	public ObjectCreationExpressionBuilder Argument(ExpressionBuilder argument)
+	public ObjectCreationExpressionBuilder Argument(LocalDeclarationStatementBuilder? variable)
 	{
-		arguments.Add(argument);
+		if (variable == null)
+		{
+			arguments.Add(SyntaxBuilder.Literal(null));
+		}
+		else
+		{
+			arguments.Add(SyntaxBuilder.Name(variable.Name));
+		}
 		return this;
 	}
 

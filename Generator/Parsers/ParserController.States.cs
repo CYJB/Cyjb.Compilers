@@ -13,42 +13,44 @@ internal sealed partial class ParserController
 	/// <param name="method">方法声明。</param>
 	private void FillStates(ParserData<SymbolKind> data, MethodDeclarationBuilder method)
 	{
-		string stateType = $"ParserStateData<{KindType}>";
-		NameBuilder statesVariable = SyntaxBuilder.Name("states");
-		Dictionary<IReadOnlyDictionary<SymbolKind, ParserAction>, string> actions =
+		NameBuilder stateType = SyntaxBuilder.Name(typeof(ParserStateData<>)).TypeArgument(KindType);
+		Dictionary<IReadOnlyDictionary<SymbolKind, ParserAction>, LocalDeclarationStatementBuilder> actions =
 			new(DictionaryEqualityComparer<SymbolKind, ParserAction>.Default);
-		Dictionary<IReadOnlySet<SymbolKind>, string> expectings =
+		Dictionary<IReadOnlySet<SymbolKind>, LocalDeclarationStatementBuilder> expectings =
 			new(SetEqualityComparer<SymbolKind>.Default);
 		int actionIndex = 1;
 		int expectingIndex = 1;
-		string actionsType = $"Dictionary<{KindType}, ParserAction>";
-		string expectingType = $"HashSet<{KindType}>";
+		NameBuilder actionsType = SyntaxBuilder.Name(typeof(Dictionary<,>))
+			.TypeArgument(KindType).TypeArgument<ParserAction>();
+		NameBuilder expectingType = SyntaxBuilder.Name(typeof(HashSet<>)).TypeArgument(KindType);
 		for (int i = 0; i < data.States.Length; i++)
 		{
 			ParserStateData<SymbolKind> state = data.States[i];
 			string? comment = parser.GetStateDescription(i);
-			if (!actions.TryGetValue(state.Actions, out string? actionName))
+			if (!actions.TryGetValue(state.Actions, out LocalDeclarationStatementBuilder? actionDecl))
 			{
-				actionName = $"action_{actionIndex++}";
-				actions[state.Actions] = actionName;
-				method.Statement(SyntaxBuilder.DeclareLocal(actionsType, actionName)
-					.Value(GetActions(state.Actions)).Comment(comment));
+				string name = $"action_{actionIndex++}";
+				actionDecl = SyntaxBuilder.DeclareLocal(actionsType, name)
+					.Value(GetActions(state.Actions)).Comment(comment);
+				actions[state.Actions] = actionDecl;
+				method.Statement(actionDecl);
 				comment = null;
 			}
-			if (!expectings.TryGetValue(state.Expecting, out string? expectingName))
+			if (!expectings.TryGetValue(state.Expecting, out LocalDeclarationStatementBuilder? expectingDecl))
 			{
-				expectingName = $"expecting_{expectingIndex++}";
-				expectings[state.Expecting] = expectingName;
-				method.Statement(SyntaxBuilder.DeclareLocal(expectingType, expectingName)
-					.Value(GetExpecting(state.Expecting)).Comment(comment));
+				string name = $"expecting_{expectingIndex++}";
+				expectingDecl = SyntaxBuilder.DeclareLocal(expectingType, name)
+					.Value(GetExpecting(state.Expecting)).Comment(comment);
+				expectings[state.Expecting] = expectingDecl;
+				method.Statement(expectingDecl);
 				comment = null;
 			}
-			method.Statement(statesVariable.AccessElement(SyntaxBuilder.Literal(i))
+			method.Statement(SyntaxBuilder.Name("states").AccessElement(SyntaxBuilder.Literal(i))
 				.Assign(SyntaxKind.SimpleAssignmentExpression,
-					SyntaxBuilder.CreateObject().Type(stateType).ArgumentWrap(1)
-						.Argument(SyntaxBuilder.Name(actionName))
+					SyntaxBuilder.CreateObject(stateType).ArgumentWrap(1)
+						.Argument(actionDecl)
 						.Argument(GetAction(state.DefaultAction))
-						.Argument(SyntaxBuilder.Name(expectingName))
+						.Argument(expectingDecl)
 						.Argument(GetProduction(data, i))
 						.Argument(SyntaxBuilder.Literal(state.RecoverIndex))
 						.Argument(SyntaxBuilder.Literal(state.FollowBaseIndex))

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,6 +13,7 @@ internal sealed class LocalDeclarationStatementBuilder : StatementBuilder
 	/// <summary>
 	/// 变量的名称。
 	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly string name;
 	/// <summary>
 	/// 变量的类型。
@@ -54,6 +56,11 @@ internal sealed class LocalDeclarationStatementBuilder : StatementBuilder
 		base.Comment(comment);
 		return this;
 	}
+
+	/// <summary>
+	/// 获取变量的名称。
+	/// </summary>
+	public string Name => name;
 
 	/// <summary>
 	/// 构造变量声明语句。

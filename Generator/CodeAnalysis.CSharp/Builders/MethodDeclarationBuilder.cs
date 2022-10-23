@@ -110,13 +110,16 @@ internal sealed class MethodDeclarationBuilder
 	/// </summary>
 	/// <param name="statement">语句。</param>
 	/// <returns>当前方法声明构造器。</returns>
-	public MethodDeclarationBuilder Statement(StatementBuilder statement)
+	public MethodDeclarationBuilder Statement(StatementBuilder? statement)
 	{
-		if (block == null)
+		if (statement != null)
 		{
-			block = new BlockBuilder();
+			if (block == null)
+			{
+				block = new BlockBuilder();
+			}
+			block.Add(statement);
 		}
-		block.Add(statement);
 		return this;
 	}
 

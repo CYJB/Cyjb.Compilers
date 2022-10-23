@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Cyjb.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -209,7 +210,8 @@ internal sealed partial class ParserController : Controller
 	public override IEnumerable<MemberDeclarationSyntax> Generate()
 	{
 		ParserData<SymbolKind> data = parser.GetData();
-		TypeBuilder factoryInterfaceType = SyntaxBuilder.Name("IParserFactory").TypeArgument(KindType);
+		TypeBuilder factoryInterfaceType = SyntaxBuilder.Name(typeof(IParserFactory<>))
+			.TypeArgument(KindType);
 		// 工厂成员声明
 		yield return SyntaxBuilder.DeclareField(factoryInterfaceType, "Factory")
 				.Modifier(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword, SyntaxKind.ReadOnlyKeyword)
@@ -221,17 +223,19 @@ internal sealed partial class ParserController : Controller
 		// 工厂方法
 		var factoryMethod = SyntaxBuilder.DeclareMethod(factoryInterfaceType, "CreateParserFactory")
 			.Comment("创建语法分析器的工厂。")
-			.Attribute(SyntaxBuilder.Attribute("System.Runtime.CompilerServices.CompilerGeneratedAttribute"))
+			.Attribute(SyntaxBuilder.Attribute<CompilerGeneratedAttribute>())
 			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
 		// 如果只包含一个起始符号，那么不需要创建 startStates 变量。
 		bool hasStartState = data.StartStates?.Count > 1;
+		LocalDeclarationStatementBuilder? startStates = null;
 		if (hasStartState)
 		{
-			factoryMethod.Statement(SyntaxBuilder
-				.DeclareLocal($"Dictionary<{KindType}, int>", "startStates")
+			TypeBuilder startStatesType = SyntaxBuilder.Name(typeof(Dictionary<,>))
+				.TypeArgument(KindType).TypeArgument(typeof(int));
+			startStates = SyntaxBuilder.DeclareLocal(startStatesType, "startStates")
 				.Comment("上下文数据")
-				.Value(KindMap(data.StartStates!))
-			);
+				.Value(KindMap(data.StartStates!));
+			factoryMethod.Statement(startStates);
 		}
 		// 符号声明，索引小于 -1 的是临时符号。
 		factoryMethod.Statement(SyntaxBuilder.DeclareLocal(KindType, "endOfFile")
@@ -243,48 +247,61 @@ internal sealed partial class ParserController : Controller
 				.Value(SyntaxBuilder.Literal(symbol.Index).Parenthesized().Cast(KindType));
 			factoryMethod.Statement(builder);
 		}
+		var productions = DeclareProductions(data);
+		NameBuilder stateType = SyntaxBuilder.Name(typeof(ParserStateData<>)).TypeArgument(KindType);
+		var states = SyntaxBuilder.DeclareLocal(stateType.Clone().Array(), "states")
+			.Comment("状态数据")
+			.Value(SyntaxBuilder.CreateArray(stateType).Rank(data.States.Length));
 		factoryMethod
-			.Statement(SyntaxBuilder.DeclareLocal($"ProductionData<{KindType}>[]", "productions")
-				.Comment("产生式数据")
-				.Value(Productions(data, actionMap)))
-			.Statement(SyntaxBuilder.DeclareLocal($"ParserStateData<{KindType}>[]", "states")
-				.Comment("状态数据")
-				.Value(SyntaxBuilder.CreateArray()
-					.Type(SyntaxBuilder.Type($"ParserStateData<{KindType}>"))
-					.Rank(SyntaxBuilder.Literal(data.States.Length))));
+			.Statement(productions)
+			.Statement(states);
 		FillStates(data, factoryMethod);
-		factoryMethod
-			.Statement(SyntaxBuilder.DeclareLocal($"Dictionary<{KindType}, int>", "gotoMap")
-				.Comment("转移数据")
-				.Value(KindMap(data.GotoMap)))
-			.Statement(SyntaxBuilder.DeclareLocal<int[]>("gotoNext")
-				.Comment("转移的目标")
-				.Value(SyntaxBuilder.LiteralArray(data.GotoNext, 24)))
-			.Statement(SyntaxBuilder.DeclareLocal($"{KindType}[]", "gotoCheck")
-				.Comment("转移的检查")
-				.Value(GotoCheck(data.GotoCheck)))
-			.Statement(SyntaxBuilder.DeclareLocal<int[]>("followNext")
-				.Comment("后继状态的目标")
-				.Value(SyntaxBuilder.LiteralArray(data.FollowNext, 24)))
-			.Statement(SyntaxBuilder.DeclareLocal<int[]>("followCheck")
-				.Comment("后继状态的检查")
-				.Value(SyntaxBuilder.LiteralArray(data.FollowCheck, 24)))
-			.Statement(SyntaxBuilder.DeclareLocal($"ParserData<{KindType}>", "parserData")
-				.Comment("语法分析器的数据")
-				.Value(SyntaxBuilder.CreateObject().ArgumentWrap(1)
-					.Argument(SyntaxBuilder.Name("productions"))
-					.Argument(hasStartState ? SyntaxBuilder.Name("startStates") : SyntaxBuilder.Literal(null))
-					.Argument(SyntaxBuilder.Name("states"))
-					.Argument(SyntaxBuilder.Name("gotoMap"))
-					.Argument(SyntaxBuilder.Name("gotoNext"))
-					.Argument(SyntaxBuilder.Name("gotoCheck"))
-					.Argument(SyntaxBuilder.Name("followNext"))
-					.Argument(SyntaxBuilder.Name("followCheck"))
-				))
+
+		TypeBuilder gotoMapType = SyntaxBuilder.Name(typeof(Dictionary<,>))
+			.TypeArgument(KindType).TypeArgument<int>();
+		var gotoMap = SyntaxBuilder.DeclareLocal(gotoMapType, "gotoMap")
+			.Comment("转移数据")
+			.Value(KindMap(data.GotoMap));
+		var gotoNext = SyntaxBuilder.DeclareLocal<int[]>("gotoNext")
+			.Comment("转移的目标")
+			.Value(SyntaxBuilder.Literal(data.GotoNext, 24));
+		var gotoCheck = SyntaxBuilder.DeclareLocal(SyntaxBuilder.Name(KindType).Array(), "gotoCheck")
+			.Comment("转移的检查")
+			.Value(GotoCheck(data.GotoCheck));
+		var followNext = SyntaxBuilder.DeclareLocal<int[]>("followNext")
+			.Comment("后继状态的目标")
+			.Value(SyntaxBuilder.Literal(data.FollowNext, 24));
+		var followCheck = SyntaxBuilder.DeclareLocal<int[]>("followCheck")
+			.Comment("后继状态的检查")
+			.Value(SyntaxBuilder.Literal(data.FollowCheck, 24));
+
+		var parserDataType = SyntaxBuilder.Name(typeof(ParserData<>)).TypeArgument(KindType);
+		var parserData = SyntaxBuilder.DeclareLocal(parserDataType, "parserData")
+			.Comment("语法分析器的数据")
+			.Value(SyntaxBuilder.CreateObject().ArgumentWrap(1)
+				.Argument(productions)
+				.Argument(startStates)
+				.Argument(states)
+				.Argument(gotoMap)
+				.Argument(gotoNext)
+				.Argument(gotoCheck)
+				.Argument(followNext)
+				.Argument(followCheck)
+			);
+
+		var factoryType = SyntaxBuilder.Name(typeof(ParserFactory<,>))
+			.TypeArgument(KindType).TypeArgument(ControllerType);
+
+		yield return factoryMethod
+			.Statement(gotoMap)
+			.Statement(gotoNext)
+			.Statement(gotoCheck)
+			.Statement(followNext)
+			.Statement(followCheck)
+			.Statement(parserData)
 			.Statement(SyntaxBuilder.Return(
-				SyntaxBuilder.CreateObject().Type($"ParserFactory<{KindType}, {Name}>")
-					.Argument(SyntaxBuilder.Name("parserData"))));
-		yield return factoryMethod.GetSyntax(Format);
+				SyntaxBuilder.CreateObject(factoryType).Argument(parserData)))
+			.GetSyntax(Format);
 	}
 
 	/// <summary>

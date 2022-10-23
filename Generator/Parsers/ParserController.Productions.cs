@@ -5,19 +5,17 @@ namespace Cyjb.Compilers.Parsers;
 internal sealed partial class ParserController
 {
 	/// <summary>
-	/// 返回指定语法分析器数据的产生式数据。
+	/// 声明指定语法分析器数据的产生式数据。
 	/// </summary>
 	/// <param name="data">语法分析器数据</param>
-	/// <param name="actionMap">动作的映射。</param>
-	/// <returns>产生式表达式。</returns>
-	private ExpressionBuilder Productions(ParserData<SymbolKind> data, Dictionary<Delegate, string> actionMap)
+	/// <returns>产生式数据声明语句。</returns>
+	private LocalDeclarationStatementBuilder DeclareProductions(ParserData<SymbolKind> data)
 	{
-		TypeBuilder productionType = SyntaxBuilder.Type($"ProductionData<{KindType}>");
+		TypeBuilder productionType = SyntaxBuilder.Name(typeof(ProductionData<>)).TypeArgument(KindType);
 		var builder = SyntaxBuilder.CreateArray().InitializerWrap(1);
 		foreach (ProductionData<SymbolKind> production in data.Productions)
 		{
-			var productionBuilder = SyntaxBuilder.CreateObject()
-				.Type(productionType).ArgumentWrap(1);
+			var productionBuilder = SyntaxBuilder.CreateObject(productionType).ArgumentWrap(1);
 			builder.Initializer(productionBuilder);
 			productionBuilder.Argument(production.Head.Syntax);
 			if (production.Action == null)
@@ -27,7 +25,7 @@ internal sealed partial class ParserController
 			else
 			{
 				var action = SyntaxBuilder.Lambda()
-					.Parameter("c", SyntaxBuilder.Name(Name))
+					.Parameter("c", Name)
 					.Body(SyntaxBuilder.Name("c").AccessMember(actionMap[production.Action]).Invoke());
 				productionBuilder.Argument(action);
 			}
@@ -36,7 +34,8 @@ internal sealed partial class ParserController
 				productionBuilder.Argument(kind.Syntax);
 			}
 		}
-		return builder;
+		return SyntaxBuilder.DeclareLocal(productionType.Array(), "productions")
+			.Comment("产生式数据").Value(builder);
 	}
 }
 

@@ -12,7 +12,7 @@ internal sealed class ArrayCreationExpressionBuilder : ExpressionBuilder
 	/// <summary>
 	/// 数组元素的类型。
 	/// </summary>
-	private TypeBuilder? type;
+	private readonly TypeBuilder? type;
 	/// <summary>
 	/// 数组的秩。
 	/// </summary>
@@ -23,14 +23,12 @@ internal sealed class ArrayCreationExpressionBuilder : ExpressionBuilder
 	private readonly InitializerExpressionBuilder initializer = new(SyntaxKind.ArrayInitializerExpression);
 
 	/// <summary>
-	/// 设置数组元素的类型。
+	/// 使用指定的元素类型初始化 <see cref="ArrayCreationExpressionBuilder"/> 类的新实例。
 	/// </summary>
 	/// <param name="type">数组元素的类型。</param>
-	/// <returns>当前数组创建表达式构造器。</returns>
-	public ArrayCreationExpressionBuilder Type(TypeBuilder type)
+	public ArrayCreationExpressionBuilder(TypeBuilder? type)
 	{
 		this.type = type;
-		return this;
 	}
 
 	/// <summary>
@@ -41,6 +39,17 @@ internal sealed class ArrayCreationExpressionBuilder : ExpressionBuilder
 	public ArrayCreationExpressionBuilder Rank(params ExpressionBuilder[] ranks)
 	{
 		this.ranks.AddRange(ranks);
+		return this;
+	}
+
+	/// <summary>
+	/// 设置数组的秩。
+	/// </summary>
+	/// <param name="ranks">数组的秩。</param>
+	/// <returns>当前数组创建表达式构造器。</returns>
+	public ArrayCreationExpressionBuilder Rank(params int[] ranks)
+	{
+		this.ranks.AddRange(ranks.Select(rank => SyntaxBuilder.Literal(rank)));
 		return this;
 	}
 

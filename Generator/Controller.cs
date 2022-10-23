@@ -18,6 +18,14 @@ internal abstract class Controller
 	{
 		Context = context;
 		Name = syntax.Identifier.ToString();
+		ControllerType = SyntaxBuilder.Name(Name);
+		if (syntax.TypeParameterList != null)
+		{
+			foreach (TypeParameterSyntax typeParam in syntax.TypeParameterList.Parameters)
+			{
+				ControllerType.TypeArgument(typeParam.ToString());
+			}
+		}
 		KindType = kindType;
 		Format = new SyntaxFormat(syntax).IncDepth();
 	}
@@ -26,6 +34,10 @@ internal abstract class Controller
 	/// 获取控制器的名称。
 	/// </summary>
 	public string Name { get; }
+	/// <summary>
+	/// 获取控制器的类型。
+	/// </summary>
+	public NameBuilder ControllerType { get; }
 
 	/// <summary>
 	/// 获取模板上下文。

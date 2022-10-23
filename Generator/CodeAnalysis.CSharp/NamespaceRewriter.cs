@@ -43,7 +43,7 @@ internal sealed class NamespaceRewriter : CSharpSyntaxRewriter
 		else
 		{
 			namespaces.Add(node.Left.ToString());
-			return node.Right.WithLeadingTrivia(node.GetLeadingTrivia());
+			return (node.Right.Accept(this) as SimpleNameSyntax)!.WithLeadingTrivia(node.GetLeadingTrivia());
 		}
 	}
 

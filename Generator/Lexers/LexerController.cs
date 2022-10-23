@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Cyjb.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp;
@@ -198,11 +199,6 @@ internal sealed partial class LexerController : Controller
 	}
 
 	/// <summary>
-	/// <c>CreateLexerFactory</c> 方法的名称。
-	/// </summary>
-	private static readonly string CreateLexerFactoryName = "CreateLexerFactory";
-
-	/// <summary>
 	/// 生成控制器的成员。
 	/// </summary>
 	/// <returns>控制器的成员。</returns>
@@ -210,87 +206,87 @@ internal sealed partial class LexerController : Controller
 	{
 		AddSymbols();
 		LexerData<SymbolKind> data = lexer.GetData();
-		TypeBuilder factoryInterfaceType = new NameBuilder("ILexerFactory").Qualifier("Cyjb.Compilers.Lexers")
+		NameBuilder factoryInterfaceType = SyntaxBuilder.Name(typeof(ILexerFactory<>))
 			.TypeArgument(KindType);
 		// 工厂成员声明
 		yield return SyntaxBuilder.DeclareField(factoryInterfaceType, "Factory")
 				.Modifier(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword, SyntaxKind.ReadOnlyKeyword)
 				.Comment("词法分析器的工厂。")
-				.Value(SyntaxBuilder.Name(CreateLexerFactoryName).Invoke())
+				.Value(SyntaxBuilder.Name("CreateLexerFactory").Invoke())
 				.GetSyntax(Format)
 				.AddTrailingTrivia(Format.EndOfLine);
 
 		// 工厂方法
-		var factoryMethod = SyntaxBuilder.DeclareMethod(factoryInterfaceType, CreateLexerFactoryName)
+		var factoryMethod = SyntaxBuilder.DeclareMethod(factoryInterfaceType, "CreateLexerFactory")
 			.Comment("创建词法分析器的工厂。")
-			.Attribute(SyntaxBuilder.Attribute("System.Runtime.CompilerServices.CompilerGeneratedAttribute"))
+			.Attribute(SyntaxBuilder.Attribute<CompilerGeneratedAttribute>())
 			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
 		// 如果只包含默认上下文，那么不需要创建 contexts 变量。
-		bool hasOtherContext = data.Contexts.Count > 1;
-		if (hasOtherContext)
+		LocalDeclarationStatementBuilder? contexts = null;
+		if (data.Contexts.Count > 1)
 		{
-			factoryMethod.Statement(SyntaxBuilder
-				.DeclareLocal<Dictionary<string, ContextData>>("contexts")
+			contexts = SyntaxBuilder.DeclareLocal<Dictionary<string, ContextData>>("contexts")
 				.Comment("上下文数据")
-				.Value(ContextsValue(data))
-			);
+				.Value(ContextsValue(data));
 		}
-		factoryMethod
-			.Statement(SyntaxBuilder.DeclareLocal($"TerminalData<{KindType}>[]", "terminals")
-				.Comment("终结符数据")
-				.Value(TerminalsValue(data, symbolInfos))
-			)
-			.Statement(SyntaxBuilder.DeclareLocal<int[]>("indexes")
+		TypeBuilder terminalsType = SyntaxBuilder.Name(typeof(TerminalData<>)).TypeArgument(KindType).Array();
+		var terminals = SyntaxBuilder.DeclareLocal(terminalsType, "terminals")
+			.Comment("终结符数据")
+			.Value(TerminalsValue(data, symbolInfos));
+		var indexes = SyntaxBuilder.DeclareLocal<int[]>("indexes")
 				.Comment("字符类信息")
 				.Comment(lexer.GetCharClassDescription())
 				.Comment("字符类索引")
-				.Value(SyntaxBuilder.LiteralArray(data.CharClasses.Indexes, 8))
-			)
-			.Statement(SyntaxBuilder.DeclareLocal<int[]>("classes")
-				.Comment("字符类列表")
-				.Value(SyntaxBuilder.LiteralArray(data.CharClasses.CharClasses, 24))
-			)
-			.DefineCharClassCategories(data)
-			.Statement(SyntaxBuilder.DeclareLocal<DfaStateData[]>("states")
-				.Comment("状态转移")
-				.Comment(lexer.GetStateDescription())
-				.Comment("状态列表")
-				.Value(StatesValue(data))
-			)
-			.Statement(SyntaxBuilder.DeclareLocal<int[]>("next")
-				.Comment("后继状态列表")
-				.Value(SyntaxBuilder.LiteralArray(data.Next, 24))
-			)
-			.Statement(SyntaxBuilder.DeclareLocal<int[]>("check")
-				.Comment("状态检查列表")
-				.Value(SyntaxBuilder.LiteralArray(data.Check, 24))
-			);
-
+				.Value(SyntaxBuilder.Literal(data.CharClasses.Indexes, 8));
+		var classes = SyntaxBuilder.DeclareLocal<int[]>("classes")
+			.Comment("字符类列表")
+			.Value(SyntaxBuilder.Literal(data.CharClasses.CharClasses, 24));
+		var categories = DeclareCharClassCategories(data);
 		var charClassBuilder = SyntaxBuilder.CreateObject<CharClassMap>()
-			.Argument(SyntaxBuilder.Name("indexes"))
-			.Argument(SyntaxBuilder.Name("classes"));
-		if (data.CharClasses.Categories != null)
-		{
-			charClassBuilder.Argument(SyntaxBuilder.Name(LexerControllerCharClass.CategoriesVarName));
-		}
-		factoryMethod.Statement(SyntaxBuilder.DeclareLocal($"LexerData<{KindType}>", "lexerData")
+			.Argument(indexes).Argument(classes).Argument(categories);
+		var states = SyntaxBuilder.DeclareLocal<DfaStateData[]>("states")
+			.Comment("状态转移")
+			.Comment(lexer.GetStateDescription())
+			.Comment("状态列表")
+			.Value(StatesValue(data));
+		var next = SyntaxBuilder.DeclareLocal<int[]>("next")
+			.Comment("后继状态列表")
+			.Value(SyntaxBuilder.Literal(data.Next, 24));
+		var check = SyntaxBuilder.DeclareLocal<int[]>("check")
+			.Comment("状态检查列表")
+			.Value(SyntaxBuilder.Literal(data.Check, 24));
+
+		TypeBuilder lexerDataType = SyntaxBuilder.Name(typeof(LexerData<>)).TypeArgument(KindType);
+		var lexerData = SyntaxBuilder.DeclareLocal(lexerDataType, "lexerData")
 			.Comment("词法分析器的数据")
 			.Value(SyntaxBuilder.CreateObject().ArgumentWrap(1)
-				.Argument(hasOtherContext ? SyntaxBuilder.Name("contexts") : SyntaxBuilder.Literal(null))
-				.Argument(SyntaxBuilder.Name("terminals"))
+				.Argument(contexts)
+				.Argument(terminals)
 				.Argument(charClassBuilder)
-				.Argument(SyntaxBuilder.Name("states"))
-				.Argument(SyntaxBuilder.Name("next"))
-				.Argument(SyntaxBuilder.Name("check"))
+				.Argument(states)
+				.Argument(next)
+				.Argument(check)
 				.Argument(SyntaxBuilder.Name("TrailingType").AccessMember(data.TrailingType.ToString()))
 				.Argument(SyntaxBuilder.Literal(data.ContainsBeginningOfLine))
 				.Argument(SyntaxBuilder.Literal(rejectable))
-				.Argument(SyntaxBuilder.TypeOf(SyntaxBuilder.Name(Name)))
-			))
+				.Argument(SyntaxBuilder.TypeOf(ControllerType)));
+
+		NameBuilder factoryType = SyntaxBuilder.Name(typeof(LexerFactory<,>))
+			.TypeArgument(KindType).TypeArgument(ControllerType);
+
+		yield return factoryMethod
+			.Statement(contexts)
+			.Statement(terminals)
+			.Statement(indexes)
+			.Statement(classes)
+			.Statement(categories)
+			.Statement(states)
+			.Statement(next)
+			.Statement(check)
+			.Statement(lexerData)
 			.Statement(SyntaxBuilder.Return(
-				SyntaxBuilder.CreateObject().Type($"LexerFactory<{KindType}, {Name}>")
-					.Argument(SyntaxBuilder.Name("lexerData"))));
-		yield return factoryMethod.GetSyntax(Format);
+				SyntaxBuilder.CreateObject(factoryType).Argument(lexerData)))
+			.GetSyntax(Format);
 	}
 
 	/// <summary>

@@ -18,7 +18,8 @@ namespace TestCompilers.Lexers
 	[LexerSymbol("\\)", Kind = Calc.RBrace)]
 	[LexerSymbol("\\)", Kind = Calc.RBrace)]
 	[LexerSymbol("\\s")]
-	public partial class TestCalcController : LexerController<Calc>
+	public partial class TestCalcLexer<T> : LexerController<Calc>
+		where T : struct
 	{
 		/// <summary>
 		/// 数字的终结符定义。

@@ -9,6 +9,11 @@ namespace Cyjb.CodeAnalysis.CSharp;
 internal sealed class SyntaxFormat
 {
 	/// <summary>
+	/// 默认语法格式。
+	/// </summary>
+	public static readonly SyntaxFormat Default = new("", SyntaxFactory.EndOfLine("\t"), 0, new List<SyntaxTrivia>());
+
+	/// <summary>
 	/// 缩进字符。
 	/// </summary>
 	private readonly string indent;

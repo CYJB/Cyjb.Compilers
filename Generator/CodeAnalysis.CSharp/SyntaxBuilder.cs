@@ -66,7 +66,7 @@ internal static class SyntaxBuilder
 	/// <param name="value">字面量的值。</param>
 	/// <param name="wrap">换行情况。</param>
 	/// <returns>指定 <see cref="int[]"/> 的字面量数组表达式。</returns>
-	public static ExpressionBuilder LiteralArray(IEnumerable<int> value, int wrap = 0)
+	public static ExpressionBuilder Literal(IEnumerable<int> value, int wrap = 0)
 	{
 		var builder = CreateArray().InitializerWrap(wrap);
 		bool isEmpty = true;
@@ -100,25 +100,32 @@ internal static class SyntaxBuilder
 	public static NameBuilder Name(string name) => new(name);
 
 	/// <summary>
-	/// 创建类型构造器。
+	/// 创建名称构造器。
 	/// </summary>
-	/// <param name="type">类型。</param>
-	/// <returns>类型构造器。</returns>
-	public static TypeBuilder Type(string type) => new CustomTypeBuilder(type);
+	/// <param name="type">要提取名称的类型。</param>
+	/// <returns>名称构造器。</returns>
+	public static NameBuilder Name(Type type) => new(type);
+
+	/// <summary>
+	/// 创建名称构造器。
+	/// </summary>
+	/// <typeparam name="T">要提取名称的类型。</typeparam>
+	/// <returns>名称构造器。</returns>
+	public static NameBuilder Name<T>() => new(typeof(T));
 
 	/// <summary>
 	/// 创建类型构造器。
 	/// </summary>
 	/// <param name="type">类型。</param>
 	/// <returns>类型构造器。</returns>
-	public static TypeBuilder Type(TypeSyntax type) => new CustomTypeBuilder(type);
+	public static TypeBuilder Type(string type) => new(type);
 
 	/// <summary>
 	/// 创建类型构造器。
 	/// </summary>
 	/// <typeparam name="T">类型。</typeparam>
 	/// <returns>类型构造器。</returns>
-	public static TypeBuilder Type<T>() => new CustomTypeBuilder(typeof(T).ToString());
+	public static TypeBuilder Type<T>() => new(typeof(T));
 
 	#endregion // Expression
 
@@ -130,7 +137,8 @@ internal static class SyntaxBuilder
 	/// <returns>using 指令。</returns>
 	public static UsingDirectiveSyntax UsingDirective(string name, SyntaxFormat format)
 	{
-		return SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName(name).WithLeadingTrivia(SyntaxFactory.Space))
+		return SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName(name)
+			.WithLeadingTrivia(SyntaxFactory.Space))
 			.WithTrailingTrivia(format.EndOfLine);
 	}
 
@@ -186,22 +194,23 @@ internal static class SyntaxBuilder
 	/// <summary>
 	/// 创建对象创建表达式的构造器。
 	/// </summary>
+	/// <param name="type">对象的类型。</param>
 	/// <returns>对象创建表达式的构造器。</returns>
-	public static ObjectCreationExpressionBuilder CreateObject() => new();
+	public static ObjectCreationExpressionBuilder CreateObject(TypeBuilder? type = null) => new(type);
 
 	/// <summary>
 	/// 创建对象创建表达式的构造器。
 	/// </summary>
 	/// <typeparam name="T">对象的类型。</typeparam>
 	/// <returns>对象创建表达式的构造器。</returns>
-	public static ObjectCreationExpressionBuilder CreateObject<T>() =>
-		new ObjectCreationExpressionBuilder().Type(Type<T>());
+	public static ObjectCreationExpressionBuilder CreateObject<T>() => new(Type<T>());
 
 	/// <summary>
 	/// 创建数组创建表达式的构造器。
 	/// </summary>
+	/// <param name="type">数组元素的类型。</param>
 	/// <returns>数组创建表达式的构造器。</returns>
-	public static ArrayCreationExpressionBuilder CreateArray() => new();
+	public static ArrayCreationExpressionBuilder CreateArray(TypeBuilder? type = null) => new(type);
 
 	/// <summary>
 	/// 创建 Lambda 表达式的构造器。
@@ -216,14 +225,6 @@ internal static class SyntaxBuilder
 	/// <param name="fieldName">变量的名称。</param>
 	/// <returns>变量声明语句的构造器。</returns>
 	public static LocalDeclarationStatementBuilder DeclareLocal(TypeBuilder type, string name) => new(type, name);
-
-	/// <summary>
-	/// 创建变量声明语句的构造器。
-	/// </summary>
-	/// <param name="type">变量的类型。</param>
-	/// <param name="fieldName">变量的名称。</param>
-	/// <returns>变量声明语句的构造器。</returns>
-	public static LocalDeclarationStatementBuilder DeclareLocal(string type, string name) => new(Type(type), name);
 
 	/// <summary>
 	/// 创建变量声明语句的构造器。
@@ -245,7 +246,14 @@ internal static class SyntaxBuilder
 	/// </summary>
 	/// <param name="name">特性的名称。</param>
 	/// <returns>特性的构造器。</returns>
-	public static AttributeBuilder Attribute(string name) => new(name);
+	public static AttributeBuilder Attribute(NameBuilder name) => new(name);
+
+	/// <summary>
+	/// 创建特性的构造器。
+	/// </summary>
+	/// <param name="name">特性的名称。</param>
+	/// <returns>特性的构造器。</returns>
+	public static AttributeBuilder Attribute<T>() => new(typeof(T));
 
 	/// <summary>
 	/// 创建字段声明的构造器。
