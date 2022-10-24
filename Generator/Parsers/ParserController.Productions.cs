@@ -34,7 +34,7 @@ internal sealed partial class ParserController
 				productionBuilder.Argument(kind.Syntax);
 			}
 		}
-		return SyntaxBuilder.DeclareLocal(productionType.Array(), "productions")
+		return SyntaxBuilder.DeclareLocal(productionType.Clone().Array(), "productions")
 			.Comment("产生式数据").Value(builder);
 	}
 }

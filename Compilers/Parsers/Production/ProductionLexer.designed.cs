@@ -9,6 +9,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Cyjb.Compilers.Lexers;
 
 namespace Cyjb.Compilers.Parsers.Production;
@@ -23,7 +24,7 @@ internal partial class ProductionLexer
 	/// <summary>
 	/// 创建词法分析器的工厂。
 	/// </summary>
-	[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+	[CompilerGeneratedAttribute]
 	private static ILexerFactory<ProductionKind> CreateLexerFactory()
 	{
 		// 终结符数据
@@ -42,7 +43,7 @@ internal partial class ProductionLexer
 			// 5: \s
 			new TerminalData<ProductionKind>(),
 			// 6: \d+|\w[\w\d]*
-			new TerminalData<ProductionKind>(ProductionKind.Id, (ProductionLexer c) => c.SymbolAction())
+			new TerminalData<ProductionKind>(ProductionKind.Id, action: (ProductionLexer c) => c.SymbolAction())
 		};
 		// 字符类信息
 		// 0: [(]

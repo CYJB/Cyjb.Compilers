@@ -106,6 +106,15 @@ internal sealed class TypeBuilder : ExpressionBuilder
 	}
 
 	/// <summary>
+	/// 返回当前类型构造器的副本。
+	/// </summary>
+	/// <returns>当前类型构造器的副本。</returns>
+	public TypeBuilder Clone()
+	{
+		return new TypeBuilder(syntax);
+	}
+
+	/// <summary>
 	/// 允许从字符串隐式转换为 <see cref="TypeBuilder"/> 对象。
 	/// </summary>
 	/// <param name="typeName">要转换的类型名称。</param>

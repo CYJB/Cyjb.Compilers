@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Globalization;
+using System.Runtime.CompilerServices;
 using Cyjb.Compilers.Parsers;
 
 namespace TestCompilers.Parsers;
@@ -23,7 +23,7 @@ public partial class TestCalcParser
 	/// <summary>
 	/// 创建语法分析器的工厂。
 	/// </summary>
-	[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+	[CompilerGeneratedAttribute]
 	private static IParserFactory<Calc> CreateParserFactory()
 	{
 		// 临时符号

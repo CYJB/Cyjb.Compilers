@@ -9,6 +9,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Cyjb.Compilers.Lexers;
 
 namespace TestCompilers.Lexers;
@@ -22,7 +23,7 @@ public partial class TestProductionLexer
 	/// <summary>
 	/// 创建词法分析器的工厂。
 	/// </summary>
-	[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+	[CompilerGeneratedAttribute]
 	private static ILexerFactory<ProductionKind> CreateLexerFactory()
 	{
 		// 终结符数据

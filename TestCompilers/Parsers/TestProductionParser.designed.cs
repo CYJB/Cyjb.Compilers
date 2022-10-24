@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Globalization;
+using System.Runtime.CompilerServices;
 using Cyjb.Compilers.Parsers;
 
 namespace TestCompilers.Parsers;
@@ -27,7 +27,7 @@ internal partial class TestProductionParser
 	/// <summary>
 	/// 创建语法分析器的工厂。
 	/// </summary>
-	[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+	[CompilerGeneratedAttribute]
 	private static IParserFactory<ProductionKind> CreateParserFactory()
 	{
 		// 临时符号
