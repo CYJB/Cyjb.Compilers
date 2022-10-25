@@ -14,7 +14,7 @@ using Cyjb.Compilers.Lexers;
 
 namespace TestCompilers.Lexers;
 
-public partial class TestCalcLexer 
+internal partial class TestCalcLexer 
 {
 	/// <summary>
 	/// 词法分析器的工厂。

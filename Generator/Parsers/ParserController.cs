@@ -182,15 +182,15 @@ internal sealed partial class ParserController : Controller
 		else
 		{
 			SymbolKind kind = SymbolKind.GetKind(exp);
-			Variant<string, SymbolKind>[] body = args.ParamsArgument.Select((arg) =>
+			Variant<SymbolKind, SymbolOption>[] body = args.ParamsArgument.Select((arg) =>
 			{
-				if (arg.TryGetStringLiteral(out string? text))
+				if (arg.TryGetEnumValue(out SymbolOption option))
 				{
-					return new Variant<string, SymbolKind>(text);
+					return new Variant<SymbolKind, SymbolOption>(option);
 				}
 				else
 				{
-					return new Variant<string, SymbolKind>(SymbolKind.GetKind(arg));
+					return new Variant<SymbolKind, SymbolOption>(SymbolKind.GetKind(arg));
 				}
 			}).ToArray();
 			var builder = parser.DefineProduction(kind, body);

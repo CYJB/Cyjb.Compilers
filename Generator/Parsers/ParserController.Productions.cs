@@ -22,6 +22,14 @@ internal sealed partial class ParserController
 			{
 				productionBuilder.Argument(SyntaxBuilder.Literal(null));
 			}
+			else if (production.Action == ProductionAction.Optional)
+			{
+				productionBuilder.Argument(SyntaxBuilder.Type<ProductionAction>().AccessMember("Optional"));
+			}
+			else if (production.Action == ProductionAction.More)
+			{
+				productionBuilder.Argument(SyntaxBuilder.Type<ProductionAction>().AccessMember("More"));
+			}
 			else
 			{
 				var action = SyntaxBuilder.Lambda()

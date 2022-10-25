@@ -33,26 +33,38 @@ internal partial class TestProductionParser
 		// 临时符号
 		ProductionKind endOfFile = (ProductionKind)(-1);
 		ProductionKind symbol_1 = (ProductionKind)(-2);
+		ProductionKind symbol_2 = (ProductionKind)(-3);
 		// 产生式数据
 		ProductionData<ProductionKind>[] productions = new[]
 		{
-			new ProductionData<ProductionKind>(ProductionKind.Expression,
-				(TestProductionParser c) => c.ExpressionAction(),
-				ProductionKind.Expression,
+			new ProductionData<ProductionKind>(ProductionKind.AltExp,
+				(TestProductionParser c) => c.OrAction(),
+				ProductionKind.AltExp,
+				ProductionKind.Or,
+				ProductionKind.Exp),
+			new ProductionData<ProductionKind>(symbol_1,
+				ProductionAction.More,
 				ProductionKind.Repeat),
+			new ProductionData<ProductionKind>(symbol_1,
+				ProductionAction.More,
+				symbol_1,
+				ProductionKind.Repeat),
+			new ProductionData<ProductionKind>(ProductionKind.Exp,
+				(TestProductionParser c) => c.ExpressionAction(),
+				symbol_1),
 			new ProductionData<ProductionKind>(ProductionKind.Item,
 				(TestProductionParser c) => c.CopyTextAction(),
 				ProductionKind.Id),
-			new ProductionData<ProductionKind>(ProductionKind.Expression,
+			new ProductionData<ProductionKind>(ProductionKind.AltExp,
 				(TestProductionParser c) => c.CopyValueAction(),
-				ProductionKind.Repeat),
+				ProductionKind.Exp),
 			new ProductionData<ProductionKind>(ProductionKind.Repeat,
 				(TestProductionParser c) => c.CopyValueAction(),
 				ProductionKind.Item),
 			new ProductionData<ProductionKind>(ProductionKind.Item,
 				(TestProductionParser c) => c.BraceAction(),
 				ProductionKind.LBrace,
-				ProductionKind.Expression,
+				ProductionKind.AltExp,
 				ProductionKind.RBrace),
 			new ProductionData<ProductionKind>(ProductionKind.Repeat,
 				(TestProductionParser c) => c.RepeatAction(),
@@ -66,24 +78,26 @@ internal partial class TestProductionParser
 				(TestProductionParser c) => c.RepeatAction(),
 				ProductionKind.Item,
 				ProductionKind.Question),
-			new ProductionData<ProductionKind>(symbol_1,
+			new ProductionData<ProductionKind>(symbol_2,
 				null,
-				ProductionKind.Expression)
+				ProductionKind.AltExp)
 		};
 		// 状态数据
-		ParserStateData<ProductionKind>[] states = new ParserStateData<ProductionKind>[12];
-		// 0: 8 Expression' -> •Expression
+		ParserStateData<ProductionKind>[] states = new ParserStateData<ProductionKind>[16];
+		// 0: 11 AltExp' -> •AltExp
 		//    
-		//    Id -> s4
-		//    LBrace -> s5
+		//    Id -> s6
+		//    LBrace -> s7
 		// 
-		//    Expression -> 1
-		//    Item -> 3
-		//    Repeat -> 2
+		//    AltExp -> 1
+		//    Exp -> 2
+		//    Item -> 5
+		//    Repeat -> 4
+		//    Repeat+ -> 3
 		Dictionary<ProductionKind, ParserAction> action_1 = new()
 		{
-			 { ProductionKind.Id, ParserAction.Shift(4) },
-			 { ProductionKind.LBrace, ParserAction.Shift(5) }
+			 { ProductionKind.Id, ParserAction.Shift(6) },
+			 { ProductionKind.LBrace, ParserAction.Shift(7) }
 		};
 		HashSet<ProductionKind> expecting_1 = new()
 		{
@@ -93,98 +107,79 @@ internal partial class TestProductionParser
 		states[0] = new ParserStateData<ProductionKind>(action_1,
 			ParserAction.Error,
 			expecting_1,
-			productions[8],
+			productions[11],
 			0,
 			-2);
-		// 1: 8 Expression' -> Expression•
-		//    0 Expression -> Expression •Repeat
+		// 1: 11 AltExp' -> AltExp•
+		//    0 AltExp -> AltExp •Or Exp
 		//    
-		//    Id -> s4
-		//    LBrace -> s5
+		//    Or -> s8
 		//    EOF -> acc
-		// 
-		//    Item -> 3
-		//    Repeat -> 6
 		Dictionary<ProductionKind, ParserAction> action_2 = new()
 		{
 			 { endOfFile, ParserAction.Accept },
-			 { ProductionKind.Id, ParserAction.Shift(4) },
-			 { ProductionKind.LBrace, ParserAction.Shift(5) }
+			 { ProductionKind.Or, ParserAction.Shift(8) }
 		};
 		HashSet<ProductionKind> expecting_2 = new()
 		{
 			endOfFile,
-			ProductionKind.Id,
-			ProductionKind.LBrace
+			ProductionKind.Or
 		};
 		states[1] = new ParserStateData<ProductionKind>(action_2,
 			ParserAction.Error,
 			expecting_2,
-			productions[8],
+			productions[11],
 			1,
-			1);
-		// 2: 2 Expression -> Repeat•
+			int.MinValue);
+		// 2: 5 AltExp -> Exp•
 		//    
-		//    Id -> r2
-		//    LBrace -> r2
-		//    RBrace -> r2
-		//    EOF -> r2
+		//    Or -> r5
+		//    RBrace -> r5
+		//    EOF -> r5
 		Dictionary<ProductionKind, ParserAction> action_3 = new();
 		HashSet<ProductionKind> expecting_3 = new()
 		{
 			ProductionKind.RBrace,
-			ProductionKind.Id,
-			ProductionKind.LBrace,
+			ProductionKind.Or,
 			endOfFile
 		};
 		states[2] = new ParserStateData<ProductionKind>(action_3,
-			ParserAction.Reduce(2),
+			ParserAction.Reduce(5),
 			expecting_3,
-			productions[2],
+			productions[5],
 			1,
 			int.MinValue);
-		// 3: 3 Repeat -> Item•
-		//    5 Repeat -> Item •Plus
-		//    6 Repeat -> Item •Star
-		//    7 Repeat -> Item •Question
+		// 3: 3 Exp -> Repeat+•
+		//    2 Repeat+ -> Repeat+ •Repeat
 		//    
-		//    Id -> r3
-		//    LBrace -> r3
-		//    Plus -> s7
-		//    Question -> s9
+		//    Id -> s6
+		//    LBrace -> s7
+		//    Or -> r3
 		//    RBrace -> r3
-		//    Star -> s8
 		//    EOF -> r3
-		Dictionary<ProductionKind, ParserAction> action_4 = new()
-		{
-			 { ProductionKind.Plus, ParserAction.Shift(7) },
-			 { ProductionKind.Star, ParserAction.Shift(8) },
-			 { ProductionKind.Question, ParserAction.Shift(9) }
-		};
+		// 
+		//    Item -> 5
+		//    Repeat -> 9
 		HashSet<ProductionKind> expecting_4 = new()
 		{
 			ProductionKind.RBrace,
-			ProductionKind.Id,
-			ProductionKind.LBrace,
+			ProductionKind.Or,
 			endOfFile,
-			ProductionKind.Plus,
-			ProductionKind.Star,
-			ProductionKind.Question
+			ProductionKind.Id,
+			ProductionKind.LBrace
 		};
-		states[3] = new ParserStateData<ProductionKind>(action_4,
+		states[3] = new ParserStateData<ProductionKind>(action_1,
 			ParserAction.Reduce(3),
 			expecting_4,
 			productions[3],
 			1,
-			int.MinValue);
-		// 4: 1 Item -> Id•
+			1);
+		// 4: 1 Repeat+ -> Repeat•
 		//    
 		//    Id -> r1
 		//    LBrace -> r1
-		//    Plus -> r1
-		//    Question -> r1
+		//    Or -> r1
 		//    RBrace -> r1
-		//    Star -> r1
 		//    EOF -> r1
 		states[4] = new ParserStateData<ProductionKind>(action_3,
 			ParserAction.Reduce(1),
@@ -192,168 +187,258 @@ internal partial class TestProductionParser
 			productions[1],
 			1,
 			int.MinValue);
-		// 5: 4 Item -> LBrace •Expression RBrace
-		//    
-		//    Id -> s4
-		//    LBrace -> s5
-		// 
-		//    Expression -> 10
-		//    Item -> 3
-		//    Repeat -> 2
-		states[5] = new ParserStateData<ProductionKind>(action_1,
-			ParserAction.Error,
-			expecting_1,
-			productions[4],
-			1,
-			5);
-		// 6: 0 Expression -> Expression Repeat•
-		//    
-		//    Id -> r0
-		//    LBrace -> r0
-		//    RBrace -> r0
-		//    EOF -> r0
-		states[6] = new ParserStateData<ProductionKind>(action_3,
-			ParserAction.Reduce(0),
-			expecting_3,
-			productions[0],
-			2,
-			int.MinValue);
-		// 7: 5 Repeat -> Item Plus•
-		//    
-		//    Id -> r5
-		//    LBrace -> r5
-		//    RBrace -> r5
-		//    EOF -> r5
-		states[7] = new ParserStateData<ProductionKind>(action_3,
-			ParserAction.Reduce(5),
-			expecting_3,
-			productions[5],
-			2,
-			int.MinValue);
-		// 8: 6 Repeat -> Item Star•
+		// 5: 6 Repeat -> Item•
+		//    8 Repeat -> Item •Plus
+		//    9 Repeat -> Item •Star
+		//    10 Repeat -> Item •Question
 		//    
 		//    Id -> r6
 		//    LBrace -> r6
+		//    Or -> r6
+		//    Plus -> s10
+		//    Question -> s12
 		//    RBrace -> r6
+		//    Star -> s11
 		//    EOF -> r6
-		states[8] = new ParserStateData<ProductionKind>(action_3,
-			ParserAction.Reduce(6),
-			expecting_3,
-			productions[6],
-			2,
-			int.MinValue);
-		// 9: 7 Repeat -> Item Question•
-		//    
-		//    Id -> r7
-		//    LBrace -> r7
-		//    RBrace -> r7
-		//    EOF -> r7
-		states[9] = new ParserStateData<ProductionKind>(action_3,
-			ParserAction.Reduce(7),
-			expecting_3,
-			productions[7],
-			2,
-			int.MinValue);
-		// 10: 4 Item -> LBrace Expression •RBrace
-		//     0 Expression -> Expression •Repeat
-		//     
-		//     Id -> s4
-		//     LBrace -> s5
-		//     RBrace -> s11
-		// 
-		//     Item -> 3
-		//     Repeat -> 6
-		Dictionary<ProductionKind, ParserAction> action_5 = new()
+		Dictionary<ProductionKind, ParserAction> action_4 = new()
 		{
-			 { ProductionKind.RBrace, ParserAction.Shift(11) },
-			 { ProductionKind.Id, ParserAction.Shift(4) },
-			 { ProductionKind.LBrace, ParserAction.Shift(5) }
+			 { ProductionKind.Plus, ParserAction.Shift(10) },
+			 { ProductionKind.Star, ParserAction.Shift(11) },
+			 { ProductionKind.Question, ParserAction.Shift(12) }
 		};
 		HashSet<ProductionKind> expecting_5 = new()
 		{
 			ProductionKind.RBrace,
+			ProductionKind.Or,
 			ProductionKind.Id,
-			ProductionKind.LBrace
+			ProductionKind.LBrace,
+			endOfFile,
+			ProductionKind.Plus,
+			ProductionKind.Star,
+			ProductionKind.Question
 		};
-		states[10] = new ParserStateData<ProductionKind>(action_5,
-			ParserAction.Error,
+		states[5] = new ParserStateData<ProductionKind>(action_4,
+			ParserAction.Reduce(6),
+			expecting_5,
+			productions[6],
+			1,
+			int.MinValue);
+		// 6: 4 Item -> Id•
+		//    
+		//    Id -> r4
+		//    LBrace -> r4
+		//    Or -> r4
+		//    Plus -> r4
+		//    Question -> r4
+		//    RBrace -> r4
+		//    Star -> r4
+		//    EOF -> r4
+		states[6] = new ParserStateData<ProductionKind>(action_3,
+			ParserAction.Reduce(4),
 			expecting_5,
 			productions[4],
+			1,
+			int.MinValue);
+		// 7: 7 Item -> LBrace •AltExp RBrace
+		//    
+		//    Id -> s6
+		//    LBrace -> s7
+		// 
+		//    AltExp -> 13
+		//    Exp -> 2
+		//    Item -> 5
+		//    Repeat -> 4
+		//    Repeat+ -> 3
+		states[7] = new ParserStateData<ProductionKind>(action_1,
+			ParserAction.Error,
+			expecting_1,
+			productions[7],
+			1,
+			7);
+		// 8: 0 AltExp -> AltExp Or •Exp
+		//    
+		//    Id -> s6
+		//    LBrace -> s7
+		// 
+		//    Exp -> 14
+		//    Item -> 5
+		//    Repeat -> 4
+		//    Repeat+ -> 3
+		states[8] = new ParserStateData<ProductionKind>(action_1,
+			ParserAction.Error,
+			expecting_1,
+			productions[0],
 			2,
-			8);
-		// 11: 4 Item -> LBrace Expression RBrace•
-		//     
-		//     Id -> r4
-		//     LBrace -> r4
-		//     Plus -> r4
-		//     Question -> r4
-		//     RBrace -> r4
-		//     Star -> r4
-		//     EOF -> r4
-		states[11] = new ParserStateData<ProductionKind>(action_3,
-			ParserAction.Reduce(4),
+			12);
+		// 9: 2 Repeat+ -> Repeat+ Repeat•
+		//    
+		//    Id -> r2
+		//    LBrace -> r2
+		//    Or -> r2
+		//    RBrace -> r2
+		//    EOF -> r2
+		states[9] = new ParserStateData<ProductionKind>(action_3,
+			ParserAction.Reduce(2),
 			expecting_4,
-			productions[4],
+			productions[2],
+			2,
+			int.MinValue);
+		// 10: 8 Repeat -> Item Plus•
+		//     
+		//     Id -> r8
+		//     LBrace -> r8
+		//     Or -> r8
+		//     RBrace -> r8
+		//     EOF -> r8
+		states[10] = new ParserStateData<ProductionKind>(action_3,
+			ParserAction.Reduce(8),
+			expecting_4,
+			productions[8],
+			2,
+			int.MinValue);
+		// 11: 9 Repeat -> Item Star•
+		//     
+		//     Id -> r9
+		//     LBrace -> r9
+		//     Or -> r9
+		//     RBrace -> r9
+		//     EOF -> r9
+		states[11] = new ParserStateData<ProductionKind>(action_3,
+			ParserAction.Reduce(9),
+			expecting_4,
+			productions[9],
+			2,
+			int.MinValue);
+		// 12: 10 Repeat -> Item Question•
+		//     
+		//     Id -> r10
+		//     LBrace -> r10
+		//     Or -> r10
+		//     RBrace -> r10
+		//     EOF -> r10
+		states[12] = new ParserStateData<ProductionKind>(action_3,
+			ParserAction.Reduce(10),
+			expecting_4,
+			productions[10],
+			2,
+			int.MinValue);
+		// 13: 7 Item -> LBrace AltExp •RBrace
+		//     0 AltExp -> AltExp •Or Exp
+		//     
+		//     Or -> s8
+		//     RBrace -> s15
+		Dictionary<ProductionKind, ParserAction> action_5 = new()
+		{
+			 { ProductionKind.RBrace, ParserAction.Shift(15) },
+			 { ProductionKind.Or, ParserAction.Shift(8) }
+		};
+		HashSet<ProductionKind> expecting_6 = new()
+		{
+			ProductionKind.RBrace,
+			ProductionKind.Or
+		};
+		states[13] = new ParserStateData<ProductionKind>(action_5,
+			ParserAction.Error,
+			expecting_6,
+			productions[7],
+			2,
+			int.MinValue);
+		// 14: 0 AltExp -> AltExp Or Exp•
+		//     
+		//     Or -> r0
+		//     RBrace -> r0
+		//     EOF -> r0
+		states[14] = new ParserStateData<ProductionKind>(action_3,
+			ParserAction.Reduce(0),
+			expecting_3,
+			productions[0],
+			3,
+			int.MinValue);
+		// 15: 7 Item -> LBrace AltExp RBrace•
+		//     
+		//     Id -> r7
+		//     LBrace -> r7
+		//     Or -> r7
+		//     Plus -> r7
+		//     Question -> r7
+		//     RBrace -> r7
+		//     Star -> r7
+		//     EOF -> r7
+		states[15] = new ParserStateData<ProductionKind>(action_3,
+			ParserAction.Reduce(7),
+			expecting_5,
+			productions[7],
 			3,
 			int.MinValue);
 		// 转移数据
 		Dictionary<ProductionKind, int> gotoMap = new()
 		{
-			 { ProductionKind.Expression, 0 },
-			 { ProductionKind.Repeat, 1 },
-			 { ProductionKind.Item, 3 },
-			 { ProductionKind.Id, 9 },
-			 { ProductionKind.LBrace, 15 },
-			 { ProductionKind.RBrace, 8 },
-			 { ProductionKind.Plus, 4 },
-			 { ProductionKind.Star, 9 },
-			 { ProductionKind.Question, 14 }
+			 { symbol_1, 3 },
+			 { ProductionKind.AltExp, 0 },
+			 { ProductionKind.Or, 3 },
+			 { ProductionKind.Exp, 1 },
+			 { ProductionKind.Repeat, 12 },
+			 { ProductionKind.Item, 14 },
+			 { ProductionKind.Id, 23 },
+			 { ProductionKind.LBrace, 25 },
+			 { ProductionKind.RBrace, 0 },
+			 { ProductionKind.Plus, -3 },
+			 { ProductionKind.Star, 0 },
+			 { ProductionKind.Question, 1 }
 		};
 		// 转移的目标
 		int[] gotoNext = new[]
 		{
-			1, 2, 6, 3, 3, 10, 2, 7, 3, 4, 4, 6, 8, 3, 4, 5, 5, 9, 11, 4, 5, -1, -1, -1,
-			-1, 5
+			1, 2, 10, 3, 8, 11, 12, 13, 2, 14, 3, 3, 4, 15, 5, 9, 8, 5, -1, 4, 4, 5, 5, 6,
+			-1, 7, 6, -1, 7, -1, 6, 6, 7, 7
 		};
 		// 转移的检查
 		ProductionKind[] gotoCheck = new[]
 		{
-			ProductionKind.Expression,
-			ProductionKind.Repeat,
-			ProductionKind.Repeat,
-			ProductionKind.Item,
-			ProductionKind.Item,
-			ProductionKind.Expression,
-			ProductionKind.Repeat,
+			ProductionKind.AltExp,
+			ProductionKind.Exp,
 			ProductionKind.Plus,
-			ProductionKind.Item,
-			ProductionKind.Id,
-			ProductionKind.Id,
-			ProductionKind.Repeat,
+			symbol_1,
+			ProductionKind.Or,
 			ProductionKind.Star,
+			ProductionKind.Question,
+			ProductionKind.AltExp,
+			ProductionKind.Exp,
+			ProductionKind.Exp,
+			symbol_1,
+			symbol_1,
+			ProductionKind.Repeat,
+			ProductionKind.RBrace,
+			ProductionKind.Item,
+			ProductionKind.Repeat,
+			ProductionKind.Or,
+			ProductionKind.Item,
+			endOfFile,
+			ProductionKind.Repeat,
+			ProductionKind.Repeat,
+			ProductionKind.Item,
 			ProductionKind.Item,
 			ProductionKind.Id,
+			endOfFile,
 			ProductionKind.LBrace,
+			ProductionKind.Id,
+			endOfFile,
 			ProductionKind.LBrace,
-			ProductionKind.Question,
-			ProductionKind.RBrace,
+			endOfFile,
+			ProductionKind.Id,
 			ProductionKind.Id,
 			ProductionKind.LBrace,
-			endOfFile,
-			endOfFile,
-			endOfFile,
-			endOfFile,
 			ProductionKind.LBrace
 		};
 		// 后继状态的目标
 		int[] followNext = new[]
 		{
-			1, 2, 3, 3, 6, 3, 3, 10, 2, 3, 3, 6, 3, 3, -1, 3, -1, -1, -1, 3
+			1, 2, 3, 4, 5, 5, 9, 5, 5, 13, 2, 3, 4, 5, 5, 14, 3, 4, 5, 5, 5
 		};
 		// 后继状态的检查
 		int[] followCheck = new[]
 		{
-			0, 0, 0, 0, 1, 1, 1, 5, 5, 5, 5, 10, 10, 10, -1, 5, -1, -1, -1, 10
+			0, 0, 0, 0, 0, 0, 3, 3, 3, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 7
 		};
 		// 语法分析器的数据
 		ParserData<ProductionKind> parserData = new(productions,

@@ -1,3 +1,5 @@
+using Cyjb.Text;
+
 namespace TestCompilers;
 
 /// <summary>
@@ -12,27 +14,41 @@ public enum ProductionKind
 	/// <summary>
 	/// 左小括号。
 	/// </summary>
+	[TokenDisplayName("(")]
 	LBrace,
 	/// <summary>
 	/// 右小括号。
 	/// </summary>
+	[TokenDisplayName(")")]
 	RBrace,
 	/// <summary>
-	/// 星号
+	/// 星号。
 	/// </summary>
+	[TokenDisplayName("*")]
 	Star,
 	/// <summary>
-	/// 加号
+	/// 加号。
 	/// </summary>
+	[TokenDisplayName("+")]
 	Plus,
 	/// <summary>
-	/// 问号
+	/// 问号。
 	/// </summary>
+	[TokenDisplayName("?")]
 	Question,
+	/// <summary>
+	/// 或符号。
+	/// </summary>
+	[TokenDisplayName("|")]
+	Or,
+	/// <summary>
+	/// 或产生式。
+	/// </summary>
+	AltExp,
 	/// <summary>
 	/// 产生式。
 	/// </summary>
-	Expression,
+	Exp,
 	/// <summary>
 	/// 重复产生式项。
 	/// </summary>

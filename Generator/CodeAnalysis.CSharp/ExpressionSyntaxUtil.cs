@@ -149,13 +149,44 @@ internal static class ExpressionSyntaxUtil
 		if (exp.IsKind(SyntaxKind.BitwiseOrExpression))
 		{
 			BinaryExpressionSyntax binaryExp = (BinaryExpressionSyntax)exp;
-			TEnum left = binaryExp.Left.GetEnumValue<TEnum>();
-			TEnum right = binaryExp.Right.GetEnumValue<TEnum>();
-			ulong leftValue = GenericConvert.ChangeType<TEnum, ulong>(left);
-			ulong rightValue = GenericConvert.ChangeType<TEnum, ulong>(right);
+			var converter = GenericConvert.GetConverter<TEnum, ulong>()!;
+			ulong leftValue = converter(binaryExp.Left.GetEnumValue<TEnum>());
+			ulong rightValue = converter(binaryExp.Right.GetEnumValue<TEnum>());
 			return GenericConvert.ChangeType<ulong, TEnum>(leftValue | rightValue);
 		}
-		return exp.GetSingleEnumValue<TEnum>();
+		if (exp.TryGetSingleEnumValue(out TEnum value, out CSharpException? exception))
+		{
+			return value;
+		}
+		else
+		{
+			throw exception;
+		}
+	}
+
+	/// <summary>
+	/// 尝试检查并返回指定枚举类型的值。
+	/// </summary>
+	/// <typeparam name="TEnum">枚举的类型。</typeparam>
+	/// <param name="exp">要检查的表达式。</param>
+	/// <param name="value">枚举的值。</param>
+	/// <returns>如果 <paramref name="exp"/> 是 <typeparamref name="TEnum"/>，
+	/// 则为 <c>true</c>；否则为 <c>false</c>。</returns>
+	public static bool TryGetEnumValue<TEnum>(this ExpressionSyntax exp, [MaybeNullWhen(false)] out TEnum value)
+		where TEnum : struct
+	{
+		if (exp.IsKind(SyntaxKind.BitwiseOrExpression))
+		{
+			BinaryExpressionSyntax binaryExp = (BinaryExpressionSyntax)exp;
+			var converter = GenericConvert.GetConverter<TEnum, ulong>()!;
+			if (binaryExp.Left.TryGetEnumValue(out TEnum left) &&
+				binaryExp.Right.TryGetEnumValue(out TEnum right))
+			{
+				value = GenericConvert.ChangeType<ulong, TEnum>(converter(left) | converter(right));
+				return true;
+			}
+		}
+		return exp.TryGetSingleEnumValue(out value, out _);
 	}
 
 	/// <summary>
@@ -164,8 +195,10 @@ internal static class ExpressionSyntaxUtil
 	/// <typeparam name="TEnum">枚举的类型。</typeparam>
 	/// <param name="exp">要检查的表达式。</param>
 	/// <returns>枚举的值。</returns>
-	/// <exception cref="CSharpException">未能解析枚举的值。</exception>
-	private static TEnum GetSingleEnumValue<TEnum>(this ExpressionSyntax exp)
+	/// <returns>如果 <paramref name="exp"/> 是 <typeparamref name="TEnum"/>，
+	/// 则为 <c>true</c>；否则为 <c>false</c>。</returns>
+	private static bool TryGetSingleEnumValue<TEnum>(this ExpressionSyntax exp,
+		[MaybeNullWhen(false)] out TEnum value, [MaybeNullWhen(true)] out CSharpException exception)
 		where TEnum : struct
 	{
 		ExpressionSyntax valueExp = exp;
@@ -188,17 +221,20 @@ internal static class ExpressionSyntaxUtil
 			if (enumName == typeof(TEnum).Name)
 			{
 				string memberName = memberAccess.Name.Identifier.Text;
-				if (Enum.TryParse(memberName, out TEnum value))
+				if (Enum.TryParse(memberName, out value))
 				{
-					return value;
+					exception = null;
+					return true;
 				}
-				throw CSharpException.NoSuchMember(enumName, memberName, memberAccess.Name.GetLocation());
+				else
+				{
+					exception = CSharpException.NoSuchMember(enumName, memberName, memberAccess.Name.GetLocation());
+					return false;
+				}
 			}
 		}
-		else if (exp.TryGetNumericLiteral(out ulong? value))
-		{
-			return GenericConvert.ChangeType<ulong?, TEnum>(value);
-		}
-		throw GetNoExplicitConv(valueExp, typeof(TEnum));
+		value = default;
+		exception = GetNoExplicitConv(valueExp, typeof(TEnum));
+		return false;
 	}
 }

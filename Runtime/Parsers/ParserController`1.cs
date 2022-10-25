@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics;
 using Cyjb.Collections;
 using Cyjb.Collections.ObjectModel;
@@ -141,7 +142,32 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 		}
 		if (action == null)
 		{
-			node.Value = nodes.ToArray();
+			node.Value = nodes.Select((item) => item.Value).ToArray();
+		}
+		else if (action == ProductionAction.Optional)
+		{
+			if (nodes.Count > 0)
+			{
+				node.Value = nodes[0].Value;
+			}
+		}
+		else if (action == ProductionAction.More)
+		{
+			ArrayList list;
+			if (nodes.Count <= 1)
+			{
+				list = new ArrayList();
+				if (nodes.Count > 0)
+				{
+					list.Add(nodes[0].Value);
+				}
+			}
+			else
+			{
+				list = (ArrayList)nodes[0].Value!;
+				list.Add(nodes[1].Value);
+			}
+			node.Value = list;
 		}
 		else
 		{

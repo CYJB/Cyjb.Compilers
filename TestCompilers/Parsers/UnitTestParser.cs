@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Linq;
 using Cyjb.Compilers.Parsers;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -89,9 +91,13 @@ public partial class UnitTestParser
 	{
 		Parser<ProductionKind> parser = new();
 		// 定义产生式
-		parser.DefineProduction(ProductionKind.Expression, ProductionKind.Repeat)
+		parser.DefineProduction(ProductionKind.AltExp, ProductionKind.Exp)
 			.Action(c => c[0].Value);
-		parser.DefineProduction(ProductionKind.Expression, ProductionKind.Expression, ProductionKind.Repeat)
+		parser.DefineProduction(ProductionKind.AltExp, ProductionKind.AltExp, ProductionKind.Or, ProductionKind.Exp)
+			.Action(c => $"({c[0].Value})|({c[2].Value})");
+		parser.DefineProduction(ProductionKind.Exp, ProductionKind.Repeat, SymbolOption.OneOrMore)
+			.Action(c => string.Join(" ", ((IList)c[0].Value!).Cast<string>()));
+		parser.DefineProduction(ProductionKind.Exp, ProductionKind.Exp, ProductionKind.Repeat)
 			.Action(c => $"{c[0].Value} {c[1].Value}");
 		parser.DefineProduction(ProductionKind.Repeat, ProductionKind.Item)
 			.Action(c => c[0].Value);
@@ -104,7 +110,7 @@ public partial class UnitTestParser
 		parser.DefineProduction(ProductionKind.Item, ProductionKind.Id)
 			.Action(c => c[0].Text);
 		parser.DefineProduction(ProductionKind.Item,
-			ProductionKind.LBrace, ProductionKind.Expression, ProductionKind.RBrace)
+			ProductionKind.LBrace, ProductionKind.AltExp, ProductionKind.RBrace)
 			.Action(c => $"({c[1].Value})");
 
 		TestProuction(parser.GetFactory());
@@ -135,6 +141,9 @@ public partial class UnitTestParser
 			new Token<ProductionKind>(ProductionKind.LBrace, "("),
 			new Token<ProductionKind>(ProductionKind.Id, "E"),
 			new Token<ProductionKind>(ProductionKind.Id, "F"),
+			new Token<ProductionKind>(ProductionKind.Or, "|"),
+			new Token<ProductionKind>(ProductionKind.Id, "E2"),
+			new Token<ProductionKind>(ProductionKind.Id, "F2"),
 			new Token<ProductionKind>(ProductionKind.RBrace, ")"),
 			new Token<ProductionKind>(ProductionKind.Plus, "+"),
 			new Token<ProductionKind>(ProductionKind.Id, "G"),
@@ -142,7 +151,7 @@ public partial class UnitTestParser
 		});
 		ITokenParser<ProductionKind> parser = factory.CreateParser(tokenizer);
 		Assert.AreEqual(ParseStatus.Ready, parser.Status);
-		Assert.AreEqual("A B* C D (E F)+ G?", parser.Parse().Value);
+		Assert.AreEqual("A B* C D ((E F)|(E2 F2))+ G?", parser.Parse().Value);
 		Assert.AreEqual(ParseStatus.Finished, parser.Status);
 	}
 }

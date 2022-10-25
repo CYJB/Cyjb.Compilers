@@ -13,7 +13,7 @@ namespace TestCompilers.Lexers;
 [LexerSymbol("\\(", Kind = Calc.LBrace)]
 [LexerSymbol("\\)", Kind = Calc.RBrace)]
 [LexerSymbol("\\s")]
-public partial class TestCalcLexer : LexerController<Calc>
+internal partial class TestCalcLexer : LexerController<Calc>
 {
 	/// <summary>
 	/// 数字的终结符定义。
