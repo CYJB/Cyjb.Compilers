@@ -5,6 +5,11 @@ Cyjb.Compilers
 
 本项目包括一些与编译相关的功能，目前包含词法分析器和 LALR 语法分析器，以及相应的运行时。
 
+- Compilers 包含了构造词法和语法分析器的功能。
+- Design 提供了通过设计时 T4 模板生成词法分析器和语法分析器的能力。
+- Generator 是用于 T4 模板的代码生成器，其产物会由 Design 工具嵌入使用。
+- Runtime 提供了词法和语法分析的运行时。
+
 详细的类库文档，请参见 [Wiki](https://github.com/CYJB/Cyjb.Compilers/wiki)。
 
 欢迎访问我的[博客](http://www.cnblogs.com/cyjb/)获取更多信息。
