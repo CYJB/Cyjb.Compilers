@@ -23,7 +23,7 @@ namespace Cyjb.Compilers.Lexers;
 /// enum Calc { Id, Add, Sub, Mul, Div, Pow, LBrace, RBrace }
 /// Lexer&lt;Calc&gt; lexer = new Lexer&lt;Calc&gt;();
 /// // 终结符的定义。
-/// lexer.DefineSymbol("[0-9]+").Kind(Calc.Id).Action(c => c.Accept(int.Parse(c.Text)));
+/// lexer.DefineSymbol("[0-9]+").Kind(Calc.Id).Action(c => c.Accept(double.Parse(c.Text)));
 /// lexer.DefineSymbol("\\+").Kind(Calc.Add);
 /// lexer.DefineSymbol("\\-").Kind(Calc.Sub);
 /// lexer.DefineSymbol("\\*").Kind(Calc.Mul);
@@ -33,12 +33,12 @@ namespace Cyjb.Compilers.Lexers;
 /// lexer.DefineSymbol("\\)").Kind(Calc.RBrace);
 /// // 吃掉所有空白。
 /// lexer.DefineSymbol("\\s");
-/// ILexerFactory&lt;Calc&gt; factory = lexer.GetFactory();
+/// ILexerFactory&lt;Calc&gt; lexerFactory = lexer.GetFactory();
 /// // 要分析的源文件。
 /// string source = "1 + 20 * 3 / 4*(5+6)";
-/// TokenReader&lt;Calc&gt; reader = factory.CreateReader(source);
+/// ITokenizer&lt;Calc&gt; tokenizer = lexerFactory.CreateTokenizer(source);
 /// // 构造词法分析器。
-/// foreach (Token&lt;Calc&gt; token in reader)
+/// foreach (Token&lt;Calc&gt; token in tokenizer)
 /// {
 /// 	Console.WriteLine(token);
 /// }

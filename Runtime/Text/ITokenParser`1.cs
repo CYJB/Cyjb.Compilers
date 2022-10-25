@@ -24,12 +24,14 @@ public interface ITokenParser<T>
 	/// <summary>
 	/// 使用默认的目标类型分析当前词法单元序列。
 	/// </summary>
+	/// <returns>语法分析的结果。</returns>
 	public abstract ParserNode<T> Parse();
 
 	/// <summary>
 	/// 使用指定的目标类型分析当前词法单元序列。
 	/// </summary>
 	/// <param name="target">目标类型。</param>
+	/// <returns>语法分析的结果。</returns>
 	public abstract ParserNode<T> Parse(T target);
 
 	/// <summary>

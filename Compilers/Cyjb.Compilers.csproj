@@ -13,6 +13,8 @@
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	<NeutralLanguage>en</NeutralLanguage>
+	<Version>$(VersionPrefix)</Version>
+	<VersionPrefix>1.0.0</VersionPrefix>
 	<RootNamespace>Cyjb.Compilers</RootNamespace>
 	<Authors>CYJB</Authors>
   </PropertyGroup>
@@ -26,11 +28,6 @@
   <ItemGroup>
 	<PackageReference Include="Cyjb" Version="1.0.10">
 	  <GeneratePathProperty>True</GeneratePathProperty>
-	</PackageReference>
-	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.4">
-	  <GeneratePathProperty>True</GeneratePathProperty>
-	  <PrivateAssets>all</PrivateAssets>
-	  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
   </ItemGroup>
 
