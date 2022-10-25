@@ -3,7 +3,7 @@ namespace Cyjb.Compilers.Parsers;
 /// <summary>
 /// 表示 LR 语法分析器的动作。
 /// </summary>
-public abstract class Action : IEquatable<Action>
+internal abstract class Action : IEquatable<Action>
 {
 	/// <summary>
 	/// 初始化 <see cref="Action"/> 类的新实例。

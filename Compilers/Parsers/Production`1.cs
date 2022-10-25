@@ -6,7 +6,7 @@ namespace Cyjb.Compilers.Parsers;
 /// 表示文法的产生式。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-public sealed class Production<T>
+internal sealed class Production<T>
 	where T : struct
 {
 	/// <summary>
