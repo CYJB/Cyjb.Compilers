@@ -286,16 +286,14 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 	/// <returns>如果成功从错误状态恢复，则为 <c>true</c>；否则为 <c>false</c>。</returns>
 	private bool TryInsertToken(int state, ref Token<T> token)
 	{
-		Dictionary<T, ParserAction> shiftActions = new(data.States[state].Actions
-			.Where(pair => pair.Value.Type == ParserActionType.Shift));
 		InsertTokenCandidate<T>? candicate = null;
-		foreach (var (kind, action) in shiftActions)
+		foreach (T kind in data.States[state].Expecting)
 		{
 			// 检查插入一个词法单元后能到达的状态
-			int nextState = GetNextState(action);
+			int nextState = GetNextState(state, kind);
 			if (data.GetAction(nextState, token.Kind).Type != ParserActionType.Error)
 			{
-				InsertTokenCandidate<T>? newCandicate = new(kind, action);
+				InsertTokenCandidate<T>? newCandicate = new(kind, data.GetAction(state, kind));
 				if (newCandicate > candicate)
 				{
 					candicate = newCandicate;
@@ -351,21 +349,31 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 	#endregion // 错误恢复
 
 	/// <summary>
-	/// 返回在应用指定动作后的状态，但不会改变当前解析状态。
+	/// 返回指定状态移入指定输入后的状态，但不会改变当前解析状态。
 	/// </summary>
-	/// <param name="action">要应用的动作。</param>
-	/// <returns>应用指定动作后的状态。</returns>
-	protected int GetNextState(ParserAction action)
+	/// <param name="state">要检查的状态。</param>
+	/// <param name="kind">要移入的输入。</param>
+	/// <returns>移入指定输入后的状态。</returns>
+	protected int GetNextState(int state, T kind)
 	{
-		switch (action.Type)
+		int top = 0;
+		while (true)
 		{
-			case ParserActionType.Shift:
-				return action.Index;
-			case ParserActionType.Reduce:
-				ProductionData<T> production = data.Productions[action.Index];
-				return data.Goto(stateStack[production.BodySize], production.Head);
-			default:
-				return stateStack[0];
+			ParserAction action = data.GetAction(state, kind);
+			switch (action.Type)
+			{
+				case ParserActionType.Shift:
+					return action.Index;
+				case ParserActionType.Reduce:
+					ProductionData<T> production = data.Productions[action.Index];
+					top += production.BodySize;
+					state = data.Goto(stateStack[top], production.Head);
+					top--;
+					break;
+				default:
+					// 一般不选择会导致完成识别的终结符。
+					return -1;
+			}
 		}
 	}
 
