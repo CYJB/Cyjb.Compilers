@@ -107,10 +107,9 @@ public partial class UnitTestParser
 		{
 			Token<TestKind> token1 = new(TestKind.Te, "e", new TextSpan(1, 2));
 			Token<TestKind> token2 = new(TestKind.Tc, "c", new TextSpan(4, 5));
-			TestRecover("A[B[C[e]c]ab]", "eeecccccdab",
+			TestRecover("A[B[C[e]cd]ab]", "eeecccccdab",
 				new UnexpectedTokenError<TestKind>(token1, new HashSet<TestKind>() { TestKind.Tc }),
-				new MissingTokenError<TestKind>(new Token<TestKind>(TestKind.Td, "", new TextSpan(4, 4))),
-				new UnexpectedTokenError<TestKind>(token2, new HashSet<TestKind>() { TestKind.Ta }));
+				new UnexpectedTokenError<TestKind>(token2, new HashSet<TestKind>() { TestKind.Td }));
 		}
 	}
 

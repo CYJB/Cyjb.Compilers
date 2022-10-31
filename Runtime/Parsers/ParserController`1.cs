@@ -291,7 +291,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 		{
 			// 检查插入一个词法单元后能到达的状态
 			int nextState = GetNextState(state, kind);
-			if (data.GetAction(nextState, token.Kind).Type != ParserActionType.Error)
+			if (data.States[nextState].Expecting.Contains(token.Kind))
 			{
 				InsertTokenCandidate<T>? newCandicate = new(kind, data.GetAction(state, kind));
 				if (newCandicate > candicate)
