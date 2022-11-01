@@ -217,34 +217,26 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 		int index = 0;
 		int prevState = -1;
 		int curState = stateStack[0];
-		HashSet<T> allFollows = new();
-		List<IReadOnlySet<T>> followList = new();
+		HashSet<T> follows = new();
+		T prevHead = default;
 		while (true)
 		{
 			ParserStateData<T> stateData = data.States[curState];
+			int followState;
 			if (prevState < 0)
 			{
 				// 当前状态的预期词法单元类型也需要纳入考虑，而不总是强制规约。
-				IReadOnlySet<T> follow = data.GetExpecting(curState);
-				allFollows.UnionWith(follow);
-				followList.Add(follow);
-				index += stateData.RecoverIndex;
+				followState = curState;
 			}
 			else
 			{
-				IReadOnlySet<T>? follow = data.GetFollow(prevState, curState);
-				if (follow == null)
-				{
-					followList.Add(new HashSet<T>());
-				}
-				else
-				{
-					allFollows.UnionWith(follow);
-					followList.Add(follow);
-				}
+				followState = data.Goto(curState, prevHead);
 				// 在前一状态已被规约后，定点会向后移动一个位，因此索引要 +1。
-				index += stateData.RecoverIndex + 1;
+				index++;
 			}
+			follows.UnionWith(data.GetExpecting(followState));
+			index += stateData.RecoverIndex;
+			prevHead = stateData.RecoverProduction.Head;
 			prevState = curState;
 			if (index >= stateStack.Count)
 			{
@@ -253,7 +245,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 			curState = stateStack[index];
 		}
 		// 跳过所有不在 FOLLOW 集中的词法单元。 
-		ConsumeTokens(allFollows);
+		ConsumeTokens(follows);
 		// 跳过无效状态。
 		SyncState();
 	}

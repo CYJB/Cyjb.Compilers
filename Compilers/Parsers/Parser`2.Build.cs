@@ -145,16 +145,13 @@ public partial class Parser<T, TController>
 		// 提取状态数据
 		List<ParserStateData<T>> states = new();
 		Dictionary<T, List<KeyValuePair<int, int>>> gotoTransitions = new();
-		ArrayCompress<int> followCompress = new(ParserData.InvalidState, ParserData.InvalidState);
 		int stateCount = this.states.Count;
 		foreach (LRState<T> state in this.states)
 		{
 			LRItem<T> recoverItem = state.GetRecoverItem();
 			states.Add(new ParserStateData<T>(state.Actions.GetActions(),
 				state.Actions.GetDefaultAction(), state.Actions.GetExpecting(),
-				productionData[recoverItem.Production.Index], recoverItem.Index,
-				state.GetFollowBaseIndex(followCompress)
-			));
+				productionData[recoverItem.Production.Index], recoverItem.Index));
 			// 提取 GOTO 信息
 			foreach (var (symbol, nextState) in state.Gotos)
 			{
@@ -173,8 +170,7 @@ public partial class Parser<T, TController>
 			gotoMap[kind] = gotoCompress.AddTransition(kind, transition);
 		}
 		return new ParserData<T>(productionData.ToArray(), startStates, states.ToArray(),
-			gotoMap, gotoCompress.GetNext(), gotoCompress.GetCheck(),
-			followCompress.GetNext(), followCompress.GetCheck());
+			gotoMap, gotoCompress.GetNext(), gotoCompress.GetCheck());
 	}
 
 	/// <summary>

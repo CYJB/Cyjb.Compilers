@@ -108,8 +108,7 @@ internal partial class TestProductionParser
 			ParserAction.Error,
 			expecting_1,
 			productions[11],
-			0,
-			-2);
+			0);
 		// 1: 11 AltExp' -> AltExp•
 		//    0 AltExp -> AltExp •Or Exp
 		//    
@@ -129,8 +128,7 @@ internal partial class TestProductionParser
 			ParserAction.Error,
 			expecting_2,
 			productions[11],
-			1,
-			int.MinValue);
+			1);
 		// 2: 5 AltExp -> Exp•
 		//    
 		//    Or -> r5
@@ -147,8 +145,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(5),
 			expecting_3,
 			productions[5],
-			1,
-			int.MinValue);
+			1);
 		// 3: 3 Exp -> Repeat+•
 		//    2 Repeat+ -> Repeat+ •Repeat
 		//    
@@ -172,7 +169,6 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(3),
 			expecting_4,
 			productions[3],
-			1,
 			1);
 		// 4: 1 Repeat+ -> Repeat•
 		//    
@@ -185,8 +181,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(1),
 			expecting_4,
 			productions[1],
-			1,
-			int.MinValue);
+			1);
 		// 5: 6 Repeat -> Item•
 		//    8 Repeat -> Item •Plus
 		//    9 Repeat -> Item •Star
@@ -221,8 +216,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(6),
 			expecting_5,
 			productions[6],
-			1,
-			int.MinValue);
+			1);
 		// 6: 4 Item -> Id•
 		//    
 		//    Id -> r4
@@ -237,8 +231,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(4),
 			expecting_5,
 			productions[4],
-			1,
-			int.MinValue);
+			1);
 		// 7: 7 Item -> LBrace •AltExp RBrace
 		//    
 		//    Id -> s6
@@ -253,8 +246,7 @@ internal partial class TestProductionParser
 			ParserAction.Error,
 			expecting_1,
 			productions[7],
-			1,
-			7);
+			1);
 		// 8: 0 AltExp -> AltExp Or •Exp
 		//    
 		//    Id -> s6
@@ -268,8 +260,7 @@ internal partial class TestProductionParser
 			ParserAction.Error,
 			expecting_1,
 			productions[0],
-			2,
-			12);
+			2);
 		// 9: 2 Repeat+ -> Repeat+ Repeat•
 		//    
 		//    Id -> r2
@@ -281,8 +272,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(2),
 			expecting_4,
 			productions[2],
-			2,
-			int.MinValue);
+			2);
 		// 10: 8 Repeat -> Item Plus•
 		//     
 		//     Id -> r8
@@ -294,8 +284,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(8),
 			expecting_4,
 			productions[8],
-			2,
-			int.MinValue);
+			2);
 		// 11: 9 Repeat -> Item Star•
 		//     
 		//     Id -> r9
@@ -307,8 +296,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(9),
 			expecting_4,
 			productions[9],
-			2,
-			int.MinValue);
+			2);
 		// 12: 10 Repeat -> Item Question•
 		//     
 		//     Id -> r10
@@ -320,8 +308,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(10),
 			expecting_4,
 			productions[10],
-			2,
-			int.MinValue);
+			2);
 		// 13: 7 Item -> LBrace AltExp •RBrace
 		//     0 AltExp -> AltExp •Or Exp
 		//     
@@ -341,8 +328,7 @@ internal partial class TestProductionParser
 			ParserAction.Error,
 			expecting_6,
 			productions[7],
-			2,
-			int.MinValue);
+			2);
 		// 14: 0 AltExp -> AltExp Or Exp•
 		//     
 		//     Or -> r0
@@ -352,8 +338,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(0),
 			expecting_3,
 			productions[0],
-			3,
-			int.MinValue);
+			3);
 		// 15: 7 Item -> LBrace AltExp RBrace•
 		//     
 		//     Id -> r7
@@ -368,8 +353,7 @@ internal partial class TestProductionParser
 			ParserAction.Reduce(7),
 			expecting_5,
 			productions[7],
-			3,
-			int.MinValue);
+			3);
 		// 转移数据
 		Dictionary<ProductionKind, int> gotoMap = new()
 		{
@@ -430,25 +414,13 @@ internal partial class TestProductionParser
 			ProductionKind.LBrace,
 			ProductionKind.LBrace
 		};
-		// 后继状态的目标
-		int[] followNext = new[]
-		{
-			1, 2, 3, 4, 5, 5, 9, 5, 5, 13, 2, 3, 4, 5, 5, 14, 3, 4, 5, 5, 5
-		};
-		// 后继状态的检查
-		int[] followCheck = new[]
-		{
-			0, 0, 0, 0, 0, 0, 3, 3, 3, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 7
-		};
 		// 语法分析器的数据
 		ParserData<ProductionKind> parserData = new(productions,
 			null,
 			states,
 			gotoMap,
 			gotoNext,
-			gotoCheck,
-			followNext,
-			followCheck);
+			gotoCheck);
 		return new ParserFactory<ProductionKind, TestProductionParser>(parserData);
 	}
 }

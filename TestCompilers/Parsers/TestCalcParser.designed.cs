@@ -91,8 +91,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_1,
 			productions[7],
-			0,
-			-2);
+			0);
 		// 1: 7 E' -> E•
 		//    1 E -> E •Add E
 		//    2 E -> E •Sub E
@@ -128,8 +127,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_2,
 			productions[7],
-			1,
-			int.MinValue);
+			1);
 		// 2: 0 E -> Id•
 		//    
 		//    Add -> r0
@@ -154,8 +152,7 @@ public partial class TestCalcParser
 			ParserAction.Reduce(0),
 			expecting_3,
 			productions[0],
-			1,
-			int.MinValue);
+			1);
 		// 3: 6 E -> LBrace •E RBrace
 		//    
 		//    Id -> s2
@@ -166,8 +163,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_1,
 			productions[6],
-			1,
-			0);
+			1);
 		// 4: 1 E -> E Add •E
 		//    
 		//    Id -> s2
@@ -178,7 +174,6 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_1,
 			productions[1],
-			2,
 			2);
 		// 5: 2 E -> E Sub •E
 		//    
@@ -190,8 +185,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_1,
 			productions[2],
-			2,
-			4);
+			2);
 		// 6: 3 E -> E Mul •E
 		//    
 		//    Id -> s2
@@ -202,8 +196,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_1,
 			productions[3],
-			2,
-			8);
+			2);
 		// 7: 4 E -> E Div •E
 		//    
 		//    Id -> s2
@@ -214,8 +207,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_1,
 			productions[4],
-			2,
-			11);
+			2);
 		// 8: 5 E -> E Pow •E
 		//    
 		//    Id -> s2
@@ -226,8 +218,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_1,
 			productions[5],
-			2,
-			14);
+			2);
 		// 9: 6 E -> LBrace E •RBrace
 		//    1 E -> E •Add E
 		//    2 E -> E •Sub E
@@ -263,8 +254,7 @@ public partial class TestCalcParser
 			ParserAction.Error,
 			expecting_4,
 			productions[6],
-			2,
-			int.MinValue);
+			2);
 		// 10: 1 E -> E Add E•
 		//     1 E -> E •Add E
 		//     2 E -> E •Sub E
@@ -288,8 +278,7 @@ public partial class TestCalcParser
 			ParserAction.Reduce(1),
 			expecting_3,
 			productions[1],
-			3,
-			int.MinValue);
+			3);
 		// 11: 2 E -> E Sub E•
 		//     1 E -> E •Add E
 		//     2 E -> E •Sub E
@@ -308,8 +297,7 @@ public partial class TestCalcParser
 			ParserAction.Reduce(2),
 			expecting_3,
 			productions[2],
-			3,
-			int.MinValue);
+			3);
 		// 12: 3 E -> E Mul E•
 		//     1 E -> E •Add E
 		//     2 E -> E •Sub E
@@ -332,8 +320,7 @@ public partial class TestCalcParser
 			ParserAction.Reduce(3),
 			expecting_3,
 			productions[3],
-			3,
-			int.MinValue);
+			3);
 		// 13: 4 E -> E Div E•
 		//     1 E -> E •Add E
 		//     2 E -> E •Sub E
@@ -352,8 +339,7 @@ public partial class TestCalcParser
 			ParserAction.Reduce(4),
 			expecting_3,
 			productions[4],
-			3,
-			int.MinValue);
+			3);
 		// 14: 5 E -> E Pow E•
 		//     1 E -> E •Add E
 		//     2 E -> E •Sub E
@@ -372,8 +358,7 @@ public partial class TestCalcParser
 			ParserAction.Reduce(5),
 			expecting_3,
 			productions[5],
-			3,
-			int.MinValue);
+			3);
 		// 15: 6 E -> LBrace E RBrace•
 		//     
 		//     Add -> r6
@@ -387,8 +372,7 @@ public partial class TestCalcParser
 			ParserAction.Reduce(6),
 			expecting_3,
 			productions[6],
-			3,
-			int.MinValue);
+			3);
 		// 转移数据
 		Dictionary<Calc, int> gotoMap = new()
 		{
@@ -487,27 +471,13 @@ public partial class TestCalcParser
 			Calc.Pow,
 			Calc.Pow
 		};
-		// 后继状态的目标
-		int[] followNext = new[]
-		{
-			1, 1, 9, 9, 10, 10, 11, 11, -1, 9, 12, 12, 10, 13, 13, 11, 14, 14, -1, -1, 12, -1, -1, -1,
-			13, -1, -1, -1, 14
-		};
-		// 后继状态的检查
-		int[] followCheck = new[]
-		{
-			0, 0, 3, 3, 4, 4, 5, 5, -1, 3, 6, 6, 4, 7, 7, 5, 8, 8, -1, -1, 6, -1, -1, -1,
-			7, -1, -1, -1, 8
-		};
 		// 语法分析器的数据
 		ParserData<Calc> parserData = new(productions,
 			null,
 			states,
 			gotoMap,
 			gotoNext,
-			gotoCheck,
-			followNext,
-			followCheck);
+			gotoCheck);
 		return new ParserFactory<Calc, TestCalcParser>(parserData);
 	}
 }

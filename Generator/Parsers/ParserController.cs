@@ -268,12 +268,6 @@ internal sealed partial class ParserController : Controller
 		var gotoCheck = SyntaxBuilder.DeclareLocal(SyntaxBuilder.Name(KindType).Array(), "gotoCheck")
 			.Comment("转移的检查")
 			.Value(GotoCheck(data.GotoCheck));
-		var followNext = SyntaxBuilder.DeclareLocal<int[]>("followNext")
-			.Comment("后继状态的目标")
-			.Value(SyntaxBuilder.Literal(data.FollowNext, 24));
-		var followCheck = SyntaxBuilder.DeclareLocal<int[]>("followCheck")
-			.Comment("后继状态的检查")
-			.Value(SyntaxBuilder.Literal(data.FollowCheck, 24));
 
 		var parserDataType = SyntaxBuilder.Name(typeof(ParserData<>)).TypeArgument(KindType);
 		var parserData = SyntaxBuilder.DeclareLocal(parserDataType, "parserData")
@@ -285,8 +279,6 @@ internal sealed partial class ParserController : Controller
 				.Argument(gotoMap)
 				.Argument(gotoNext)
 				.Argument(gotoCheck)
-				.Argument(followNext)
-				.Argument(followCheck)
 			);
 
 		var factoryType = SyntaxBuilder.Name(typeof(ParserFactory<,>))
@@ -296,8 +288,6 @@ internal sealed partial class ParserController : Controller
 			.Statement(gotoMap)
 			.Statement(gotoNext)
 			.Statement(gotoCheck)
-			.Statement(followNext)
-			.Statement(followCheck)
 			.Statement(parserData)
 			.Statement(SyntaxBuilder.Return(
 				SyntaxBuilder.CreateObject(factoryType).Argument(parserData)))

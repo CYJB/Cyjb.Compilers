@@ -78,28 +78,6 @@ internal sealed class LRState<T>
 	}
 
 	/// <summary>
-	/// 返回当前状态用于错误恢复的 FOLLOW 集合。
-	/// </summary>
-	/// <param name="compress">三数组压缩。</param>
-	/// <returns>用于错误恢复的 FOLLOW 集合的基索引。</returns>
-	/// <remarks>如果某状态出现了未识别的终结符，且进入恐慌模式的错误恢复，
-	/// 需要尝试将该状态规约掉，这时需要跳过多个终结符，直到出现 FOLLOW 集合中的终结符。</remarks>
-	public int GetFollowBaseIndex(ArrayCompress<int> compress)
-	{
-		List<KeyValuePair<int, int>> follows = new();
-		foreach (var (_, nextState) in gotos)
-		{
-			// GOTO 对应状态的非终结符，FOLLOW 集合就是规约后的状态可以接受的状态的终结符集合。
-			if (gotos.TryGetValue(nextState.GetRecoverItem().Production.Head, out LRState<T>? followState))
-			{
-				follows.Add(new KeyValuePair<int, int>(nextState.Index, followState.Index));
-			}
-		}
-		follows.Sort((left, right) => left.Key - right.Key);
-		return compress.AddTransition(Index, follows);
-	}
-
-	/// <summary>
 	/// 返回当前对象的字符串表示形式。
 	/// </summary>
 	/// <returns>当前对象的字符串表示形式。</returns>

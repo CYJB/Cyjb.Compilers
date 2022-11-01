@@ -41,16 +41,6 @@ public sealed class ParserData<T>
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly T[] gotoCheck;
-	/// <summary>
-	/// FOLLOW 的下一状态。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly int[] followNext;
-	/// <summary>
-	/// FOLLOW 的状态检查。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly int[] followCheck;
 
 	/// <summary>
 	/// 使用指定的语法分析器数据初始化 <see cref="ParserData{T}"/> 类的新实例。
@@ -61,11 +51,8 @@ public sealed class ParserData<T>
 	/// <param name="gotoMap">GOTO 表的起始索引。</param>
 	/// <param name="gotoNext">GOTO 的下一状态。</param>
 	/// <param name="gotoCheck">GOTO 的状态检查。</param>
-	/// <param name="followNext">FOLLOW 的下一状态。</param>
-	/// <param name="followCheck">FOLLOW 的状态检查。</param>
 	public ParserData(ProductionData<T>[] productions, Dictionary<T, int>? startStates,
-		ParserStateData<T>[] states, Dictionary<T, int> gotoMap, int[] gotoNext, T[] gotoCheck,
-		int[] followNext, int[] followCheck)
+		ParserStateData<T>[] states, Dictionary<T, int> gotoMap, int[] gotoNext, T[] gotoCheck)
 	{
 		this.productions = productions;
 		this.startStates = startStates;
@@ -73,8 +60,6 @@ public sealed class ParserData<T>
 		this.gotoMap = gotoMap;
 		this.gotoNext = gotoNext;
 		this.gotoCheck = gotoCheck;
-		this.followNext = followNext;
-		this.followCheck = followCheck;
 	}
 
 	/// <summary>
@@ -101,14 +86,6 @@ public sealed class ParserData<T>
 	/// 获取 GOTO 的状态检查。
 	/// </summary>
 	public T[] GotoCheck => gotoCheck;
-	/// <summary>
-	/// 获取 FOLLOW 的下一状态。
-	/// </summary>
-	public int[] FollowNext => followNext;
-	/// <summary>
-	/// 获取 FOLLOW 的状态检查。
-	/// </summary>
-	public int[] FollowCheck => followCheck;
 
 	/// <summary>
 	/// 获取指定状态在指定终结符上的动作。
@@ -145,22 +122,6 @@ public sealed class ParserData<T>
 	public IReadOnlySet<T> GetExpecting(int state)
 	{
 		return states[state].Expecting;
-	}
-
-	/// <summary>
-	/// 返回指定状态的状态相关 FOLLOW 集合。
-	/// </summary>
-	/// <param name="state">要检查的状态。</param>
-	/// <param name="parentState"><paramref name="state"/> 的父状态。</param>
-	/// <returns>指定状态的状态相关 FOLLOW 集合。</returns>
-	public IReadOnlySet<T>? GetFollow(int state, int parentState)
-	{
-		int idx = states[parentState].FollowBaseIndex + state;
-		if (idx >= 0 && idx < followNext.Length && parentState == followCheck[idx])
-		{
-			return states[followNext[idx]].Expecting;
-		}
-		return null;
 	}
 }
 

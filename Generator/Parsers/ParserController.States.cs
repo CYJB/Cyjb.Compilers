@@ -53,7 +53,6 @@ internal sealed partial class ParserController
 						.Argument(expectingDecl)
 						.Argument(GetProduction(data, i))
 						.Argument(SyntaxBuilder.Literal(state.RecoverIndex))
-						.Argument(SyntaxBuilder.Literal(state.FollowBaseIndex))
 				)
 				.Statement().Comment(comment));
 		}

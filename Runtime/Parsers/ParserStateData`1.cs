@@ -28,16 +28,14 @@ public class ParserStateData<T>
 	/// <param name="expecting">预期词法单元类型集合。</param>
 	/// <param name="recoverProduction">用于状态恢复的产生式。</param>
 	/// <param name="recoverIndex">用于错误恢复的产生式定点。</param>
-	/// <param name="followBaseIndex">用于错误恢复的 FOLLOW 集基索引。</param>
 	public ParserStateData(IReadOnlyDictionary<T, ParserAction> actions, ParserAction defaultAction,
-		IReadOnlySet<T> expecting, ProductionData<T> recoverProduction, int recoverIndex, int followBaseIndex)
+		IReadOnlySet<T> expecting, ProductionData<T> recoverProduction, int recoverIndex)
 	{
 		this.actions = actions;
 		this.defaultAction = defaultAction;
 		Expecting = expecting;
 		RecoverProduction = recoverProduction;
 		RecoverIndex = recoverIndex;
-		FollowBaseIndex = followBaseIndex;
 	}
 
 	/// <summary>
@@ -60,10 +58,6 @@ public class ParserStateData<T>
 	/// 获取当前状态用于错误恢复的产生式定点。
 	/// </summary>
 	public int RecoverIndex { get; }
-	/// <summary>
-	/// 获取当前状态用于错误恢复的 FOLLOW 集基索引。
-	/// </summary>
-	public int FollowBaseIndex { get; }
 
 	/// <summary>
 	/// 返回与指定终结符关联的动作。
