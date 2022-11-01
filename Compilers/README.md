@@ -185,3 +185,13 @@ C# 词法分析器系列博文
  - [C# 词法分析器（五）转换 DFA](http://www.cnblogs.com/cyjb/archive/p/LexerDfa.html)
  - [C# 词法分析器（六）构造词法分析器](http://www.cnblogs.com/cyjb/archive/p/LexerLexer.html)
  - [C# 词法分析器（七）总结](http://www.cnblogs.com/cyjb/p/LexerSummary.html)
+
+C# 语法法分析器系列博文
+
+- [C# 语法分析器（一）语法分析介绍](https://www.cnblogs.com/cyjb/p/ParserIntroduce.html)
+- [C# 语法分析器（二）LR(0) 语法分析](https://www.cnblogs.com/cyjb/p/ParserLR_0.html)
+- [C# 语法分析器（三）LALR 语法分析](https://www.cnblogs.com/cyjb/p/ParserLALR.html)
+- [C# 语法分析器（四）二义性文法](https://www.cnblogs.com/cyjb/p/ParserAmbiguous.html)
+- [C# 语法分析器（五）错误恢复](https://www.cnblogs.com/cyjb/p/ParserErrorRecovery.html)
+- [C# 语法分析器（六）构造语法分析器](https://www.cnblogs.com/cyjb/p/ParserCreate.html)
+

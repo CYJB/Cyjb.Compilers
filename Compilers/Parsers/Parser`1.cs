@@ -6,7 +6,9 @@ namespace Cyjb.Compilers.Parsers;
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 /// <remarks>
 /// <para>泛型参数 <typeparamref name="T"/> 一般是一个枚举类型，用于标识词法单元。
-/// 其中包含了所有终结符和非终结符的定义。</para>
+/// 其中包含了所有终结符和非终结符的定义。关于语法分析的相关信息，请参考我的系列博文
+/// <see href="http://www.cnblogs.com/cyjb/archive/p/ParserIntroduce.html">
+/// 《C# 语法分析器（一）语法分析介绍》</see>。</para></remarks>
 /// <example>
 /// 下面简单的构造一个数学算式的语法分析器：
 /// <code>
@@ -40,8 +42,9 @@ namespace Cyjb.Compilers.Parsers;
 /// // 输出 166.0
 /// </code>
 /// </example>
-/// </remarks>
 /// <seealso cref="ParserData{T}"/>
+/// <seealso href="http://www.cnblogs.com/cyjb/archive/p/ParserIntroduce.html">
+/// 《C# 语法分析器（一）语法分析介绍》</seealso>
 public sealed class Parser<T> : Parser<T, ParserController<T>>
 	where T : struct
 {
