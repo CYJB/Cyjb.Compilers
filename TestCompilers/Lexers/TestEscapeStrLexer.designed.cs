@@ -115,40 +115,40 @@ public partial class TestEscapeStrLexer
 		// 状态列表
 		DfaStateData[] states = new[]
 		{
-			new DfaStateData(0, 2),
-			new DfaStateData(2, 2),
-			new DfaStateData(5, -1),
-			new DfaStateData(3, -1, 2),
+			new DfaStateData(0, -1),
+			new DfaStateData(9, 0),
+			new DfaStateData(12, 0),
+			new DfaStateData(14, -1, 2),
 			new DfaStateData(int.MinValue, -1, 8),
 			new DfaStateData(int.MinValue, -1, 9),
 			new DfaStateData(int.MinValue, -1, 2),
-			new DfaStateData(14, -1, 8),
+			new DfaStateData(15, -1, 8),
 			new DfaStateData(int.MinValue, -1, 6),
-			new DfaStateData(11, -1),
 			new DfaStateData(12, -1),
+			new DfaStateData(13, -1),
 			new DfaStateData(int.MinValue, -1, 5),
 			new DfaStateData(int.MinValue, -1, 7),
-			new DfaStateData(14, -1),
+			new DfaStateData(15, -1),
 			new DfaStateData(int.MinValue, -1, 4),
-			new DfaStateData(18, -1),
 			new DfaStateData(19, -1),
 			new DfaStateData(20, -1),
+			new DfaStateData(21, -1),
 			new DfaStateData(int.MinValue, -1, 3),
 			new DfaStateData(int.MinValue, -1, 0),
-			new DfaStateData(25, -1, 8),
+			new DfaStateData(26, -1, 8),
 			new DfaStateData(int.MinValue, -1, 1)
 		};
 		// 后继状态列表
 		int[] next = new[]
 		{
-			19, 20, 6, 5, 7, 3, 4, 4, 4, 4, 4, 4, 4, 4, 8, 15, 13, 9, 14, 10, 11, 12, 16, 17,
-			18, 21
+			19, 20, 4, 4, 4, 4, 4, 4, 4, 6, 4, 7, 3, 4, 5, 8, 15, 13, 9, 14, 10, 11, 12, 16,
+			17, 18, 21
 		};
 		// 状态检查列表
 		int[] check = new[]
 		{
-			0, 0, 1, 3, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7, 9, 10, 7, 13, 7, 7, 7, 15, 16,
-			17, 20
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 7, 9, 10, 7, 13, 7, 7, 7, 15,
+			16, 17, 20
 		};
 		// 词法分析器的数据
 		LexerData<Str> lexerData = new(contexts,

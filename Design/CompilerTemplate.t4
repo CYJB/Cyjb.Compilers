@@ -17,9 +17,7 @@
 <#@ import namespace="System.Text.RegularExpressions" #>
 <#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
 <#
-	string toolPath = Host.ResolveAssemblyReference(@"$(PkgCyjb_Compilers_Design)\Tools");
-	string runtime = Environment.Is64BitOperatingSystem ? "x64" : "x86";
-	toolPath = $@"{toolPath}\win-{runtime}/Generator.exe";
+	string toolPath = Host.ResolveAssemblyReference(@"$(PkgCyjb_Compilers_Design)\Tools\Generator.dll");
 	string filePath = Host.TemplateFile.Replace(".tt", ".cs");
 	try
 	{
@@ -27,8 +25,8 @@
 		myProcess.StartInfo.UseShellExecute = false;
 		myProcess.StartInfo.RedirectStandardOutput = true;
 		myProcess.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
-		myProcess.StartInfo.FileName = toolPath;
-		myProcess.StartInfo.Arguments = Path.GetFullPath(filePath);
+		myProcess.StartInfo.FileName = "dotnet";
+		myProcess.StartInfo.Arguments = $"\"{Path.GetFullPath(toolPath)}\" \"{Path.GetFullPath(filePath)}\"";
 		myProcess.StartInfo.CreateNoWindow = true;
 		myProcess.Start();
 		string content = myProcess.StandardOutput.ReadToEnd();

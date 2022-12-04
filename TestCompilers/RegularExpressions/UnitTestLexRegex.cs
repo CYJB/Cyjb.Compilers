@@ -29,6 +29,7 @@ public class UnitTestLexRegex
 	[DataRow("a.+b", RegexOptions.Singleline, "\"a\"[\\0-\\uFFFF]+\"b\"")]
 	[DataRow("ab(?# comment)c", RegexOptions.None, "\"ab\"\"c\"")]
 	[DataRow("a   b (?# comment) c", RegexOptions.IgnorePatternWhitespace, "\"a\"\"b\"\"c\"")]
+	[DataRow(@"(\*\s*){0,3}", RegexOptions.None, "(\"*\"[\\t-\\r\\u0085\\p{Zs}\\p{Zl}\\p{Zp}]*){0,3}")]
 	public void TestParse(string pattern, RegexOptions option, string expected)
 	{
 		Assert.AreEqual(expected, LexRegex.Parse(pattern, option).ToString());

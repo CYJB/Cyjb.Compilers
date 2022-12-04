@@ -159,11 +159,11 @@ public class LexerData<T>
 		{
 			stateData = states[state];
 			int idx = stateData.BaseIndex + charClass;
-			if (idx < 0 || idx >= len)
+			if (idx < 0)
 			{
 				return DfaStateData.InvalidState;
 			}
-			if (check[idx] == state)
+			if (idx < len && check[idx] == state)
 			{
 				return next[idx];
 			}

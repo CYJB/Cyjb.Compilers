@@ -75,7 +75,9 @@ internal class DfaDataBuilder
 			maxCount = defaultState.CoverCount;
 			result = defaultState.State;
 		}
-		for (int i = index + 1; i < states.Count; i++)
+		// 总是从之前的状态中寻找默认状态。
+		// 此时状态 0 总是没有默认状态，也避免了状态 0 的转移索引小于 0 被误认为不存在的场景。
+		for (int i = 0; i < index; i++)
 		{
 			DfaState other = states[i];
 			int otherTransCount = other.Count;
