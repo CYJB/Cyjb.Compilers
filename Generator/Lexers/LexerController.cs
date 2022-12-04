@@ -320,25 +320,32 @@ internal sealed partial class LexerController : Controller
 					contexts = new string(context).Split(',');
 				}
 			}
-			var builder = lexer.DefineSymbol(regex, info.RegexOptions);
-			if (contexts.Length > 0)
+			try
 			{
-				builder.Context(contexts);
-			}
-			if (info.Kind != null)
-			{
-				// Kind 本身是 ExpressionSyntax，这里临时符号索引代替，后续生成代码时再替换。
-				builder.Kind(info.Kind.Value);
-			}
-			builder.Value(info.Value);
-			if (info.MethodName != null)
-			{
-				void action(LexerController<SymbolKind> c)
+				var builder = lexer.DefineSymbol(regex, info.RegexOptions);
+				if (contexts.Length > 0)
 				{
-					c.Text = info.MethodName;
+					builder.Context(contexts);
 				}
-				actionMap[action] = info.MethodName;
-				builder.Action(action);
+				if (info.Kind != null)
+				{
+					// Kind 本身是 ExpressionSyntax，这里临时符号索引代替，后续生成代码时再替换。
+					builder.Kind(info.Kind.Value);
+				}
+				builder.Value(info.Value);
+				if (info.MethodName != null)
+				{
+					void action(LexerController<SymbolKind> c)
+					{
+						c.Text = info.MethodName;
+					}
+					actionMap[action] = info.MethodName;
+					builder.Action(action);
+				}
+			}
+			catch (RegexParseException ex)
+			{
+				Context.AddError(ex.Message, info.Syntax);
 			}
 		}
 	}
