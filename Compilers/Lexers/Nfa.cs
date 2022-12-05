@@ -160,6 +160,7 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 		}
 		else if (regex is QuantifierExp quantifier)
 		{
+			NfaState lastTail = head;
 			NfaState lastHead = head;
 			// 如果没有上限，则需要特殊处理。
 			int times = quantifier.MaxTimes == int.MaxValue ? quantifier.MinTimes : quantifier.MaxTimes;
@@ -171,21 +172,22 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 			for (int i = 0; i < times; i++)
 			{
 				var (subHead, subTail) = BuildNFA(quantifier.InnerExpression);
-				lastHead.Add(subHead);
+				lastTail.Add(subHead);
 				if (i >= quantifier.MinTimes)
 				{
 					// 添加到最终的尾状态的转移。
-					lastHead.Add(tail);
+					lastTail.Add(tail);
 				}
-				lastHead = subTail;
+				lastTail = subTail;
+				lastHead = subHead;
 			}
 			// 为最后一个节点添加转移。
-			lastHead.Add(tail);
+			lastTail.Add(tail);
 			// 无上限的情况。
 			if (quantifier.MaxTimes == int.MaxValue)
 			{
 				// 在尾部添加一个无限循环。
-				tail.Add(head);
+				lastTail.Add(lastHead);
 			}
 		}
 		else if (regex is AnchorExp anchor)

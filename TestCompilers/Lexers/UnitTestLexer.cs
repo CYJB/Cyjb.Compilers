@@ -14,6 +14,22 @@ namespace TestCompilers.Lexers;
 [TestClass]
 public partial class UnitTestLexer
 {
+
+	/// <summary>
+	/// 测试正则表达式。
+	/// </summary>
+	[TestMethod]
+	public void TestRegex()
+	{
+		Lexer<TestKind> lexer = new();
+		lexer.DefineSymbol(@"^_{3,}$").Kind(TestKind.A);
+		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
+		var factory = lexer.GetFactory();
+
+		var tokenizer = factory.CreateTokenizer("____");
+		Assert.AreEqual(new Token<TestKind>(TestKind.A, "____", new TextSpan(0, 4)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(4), tokenizer.Read());
+	}
 	/// <summary>
 	/// 对计算器词法分析进行测试。
 	/// </summary>
