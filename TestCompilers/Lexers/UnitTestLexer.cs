@@ -342,7 +342,7 @@ public partial class UnitTestLexer
 	{
 		// 前面固定长度
 		Lexer<TestKind> lexer = new();
-		lexer.DefineSymbol(@"ab$").Kind(TestKind.A);
+		lexer.DefineSymbol(@"ab/c").Kind(TestKind.A);
 		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
 		var factory = lexer.GetFactory();
 
@@ -351,9 +351,9 @@ public partial class UnitTestLexer
 		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(1, 2)), tokenizer.Read());
 		Assert.AreEqual(Token<TestKind>.GetEndOfFile(2), tokenizer.Read());
 
-		tokenizer = factory.CreateTokenizer("ab\n");
+		tokenizer = factory.CreateTokenizer("abc");
 		Assert.AreEqual(new Token<TestKind>(TestKind.A, "ab", new TextSpan(0, 2)), tokenizer.Read());
-		Assert.AreEqual(new Token<TestKind>(TestKind.B, "\n", new TextSpan(2, 3)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "c", new TextSpan(2, 3)), tokenizer.Read());
 		Assert.AreEqual(Token<TestKind>.GetEndOfFile(3), tokenizer.Read());
 
 		// 后面固定长度
@@ -391,5 +391,40 @@ public partial class UnitTestLexer
 		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(2, 3)), tokenizer.Read());
 		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(3, 4)), tokenizer.Read());
 		Assert.AreEqual(Token<TestKind>.GetEndOfFile(4), tokenizer.Read());
+	}
+
+	/// <summary>
+	/// 测试向前看行尾。
+	/// </summary>
+	[TestMethod]
+	public void TestTrailingEOL()
+	{
+		Lexer<TestKind> lexer = new();
+		lexer.DefineSymbol(@"a$").Kind(TestKind.A);
+		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
+		var factory = lexer.GetFactory();
+
+		var tokenizer = factory.CreateTokenizer("ab");
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(1, 2)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(2), tokenizer.Read());
+
+		// 匹配 \n。
+		tokenizer = factory.CreateTokenizer("a\n");
+		Assert.AreEqual(new Token<TestKind>(TestKind.A, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "\n", new TextSpan(1, 2)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(2), tokenizer.Read());
+
+		// 匹配 \r\n
+		tokenizer = factory.CreateTokenizer("a\r\n");
+		Assert.AreEqual(new Token<TestKind>(TestKind.A, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "\r", new TextSpan(1, 2)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "\n", new TextSpan(2, 3)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(3), tokenizer.Read());
+
+		// 匹配 EOF
+		tokenizer = factory.CreateTokenizer("a");
+		Assert.AreEqual(new Token<TestKind>(TestKind.A, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(1), tokenizer.Read());
 	}
 }

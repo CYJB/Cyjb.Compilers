@@ -233,7 +233,7 @@ internal sealed partial class LexerController : Controller
 		var terminals = SyntaxBuilder.DeclareLocal(terminalsType, "terminals")
 			.Comment("终结符数据")
 			.Value(TerminalsValue(data, symbolInfos));
-		var indexes = SyntaxBuilder.DeclareLocal<int[]>("indexes")
+		var indexes = SyntaxBuilder.DeclareLocal<uint[]>("indexes")
 				.Comment("字符类信息")
 				.Comment(lexer.GetCharClassDescription())
 				.Comment("字符类索引")

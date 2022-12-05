@@ -61,6 +61,20 @@ internal static class SyntaxBuilder
 	}
 
 	/// <summary>
+	/// 返回指定 <see cref="uint"/> 的字面量表达式。
+	/// </summary>
+	/// <param name="value">字面量的值。</param>
+	/// <returns>指定 <see cref="uint"/> 的字面量表达式。</returns>
+	public static ExpressionBuilder Literal(uint value)
+	{
+		if (value == uint.MaxValue)
+		{
+			return Name("uint.MaxValue");
+		}
+		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(value));
+	}
+
+	/// <summary>
 	/// 返回指定 <see cref="int[]"/> 的字面量数组表达式。
 	/// </summary>
 	/// <param name="value">字面量的值。</param>
@@ -78,6 +92,31 @@ internal static class SyntaxBuilder
 		if (isEmpty)
 		{
 			return Name("Array").Qualifier("System").AccessMember("Empty<int>").Invoke();
+		}
+		else
+		{
+			return builder;
+		}
+	}
+
+	/// <summary>
+	/// 返回指定 <see cref="uint[]"/> 的字面量数组表达式。
+	/// </summary>
+	/// <param name="value">字面量的值。</param>
+	/// <param name="wrap">换行情况。</param>
+	/// <returns>指定 <see cref="uint[]"/> 的字面量数组表达式。</returns>
+	public static ExpressionBuilder Literal(IEnumerable<uint> value, int wrap = 0)
+	{
+		var builder = CreateArray().InitializerWrap(wrap);
+		bool isEmpty = true;
+		foreach (uint item in value)
+		{
+			builder.Initializer(Literal(item));
+			isEmpty = false;
+		}
+		if (isEmpty)
+		{
+			return Name("Array").Qualifier("System").AccessMember("Empty<uint>").Invoke();
 		}
 		else
 		{

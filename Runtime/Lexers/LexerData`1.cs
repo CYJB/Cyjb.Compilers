@@ -148,10 +148,6 @@ public class LexerData<T>
 	/// <returns>转以后的状态，使用 <c>-1</c> 表示没有找到合适的状态。</returns>
 	public int NextState(int state, char ch)
 	{
-		if (ch == SourceReader.InvalidCharacter)
-		{
-			return DfaStateData.InvalidState;
-		}
 		int charClass = charClasses.GetCharClass(ch);
 		DfaStateData stateData;
 		int len = check.Length;

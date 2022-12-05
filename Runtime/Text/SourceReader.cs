@@ -253,7 +253,7 @@ public sealed class SourceReader : IDisposable
 	/// <summary>
 	/// 返回下一个可用的字符，但不使用它。
 	/// </summary>
-	/// <returns>表示下一个要读取的字符的整数，或者如果没有要读取的字符，则为 <c>-1</c>。</returns>
+	/// <returns>表示下一个要读取的字符的整数，或者如果没有要读取的字符，则为 <see cref="InvalidCharacter"/>。</returns>
 	/// <overloads>
 	/// <summary>
 	/// 返回之后可用的字符，但不使用它。
@@ -272,7 +272,7 @@ public sealed class SourceReader : IDisposable
 	/// 返回文本读取器中之后的 <paramref name="idx"/> 索引的字符，但不使用它。<c>Peek(0)</c> 等价于 <see cref="Peek()"/>。
 	/// </summary>
 	/// <param name="idx">要读取的索引。</param>
-	/// <returns>文本读取器中之后的 <paramref name="idx"/> 索引的字符，或为 <c>-1</c>（如果没有更多的可用字符）。</returns>
+	/// <returns>文本读取器中之后的 <paramref name="idx"/> 索引的字符，或为 <see cref="InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
 	/// <exception cref="ObjectDisposedException">当前 <see cref="SourceReader"/> 已关闭。</exception>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="idx"/> 小于 <c>0</c>。</exception>
 	public char Peek(int idx)
@@ -310,7 +310,7 @@ public sealed class SourceReader : IDisposable
 	/// <summary>
 	/// 读取文本读取器中的下一个字符并使该字符的位置提升一个字符。
 	/// </summary>
-	/// <returns>文本读取器中的下一个字符，或为 <c>-1</c>（如果没有更多的可用字符）。</returns>
+	/// <returns>文本读取器中的下一个字符，或为 <see cref="InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
 	/// <overloads>
 	/// <summary>
 	/// 返回之后可用的字符，并使该字符的位置提升。
@@ -332,7 +332,7 @@ public sealed class SourceReader : IDisposable
 	/// </summary>
 	/// <param name="idx">要读取的索引。</param>
 	/// <returns>文本读取器中之后的 <paramref name="idx"/> 索引的字符，
-	/// 或为 <c>-1</c>（如果没有更多的可用字符）。</returns>
+	/// 或为 <see cref="InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
 	/// <exception cref="ObjectDisposedException">当前 <see cref="SourceReader"/> 已关闭。</exception>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="idx"/> 小于 <c>0</c>。</exception>
 	public char Read(int idx)

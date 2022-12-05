@@ -39,7 +39,7 @@ public partial class TestSymbolValueLexer
 		// 字符类信息
 		// 0: [0-9]
 		// 字符类索引
-		int[] indexes = Array.Empty<int>();
+		uint[] indexes = Array.Empty<uint>();
 		// 字符类列表
 		int[] classes = new[]
 		{

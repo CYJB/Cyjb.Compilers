@@ -53,9 +53,9 @@ public partial class TestProductionLexer
 		// 5: [?]
 		// 6: [\t-\r\u0085\p{Zs}\p{Zl}\p{Zp}]
 		// 字符类索引
-		int[] indexes = new[]
+		uint[] indexes = new[]
 		{
-			8716421
+			8716421U
 		};
 		// 字符类列表
 		int[] classes = new[]

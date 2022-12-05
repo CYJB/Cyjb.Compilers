@@ -6,6 +6,7 @@ namespace Cyjb.Compilers.Lexers;
 /// <summary>
 /// 表示字符类的映射。
 /// </summary>
+[CLSCompliant(false)]
 public sealed class CharClassMap
 {
 	/// <summary>
@@ -13,7 +14,7 @@ public sealed class CharClassMap
 	/// </summary>
 	/// <remarks>索引的高 16 位表示起始字符（包含），低 16 位表示结束字符（包含）</remarks>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly int[] indexes;
+	private readonly uint[] indexes;
 	/// <summary>
 	/// 字符类。
 	/// </summary>
@@ -32,7 +33,7 @@ public sealed class CharClassMap
 	/// <param name="indexes">范围索引。</param>
 	/// <param name="charClasses">字符类。</param>
 	/// <param name="categories">Unicode 类别对应的字符类。</param>
-	public CharClassMap(int[] indexes, int[] charClasses, 
+	public CharClassMap(uint[] indexes, int[] charClasses,
 		IReadOnlyDictionary<UnicodeCategory, int>? categories = null)
 	{
 		this.indexes = indexes;
@@ -44,7 +45,7 @@ public sealed class CharClassMap
 	/// 获取范围索引。
 	/// </summary>
 	/// <remarks>索引的高 16 位表示起始字符（包含），低 16 位表示结束字符（包含）</remarks>
-	public int[] Indexes => indexes;
+	public uint[] Indexes => indexes;
 
 	/// <summary>
 	/// 获取字符类。
@@ -70,7 +71,7 @@ public sealed class CharClassMap
 		{
 			return charClasses[ch];
 		}
-		int index = (ch << 0x10) | 0xFFFF;
+		uint index = ((uint)ch << 0x10) | 0xFFFF;
 		int charClassIdx = Array.BinarySearch(indexes, index);
 		if (charClassIdx < 0)
 		{
@@ -89,13 +90,13 @@ public sealed class CharClassMap
 				return -1;
 			}
 		}
-		index = charClasses[charClassIdx + 0x80];
-		if (index < -1)
+		int charClass = charClasses[charClassIdx + 0x80];
+		if (charClass < -1)
 		{
 			// 是范围映射。
-			int start = (indexes[charClassIdx] >> 0x10) & 0xFFFF;
-			index = charClasses[ch - start - index];
+			uint start = (indexes[charClassIdx] >> 0x10) & 0xFFFF;
+			charClass = charClasses[ch - start - charClass];
 		}
-		return index;
+		return charClass;
 	}
 }

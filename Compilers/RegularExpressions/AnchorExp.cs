@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using Cyjb.Text;
 
 namespace Cyjb.Compilers.RegularExpressions;
 
@@ -11,7 +12,10 @@ public sealed class AnchorExp : LexRegex
 	/// <summary>
 	/// 表示行的结尾的正则表达式。
 	/// </summary>
-	internal static new readonly LexRegex EndOfLine = Concat(Symbol('\r').Optional(), Symbol('\n'));
+	/// <remarks>同时会匹配文件结尾 EOF。</remarks>
+	internal static new readonly LexRegex EndOfLine = Alternate(
+		Concat(Symbol('\r').Optional(), Symbol('\n')),
+		Symbol(SourceReader.InvalidCharacter));
 
 	/// <summary>
 	/// 内部正则表达式。

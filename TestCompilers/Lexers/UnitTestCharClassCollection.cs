@@ -55,7 +55,7 @@ public class UnitTestCharClassCollection
 		charClassCollection.Invoke("MergeCharClass", new Dictionary<CharClass, CharClass>());
 
 		CharClassMap map = (CharClassMap)charClassCollection.Invoke("GetCharClassMap")!;
-		int[] indexes = new int[] { 0x268027A, 0x280028A, 0x3AA03AD };
+		uint[] indexes = new uint[] { 0x268027A, 0x280028A, 0x3AA03AD };
 		int[] charClasses = new int[128 + 3 + 0xB];
 		charClasses.Fill(-1, 0, 128);
 		charClasses['A'] = 0;

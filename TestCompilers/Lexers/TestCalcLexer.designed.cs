@@ -60,9 +60,9 @@ internal partial class TestCalcLexer
 		// 7: [\t-\r\u0085\p{Zs}\p{Zl}\p{Zp}]
 		// 8: [0-9]
 		// 字符类索引
-		int[] indexes = new[]
+		uint[] indexes = new[]
 		{
-			8716421
+			8716421U
 		};
 		// 字符类列表
 		int[] classes = new[]

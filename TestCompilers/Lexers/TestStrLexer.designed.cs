@@ -41,9 +41,9 @@ public partial class TestStrLexer
 		// 4: [\u0085\p{Zl}\p{Zp}]
 		// 5: [@]
 		// 字符类索引
-		int[] indexes = new[]
+		uint[] indexes = new[]
 		{
-			8716421, 10493991, 539688959
+			8716421U, 10493991U, 539688959U
 		};
 		// 字符类列表
 		int[] classes = new[]

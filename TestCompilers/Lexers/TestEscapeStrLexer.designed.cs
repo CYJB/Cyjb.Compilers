@@ -69,9 +69,9 @@ public partial class TestEscapeStrLexer
 		// 7: [r]
 		// 8: [\0-\t\v\f\u000E-!#-/:-?A-[]-mo-qstvwy-\uFFFF]
 		// 字符类索引
-		int[] indexes = new[]
+		uint[] indexes = new[]
 		{
-			10551295
+			10551295U
 		};
 		// 字符类列表
 		int[] classes = new[]

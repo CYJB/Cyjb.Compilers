@@ -201,10 +201,7 @@ public class Lexer<T, TController>
 	{
 		get
 		{
-			if (contextLabels == null)
-			{
-				contextLabels = contexts.Keys.ToArray();
-			}
+			contextLabels ??= contexts.Keys.ToArray();
 			return contextLabels;
 		}
 	}

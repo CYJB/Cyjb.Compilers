@@ -130,11 +130,11 @@ internal class CharClassMapBuilder
 		CheckUnicodeCategory(items);
 		List<CharClassRange> ranges = BuildRanges(items);
 		this.charClasses.AddRange(Enumerable.Repeat(0, ranges.Count));
-		List<int> resultRange = new();
+		List<uint> resultRange = new();
 		for (int i = 0; i < ranges.Count; i++)
 		{
 			CharClassRange range = ranges[i];
-			resultRange.Add((range.Start << 0x10) | range.End);
+			resultRange.Add(((uint)range.Start << 0x10) | range.End);
 			if (range.CharClassList == null)
 			{
 				this.charClasses[AsciiLength + i] = range.CharClass;
