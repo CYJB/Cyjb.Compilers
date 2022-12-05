@@ -106,10 +106,13 @@ public sealed class ParserData<T>
 	/// <returns>转以后的状态，使用 <c>-1</c> 表示没有找到合适的状态。</returns>
 	public int Goto(int state, T kind)
 	{
-		int idx = gotoMap[kind] + state;
-		if (idx >= 0 && idx < gotoNext.Length && EqualityComparer<T>.Default.Equals(kind, gotoCheck[idx]))
+		if (gotoMap.TryGetValue(kind, out int idx))
 		{
-			return gotoNext[idx];
+			idx += state;
+			if (idx >= 0 && idx < gotoNext.Length && EqualityComparer<T>.Default.Equals(kind, gotoCheck[idx]))
+			{
+				return gotoNext[idx];
+			}
 		}
 		return ParserData.InvalidState;
 	}

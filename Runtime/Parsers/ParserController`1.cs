@@ -234,7 +234,10 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 				// 在前一状态已被规约后，定点会向后移动一个位，因此索引要 +1。
 				index++;
 			}
-			follows.UnionWith(data.GetExpecting(followState));
+			if (followState >= 0)
+			{
+				follows.UnionWith(data.GetExpecting(followState));
+			}
 			index += stateData.RecoverIndex;
 			prevHead = stateData.RecoverProduction.Head;
 			prevState = curState;
