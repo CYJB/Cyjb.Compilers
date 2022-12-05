@@ -19,13 +19,12 @@ public class UnitTestTemplateDiagnostics
 	public void TestDiagnostics()
 	{
 		string filePath = @"Lexers\UnitTestTemplateDiagnostics.template.cs";
-		string runtime = Environment.Is64BitOperatingSystem ? "x64" : "x86";
 		using Process myProcess = new();
 		myProcess.StartInfo.UseShellExecute = false;
 		myProcess.StartInfo.RedirectStandardOutput = true;
 		myProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-		myProcess.StartInfo.FileName = $@"..\..\..\..\Design\Tools\win-{runtime}\Generator.exe";
-		myProcess.StartInfo.Arguments = Path.GetFullPath(filePath);
+		myProcess.StartInfo.FileName = "dotnet";
+		myProcess.StartInfo.Arguments = @$"""..\..\..\..\Design\Tools\Generator.dll"" ""{Path.GetFullPath(filePath)}""";
 		myProcess.StartInfo.CreateNoWindow = true;
 		myProcess.Start();
 		string content = myProcess.StandardOutput.ReadToEnd();

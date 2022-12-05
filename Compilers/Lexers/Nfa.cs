@@ -92,14 +92,14 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 				}
 				if (len == null)
 				{
+					trailingType = TrailingType.Variable;
+				}
+				else
+				{
 					if (trailingType == TrailingType.None)
 					{
 						trailingType = TrailingType.Fixed;
 					}
-				}
-				else
-				{
-					trailingType = TrailingType.Variable;
 				}
 			}
 		}
@@ -242,16 +242,17 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 						stateMap.Add(newState, set);
 						dfaStateMap.Add(set, newState);
 						stack.Push(newState);
-						// 合并符号索引。
+						// 合并符号索引，确保正常符号的索引排在向前看符号头状态之前。
 						newState.Symbols = set.Where(state => state.Symbol != null).Select(state =>
 						{
 							int value = state.Symbol!.Value;
 							if (state.StateType == NfaStateType.TrailingHead)
 							{
-								value = -value;
+								// 确保 0 得到的结果是负数。
+								value = -value - 1;
 							}
 							return value;
-						}).OrderBy(idx => idx < 0 ? int.MaxValue - idx : idx).ToArray();
+						}).OrderBy(idx => idx < 0 ? int.MaxValue + idx : idx).ToArray();
 						// 未用到 Reject 动作时，只需要保留第一个符号。
 						if (newState.Symbols.Length > 1 && !rejectable)
 						{

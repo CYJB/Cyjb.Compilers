@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.6">
+	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.7">
 	  <GeneratePathProperty>True</GeneratePathProperty>
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

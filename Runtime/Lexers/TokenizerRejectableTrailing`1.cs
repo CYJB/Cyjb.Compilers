@@ -79,7 +79,7 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 					else
 					{
 						// 前后长度都不固定，需要沿着堆栈向前找。
-						int target = -acceptState;
+						int target = -acceptState - 1;
 						for (int j = i - 1; j >= 0; j--)
 						{
 							if (ContainsTrailingHead(states[j].Symbols, target))

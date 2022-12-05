@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Cyjb.Compilers.Lexers;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -331,5 +332,64 @@ public partial class UnitTestLexer
 		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.RBrace, ")", new TextSpan(22, 23)), tokenizer.Read());
 		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Star, "*", new TextSpan(23, 24)), tokenizer.Read());
 		Assert.AreEqual(Token<ProductionKind>.GetEndOfFile(25), tokenizer.Read());
+	}
+
+	/// <summary>
+	/// 测试向前看。
+	/// </summary>
+	[TestMethod]
+	public void TestTrailing()
+	{
+		// 前面固定长度
+		Lexer<TestKind> lexer = new();
+		lexer.DefineSymbol(@"ab$").Kind(TestKind.A);
+		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
+		var factory = lexer.GetFactory();
+
+		var tokenizer = factory.CreateTokenizer("ab");
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(1, 2)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(2), tokenizer.Read());
+
+		tokenizer = factory.CreateTokenizer("ab\n");
+		Assert.AreEqual(new Token<TestKind>(TestKind.A, "ab", new TextSpan(0, 2)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "\n", new TextSpan(2, 3)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(3), tokenizer.Read());
+
+		// 后面固定长度
+		lexer = new();
+		lexer.DefineSymbol(@"a+/b").Kind(TestKind.A);
+		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
+		factory = lexer.GetFactory();
+
+		tokenizer = factory.CreateTokenizer("ab");
+		Assert.AreEqual(new Token<TestKind>(TestKind.A, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(1, 2)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(2), tokenizer.Read());
+
+		tokenizer = factory.CreateTokenizer("ac");
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "c", new TextSpan(1, 2)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(2), tokenizer.Read());
+
+		// 都不固定长度
+		lexer = new();
+		lexer.DefineSymbol(@"a+/b*c").Kind(TestKind.A);
+		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
+		factory = lexer.GetFactory();
+
+		tokenizer = factory.CreateTokenizer("aabbc");
+		Assert.AreEqual(new Token<TestKind>(TestKind.A, "aa", new TextSpan(0, 2)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(2, 3)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(3, 4)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "c", new TextSpan(4, 5)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(5), tokenizer.Read());
+
+		tokenizer = factory.CreateTokenizer("aabb");
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "a", new TextSpan(0, 1)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "a", new TextSpan(1, 2)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(2, 3)), tokenizer.Read());
+		Assert.AreEqual(new Token<TestKind>(TestKind.B, "b", new TextSpan(3, 4)), tokenizer.Read());
+		Assert.AreEqual(Token<TestKind>.GetEndOfFile(4), tokenizer.Read());
 	}
 }
