@@ -191,7 +191,7 @@ namespace Cyjb.Compilers.Parsers
 			LineLocator? locator;
 			if (size > 0)
 			{
-				int start = nodeStack[^1].Span.Start;
+				int start = nodeStack[size - 1].Span.Start;
 				int end = nodeStack[0].Span.End;
 				span = new TextSpan(start, end);
 				locator = nodeStack[0].Locator;
