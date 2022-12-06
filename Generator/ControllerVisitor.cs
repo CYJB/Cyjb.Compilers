@@ -212,9 +212,9 @@ internal sealed class ControllerVisitor : CSharpSyntaxVisitor
 		// 将 BaseList 的 TrailingTrivia 添加到 openBraceToken 之前，避免丢失换行符。
 		SyntaxToken openBraceToken = controllerSyntax.OpenBraceToken.InsertLeadingTrivia(0,
 			controllerSyntax.BaseList!.GetTrailingTrivia());
-		// 保留类声明前的空行
+		// 保留类声明前的空行和首个空白。
 		IEnumerable<SyntaxTrivia> newLines = controllerSyntax.GetLeadingTrivia()
-			.Where((trivia) => trivia.IsKind(SyntaxKind.EndOfLineTrivia));
+			.TakeWhile((trivia) => trivia.IsKind(SyntaxKind.EndOfLineTrivia) || trivia.IsKind(SyntaxKind.WhitespaceTrivia));
 		MemberDeclarationSyntax declaration = SyntaxFactory.ClassDeclaration(
 			SyntaxFactory.List<AttributeListSyntax>(),
 			controllerSyntax.Modifiers,
@@ -226,7 +226,7 @@ internal sealed class ControllerVisitor : CSharpSyntaxVisitor
 			openBraceToken,
 			SyntaxFactory.List(controller.Generate()),
 			controllerSyntax.CloseBraceToken,
-			controllerSyntax.SemicolonToken).InsertLeadingTrivia(0, newLines);
+			controllerSyntax.SemicolonToken).WithLeadingTrivia(newLines);
 
 		foreach (BaseNamespaceDeclarationSyntax syntax in namespaces)
 		{
