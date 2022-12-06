@@ -222,7 +222,10 @@ public class LexerController<T>
 			throw new InvalidOperationException(Resources.InvalidLexerKind);
 		}
 		userAccepted = true;
-		Value = value;
+		if (value != null)
+		{
+			Value = value;
+		}
 	}
 
 	/// <summary>
@@ -238,7 +241,10 @@ public class LexerController<T>
 		}
 		userAccepted = true;
 		Kind = kind;
-		Value = value;
+		if (value != null)
+		{
+			Value = value;
+		}
 	}
 
 	/// <summary>
