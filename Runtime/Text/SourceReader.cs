@@ -122,6 +122,11 @@ public sealed class SourceReader : IDisposable
 	/// 获取行列定位器。
 	/// </summary>
 	public LineLocator? Locator => locator;
+	/// <summary>
+	/// 获取或设置结束读取的位置。
+	/// </summary>
+	/// <remarks>会为超出 <see cref="End"/> 的读取返回 <see cref="InvalidCharacter"/>。</remarks>
+	public int End { get; set; } = int.MaxValue;
 
 	/// <summary>
 	/// 获取或设置当前的字符索引。
@@ -202,10 +207,7 @@ public sealed class SourceReader : IDisposable
 	/// <param name="tabSize">Tab 的宽度。</param>
 	public void UseLineLocator(int tabSize = 4)
 	{
-		if (locator == null)
-		{
-			locator = new LineLocator(tabSize);
-		}
+		locator ??= new LineLocator(tabSize);
 	}
 
 	/// <summary>
@@ -261,6 +263,10 @@ public sealed class SourceReader : IDisposable
 	/// </overloads>
 	public char Peek()
 	{
+		if (globalIndex >= End)
+		{
+			return InvalidCharacter;
+		}
 		if (index == length && !NextBuffer())
 		{
 			return InvalidCharacter;
@@ -284,6 +290,10 @@ public sealed class SourceReader : IDisposable
 		else if (idx == 0)
 		{
 			return Peek();
+		}
+		if (globalIndex + idx >= End)
+		{
+			return InvalidCharacter;
 		}
 		SourceBuffer temp = current;
 		int tempLen = length;
@@ -318,6 +328,10 @@ public sealed class SourceReader : IDisposable
 	/// </overloads>
 	public char Read()
 	{
+		if (globalIndex >= End)
+		{
+			return InvalidCharacter;
+		}
 		if (index == length && !NextBuffer())
 		{
 			return InvalidCharacter;
@@ -344,6 +358,10 @@ public sealed class SourceReader : IDisposable
 		else if (idx == 0)
 		{
 			return Read();
+		}
+		if (globalIndex + idx >= End)
+		{
+			return InvalidCharacter;
 		}
 		while (true)
 		{
@@ -645,10 +663,7 @@ public sealed class SourceReader : IDisposable
 			}
 		}
 		lastLength = reader.ReadBlock(last.Buffer, 0, BufferSize);
-		if (locator != null)
-		{
-			locator.Read(last.Buffer.AsSpan(0, lastLength));
-		}
+		locator?.Read(last.Buffer.AsSpan(0, lastLength));
 		if (length == 0)
 		{
 			length = lastLength;

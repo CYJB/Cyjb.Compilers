@@ -183,5 +183,26 @@ namespace TestCompilers.Text
 			Assert.AreEqual('3', reader.Read(2));
 			Assert.IsFalse(reader.IsLineStart);
 		}
+
+		/// <summary>
+		/// 对 <see cref="SourceReader.End"/> 进行测试。
+		/// </summary>
+		[TestMethod]
+		public void TestEnd()
+		{
+			SourceReader reader = new(new StringReader("1234567890"));
+			Assert.AreEqual('1', reader.Peek());
+			Assert.AreEqual('1', reader.Read());
+			reader.End = 2;
+			Assert.AreEqual('2', reader.Peek());
+			Assert.AreEqual('2', reader.Read());
+			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Peek());
+			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read());
+			reader.End = 3;
+			Assert.AreEqual('3', reader.Peek());
+			Assert.AreEqual('3', reader.Read());
+			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Peek());
+			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read());
+		}
 	}
 }
