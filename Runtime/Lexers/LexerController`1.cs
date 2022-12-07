@@ -103,6 +103,10 @@ public class LexerController<T>
 	/// 获取或设置当前词法单元的值。
 	/// </summary>
 	public object? Value { get; set; }
+	/// <summary>
+	/// 获取当前词法单元的文本范围。
+	/// </summary>
+	public TextSpan Span => new(Start, source.Index);
 
 	/// <summary>
 	/// 获取当前的上下文数据。
@@ -189,7 +193,7 @@ public class LexerController<T>
 	/// <returns><see cref="Token{T}"/> 的新实例。</returns>
 	internal Token<T> CreateToken()
 	{
-		return new Token<T>(Kind!.Value, Text, new TextSpan(Start, source.Index), source.Locator, Value);
+		return new Token<T>(Kind!.Value, Text, Span, source.Locator, Value);
 	}
 
 	/// <summary>
