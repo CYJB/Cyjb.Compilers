@@ -205,7 +205,7 @@ internal sealed partial class LexerController : Controller
 	public override IEnumerable<MemberDeclarationSyntax> Generate()
 	{
 		AddSymbols();
-		LexerData<SymbolKind> data = lexer.GetData();
+		LexerData<SymbolKind> data = lexer.GetData(rejectable);
 		NameBuilder factoryInterfaceType = SyntaxBuilder.Name(typeof(ILexerFactory<>))
 			.TypeArgument(KindType);
 		// 工厂成员声明

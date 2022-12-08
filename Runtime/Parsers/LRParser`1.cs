@@ -128,7 +128,7 @@ namespace Cyjb.Compilers.Parsers
 						node = new ParserNode<T>(token);
 						break;
 					case ParserActionType.Reduce:
-						Reduce(data.Productions[action.Index]);
+						Reduce(data.Productions[action.Index], token.Span.Start);
 						break;
 					case ParserActionType.Accept:
 						goto Accept;
@@ -171,7 +171,8 @@ namespace Cyjb.Compilers.Parsers
 				ParserAction action = topState.DefaultAction;
 				if (action.Type == ParserActionType.Reduce && topState.Actions.Count == 0)
 				{
-					Reduce(data.Productions[action.Index]);
+					// 这里总是有 token，start 的值不影响。
+					Reduce(data.Productions[action.Index], 0);
 				}
 				else
 				{
@@ -184,16 +185,15 @@ namespace Cyjb.Compilers.Parsers
 		/// 使用指定的产生式规约。
 		/// </summary>
 		/// <param name="production">规约时使用的产生式。</param>
-		private void Reduce(ProductionData<T> production)
+		/// <param name="start">源码的起始位置。</param>
+		private void Reduce(ProductionData<T> production, int start)
 		{
 			int size = production.BodySize;
 			TextSpan span;
 			LineLocator? locator;
 			if (size > 0)
 			{
-				int start = nodeStack[size - 1].Span.Start;
-				int end = nodeStack[0].Span.End;
-				span = new TextSpan(start, end);
+				span = TextSpan.Combine(nodeStack[0].Span, nodeStack[size - 1].Span);
 				locator = nodeStack[0].Locator;
 			}
 			else if (nodeStack.Count > 0)
@@ -204,7 +204,7 @@ namespace Cyjb.Compilers.Parsers
 			}
 			else
 			{
-				span = new TextSpan();
+				span = new TextSpan(start, start);
 				locator = null;
 			}
 			ParserNode<T> node = new(production.Head, span, locator);
@@ -242,7 +242,7 @@ namespace Cyjb.Compilers.Parsers
 					stateStack.Push(ParserData.InvalidState);
 				}
 				// 执行规约
-				Reduce(production);
+				Reduce(production, token.Span.Start);
 			}
 		}
 
@@ -292,7 +292,7 @@ namespace Cyjb.Compilers.Parsers
 					stateStack.Push(ParserData.InvalidState);
 				}
 				// 执行规约
-				Reduce(production);
+				Reduce(production, start);
 			}
 		}
 	}

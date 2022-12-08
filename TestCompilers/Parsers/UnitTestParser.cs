@@ -154,4 +154,24 @@ public partial class UnitTestParser
 		Assert.AreEqual("A B* C D ((E F)|(E2 F2))+ G?", parser.Parse().Value);
 		Assert.AreEqual(ParseStatus.Finished, parser.Status);
 	}
+
+	/// <summary>
+	/// 对空产生式的 Span 进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestSpanForEmptyProductionBody()
+	{
+		Parser<TestKind> parser = new();
+		// 定义产生式
+		parser.DefineProduction(TestKind.A);
+		parser.DefineProduction(TestKind.A, TestKind.A, TestKind.B);
+		var factory = parser.GetFactory();
+
+		ITokenizer<TestKind> tokenizer = new EnumerableTokenizer<TestKind>(new Token<TestKind>[]
+		{
+			new Token<TestKind>(TestKind.B, "1", new TextSpan(10, 11)),
+		});
+		ITokenParser<TestKind> tokenParser = factory.CreateParser(tokenizer);
+		Assert.AreEqual(new TextSpan(10, 11), tokenParser.Parse().Span);
+	}
 }
