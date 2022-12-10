@@ -264,7 +264,11 @@ internal sealed class RegexParser
 							if (CharsRight() > 0 && Peek() == '}')
 							{
 								MoveRight();
-								if (!regexDefinition.TryGetValue(name, out current))
+								if (name == "EOF")
+								{
+									current = LexRegex.EOF;
+								}
+								else if (!regexDefinition.TryGetValue(name, out current))
 								{
 									throw CreateException(RegexParseError.Unknown, Resources.UndefinedRegex(name));
 								}

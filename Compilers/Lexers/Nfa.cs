@@ -1,6 +1,7 @@
 using Cyjb.Collections;
 using Cyjb.Collections.ObjectModel;
 using Cyjb.Compilers.RegularExpressions;
+using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
 
@@ -55,7 +56,7 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 	public NfaBuildResult BuildRegex(LexRegex regex, int symbol)
 	{
 		NfaBuildResult result = new();
-		var (head, tail) = BuildNFA(regex);
+		var (head, tail) = BuildNFA(regex, false);
 		tail.Symbol = symbol;
 		result.Head = head;
 		result.Tail = tail;
@@ -71,7 +72,7 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 				// 设置向前看状态类型。
 				result.UseTrailing = true;
 				tail.StateType = NfaStateType.TrailingHead;
-				var (trailingHead, trailingTail) = BuildNFA(trailingExp);
+				var (trailingHead, trailingTail) = BuildNFA(trailingExp, true);
 				tail.Add(trailingHead);
 				trailingTail.StateType = NfaStateType.Trailing;
 				trailingTail.Symbol = symbol;
@@ -110,7 +111,8 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 	/// 使用指定正则表达式构造 NFA，并返回构造结果。
 	/// </summary>
 	/// <param name="regex">使用的正则表达式。</param>
-	private (NfaState head, NfaState tail) BuildNFA(LexRegex regex)
+	/// <param name="trailing">当前是否在向前看表达式中。</param>
+	private (NfaState head, NfaState tail) BuildNFA(LexRegex regex, bool trailing)
 	{
 		NfaState head = NewState();
 		NfaState tail = NewState();
@@ -118,7 +120,7 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 		{
 			foreach (LexRegex subRegex in alternation.Expressions)
 			{
-				var (subHead, subTail) = BuildNFA(subRegex);
+				var (subHead, subTail) = BuildNFA(subRegex, trailing);
 				head.Add(subHead);
 				subTail.Add(tail);
 			}
@@ -128,20 +130,31 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 			tail = head;
 			foreach (LexRegex subRegex in concatenation.Expressions)
 			{
-				var (subHead, subTail) = BuildNFA(subRegex);
+				var (subHead, subTail) = BuildNFA(subRegex, trailing);
 				tail.Add(subHead);
 				tail = subTail;
 			}
 		}
 		else if (regex is CharClassExp charClass)
 		{
-			head.Add(tail, charClass.CharClass.GetCharSet());
+			CharSet charSet = charClass.CharClass.GetCharSet();
+			// 确保在非向前看表达式中不能包含 EOF。
+			if (!trailing)
+			{
+				charSet.Remove(SourceReader.InvalidCharacter);
+			}
+			head.Add(tail, charSet);
 		}
 		else if (regex is LiteralExp literal)
 		{
 			tail = head;
 			foreach (char ch in literal.Literal)
 			{
+				// 确保在非向前看表达式中不能包含 EOF。
+				if (!trailing && ch == SourceReader.InvalidCharacter)
+				{
+					continue;
+				}
 				NfaState state = NewState();
 				if (literal.IgnoreCase)
 				{
@@ -171,7 +184,7 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 			}
 			for (int i = 0; i < times; i++)
 			{
-				var (subHead, subTail) = BuildNFA(quantifier.InnerExpression);
+				var (subHead, subTail) = BuildNFA(quantifier.InnerExpression, trailing);
 				lastTail.Add(subHead);
 				if (i >= quantifier.MinTimes)
 				{
@@ -192,7 +205,20 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 		}
 		else if (regex is AnchorExp anchor)
 		{
-			return BuildNFA(anchor.InnerExpression);
+			return BuildNFA(anchor.InnerExpression, trailing);
+		}
+		else if (regex is EndOfFileExp)
+		{
+			if (trailing)
+			{
+				// 向前看表达式中，相当于 Symbol(EOF)。
+				head.Add(tail, SourceReader.InvalidCharacter);
+			}
+			else
+			{
+				// 非向前看表达式中，相当于一个空转移。
+				head.Add(tail);
+			}
 		}
 		return (head, tail);
 	}

@@ -93,27 +93,27 @@ public class UnitTestNFA
 		start.Add(nfa.BuildRegex(LexRegex.Alternate(regularLiteral, verbatimLiteral), 1).Head);
 		Dfa dfa = nfa.BuildDFA(1);
 		//     | 0 | 1 | 2 | 3 | 4 | 5 |
-		// | 0 |   | 1 |   |   |   | 2 |
-		// | 1 |   | 5 | 1 | 6 |   | 1 |
-		// | 2 |   | 3 |   |   |   |   |
-		// | 3 | 3 | 4 | 3 | 3 | 3 | 3 |
-		// | 4 |   | 3 |   |   |   |   |
+		// | 0 | 1 |   |   |   | 2 |   |
+		// | 1 | 5 | 1 | 6 |   | 1 |   |
+		// | 2 | 3 |   |   |   |   |   |
+		// | 3 | 4 | 3 | 3 | 3 | 3 | 3 |
+		// | 4 | 3 |   |   |   |   |   |
 		// | 5 |   |   |   |   |   |   |
-		// | 6 |   | 1 | 1 | 1 | 1 | 1 |
+		// | 6 | 1 | 1 | 1 | 1 | 1 |   |
 		Assert.AreEqual(6, dfa.CharClasses.Count);
 		Assert.AreEqual(7, dfa.Count);
 
 		// 检查 DFA 数据。
 		DfaData data = dfa.GetData();
-		Assert.AreEqual(-1, data.States[0].BaseIndex);
+		Assert.AreEqual(0, data.States[0].BaseIndex);
 		Assert.AreEqual(-1, data.States[0].DefaultState);
 		CollectionAssert.AreEqual(Array.Empty<int>(), data.States[0].Symbols);
 
-		Assert.AreEqual(0, data.States[1].BaseIndex);
+		Assert.AreEqual(1, data.States[1].BaseIndex);
 		Assert.AreEqual(-1, data.States[1].DefaultState);
 		CollectionAssert.AreEqual(Array.Empty<int>(), data.States[1].Symbols);
 
-		Assert.AreEqual(5, data.States[2].BaseIndex);
+		Assert.AreEqual(6, data.States[2].BaseIndex);
 		Assert.AreEqual(-1, data.States[2].DefaultState);
 		CollectionAssert.AreEqual(Array.Empty<int>(), data.States[2].Symbols);
 
@@ -121,7 +121,7 @@ public class UnitTestNFA
 		Assert.AreEqual(-1, data.States[3].DefaultState);
 		CollectionAssert.AreEqual(Array.Empty<int>(), data.States[3].Symbols);
 
-		Assert.AreEqual(12, data.States[4].BaseIndex);
+		Assert.AreEqual(13, data.States[4].BaseIndex);
 		Assert.AreEqual(-1, data.States[4].DefaultState);
 		CollectionAssert.AreEqual(new int[] { 1 }, data.States[4].Symbols);
 
@@ -129,11 +129,11 @@ public class UnitTestNFA
 		Assert.AreEqual(-1, data.States[5].DefaultState);
 		CollectionAssert.AreEqual(new int[] { 1 }, data.States[5].Symbols);
 
-		Assert.AreEqual(13, data.States[6].BaseIndex);
+		Assert.AreEqual(14, data.States[6].BaseIndex);
 		Assert.AreEqual(-1, data.States[6].DefaultState);
 		CollectionAssert.AreEqual(Array.Empty<int>(), data.States[6].Symbols);
 
-		CollectionAssert.AreEqual(new int[] { 1, 5, 1, 6, 2, 1, 3, 3, 4, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1 }, data.Next);
+		CollectionAssert.AreEqual(new int[] { 1, 5, 1, 6, 2, 1, 3, 4, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1 }, data.Next);
 		CollectionAssert.AreEqual(new int[] { 0, 1, 1, 1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 4, 6, 6, 6, 6, 6}, data.Check);
 	}
 }
