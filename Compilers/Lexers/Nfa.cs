@@ -281,11 +281,20 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 							}
 							return value;
 						}).OrderBy(idx => idx < 0 ? int.MaxValue + idx : idx).ToArray();
-						// 未用到 Reject 动作时，只需要保留第一个符号。
-						if (newState.Symbols.Length > 1 && !rejectable)
+						// 未用到 Reject 动作时，只需要保留第一个非向前看符号。
+						if (newState.Symbols.Length > 1 && newState.Symbols[0] >= 0 && !rejectable)
 						{
-							newState.ConflictedSymbols = newState.Symbols[1..];
-							newState.Symbols = newState.Symbols[0..1];
+							int headIdx = Array.FindIndex(newState.Symbols, (idx) => idx < 0);
+							if (headIdx < 0)
+							{
+								newState.ConflictedSymbols = newState.Symbols[1..];
+								newState.Symbols = newState.Symbols[0..1];
+							}
+							else if (headIdx > 1)
+							{
+								newState.ConflictedSymbols = newState.Symbols[1..headIdx];
+								newState.Symbols = newState.Symbols[0..1].Concat(newState.Symbols[headIdx..]);
+							}
 						}
 					}
 					// 添加 DFA 的转移。
