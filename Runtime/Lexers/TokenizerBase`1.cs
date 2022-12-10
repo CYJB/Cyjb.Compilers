@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics;
+using Cyjb.Collections;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -78,6 +79,11 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// </summary>
 	/// <value>当前词法单元的起始位置。</value>
 	protected int Start => start;
+	/// <summary>
+	/// 获取当前词法分析器剩余的候选类型。
+	/// </summary>
+	/// <remarks>仅在允许 Reject 动作的词法分析器中，返回剩余的候选类型。</remarks>
+	internal virtual IReadOnlySet<T> Candidates => SetUtil.Empty<T>();
 
 	/// <summary>
 	/// 读取输入流中的下一个词法单元并提升输入流的字符位置。

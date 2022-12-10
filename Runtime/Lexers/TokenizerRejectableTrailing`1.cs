@@ -1,3 +1,4 @@
+using Cyjb.Collections;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -12,7 +13,51 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	/// <summary>
 	/// 接受状态的堆栈。
 	/// </summary>
-	private readonly List<AcceptState> states = new();
+	private readonly Stack<AcceptState> stateStack = new();
+	/// <summary>
+	/// 候选类型。
+	/// </summary>
+	private IReadOnlySet<T>? candidates;
+	/// <summary>
+	/// 当前候选。
+	/// </summary>
+	private AcceptState curCandidate;
+	/// <summary>
+	/// 当前候选索引。
+	/// </summary>
+	private int curCandidateIndex;
+	/// <summary>
+	/// 获取当前词法分析器剩余的候选类型。
+	/// </summary>
+	/// <remarks>仅在允许 Reject 动作的词法分析器中，返回剩余的候选类型。</remarks>
+	internal override IReadOnlySet<T> Candidates
+	{
+		get
+		{
+			if (candidates == null)
+			{
+				HashSet<T> result = new();
+				// 先添加当前候选
+				for (int i = curCandidateIndex; i < curCandidate.Symbols.Length; i++)
+				{
+					int acceptState = curCandidate.Symbols[i];
+					if (acceptState < 0)
+					{
+						// 跳过向前看的头状态。
+						break;
+					}
+					var kind = Data.Terminals[acceptState].Kind;
+					if (kind.HasValue)
+					{
+						result.Add(kind.Value);
+					}
+				}
+				result.UnionWith(stateStack.SelectMany(GetCandidates));
+				candidates = result.AsReadOnly();
+			}
+			return candidates;
+		}
+	}
 
 	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenizerRejectableTrailing{T}"/> 类的新实例。
@@ -31,7 +76,7 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	/// <returns>词法单元读入是否成功。</returns>
 	protected override bool NextToken(int state)
 	{
-		states.Clear();
+		stateStack.Clear();
 		int startIndex = source.Index;
 		while (true)
 		{
@@ -45,21 +90,23 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			if (symbols.Length > 0)
 			{
 				// 将接受状态记录在堆栈中。
-				states.Add(new AcceptState(symbols, source.Index));
+				stateStack.Push(new AcceptState(symbols, source.Index));
 			}
 		}
 		// 遍历终结状态，执行相应动作。
-		for (int i = states.Count - 1; i >= 0; i--)
+		while (stateStack.Count > 0)
 		{
-			AcceptState candidate = states[i];
-			foreach (int acceptState in candidate.Symbols)
+			curCandidate = stateStack.Pop();
+			curCandidateIndex = 0;
+			foreach (int acceptState in curCandidate.Symbols)
 			{
+				curCandidateIndex++;
 				if (acceptState < 0)
 				{
 					// 跳过向前看的头状态。
 					break;
 				}
-				int lastIndex = candidate.Index;
+				int lastIndex = curCandidate.Index;
 				TerminalData<T> terminal = Data.Terminals[acceptState];
 				int? trailing = terminal.Trailing;
 				if (trailing.HasValue)
@@ -80,11 +127,11 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 					{
 						// 前后长度都不固定，需要沿着堆栈向前找。
 						int target = -acceptState - 1;
-						for (int j = i - 1; j >= 0; j--)
+						foreach (AcceptState s in stateStack)
 						{
-							if (ContainsTrailingHead(states[j].Symbols, target))
+							if (ContainsTrailingHead(s.Symbols, target))
 							{
-								lastIndex = states[j].Index;
+								lastIndex = s.Index;
 								break;
 							}
 						}
@@ -92,6 +139,8 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 				}
 				// 将文本和流调整到与接受状态匹配的状态。
 				source.Index = lastIndex;
+				// 每次都需要清空候选集合，并在使用时重新计算。
+				candidates = null;
 				Controller.DoAction(Start, terminal);
 				if (!Controller.IsReject)
 				{
@@ -125,5 +174,27 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			}
 		}
 		return false;
+	}
+
+	/// <summary>
+	/// 返回指定状态中的候选类型。
+	/// </summary>
+	/// <param name="state">要检查的状态。</param>
+	/// <returns><paramref name="state"/> 中包含的候选状态。</returns>
+	private IEnumerable<T> GetCandidates(AcceptState state)
+	{
+		foreach (int acceptState in state.Symbols)
+		{
+			if (acceptState < 0)
+			{
+				// 跳过向前看的头状态。
+				break;
+			}
+			var kind = Data.Terminals[acceptState].Kind;
+			if (kind.HasValue)
+			{
+				yield return kind.Value;
+			}
+		}
 	}
 }

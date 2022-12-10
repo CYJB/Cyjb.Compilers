@@ -107,6 +107,11 @@ public class LexerController<T>
 	/// 获取当前词法单元的文本范围。
 	/// </summary>
 	public TextSpan Span => new(Start, source.Index);
+	/// <summary>
+	/// 获取当前词法分析器剩余的候选类型。
+	/// </summary>
+	/// <remarks>仅在允许 Reject 动作的词法分析器中，返回剩余的候选类型。</remarks>
+	public IReadOnlySet<T> Candidates => tokenizer.Candidates;
 
 	/// <summary>
 	/// 获取当前的上下文数据。

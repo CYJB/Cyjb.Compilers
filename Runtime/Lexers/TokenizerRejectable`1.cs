@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Cyjb.Collections;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -13,6 +15,44 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 	/// 接受状态的堆栈。
 	/// </summary>
 	private readonly Stack<AcceptState> stateStack = new();
+	/// <summary>
+	/// 候选类型。
+	/// </summary>
+	private IReadOnlySet<T>? candidates;
+	/// <summary>
+	/// 当前候选。
+	/// </summary>
+	private AcceptState curCandidate;
+	/// <summary>
+	/// 当前候选索引。
+	/// </summary>
+	private int curCandidateIndex;
+	/// <summary>
+	/// 获取当前词法分析器剩余的候选类型。
+	/// </summary>
+	/// <remarks>仅在允许 Reject 动作的词法分析器中，返回剩余的候选类型。</remarks>
+	internal override IReadOnlySet<T> Candidates
+	{
+		get
+		{
+			if (candidates == null)
+			{
+				HashSet<T> result = new();
+				// 先添加当前候选
+				for (int i = curCandidateIndex; i < curCandidate.Symbols.Length; i++)
+				{
+					var kind = Data.Terminals[curCandidate.Symbols[i]].Kind;
+					if (kind.HasValue)
+					{
+						result.Add(kind.Value);
+					}
+				}
+				result.UnionWith(stateStack.SelectMany(GetCandidates));
+				candidates = result.AsReadOnly();
+			}
+			return candidates;
+		}
+	}
 
 	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenizerRejectable&lt;T&gt;"/> 类的新实例。
@@ -50,12 +90,16 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 		// 遍历终结状态，执行相应动作。
 		while (stateStack.Count > 0)
 		{
-			AcceptState candidate = stateStack.Pop();
-			int index = candidate.Index;
-			foreach (int acceptState in candidate.Symbols)
+			curCandidate = stateStack.Pop();
+			int index = curCandidate.Index;
+			curCandidateIndex = 0;
+			foreach (int acceptState in curCandidate.Symbols)
 			{
+				curCandidateIndex++;
 				// 将文本和流调整到与接受状态匹配的状态。
 				source.Index = index;
+				// 每次都需要清空候选集合，并在使用时重新计算。
+				candidates = null;
 				Controller.DoAction(Start, Data.Terminals[acceptState]);
 				if (!Controller.IsReject)
 				{
@@ -64,5 +108,22 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 			}
 		}
 		return false;
+	}
+
+	/// <summary>
+	/// 返回指定状态中的候选类型。
+	/// </summary>
+	/// <param name="state">要检查的状态。</param>
+	/// <returns><paramref name="state"/> 中包含的候选状态。</returns>
+	private IEnumerable<T> GetCandidates(AcceptState state)
+	{
+		foreach (int acceptState in state.Symbols)
+		{
+			var kind = Data.Terminals[acceptState].Kind;
+			if (kind.HasValue)
+			{
+				yield return kind.Value;
+			}
+		}
 	}
 }
