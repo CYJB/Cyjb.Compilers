@@ -15,7 +15,7 @@ internal sealed class Production<T>
 	/// <param name="index">产生式的索引。</param>
 	/// <param name="head">产生式头。</param>
 	/// <param name="body">产生式体。</param>
-	internal Production(int index, Symbol<T> head, Symbol<T>[] body)
+	internal Production(int index, Symbol<T> head, params Symbol<T>[] body)
 	{
 		Index = index;
 		Head = head;

@@ -101,7 +101,7 @@ public partial class Parser<T, TController>
 		// 如果未指定起始符号，那么将首条产生式的头作为起始符号。
 		if (startSymbols.Count == 0)
 		{
-			AddStart(productions[0].Head.Kind);
+			AddStart(firstProduction!.Head.Kind);
 		}
 		// 检查产生式。
 		foreach (Production<T> production in productions)

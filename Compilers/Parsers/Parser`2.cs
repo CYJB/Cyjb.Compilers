@@ -79,6 +79,10 @@ public partial class Parser<T, TController>
 	/// </summary>
 	private readonly List<Production<T>> productions = new();
 	/// <summary>
+	/// 首个产生式。
+	/// </summary>
+	private Production<T>? firstProduction;
+	/// <summary>
 	/// 终结符的结合性信息。
 	/// </summary>
 	private readonly Dictionary<T, Associativity> associativities = new();
@@ -102,7 +106,7 @@ public partial class Parser<T, TController>
 		augmentedStartSymbol.StartType = option == ParseOption.ScanToMatch ?
 			SymbolStartType.AugmentedStartLowPriority : SymbolStartType.AugmentedStartHighPriority;
 		startSymbols.Add(new StartSymbol<T>(kind, augmentedStartSymbol, option));
-		Production<T> production = new(productions.Count, augmentedStartSymbol, new Symbol<T>[] { start });
+		Production<T> production = new(productions.Count, augmentedStartSymbol, start);
 		augmentedStartSymbol.Productions.Add(production);
 		productions.Add(production);
 	}
@@ -116,6 +120,8 @@ public partial class Parser<T, TController>
 	public ProductionBuilder<T, TController> DefineProduction(T kind, params Variant<T, SymbolOption>[] body)
 	{
 		Symbol<T> head = GetOrCreateSymbol(kind, SymbolType.NonTerminal);
+		// 提前记录产生式索引，避免 SymbolOptions 生成的额外产生式影响首个产生式的索引。
+		int index = productions.Count;
 		List<Symbol<T>> symbols = new();
 		SymbolOption option = SymbolOption.None;
 		foreach (var item in body)
@@ -138,7 +144,12 @@ public partial class Parser<T, TController>
 		{
 			symbols[^1] = ApplyOption(symbols[^1], option);
 		}
-		return new ProductionBuilder<T, TController>(this, DefineProduction(head, symbols.ToArray()));
+		Production<T> production = DefineProduction(head, symbols.ToArray());
+		if (firstProduction == null)
+		{
+			firstProduction = production;
+		}
+		return new ProductionBuilder<T, TController>(this, production);
 	}
 
 	/// <summary>
