@@ -16,6 +16,10 @@ namespace Cyjb.Compilers.Parsers
 		/// </summary>
 		private readonly ParserData<T> data;
 		/// <summary>
+		/// 词法分析器。
+		/// </summary>
+		private readonly ITokenizer<T> tokenizer;
+		/// <summary>
 		/// 语法节点堆栈。
 		/// </summary>
 		private readonly ListStack<ParserNode<T>> nodeStack = new();
@@ -32,6 +36,10 @@ namespace Cyjb.Compilers.Parsers
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private ParseStatus status = ParseStatus.Ready;
+		/// <summary>
+		/// 是否已同步共享上下文。
+		/// </summary>
+		private bool contextSynced = false;
 
 		/// <summary>
 		/// 语法分析错误的事件。
@@ -42,10 +50,12 @@ namespace Cyjb.Compilers.Parsers
 		/// 使用指定的 LR 规则和词法分析器初始化 <see cref="LRParser{T}"/> 类的新实例。
 		/// </summary>
 		/// <param name="data">LR 语法分析器的规则。</param>
+		/// <param name="tokenizer">词法分析器。</param>
 		/// <param name="controller">语法分析控制器。</param>
-		internal LRParser(ParserData<T> data, ParserController<T> controller)
+		internal LRParser(ParserData<T> data, ITokenizer<T> tokenizer, ParserController<T> controller)
 		{
 			this.data = data;
+			this.tokenizer = tokenizer;
 			this.controller = controller;
 			controller.SetParser(this);
 		}
@@ -65,8 +75,8 @@ namespace Cyjb.Compilers.Parsers
 		/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
 		public object? SharedContext
 		{
-			get { return controller.SharedContext; }
-			set { controller.SharedContext = value; }
+			get { return tokenizer.SharedContext; }
+			set { tokenizer.SharedContext = value; }
 		}
 
 		/// <summary>
@@ -96,6 +106,11 @@ namespace Cyjb.Compilers.Parsers
 		/// </summary>
 		private ParserNode<T> ParseTokens(int initialState)
 		{
+			if (!contextSynced)
+			{
+				contextSynced = true;
+				controller.SharedContext = tokenizer.SharedContext;
+			}
 			if (status != ParseStatus.Ready)
 			{
 				return new ParserNode<T>(Token<T>.GetEndOfFile(controller.Span.End));

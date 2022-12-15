@@ -19,7 +19,7 @@ public interface ITokenizer<T> : IDisposable, IEnumerable<Token<T>>
 	/// <summary>
 	/// 获取或设置共享的上下文对象。
 	/// </summary>
-	/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
+	/// <remarks>可以与外部（例如语法分析器）共享信息，只能够在首次调用 <see cref="Read"/> 前设置。</remarks>
 	object? SharedContext { get; set; }
 
 	/// <summary>

@@ -93,14 +93,11 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 	/// <value>语法节点的行列位置范围。</value>
 	public LinePositionSpan LinePositionSpan => node.LinePositionSpan;
 	/// <summary>
-	/// 获取共享的上下文对象。
+	/// 获取或设置共享的上下文对象。
 	/// </summary>
-	/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
-	public object? SharedContext
-	{
-		get { return tokenizer.SharedContext; }
-		internal set { tokenizer.SharedContext = value; }
-	}
+	/// <remarks>可以与外部（例如语法分析器）共享信息，
+	/// 会在首次调用 <see cref="ITokenParser{T}.Parse()"/> 前设置。</remarks>
+	public virtual object? SharedContext { get; set; }
 
 	/// <summary>
 	/// 获取语法分析器的状态堆栈。

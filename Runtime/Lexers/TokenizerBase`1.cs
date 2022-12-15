@@ -36,6 +36,10 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private int start;
+	/// <summary>
+	/// 是否已同步共享上下文。
+	/// </summary>
+	private bool contextSynced = false;
 
 	/// <summary>
 	/// 词法分析错误的事件。
@@ -91,6 +95,11 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// <returns>输入流中的下一个词法单元。</returns>
 	public Token<T> Read()
 	{
+		if (!contextSynced)
+		{
+			contextSynced = true;
+			controller.SharedContext = SharedContext;
+		}
 		if (status != ParseStatus.Ready)
 		{
 			return Token<T>.GetEndOfFile(source.Index);

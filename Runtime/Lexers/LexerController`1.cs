@@ -67,7 +67,7 @@ public class LexerController<T>
 	{
 		this.source = source;
 		this.contexts = contexts;
-		context = contexts[ContextData.Initial];
+		context = contexts[InitialContext];
 		this.actionHandler = actionHandler;
 		this.rejectable = rejectable;
 	}
@@ -83,10 +83,11 @@ public class LexerController<T>
 	/// <value>要扫描的源文件。</value>
 	public SourceReader Source => source;
 	/// <summary>
-	/// 获取共享的上下文对象。
+	/// 获取或设置共享的上下文对象。
 	/// </summary>
-	/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
-	public object? SharedContext => tokenizer.SharedContext;
+	/// <remarks>可以与外部（例如语法分析器）共享信息，
+	/// 会在首次调用 <see cref="ITokenizer{T}.Read"/> 前设置。</remarks>
+	public virtual object? SharedContext { get; set; }
 	/// <summary>
 	/// 获取当前词法单元的标识符。
 	/// </summary>
@@ -284,6 +285,11 @@ public class LexerController<T>
 	#region 上下文切换
 
 	/// <summary>
+	/// 获取初始上下文。
+	/// </summary>
+	protected virtual string InitialContext => ContextData.Initial;
+
+	/// <summary>
 	/// 将指定标签的上下文设置为当前的上下文。
 	/// </summary>
 	/// <param name="label">要设置的上下文的标签。</param>
@@ -314,6 +320,35 @@ public class LexerController<T>
 		else
 		{
 			context = contexts[ContextData.Initial];
+		}
+	}
+
+	/// <summary>
+	/// 进入指定上下文。
+	/// </summary>
+	/// <remarks>如果当前上下文不是 <paramref name="label"/>，则将其压入堆栈，
+	/// 并将 <paramref name="label"/> 设置为当前上下文。否则什么都不做。</remarks>
+	/// <param name="label">要进入的上下文的标签。</param>
+	public void EnterContext(string label)
+	{
+		if (context.Label != label)
+		{
+			PushContext(label);
+		}
+	}
+
+	/// <summary>
+	/// 退出指定上下文。
+	/// </summary>
+	/// <remarks>如果当前上下文是 <paramref name="label"/>，则弹出堆栈顶的上下文用作当前上下文。
+	/// 否则什么都不做。</remarks>
+	/// <param name="label">要退出的上下文的标签。</param>
+
+	public void ExitContext(string label)
+	{
+		if(context.Label == label)
+		{
+			PopContext();
 		}
 	}
 

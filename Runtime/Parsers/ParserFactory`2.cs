@@ -45,6 +45,6 @@ public sealed class ParserFactory<T, TController> : IParserFactory<T>
 		ArgumentNullException.ThrowIfNull(tokenizer);
 		TController controller = new();
 		controller.Init(parserData, tokenizer, actionHandler);
-		return new LRParser<T>(parserData, controller);
+		return new LRParser<T>(parserData, tokenizer, controller);
 	}
 }
