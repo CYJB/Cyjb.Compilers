@@ -41,14 +41,12 @@ internal class DfaDataBuilder
 			DfaState state = states[i];
 			DfaState? defaultState = GetDefaultState(i);
 			KeyValuePair<int, int>[] transitions = state.GetTransitions(defaultState);
-			if (transitions.Length == 0)
+			int baseIndex = int.MinValue;
+			if (transitions.Length > 0)
 			{
-				// 无有效转移。
-				stateDataList.Add(new DfaStateData(int.MinValue, DfaStateData.InvalidState, state.Symbols));
-				continue;
+				// 找到合适的 next 空当。
+				baseIndex = compress.AddTransition(i, transitions);
 			}
-			// 找到合适的 next 空当。
-			int baseIndex = compress.AddTransition(i, transitions);
 			stateDataList.Add(new DfaStateData(baseIndex, defaultState?.Index ?? DfaStateData.InvalidState, state.Symbols));
 		}
 		return new DfaData(stateDataList.ToArray(), compress.GetNext(), compress.GetCheck());
