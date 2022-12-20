@@ -137,6 +137,10 @@
     <value>Invalid lexer kind.</value>
     <comment>无效的词法分析类型。</comment>
   </data>
+  <data name="InvalidSourceMark" xml:space="preserve">
+    <value>Source mark has been released.</value>
+    <comment>无效的源文件标记。</comment>
+  </data>
   <data name="MissingToken" xml:space="preserve">
     <value>Missing token '{0}' at {1}.</value>
     <comment>缺失的词法单元。</comment>

@@ -137,6 +137,10 @@
     <value>无效的词法分析类型。</value>
     <comment>无效的词法分析类型。</comment>
   </data>
+  <data name="InvalidSourceMark" xml:space="preserve">
+    <value>源文件标记已被释放。</value>
+    <comment>无效的源文件标记。</comment>
+  </data>
   <data name="MissingToken" xml:space="preserve">
     <value>缺失的词法单元“{0}”位于 {1}。</value>
     <comment>缺失的词法单元。</comment>

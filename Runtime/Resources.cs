@@ -89,6 +89,11 @@ internal partial class Resources
 	internal static string InvalidLexerKind => ResourceManager.GetString("InvalidLexerKind", resourceCulture)!;
 	
 	/// <summary>
+	/// 返回类似 <c>Source mark has been released.</c> 的本地化字符串。
+	/// </summary>
+	internal static string InvalidSourceMark => ResourceManager.GetString("InvalidSourceMark", resourceCulture)!;
+	
+	/// <summary>
 	/// 返回类似 <c>Missing token '{0}' at {1}.</c> 的本地化字符串。
 	/// </summary>
 	internal static string MissingToken(object? arg0, object? arg1)

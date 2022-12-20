@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using Cyjb.Compilers;
+using Cyjb.Compilers.Text;
 
 namespace Cyjb.Text;
 
@@ -94,6 +95,10 @@ public sealed class SourceReader : IDisposable
 	/// 行列定位器。
 	/// </summary>
 	private LineLocator? locator;
+	/// <summary>
+	/// 标记列表。
+	/// </summary>
+	private readonly List<SourceMark> marks = new();
 
 	/// <summary>
 	/// 使用指定的字符读取器初始化 <see cref="SourceReader"/> 类的新实例。
@@ -581,6 +586,136 @@ public sealed class SourceReader : IDisposable
 
 	#endregion // 读取字符
 
+	#region 标记
+
+	/// <summary>
+	/// 标记源文件的当前位置。
+	/// </summary>
+	/// <returns>位置的标记。</returns>
+	/// <remarks>被标记的位置及其之后的字符可以确保能够通过 <c>ReadBlock</c> 方法读取。</remarks>
+	public SourceMark Mark()
+	{
+		SourceMark mark = new(globalIndex);
+		int index = marks.BinarySearch(mark);
+		if (index < 0)
+		{
+			index = ~index;
+		}
+		marks.Insert(index, mark);
+		return mark;
+	}
+
+	/// <summary>
+	/// 释放指定的源文件位置标记。
+	/// </summary>
+	/// <param name="mark">要释放的位置标记。</param>
+	public void Release(SourceMark? mark)
+	{
+		if (mark == null || !mark.Valid)
+		{
+			return;
+		}
+		int index = marks.BinarySearch(mark);
+		if (index < 0)
+		{
+			return;
+		}
+		// index 可能是任何一个匹配项，因此需要在双向查找一下。
+		for (int i = index; i >= 0 && marks[i].Index == mark.Index; i--)
+		{
+			if (marks[i] == mark)
+			{
+				mark.Valid = false;
+				marks.RemoveAt(i);
+				return;
+			}
+		}
+		for (int i = index + 1; i < marks.Count && marks[i].Index == mark.Index; i++)
+		{
+			if (marks[i] == mark)
+			{
+				mark.Valid = false;
+				marks.RemoveAt(i);
+				return;
+			}
+		}
+	}
+
+	/// <summary>
+	/// 读取指定范围的文本。
+	/// </summary>
+	/// <param name="index">起始索引。</param>
+	/// <param name="count">要读取的长度。</param>
+	/// <returns>指定范围的文本。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> 不在已保留的字符缓冲范围内。
+	/// </exception>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> + <paramref name="count"/>
+	/// 超出当前已读取的字符范围。</exception>
+	public string ReadBlock(int index, int count)
+	{
+		int minIndex = marks.Count == 0 ? startIndex : marks[0].Index;
+		// 检查 index 和 count 是否在当前范围内。
+		if (index < minIndex)
+		{
+			throw CommonExceptions.ArgumentOutOfRange(index);
+		}
+		if (index + count > globalIndex)
+		{
+			throw CommonExceptions.ArgumentOutOfRange(count);
+		}
+		if (count == 0)
+		{
+			return string.Empty;
+		}
+		StringBuilder builder = new(count);
+		// 将字符串复制到 StringBuilder 中。
+		SourceBuffer buffer = current;
+		while (index < buffer.StartIndex)
+		{
+			buffer = buffer.Prev;
+		}
+		int start = index - buffer.StartIndex;
+		while (buffer != current && count >= BufferSize)
+		{
+			builder.Append(buffer.Buffer, start, BufferSize - start);
+			count -= BufferSize - start;
+			start = 0;
+			buffer = buffer.Next;
+		}
+		if (count > 0)
+		{
+			builder.Append(buffer.Buffer, start, count);
+		}
+		return builder.ToString();
+	}
+
+	/// <summary>
+	/// 读取指定标记间的文本。
+	/// </summary>
+	/// <param name="start">起始标记（包含）。</param>
+	/// <param name="end">结束标记（不包含）。</param>
+	/// <returns>指定标记间的文本。</returns>
+	/// <exception cref="ArgumentException">传入的标记已被释放。</exception>
+	/// <exception cref="ArgumentOutOfRangeException">起始和结束标记的顺序不正确。</exception>
+	public string ReadBlock(SourceMark start, SourceMark end)
+	{
+		if (!start.Valid)
+		{
+			throw new ArgumentException(Resources.InvalidSourceMark, nameof(start));
+		}
+		if (!end.Valid)
+		{
+			throw new ArgumentException(Resources.InvalidSourceMark, nameof(end));
+		}
+		if (start.Index > end.Index)
+		{
+			throw CommonExceptions.ArgumentMinMaxValue(nameof(start), nameof(end));
+		}
+		return ReadBlock(start.Index, end.Index - start.Index);
+	}
+
+	#endregion // 标记
+
 	#region 缓冲区操作
 
 	/// <summary>
@@ -628,9 +763,10 @@ public sealed class SourceReader : IDisposable
 		}
 		if (length > 0)
 		{
-			if (last.Next == first)
+			int minMark = marks.Count == 0 ? int.MaxValue : marks[0].Index;
+			if (last.Next == first || last.Next.StartIndex + BufferSize > minMark)
 			{
-				// 没有可用的空缓冲区，则需要新建立一块。
+				// 没有可用的空缓冲区，或者缓冲区需要未标记保留，则需要新建立一块。
 				SourceBuffer buffer = new(current, last.Next);
 				last.Next.Prev = buffer;
 				last.Next = buffer;

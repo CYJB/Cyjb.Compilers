@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using Cyjb.Compilers.Text;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -203,6 +204,61 @@ namespace TestCompilers.Text
 			Assert.AreEqual('3', reader.Read());
 			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Peek());
 			Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read());
+		}
+
+		/// <summary>
+		/// 对 <see cref="SourceReader.Mark"/> 进行测试。
+		/// </summary>
+		[TestMethod]
+		public void TestMark()
+		{
+			StringBuilder builder = new(1030);
+			for (int i = 0; i < 103; i++)
+			{
+				builder.Append("0123456789");
+			}
+			SourceReader reader = new(new StringReader(builder.ToString()));
+			Assert.AreEqual('0', reader.Read());
+			Assert.AreEqual("0", reader.ReadBlock(0, 1));
+			Assert.AreEqual("", reader.ReadBlock(0, 0));
+			Assert.AreEqual("", reader.ReadBlock(1, 0));
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => reader.ReadBlock(-1, 0));
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => reader.ReadBlock(0, 2));
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => reader.ReadBlock(1, 1));
+
+			SourceMark mark1 = reader.Mark();
+			Assert.AreEqual('3', reader.Read(512));
+			SourceMark mark2 = reader.Mark();
+			reader.Drop();
+			Assert.AreEqual('6', reader.Read(512));
+			SourceMark mark3 = reader.Mark();
+			reader.Drop();
+
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => reader.ReadBlock(0, 1));
+			Assert.AreEqual("", reader.ReadBlock(1, 0));
+			Assert.AreEqual("1", reader.ReadBlock(1, 1));
+			Assert.AreEqual("123", reader.ReadBlock(1, 3));
+
+			string text = reader.ReadBlock(49, 13);
+			Assert.AreEqual('9', text[0]);
+			Assert.AreEqual('1', text[^1]);
+
+			text = reader.ReadBlock(1, 1026);
+			Assert.AreEqual('1', text[0]);
+			Assert.AreEqual('6', text[^1]);
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => reader.ReadBlock(1, 1027));
+
+			text = reader.ReadBlock(mark1, mark2);
+			Assert.AreEqual('1', text[0]);
+			Assert.AreEqual('3', text[^1]);
+
+			text = reader.ReadBlock(mark2, mark3);
+			Assert.AreEqual('4', text[0]);
+			Assert.AreEqual('6', text[^1]);
+
+			reader.Release(mark2);
+			Assert.ThrowsException<ArgumentException>(() => reader.ReadBlock(mark2, mark3));
+			Assert.ThrowsException<ArgumentOutOfRangeException>(() => reader.ReadBlock(mark3, mark1));
 		}
 	}
 }
