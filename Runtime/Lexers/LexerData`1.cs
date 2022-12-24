@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
 
@@ -67,6 +66,11 @@ public class LexerData<T>
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly Type controllerType;
+	/// <summary>
+	/// 是否使用了最短匹配。
+	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private readonly bool useShortest;
 
 	/// <summary>
 	/// 使用指定的词法分析器数据初始化 <see cref="LexerData{T}"/> 类的新实例。
@@ -81,9 +85,10 @@ public class LexerData<T>
 	/// <param name="containsBeginningOfLine">是否包含行首匹配的规则。</param>
 	/// <param name="rejectable">是否用到了 Reject 动作。</param>
 	/// <param name="controllerType">词法分析控制器的类型。</param>
+	[CLSCompliant(false)]
 	public LexerData(IReadOnlyDictionary<string, ContextData>? contexts, TerminalData<T>[] terminals,
-		CharClassMap charClasses, DfaStateData[] states, int[] next, int[] check,
-		TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
+			CharClassMap charClasses, DfaStateData[] states, int[] next, int[] check,
+			TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
 	{
 		this.contexts = contexts ?? ContextData.Default;
 		this.terminals = terminals;
@@ -95,6 +100,7 @@ public class LexerData<T>
 		this.containsBeginningOfLine = containsBeginningOfLine;
 		this.rejectable = rejectable;
 		this.controllerType = controllerType;
+		useShortest = terminals.Any(t => t.UseShortest);
 	}
 
 	/// <summary>
@@ -108,6 +114,7 @@ public class LexerData<T>
 	/// <summary>
 	/// 获取词法分析的字符类映射。
 	/// </summary>
+	[CLSCompliant(false)]
 	public CharClassMap CharClasses => charClasses;
 	/// <summary>
 	/// 获取 DFA 的状态列表。
@@ -139,6 +146,10 @@ public class LexerData<T>
 	/// 获取词法分析控制器的类型。
 	/// </summary>
 	public Type ControllerType => controllerType;
+	/// <summary>
+	/// 获取是否用到了最短匹配。
+	/// </summary>
+	public bool UseShortest => useShortest;
 
 	/// <summary>
 	/// 返回指定状态使用指定字符转移后的状态。

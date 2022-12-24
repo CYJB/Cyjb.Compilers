@@ -69,6 +69,18 @@ internal sealed class TerminalBuilder<T, TController> : ITerminalBuilder<T, TCon
 	}
 
 	/// <summary>
+	/// 设置使用终结符的最短匹配。
+	/// </summary>
+	/// <returns>终结符的构造器。</returns>
+	/// <remarks>默认都会使用正则表达式的最长匹配，允许指定为使用最短匹配，
+	/// 会在遇到第一个匹配时立即返回结果。</remarks>
+	public ITerminalBuilder<T, TController> UseShortest()
+	{
+		terminal.UseShortest = true;
+		return this;
+	}
+
+	/// <summary>
 	/// 添加正则表达式对应的词法单元动作。
 	/// </summary>
 	/// <param name="action">词法单元的动作。</param>

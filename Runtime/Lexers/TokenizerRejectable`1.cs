@@ -83,6 +83,27 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 			int[] symbols = Data.States[state].Symbols;
 			if (symbols.Length > 0)
 			{
+				if (Data.UseShortest)
+				{
+					// 保存流的索引，避免被误修改影响后续匹配。
+					int originIndex = source.Index;
+					// 最短匹配时不需要生成候选列表。
+					candidates = SetUtil.Empty<T>();
+					// 使用最短匹配时，需要先调用 Action。
+					foreach (int acceptState in symbols)
+					{
+						var terminal = Data.Terminals[acceptState];
+						if (terminal.UseShortest)
+						{
+							Controller.DoAction(Start, terminal);
+							if (!Controller.IsReject)
+							{
+								return true;
+							}
+							source.Index = originIndex;
+						}
+					}
+				}
 				// 将接受状态记录在堆栈中。
 				stateStack.Push(new AcceptState(symbols, source.Index));
 			}

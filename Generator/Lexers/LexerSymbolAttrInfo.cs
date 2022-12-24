@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Cyjb.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Cyjb.Compilers.Lexers;
@@ -44,6 +46,12 @@ internal class LexerSymbolAttrInfo
 			if (exp != null)
 			{
 				info.Value = exp;
+			}
+			exp = args["UseShortest"];
+			if (exp != null && exp.IsKind(SyntaxKind.TrueLiteralExpression) &&
+				((LiteralExpressionSyntax)exp).Token.IsKind(SyntaxKind.TrueKeyword))
+			{
+				info.UseShortest = true;
 			}
 			exp = args["options"];
 			if (exp != null)
@@ -91,6 +99,10 @@ internal class LexerSymbolAttrInfo
 	/// 获取或设置词法单元的值。
 	/// </summary>
 	public ExpressionSyntax? Value { get; set; }
+	/// <summary>
+	/// 获取或设置是否使用了最短匹配。
+	/// </summary>
+	public bool UseShortest { get; set; }
 	/// <summary>
 	/// 获取或设置关联到的方法名称。
 	/// </summary>

@@ -14,32 +14,41 @@ public sealed class TerminalData<T>
 	/// <param name="value">终结符的值。</param>
 	/// <param name="action">终结符的动作。</param>
 	/// <param name="trailing">向前看信息。</param>
-	public TerminalData(T? kind = null, object? value = null, Delegate? action = null, int? trailing = null)
+	/// <param name="useShortest">是否使用最短匹配。</param>
+	public TerminalData(T? kind = null, object? value = null, Delegate? action = null,
+		int? trailing = null, bool useShortest = false)
 	{
 		Kind = kind;
 		Value = value;
 		Action = action;
 		Trailing = trailing;
+		UseShortest = useShortest;
 	}
 
 	/// <summary>
-	/// 终结符的类型。
+	/// 获取终结符的类型。
 	/// </summary>
 	public T? Kind { get; }
 	/// <summary>
-	/// 终结符的值。
+	/// 获取终结符的值。
 	/// </summary>
 	public object? Value { get; }
 	/// <summary>
-	/// 终结符的动作。
+	/// 获取终结符的动作。
 	/// </summary>
 	public Delegate? Action { get; }
 	/// <summary>
-	/// 终结符的向前看信息。
+	/// 获取终结符的向前看信息。
 	/// </summary>
 	/// <remarks><c>null</c> 表示不是向前看符号，正数表示前面长度固定，
 	/// 负数表示后面长度固定，<c>0</c> 表示长度不固定。</remarks>
 	public int? Trailing { get; }
+	/// <summary>
+	/// 获取设置是否使用终结符的最短匹配。
+	/// </summary>
+	/// <remarks>默认都会使用正则表达式的最长匹配，允许指定为使用最短匹配，
+	/// 会在遇到第一个匹配时立即返回结果。</remarks>
+	public bool UseShortest { get; }
 
 	/// <summary>
 	/// 返回当前对象的字符串表示形式。
@@ -47,13 +56,14 @@ public sealed class TerminalData<T>
 	/// <returns>当前对象的字符串表示形式。</returns>
 	public override string ToString()
 	{
+		string mark = UseShortest ? " (s)" : "";
 		if (Trailing == null)
 		{
-			return $"[{Kind}]";
+			return $"[{Kind}]{mark}";
 		}
 		else
 		{
-			return $"[{Kind}] {Trailing}";
+			return $"[{Kind}] {Trailing}{mark}";
 		}
 	}
 }

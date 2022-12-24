@@ -63,7 +63,11 @@ internal sealed partial class LexerController
 					terminalBuilder.Argument(action, "action");
 				}
 			}
-			if (terminal.Trailing != null)
+			if (terminal.Trailing == null)
+			{
+				argContinues = false;
+			}
+			else
 			{
 				var trailing = SyntaxBuilder.Literal(terminal.Trailing.Value);
 				if (argContinues)
@@ -73,6 +77,17 @@ internal sealed partial class LexerController
 				else
 				{
 					terminalBuilder.Argument(trailing, "trailing");
+				}
+			}
+			if (terminal.UseShortest)
+			{
+				if (argContinues)
+				{
+					terminalBuilder.Argument(SyntaxBuilder.Literal(true));
+				}
+				else
+				{
+					terminalBuilder.Argument(SyntaxBuilder.Literal(true), "useShortest");
 				}
 			}
 		}

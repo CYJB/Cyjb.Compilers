@@ -31,4 +31,11 @@ public sealed class LexerSymbolAttribute : Attribute
 	/// 获取或设置终结符的词法单元值。
 	/// </summary>
 	public object? Value { get; set; }
+
+	/// <summary>
+	/// 获取或设置是否使用终结符的最短匹配。
+	/// </summary>
+	/// <remarks>默认都会使用正则表达式的最长匹配，允许指定为使用最短匹配，
+	/// 会在遇到第一个匹配时立即返回结果。</remarks>
+	public bool UseShortest { get; set; }
 }

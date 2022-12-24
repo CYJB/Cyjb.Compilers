@@ -89,6 +89,33 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			int[] symbols = Data.States[state].Symbols;
 			if (symbols.Length > 0)
 			{
+				if (Data.UseShortest)
+				{
+					// 保存流的索引，避免被误修改影响后续匹配。
+					int originIndex = source.Index;
+					// 最短匹配时不需要生成候选列表。
+					candidates = SetUtil.Empty<T>();
+					// 使用最短匹配时，需要先调用 Action。
+					foreach (int acceptState in symbols)
+					{
+						// 跳过向前看的头状态。
+						if (acceptState < 0)
+						{
+							break;
+						}
+						var terminal = Data.Terminals[acceptState];
+						if (terminal.UseShortest)
+						{
+							AdjustIndex(acceptState, startIndex, originIndex);
+							Controller.DoAction(Start, terminal);
+							if (!Controller.IsReject)
+							{
+								return true;
+							}
+							source.Index = originIndex;
+						}
+					}
+				}
 				// 将接受状态记录在堆栈中。
 				stateStack.Push(new AcceptState(symbols, source.Index));
 			}
@@ -106,42 +133,10 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 					// 跳过向前看的头状态。
 					break;
 				}
-				int lastIndex = curCandidate.Index;
-				TerminalData<T> terminal = Data.Terminals[acceptState];
-				int? trailing = terminal.Trailing;
-				if (trailing.HasValue)
-				{
-					// 是向前看状态。
-					int index = trailing.Value;
-					if (index > 0)
-					{
-						// 前面长度固定。
-						lastIndex = startIndex + index;
-					}
-					else if (index < 0)
-					{
-						// 后面长度固定，注意此时 index 是负数。
-						lastIndex += index;
-					}
-					else
-					{
-						// 前后长度都不固定，需要沿着堆栈向前找。
-						int target = -acceptState - 1;
-						foreach (AcceptState s in stateStack)
-						{
-							if (ContainsTrailingHead(s.Symbols, target))
-							{
-								lastIndex = s.Index;
-								break;
-							}
-						}
-					}
-				}
-				// 将文本和流调整到与接受状态匹配的状态。
-				source.Index = lastIndex;
+				AdjustIndex(acceptState, startIndex, curCandidate.Index);
 				// 每次都需要清空候选集合，并在使用时重新计算。
 				candidates = null;
-				Controller.DoAction(Start, terminal);
+				Controller.DoAction(Start, Data.Terminals[acceptState]);
 				if (!Controller.IsReject)
 				{
 					return true;
@@ -149,6 +144,48 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			}
 		}
 		return false;
+	}
+
+	/// <summary>
+	/// 根据向前看状态调整流的位置。
+	/// </summary>
+	/// <param name="state">当前状态。</param>
+	/// <param name="startIndex">当前匹配的起始索引。</param>
+	/// <param name="index">当前索引。</param>
+	private void AdjustIndex(int state, int startIndex, int index)
+	{
+		TerminalData<T> terminal = Data.Terminals[state];
+		int? trailing = terminal.Trailing;
+		if (trailing.HasValue)
+		{
+			// 是向前看状态。
+			int trailingIndex = trailing.Value;
+			if (trailingIndex > 0)
+			{
+				// 前面长度固定。
+				index = startIndex + trailingIndex;
+			}
+			else if (trailingIndex < 0)
+			{
+				// 后面长度固定，注意此时 index 是负数。
+				index += trailingIndex;
+			}
+			else
+			{
+				// 前后长度都不固定，需要沿着堆栈向前找。
+				int target = -state - 1;
+				foreach (AcceptState s in stateStack)
+				{
+					if (ContainsTrailingHead(s.Symbols, target))
+					{
+						index = s.Index;
+						break;
+					}
+				}
+			}
+		}
+		// 将文本和流调整到与接受状态匹配的状态。
+		source.Index = index;
 	}
 
 	/// <summary>

@@ -31,6 +31,14 @@ public interface ITerminalBuilder<T, TController>
 	ITerminalBuilder<T, TController> Value(object? value);
 
 	/// <summary>
+	/// 设置使用终结符的最短匹配。
+	/// </summary>
+	/// <returns>终结符的构造器。</returns>
+	/// <remarks>默认都会使用正则表达式的最长匹配，允许指定为使用最短匹配，
+	/// 会在遇到第一个匹配时立即返回结果。</remarks>
+	ITerminalBuilder<T, TController> UseShortest();
+
+	/// <summary>
 	/// 设置终结符的动作。
 	/// </summary>
 	/// <param name="action">终结符的动作。</param>

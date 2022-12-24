@@ -54,6 +54,10 @@ internal sealed class Terminal<T>
 	/// <remarks><c>null</c> 表示不是向前看符号，正数表示前面长度固定，
 	/// 负数表示后面长度固定，<c>0</c> 表示长度不固定。</remarks>
 	public int? Trailing { get; set; }
+	/// <summary>
+	/// 是否使用当前终结符的最短匹配。
+	/// </summary>
+	public bool UseShortest { get; set; } = false;
 
 	/// <summary>
 	/// 返回词法分析器的终结符数据。
@@ -61,6 +65,6 @@ internal sealed class Terminal<T>
 	/// <returns>词法分析器的终结符数据。</returns>
 	public TerminalData<T> GetData()
 	{
-		return new TerminalData<T>(Kind, Value, Action, Trailing);
+		return new TerminalData<T>(Kind, Value, Action, Trailing, UseShortest);
 	}
 }

@@ -333,6 +333,10 @@ internal sealed partial class LexerController : Controller
 					builder.Kind(info.Kind.Value);
 				}
 				builder.Value(info.Value);
+				if (info.UseShortest)
+				{
+					builder.UseShortest();
+				}
 				if (info.MethodName != null)
 				{
 					void action(LexerController<SymbolKind> c)

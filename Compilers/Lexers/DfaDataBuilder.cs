@@ -1,5 +1,3 @@
-using Cyjb.Collections;
-
 namespace Cyjb.Compilers.Lexers;
 
 /// <summary>

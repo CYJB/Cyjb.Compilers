@@ -42,6 +42,11 @@ internal sealed class TokenizerFixedTrailing<T> : TokenizerBase<T>
 			{
 				lastAccept = symbols[0];
 				lastIndex = source.Index;
+				// 使用最短匹配时，可以直接返回。
+				if (Data.UseShortest && Data.Terminals[lastAccept].UseShortest)
+				{
+					break;
+				}
 			}
 		}
 		if (lastAccept >= 0)
