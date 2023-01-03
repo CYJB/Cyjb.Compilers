@@ -20,17 +20,19 @@ public class UnitTestMappedTokenizer
 			new Token<int>(0, "", 0..1),
 			new Token<int>(0, "", 1..3),
 			new Token<int>(0, "", 3..7),
-			new Token<int>(0, "", 7..20)
+			new Token<int>(0, "", 8..20)
 		);
 		tokenizer = new MappedTokenizer<int>(tokenizer, new Tuple<int, int>[]
 		{
 			new Tuple<int, int>(1, 10),
 			new Tuple<int, int>(5, 100),
+			new Tuple<int, int>(8, 101),
+			new Tuple<int, int>(10, 103),
+			new Tuple<int, int>(15, 108),
 		});
 		Assert.AreEqual(0..10, tokenizer.Read().Span);
 		Assert.AreEqual(10..12, tokenizer.Read().Span);
-		Assert.AreEqual(12..102, tokenizer.Read().Span);
-		Assert.AreEqual(102..115, tokenizer.Read().Span);
-
+		Assert.AreEqual(12..100, tokenizer.Read().Span);
+		Assert.AreEqual(101..113, tokenizer.Read().Span);
 	}
 }

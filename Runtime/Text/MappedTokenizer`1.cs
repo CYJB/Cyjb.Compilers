@@ -18,21 +18,25 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	/// </summary>
 	private readonly Tuple<int, int>[] map;
 	/// <summary>
+	/// 映射索引。
+	/// </summary>
+	private int mapIndex = 0;
+	/// <summary>
 	/// 当前索引。
 	/// </summary>
 	private int curIndex;
 	/// <summary>
-	/// 当前映射后的索引。
+	/// 当前映射后的偏移。
 	/// </summary>
-	private int curMappedIndex;
-	/// <summary>
-	/// 下一个映射索引。
-	/// </summary>
-	private int nextMapIndex = 0;
+	private int curOffset;
 	/// <summary>
 	/// 下一索引。
 	/// </summary>
 	private int nextIndex;
+	/// <summary>
+	/// 下一映射后的索引。
+	/// </summary>
+	private int nextMappedIndex;
 
 	/// <summary>
 	/// 词法分析错误的事件。
@@ -55,7 +59,7 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 		this.map = map.ToArray();
 		Array.Sort(this.map, (left, right) => left.Item1 - right.Item1);
 		curIndex = this.map[0].Item1;
-		curMappedIndex = this.map[0].Item2;
+		curOffset = this.map[0].Item2 - curIndex;
 		FindNextIndex();
 	}
 
@@ -108,14 +112,16 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	/// </summary>
 	private void FindNextIndex()
 	{
-		nextMapIndex++;
-		if (nextMapIndex < map.Length)
+		mapIndex++;
+		if (mapIndex < map.Length)
 		{
-			nextIndex = map[nextMapIndex].Item1;
+			nextIndex = map[mapIndex].Item1;
+			nextMappedIndex = map[mapIndex].Item2;
 		}
 		else
 		{
 			nextIndex = int.MaxValue;
+			nextMappedIndex = int.MaxValue;
 		}
 	}
 
@@ -131,16 +137,20 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 		{
 			return index;
 		}
-		// 在当前索引范围之内。
-		if (index < nextIndex)
+		// 在当前索引范围之外，需要切换到下一索引。
+		while (index >= nextIndex)
 		{
-			return index - curIndex + curMappedIndex;
+			curIndex = nextIndex;
+			curOffset = nextMappedIndex - nextIndex;
+			FindNextIndex();
 		}
-		// 需要切换到下一个索引。
-		curIndex = nextIndex;
-		curMappedIndex = map[nextMapIndex].Item2;
-		FindNextIndex();
-		return index - curIndex + curMappedIndex;
+		index += curOffset;
+		// 避免 index 超出 nextMappedIndex
+		if (index >= nextMappedIndex)
+		{
+			index = nextMappedIndex - 1;
+		}
+		return index;
 	}
 
 	#region IDisposable 成员
