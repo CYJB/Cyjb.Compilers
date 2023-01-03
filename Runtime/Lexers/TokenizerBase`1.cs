@@ -44,7 +44,7 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// <summary>
 	/// 词法分析错误的事件。
 	/// </summary>
-	public event Action<ITokenizer<T>, TokenizeError>? TokenizeError;
+	public event TokenizeErrorHandler<T>? TokenizeError;
 
 	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="TokenizerBase{T}"/> 类的新实例。
@@ -198,6 +198,14 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 		{
 			status = ParseStatus.Cancelled;
 		}
+	}
+
+	/// <summary>
+	/// 重置词法分析的状态，允许在结束/取消后继续进行分析。
+	/// </summary>
+	public void Reset()
+	{
+		status = ParseStatus.Ready;
 	}
 
 	#region IDisposable 成员

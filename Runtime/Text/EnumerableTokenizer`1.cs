@@ -6,7 +6,7 @@ namespace Cyjb.Text;
 /// <summary>
 /// 提供将 <see cref="Token{T}"/> 枚举封装为词法分析器的能力。
 /// </summary>
-/// <typeparam name="T"></typeparam>
+/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 public sealed class EnumerableTokenizer<T> : ITokenizer<T>
 	where T : struct
 {
@@ -28,15 +28,24 @@ public sealed class EnumerableTokenizer<T> : ITokenizer<T>
 	/// <summary>
 	/// 词法分析错误的事件。
 	/// </summary>
-	public event Action<ITokenizer<T>, TokenizeError>? TokenizeError;
+	public event TokenizeErrorHandler<T>? TokenizeError;
 
 	/// <summary>
-	/// 使用给定的词法单元枚举初始化 <see cref="EnumerableTokenizer{T}"/> 类的新实例。
+	/// 使用指定的词法单元枚举初始化 <see cref="EnumerableTokenizer{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="tokens">要包装的词法单元枚举。</param>
 	public EnumerableTokenizer(IEnumerable<Token<T>> tokens)
 	{
 		enumerator = tokens.GetEnumerator();
+	}
+
+	/// <summary>
+	/// 使用指定的词法单元列表初始化 <see cref="EnumerableTokenizer{T}"/> 类的新实例。
+	/// </summary>
+	/// <param name="tokens">要包装的词法单元枚举。</param>
+	public EnumerableTokenizer(params Token<T>[] tokens)
+	{
+		enumerator = tokens.Cast<Token<T>>().GetEnumerator();
 	}
 
 	/// <summary>
@@ -75,6 +84,14 @@ public sealed class EnumerableTokenizer<T> : ITokenizer<T>
 		{
 			status = ParseStatus.Cancelled;
 		}
+	}
+
+	/// <summary>
+	/// 重置词法分析的状态，允许在结束/取消后继续进行分析。
+	/// </summary>
+	public void Reset()
+	{
+		status = ParseStatus.Ready;
 	}
 
 	#region IDisposable 成员

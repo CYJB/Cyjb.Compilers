@@ -1,6 +1,16 @@
 namespace Cyjb.Text;
 
 /// <summary>
+/// 表示语法分析错误的事件处理器。
+/// </summary>
+/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
+/// <param name="parser">出现错误的语法分析器。</param>
+/// <param name="error">错误信息</param>
+public delegate void TokenParseErrorHandler<T>(ITokenParser<T> parser, TokenParseError error)
+	where T : struct;
+
+
+/// <summary>
 /// 表示语法分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
@@ -10,7 +20,7 @@ public interface ITokenParser<T>
 	/// <summary>
 	/// 语法分析错误的事件。
 	/// </summary>
-	event Action<ITokenParser<T>, TokenParseError> ParseError;
+	event TokenParseErrorHandler<T>? ParseError;
 	/// <summary>
 	/// 获取语法分析器的解析状态。
 	/// </summary>
@@ -38,4 +48,9 @@ public interface ITokenParser<T>
 	/// 取消后续语法分析。
 	/// </summary>
 	void Cancel();
+
+	/// <summary>
+	/// 重置语法分析的状态，允许在结束/取消后继续进行分析。
+	/// </summary>
+	void Reset();
 }
