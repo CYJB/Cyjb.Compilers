@@ -35,4 +35,23 @@ public class UnitTestMappedTokenizer
 		Assert.AreEqual(12..100, tokenizer.Read().Span);
 		Assert.AreEqual(101..113, tokenizer.Read().Span);
 	}
+
+	/// <summary>
+	/// 对空 map 进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestEmptyMap()
+	{
+		ITokenizer<int> tokenizer = new EnumerableTokenizer<int>(
+			new Token<int>(0, "", 0..1),
+			new Token<int>(0, "", 1..3),
+			new Token<int>(0, "", 3..7),
+			new Token<int>(0, "", 8..20)
+		);
+		tokenizer = new MappedTokenizer<int>(tokenizer, Array.Empty<Tuple<int, int>>());
+		Assert.AreEqual(0..1, tokenizer.Read().Span);
+		Assert.AreEqual(1..3, tokenizer.Read().Span);
+		Assert.AreEqual(3..7, tokenizer.Read().Span);
+		Assert.AreEqual(8..20, tokenizer.Read().Span);
+	}
 }

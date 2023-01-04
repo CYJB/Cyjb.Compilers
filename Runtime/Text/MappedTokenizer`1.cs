@@ -58,8 +58,16 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 		this.tokenizer = tokenizer;
 		this.map = map.ToArray();
 		Array.Sort(this.map, (left, right) => left.Item1 - right.Item1);
-		curIndex = this.map[0].Item1;
-		curOffset = this.map[0].Item2 - curIndex;
+		if (this.map.Length == 0)
+		{
+			curIndex = 0;
+			curOffset = 0;
+		}
+		else
+		{
+			curIndex = this.map[0].Item1;
+			curOffset = this.map[0].Item2 - curIndex;
+		}
 		FindNextIndex();
 	}
 
