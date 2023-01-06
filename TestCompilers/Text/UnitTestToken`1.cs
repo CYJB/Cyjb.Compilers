@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -26,6 +28,42 @@ namespace TestCompilers.Text
 			Assert.AreEqual("test2", token.Text);
 			Assert.AreEqual(new TextSpan(20, 40), token.Span);
 			Assert.AreEqual("test2", token.Value);
+		}
+
+		/// <summary>
+		/// 对 <see cref="Token{T}.Combine"/> 方法进行测试。
+		/// </summary>
+		[TestMethod]
+		public void TestCombine()
+		{
+			Assert.AreEqual(new Token<int>(1, "abcdef", 0..7, "aaa"), Token<int>.Combine(
+				new Token<int>(1, "abc", 0..1, "aaa"),
+				new Token<int>(3, "def", 5..7, "bbb")
+			));
+
+			LineLocator locator1 = new();
+			LineLocator locator2 = new();
+			Assert.AreEqual(Token<int>.GetEndOfFile(0), Token<int>.Combine());
+			Assert.AreEqual(new Token<int>(1, "abc", 0..1, locator1, "aaa"), Token<int>.Combine(
+				new Token<int>(1, "abc", 0..1, locator1, "aaa")
+				));
+			Assert.AreEqual(new Token<int>(1, "abcdef123", 0..5, locator1, "aaa"), Token<int>.Combine(
+				new Token<int>(1, "abc", 0..1, locator1, "aaa"),
+				new Token<int>(3, "def", 5..7, locator2, "bbb"),
+				new Token<int>(8, "123", 2..5, "ccc")
+				));
+
+			Assert.AreEqual(Token<int>.GetEndOfFile(0), Token<int>.Combine(Enumerable.Empty<Token<int>>()));
+			Assert.AreEqual(new Token<int>(1, "abc", 0..1, locator1, "aaa"), Token<int>.Combine(
+				(IEnumerable<Token<int>>)new Token<int>[] {
+				new Token<int>(1, "abc", 0..1, locator1, "aaa")
+				}));
+			Assert.AreEqual(new Token<int>(1, "abcdef123", 0..5, locator1, "aaa"), Token<int>.Combine(
+				(IEnumerable<Token<int>>)new Token<int>[] {
+				new Token<int>(1, "abc", 0..1, locator1, "aaa"),
+				new Token<int>(3, "def", 5..7, locator2, "bbb"),
+				new Token<int>(8, "123", 2..5, "ccc")
+				}));
 		}
 	}
 }

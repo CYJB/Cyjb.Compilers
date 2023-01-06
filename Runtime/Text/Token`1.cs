@@ -7,7 +7,7 @@ namespace Cyjb.Text;
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
 /// <remarks>使用 <typeparamref name="T"/> 的特殊值 <c>-1</c> 用于表示文件结束。</remarks>
-public partial struct Token<T> : IEquatable<Token<T>>
+public readonly partial struct Token<T> : IEquatable<Token<T>>
 	where T : struct
 {
 	/// <summary>
