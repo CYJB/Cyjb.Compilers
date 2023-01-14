@@ -51,7 +51,7 @@ public partial class UnitTestParser
 			.Action(c => "(a)");
 		parser.DefineProduction(TestKind.A)
 			.Action(c => "()");
-		parser.AddStart(TestKind.A, ParseOption.ScanToMatch);
+		parser.AddStart(TestKind.A, ParseOptions.ScanToMatch);
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
 		ITokenParser<TestKind> tokenParser = factory.CreateParser(GetTestOptionTokenizer());
@@ -80,7 +80,7 @@ public partial class UnitTestParser
 			.Action(c => "(a)");
 		parser.DefineProduction(TestKind.A)
 			.Action(c => "()");
-		parser.AddStart(TestKind.A, ParseOption.ScanToFirstMatch);
+		parser.AddStart(TestKind.A, ParseOptions.ScanToFirstMatch);
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
 		ITokenParser<TestKind> tokenParser = factory.CreateParser(GetTestOptionTokenizer());

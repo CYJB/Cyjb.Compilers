@@ -456,7 +456,7 @@ public partial class Parser<T, TController>
 			LRItem<T> item = states[i].Items[0];
 			switch (startSymbols[i].Option)
 			{
-				case ParseOption.ScanToEOF:
+				case ParseOptions.ScanToEOF:
 					// 扫描到 EOF 时，只添加 EOF 即可。
 					item.Forwards.Add(Symbol<T>.EndOfFile);
 					break;

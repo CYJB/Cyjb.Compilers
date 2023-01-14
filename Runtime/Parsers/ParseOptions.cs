@@ -3,7 +3,7 @@ namespace Cyjb.Compilers.Parsers;
 /// <summary>
 /// 语法分析选项。
 /// </summary>
-public enum ParseOption
+public enum ParseOptions
 {
 	/// <summary>
 	/// 扫描到文件结尾。

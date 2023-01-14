@@ -13,7 +13,7 @@ internal class StartSymbol<T>
 	/// <param name="kind">非终结符的类型。</param>
 	/// <param name="augmentedStartSymbol">增广起始符号。</param>
 	/// <param name="option">分析选项。</param>
-	public StartSymbol(T kind, Symbol<T> augmentedStartSymbol, ParseOption option)
+	public StartSymbol(T kind, Symbol<T> augmentedStartSymbol, ParseOptions option)
 	{
 		Kind = kind;
 		AugmentedStartSymbol = augmentedStartSymbol;
@@ -31,5 +31,5 @@ internal class StartSymbol<T>
 	/// <summary>
 	/// 获取分析选项。
 	/// </summary>
-	public ParseOption Option { get; }
+	public ParseOptions Option { get; }
 }

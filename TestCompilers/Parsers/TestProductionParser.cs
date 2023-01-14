@@ -15,7 +15,7 @@ internal partial class TestProductionParser : ParserController<ProductionKind>
 		return $"({this[0].Value})|({this[2].Value})";
 	}
 
-	[ParserProduction(ProductionKind.Exp, ProductionKind.Repeat, SymbolOption.OneOrMore)]
+	[ParserProduction(ProductionKind.Exp, ProductionKind.Repeat, SymbolOptions.OneOrMore)]
 	private object? ExpressionAction()
 	{
 		return string.Join(" ", ((IList)this[0].Value!).Cast<string>());

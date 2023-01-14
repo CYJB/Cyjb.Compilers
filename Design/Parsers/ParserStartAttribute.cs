@@ -23,7 +23,7 @@ public sealed class ParserStartAttribute : Attribute
 	/// </summary>
 	/// <param name="kind">语法分析器的起始符号。</param>
 	/// <param name="option">语法分析器的分析选项。</param>
-	public ParserStartAttribute(object kind, ParseOption option) { }
+	public ParserStartAttribute(object kind, ParseOptions option) { }
 
 #pragma warning restore IDE0060 // 删除未使用的参数
 

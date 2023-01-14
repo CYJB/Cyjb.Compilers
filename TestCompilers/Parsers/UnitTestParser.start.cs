@@ -32,9 +32,9 @@ public partial class UnitTestParser
 			.Action(c => $"B[{c[0].Value}{c[1].Text}{c[2].Text}]");
 		parser.DefineProduction(TestKind.C, TestKind.Te)
 			.Action(c => $"C[{c[0].Text}]");
-		parser.AddStart(TestKind.A, ParseOption.ScanToMatch);
-		parser.AddStart(TestKind.B, ParseOption.ScanToMatch);
-		parser.AddStart(TestKind.C, ParseOption.ScanToMatch);
+		parser.AddStart(TestKind.A, ParseOptions.ScanToMatch);
+		parser.AddStart(TestKind.B, ParseOptions.ScanToMatch);
+		parser.AddStart(TestKind.C, ParseOptions.ScanToMatch);
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
 		ITokenParser<TestKind> tokenParser = factory.CreateParser(tokens);

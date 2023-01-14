@@ -3,7 +3,7 @@ namespace Cyjb.Compilers.Parsers;
 /// <summary>
 /// 符号选项。
 /// </summary>
-public enum SymbolOption
+public enum SymbolOptions
 {
 	/// <summary>
 	/// 无选项。

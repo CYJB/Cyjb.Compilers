@@ -13,10 +13,6 @@ using Cyjb.Compilers.Lexers;
 
 namespace TestCompilers.Lexers;
 
-
-/// <summary>
-/// 测试词法单元的值。
-/// </summary>
 public partial class TestSymbolValueLexer 
 {
 	/// <summary>

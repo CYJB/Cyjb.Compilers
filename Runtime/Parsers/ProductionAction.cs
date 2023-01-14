@@ -6,11 +6,11 @@ namespace Cyjb.Compilers.Parsers;
 public sealed class ProductionAction
 {
 	/// <summary>
-	/// 供 <see cref="SymbolOption.Optional"/> 使用的动作。
+	/// 供 <see cref="SymbolOptions.Optional"/> 使用的动作。
 	/// </summary>
 	public static readonly Delegate Optional = () => "OptionalAction";
 	/// <summary>
-	/// 供 <see cref="SymbolOption.ZeroOrMore"/> 和 <see cref="SymbolOption.OneOrMore"/> 使用的动作。
+	/// 供 <see cref="SymbolOptions.ZeroOrMore"/> 和 <see cref="SymbolOptions.OneOrMore"/> 使用的动作。
 	/// </summary>
 	public static readonly Delegate More = () => "MoreAction";
 }

@@ -34,58 +34,58 @@ public partial class TestStrLexer
 			new TerminalData<Str>(Str.Str)
 		};
 		// 字符类信息
-		// 0: [\n\r]
-		// 1: ["]
-		// 2: [\0-\t\v\f\u000E-!#-?A-[]-\u0084\u0086-‧\u202A-\uFFFF]
-		// 3: [\\]
-		// 4: [\u0085\p{Zl}\p{Zp}]
-		// 5: [@]
+		// 0: ["]
+		// 1: [\0-\t\v\f\u000E-!#-?A-[]-\u0084\u0086-‧\u202A-\uFFFE]
+		// 2: [\\]
+		// 3: [\u0085\p{Zl}\p{Zp}]
+		// 4: [@]
+		// 5: [\n\r]
 		// 字符类索引
 		uint[] indexes = new[]
 		{
-			8716421U, 10493991U, 539688959U
+			8716421U, 10493991U, 539688958U
 		};
 		// 字符类列表
 		int[] classes = new[]
 		{
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-			2, 2, 2, 2, 2, 2, 2, 2, 4, 2, 2
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1
 		};
 		// 字符类 Unicode 类别
 		Dictionary<UnicodeCategory, int> categories = new()
 		{
-			 { UnicodeCategory.LineSeparator, 4 },
-			 { UnicodeCategory.ParagraphSeparator, 4 },
-			 { UnicodeCategory.Control, 2 }
+			 { UnicodeCategory.LineSeparator, 3 },
+			 { UnicodeCategory.ParagraphSeparator, 3 },
+			 { UnicodeCategory.Control, 1 }
 		};
 		// 状态转移
 		//    0  1  2  3  4  5 -> Symbols
-		// 0     1           2
-		// 1     5  1  6     1
-		// 2     3            
-		// 3  3  4  3  3  3  3
-		// 4     3             -> 0
+		// 0  1           2   
+		// 1  5  1  6     1   
+		// 2  3               
+		// 3  4  3  3  3  3  3
+		// 4  3                -> 0
 		// 5                   -> 0
-		// 6     1  1  1  1  1
+		// 6  1  1  1  1  1   
 		// 状态列表
 		DfaStateData[] states = new[]
 		{
-			new DfaStateData(-1, -1),
 			new DfaStateData(0, -1),
-			new DfaStateData(5, -1),
+			new DfaStateData(1, -1),
+			new DfaStateData(6, -1),
 			new DfaStateData(7, -1),
-			new DfaStateData(12, -1, 0),
+			new DfaStateData(13, -1, 0),
 			new DfaStateData(int.MinValue, -1, 0),
-			new DfaStateData(13, -1)
+			new DfaStateData(14, -1)
 		};
 		// 后继状态列表
 		int[] next = new[]
 		{
-			1, 5, 1, 6, 2, 1, 3, 3, 4, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1
+			1, 5, 1, 6, 2, 1, 3, 4, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1
 		};
 		// 状态检查列表
 		int[] check = new[]

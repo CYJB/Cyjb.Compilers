@@ -96,14 +96,14 @@ public partial class Parser<T, TController>
 	/// </summary>
 	/// <param name="kind">要标记的开始符号。</param>
 	/// <param name="option">指定开始符号的分析选项。</param>
-	public void AddStart(T kind, ParseOption option = ParseOption.ScanToEOF)
+	public void AddStart(T kind, ParseOptions option = ParseOptions.ScanToEOF)
 	{
 		Symbol<T> start = GetOrCreateSymbol(kind, SymbolType.NonTerminal);
 		start.StartType = SymbolStartType.Start;
 		// 添加增广文法
 		Symbol<T> augmentedStartSymbol = CreateTempSymbol($"{kind}'");
 		// 扫描到匹配时，需要使用低优先级的 Accept 动作，确保能够被其它动作覆盖。
-		augmentedStartSymbol.StartType = option == ParseOption.ScanToMatch ?
+		augmentedStartSymbol.StartType = option == ParseOptions.ScanToMatch ?
 			SymbolStartType.AugmentedStartLowPriority : SymbolStartType.AugmentedStartHighPriority;
 		startSymbols.Add(new StartSymbol<T>(kind, augmentedStartSymbol, option));
 		Production<T> production = new(productions.Count, augmentedStartSymbol, start);
@@ -117,13 +117,13 @@ public partial class Parser<T, TController>
 	/// <param name="kind">产生式所属的非终结符。</param>
 	/// <param name="body">产生式的内容。</param>
 	/// <returns>产生式的构造器。</returns>
-	public ProductionBuilder<T, TController> DefineProduction(T kind, params Variant<T, SymbolOption>[] body)
+	public ProductionBuilder<T, TController> DefineProduction(T kind, params Variant<T, SymbolOptions>[] body)
 	{
 		Symbol<T> head = GetOrCreateSymbol(kind, SymbolType.NonTerminal);
 		// 提前记录产生式索引，避免 SymbolOptions 生成的额外产生式影响首个产生式的索引。
 		int index = productions.Count;
 		List<Symbol<T>> symbols = new();
-		SymbolOption option = SymbolOption.None;
+		SymbolOptions option = SymbolOptions.None;
 		foreach (var item in body)
 		{
 			if (item.TryGetValue(out T itemType))
@@ -133,11 +133,11 @@ public partial class Parser<T, TController>
 					symbols[^1] = ApplyOption(symbols[^1], option);
 				}
 				symbols.Add(GetOrCreateSymbol(itemType));
-				option = SymbolOption.None;
+				option = SymbolOptions.None;
 			}
 			else
 			{
-				option = MergeOption(option, (SymbolOption)item);
+				option = MergeOption(option, (SymbolOptions)item);
 			}
 		}
 		if (symbols.Count > 0)
@@ -224,11 +224,11 @@ public partial class Parser<T, TController>
 	/// <param name="symbol">要应用选项的符号。</param>
 	/// <param name="option">符号的选项。</param>
 	/// <returns>应用选项后的符号。</returns>
-	private Symbol<T> ApplyOption(Symbol<T> symbol, SymbolOption option)
+	private Symbol<T> ApplyOption(Symbol<T> symbol, SymbolOptions option)
 	{
 		switch (option)
 		{
-			case SymbolOption.Optional:
+			case SymbolOptions.Optional:
 				{
 					// 生成 h -> [] 和 h -> [ symbol ] 两条产生式
 					Symbol<T> head = CreateTempSymbol($"{symbol.Name}?");
@@ -238,7 +238,7 @@ public partial class Parser<T, TController>
 						.Action = ProductionAction.Optional;
 					return head;
 				}
-			case SymbolOption.ZeroOrMore:
+			case SymbolOptions.ZeroOrMore:
 				{
 					// 生成 h -> []、h -> [ symbol ] 和 h -> [ h, symbol ] 三条产生式
 					Symbol<T> head = CreateTempSymbol($"{symbol.Name}*");
@@ -250,7 +250,7 @@ public partial class Parser<T, TController>
 						.Action = ProductionAction.More;
 					return head;
 				}
-			case SymbolOption.OneOrMore:
+			case SymbolOptions.OneOrMore:
 				{
 					// 生成 h -> [ symbol ] 和 h -> [ h, symbol ] 两条产生式
 					Symbol<T> head = CreateTempSymbol($"{symbol.Name}+");
@@ -271,7 +271,7 @@ public partial class Parser<T, TController>
 	/// <param name="last">上一个符号选项。</param>
 	/// <param name="other">当前符号选项。</param>
 	/// <returns>合并后的符号选项。</returns>
-	private static SymbolOption MergeOption(SymbolOption last, SymbolOption other)
+	private static SymbolOptions MergeOption(SymbolOptions last, SymbolOptions other)
 	{
 		if (last == other)
 		{
@@ -279,9 +279,9 @@ public partial class Parser<T, TController>
 		}
 		return last switch
 		{
-			SymbolOption.None => other,
-			SymbolOption.ZeroOrMore => SymbolOption.ZeroOrMore,
-			_ => other == SymbolOption.None ? last : SymbolOption.ZeroOrMore,
+			SymbolOptions.None => other,
+			SymbolOptions.ZeroOrMore => SymbolOptions.ZeroOrMore,
+			_ => other == SymbolOptions.None ? last : SymbolOptions.ZeroOrMore,
 		};
 	}
 }

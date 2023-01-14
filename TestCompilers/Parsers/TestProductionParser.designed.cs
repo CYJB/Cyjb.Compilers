@@ -13,10 +13,6 @@ using Cyjb.Compilers.Parsers;
 
 namespace TestCompilers.Parsers;
 
-
-/// <summary>
-/// 用于单元测试的产生式语法分析。
-/// </summary>
 internal partial class TestProductionParser 
 {
 	/// <summary>
