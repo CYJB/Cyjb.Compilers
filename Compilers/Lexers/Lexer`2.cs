@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Cyjb.Collections;
 using Cyjb.Compilers.RegularExpressions;
 
 namespace Cyjb.Compilers.Lexers;
@@ -83,6 +84,10 @@ public class Lexer<T, TController>
 	/// 最近构造的 DFA。
 	/// </summary>
 	private Dfa? dfa;
+	/// <summary>
+	/// 终结符的合并信息。
+	/// </summary>
+	private readonly Dictionary<int, List<int>> terminalMerge = new();
 
 	/// <summary>
 	/// 初始化 <see cref="Lexer{T,TController}"/> 类的新实例。
@@ -207,20 +212,28 @@ public class Lexer<T, TController>
 	}
 
 	/// <summary>
+	/// 获取终结符的合并信息。
+	/// </summary>
+	/// <remarks>键为终结符索引，值为合并前的原始终结符索引。</remarks>
+	public Dictionary<int, List<int>> TerminalMerge => terminalMerge;
+
+	/// <summary>
 	/// 返回词法分析的数据。
 	/// </summary>
 	/// <param name="rejectable">是否用到了 Reject 动作。</param>
 	/// <returns>词法分析的数据。</returns>
 	public LexerData<T> GetData(bool rejectable = false)
 	{
+		// 如果终结符未指定上下文，那么添加所有包含型上下文。
 		LexerContext[] inclusiveContexts = this.contexts.Values
 			.Where(c => c.Type == LexerContextType.Inclusive).ToArray();
 		foreach (Terminal<T> terminal in this.terminals)
 		{
-			// 如果终结符未指定上下文，那么添加所有包含型上下文。
-			if (terminal.Context.Count == 0)
+			// 此时尚未合并终结符，只会包含一个匹配。
+			TerminalMatch match = terminal.Matches[0];
+			if (match.Context.Count == 0)
 			{
-				terminal.Context.UnionWith(inclusiveContexts);
+				match.Context.UnionWith(inclusiveContexts);
 			}
 		}
 		Dictionary<string, ContextData> contexts = new();
@@ -228,6 +241,8 @@ public class Lexer<T, TController>
 		{
 			contexts.Add(label, context.GetData());
 		}
+		// 合并终结符。
+		MergeTerminal();
 		// 构造 DFA。
 		Nfa nfa = BuildNfa();
 		int headCount = contexts.Count;
@@ -280,6 +295,35 @@ public class Lexer<T, TController>
 	}
 
 	/// <summary>
+	/// 合并指向相同状态的终结符。
+	/// </summary>
+	private void MergeTerminal()
+	{
+		// 合并指向相同状态的终结符。
+		HashSet<Terminal<T>> terminalSet = new(Terminal<T>.StateComparer);
+		int j = 0;
+		for (int i = 0; i < terminals.Count; i++)
+		{
+			Terminal<T> cur = terminals[i];
+			if (terminalSet.TryGetValue(cur, out Terminal<T>? prev))
+			{
+				// 已包含指向相同状态的终结符，合并过去。
+				prev.Matches.AddRange(cur.Matches);
+				terminalMerge[prev.Index].Add(cur.Index);
+			}
+			else
+			{
+				terminalSet.Add(cur);
+				terminalMerge[j] = new List<int>() { cur.Index };
+				cur.Index = j;
+				terminals[j] = cur;
+				j++;
+			}
+		}
+		terminals.RemoveRange(j, terminals.Count - j);
+	}
+
+	/// <summary>
 	/// 构造 NFA。
 	/// </summary>
 	/// <returns>构造得到的 NFA。</returns>
@@ -287,13 +331,10 @@ public class Lexer<T, TController>
 	{
 		foreach (Terminal<T> terminal in terminals)
 		{
-			if (terminal.RegularExpression is AnchorExp anchor)
+			if (terminal.ContainsBeginningOfLine())
 			{
-				if (anchor.BeginningOfLine)
-				{
-					containsBeginningOfLine = true;
-					break;
-				}
+				containsBeginningOfLine = true;
+				break;
 			}
 		}
 		// 将多个上下文的规则放入一个 NFA 中，但起始状态不同。
@@ -310,29 +351,28 @@ public class Lexer<T, TController>
 		}
 		foreach (Terminal<T> terminal in terminals)
 		{
-			NfaBuildResult result = nfa.BuildRegex(terminal.RegularExpression, terminal.Index);
-			if (result.UseTrailing)
+			foreach (TerminalMatch match in terminal.Matches)
 			{
-				terminal.Trailing = result.TrailingLength;
-			}
-			foreach (LexerContext context in terminal.Context)
-			{
-				if (result.BeginningOfLine)
+				NfaBuildResult result = nfa.BuildRegex(match.RegularExpression, terminal.Index);
+				foreach (LexerContext context in match.Context)
 				{
-					// 行首限定规则。
-					nfa[context.Index * 2 + 1].Add(result.Head);
-				}
-				else
-				{
-					// 普通规则。
-					if (containsBeginningOfLine)
+					if (result.BeginningOfLine)
 					{
-						nfa[context.Index * 2].Add(result.Head);
+						// 行首限定规则。
 						nfa[context.Index * 2 + 1].Add(result.Head);
 					}
 					else
 					{
-						nfa[context.Index].Add(result.Head);
+						// 普通规则。
+						if (containsBeginningOfLine)
+						{
+							nfa[context.Index * 2].Add(result.Head);
+							nfa[context.Index * 2 + 1].Add(result.Head);
+						}
+						else
+						{
+							nfa[context.Index].Add(result.Head);
+						}
 					}
 				}
 			}

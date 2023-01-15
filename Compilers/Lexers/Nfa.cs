@@ -70,7 +70,6 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 			if (trailingExp != null)
 			{
 				// 设置向前看状态类型。
-				result.UseTrailing = true;
 				tail.StateType = NfaStateType.TrailingHead;
 				var (trailingHead, trailingTail) = BuildNFA(trailingExp, true);
 				tail.Add(trailingHead);
@@ -78,29 +77,14 @@ public sealed class Nfa : ReadOnlyListBase<NfaState>
 				trailingTail.Symbol = symbol;
 				result.Tail = trailingTail;
 				// 检查向前看的长度。
-				int? len = trailingExp.Length;
-				if (len != null)
-				{
-					result.TrailingLength = -len.Value;
-				}
-				else
-				{
-					len = anchor.InnerExpression.Length;
-					if (len != null)
-					{
-						result.TrailingLength = len.Value;
-					}
-				}
+				int? len = trailingExp.Length ?? anchor.InnerExpression.Length;
 				if (len == null)
 				{
 					trailingType = TrailingType.Variable;
 				}
-				else
+				else if (trailingType == TrailingType.None)
 				{
-					if (trailingType == TrailingType.None)
-					{
-						trailingType = TrailingType.Fixed;
-					}
+					trailingType = TrailingType.Fixed;
 				}
 			}
 		}

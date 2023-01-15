@@ -40,7 +40,7 @@ internal sealed class TerminalBuilder<T, TController> : ITerminalBuilder<T, TCon
 		{
 			if (label != null)
 			{
-				terminal.Context.Add(lexer.GetContext(label));
+				terminal.Matches[0].Context.Add(lexer.GetContext(label));
 			}
 		}
 		return this;

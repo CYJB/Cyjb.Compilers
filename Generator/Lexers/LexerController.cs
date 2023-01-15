@@ -232,7 +232,7 @@ internal sealed partial class LexerController : Controller
 		TypeBuilder terminalsType = SyntaxBuilder.Name(typeof(TerminalData<>)).TypeArgument(KindType).Array();
 		var terminals = SyntaxBuilder.DeclareLocal(terminalsType, "terminals")
 			.Comment("终结符数据")
-			.Value(TerminalsValue(data, symbolInfos));
+			.Value(TerminalsValue(data, lexer.TerminalMerge, symbolInfos));
 		var indexes = SyntaxBuilder.DeclareLocal<uint[]>("indexes")
 				.Comment("字符类信息")
 				.Comment(lexer.GetCharClassDescription())
@@ -294,6 +294,7 @@ internal sealed partial class LexerController : Controller
 	/// </summary>
 	private void AddSymbols()
 	{
+		Dictionary<string, Action<LexerController<SymbolKind>>> methodMap = new();
 		for (int i = 0; i < symbolInfos.Count; i++)
 		{
 			LexerSymbolAttrInfo info = symbolInfos[i];
@@ -339,11 +340,15 @@ internal sealed partial class LexerController : Controller
 				}
 				if (info.MethodName != null)
 				{
-					void action(LexerController<SymbolKind> c)
+					// 相同的方法使用相同的 Action，支持合并终结符。
+					if (!methodMap.TryGetValue(info.MethodName, out Action<LexerController<SymbolKind>>? action))
 					{
-						c.Text = info.MethodName;
+						action = (LexerController<SymbolKind> c) =>
+						{
+							c.Text = info.MethodName;
+						};
+						actionMap[action] = info.MethodName;
 					}
-					actionMap[action] = info.MethodName;
 					builder.Action(action);
 				}
 			}

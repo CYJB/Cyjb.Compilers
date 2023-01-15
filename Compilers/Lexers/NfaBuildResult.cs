@@ -17,12 +17,4 @@ public struct NfaBuildResult
 	/// 是否是行首限定的。
 	/// </summary>
 	public bool BeginningOfLine;
-	/// <summary>
-	/// 是否使用了向前看符号。
-	/// </summary>
-	public bool UseTrailing;
-	/// <summary>
-	/// 向前看符号的长度。
-	/// </summary>
-	public int TrailingLength;
 }
