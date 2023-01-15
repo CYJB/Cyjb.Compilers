@@ -347,6 +347,7 @@ internal sealed partial class LexerController : Controller
 						{
 							c.Text = info.MethodName;
 						};
+						methodMap[info.MethodName] = action;
 						actionMap[action] = info.MethodName;
 					}
 					builder.Action(action);
