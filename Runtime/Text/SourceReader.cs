@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.Text;
 using Cyjb.Compilers;
 using Cyjb.Compilers.Text;
@@ -484,19 +485,7 @@ public sealed class SourceReader : IDisposable
 	/// <returns>当前位置之前的数据。</returns>
 	public string ReadedText()
 	{
-		InitBuilder();
-		// 将字符串复制到 StringBuilder 中。
-		SourceBuffer buf = first;
-		int fIndex = firstIndex;
-		while (buf != current)
-		{
-			CopyToBuilder(buf, fIndex, BufferSize - fIndex);
-			fIndex = 0;
-			buf = buf.Next;
-		}
-		CopyToBuilder(buf, fIndex, index - fIndex);
-		builder.Length = builderCopiedLen;
-		return builder.ToString();
+		return ReadedText(false);
 	}
 
 	/// <summary>
@@ -520,19 +509,37 @@ public sealed class SourceReader : IDisposable
 	/// <returns>当前位置之前的数据。</returns>
 	public string Accept()
 	{
+		return ReadedText(true);
+	}
+
+	/// <summary>
+	/// 返回当前位置之前的数据。
+	/// </summary>
+	/// <param name="save">是否需要保存位置。</param>
+	/// <returns>当前位置之前的数据。</returns>
+	private string ReadedText(bool save)
+	{
 		InitBuilder();
 		// 将字符串复制到 StringBuilder 中。
-		while (first != current)
+		SourceBuffer buf = first;
+		int fIndex = firstIndex;
+		int start = 0;
+		while (buf != current)
 		{
-			CopyToBuilder(first, firstIndex, BufferSize - firstIndex);
-			startIndex += BufferSize - firstIndex;
-			firstIndex = 0;
-			first = first.Next;
+			CopyToBuilder(start, buf, fIndex, BufferSize - fIndex);
+			start += BufferSize - fIndex;
+			fIndex = 0;
+			buf = buf.Next;
 		}
-		CopyToBuilder(first, firstIndex, index - firstIndex);
-		startIndex += index - firstIndex;
-		firstIndex = index;
+		CopyToBuilder(start, buf, fIndex, index - fIndex);
+		builderCopiedLen = start + index - fIndex;
 		builder.Length = builderCopiedLen;
+		if (save)
+		{
+			first = buf;
+			firstIndex = index;
+			startIndex += builderCopiedLen;
+		}
 		return builder.ToString();
 	}
 
@@ -560,27 +567,29 @@ public sealed class SourceReader : IDisposable
 		{
 			builder.Clear();
 			builderIndex = startIndex;
+			builderCopiedLen = 0;
 		}
-		builderCopiedLen = 0;
 	}
 
 	/// <summary>
 	/// 将指定缓冲区中从指定索引开始，指定长度的字符串复制到 <see cref="builder"/> 中。
 	/// </summary>
+	/// <param name="index">当前的字符位置。</param>
 	/// <param name="buffer">要复制字符串的缓冲区。</param>
 	/// <param name="start">要复制的起始长度。</param>
 	/// <param name="len">要复制的长度。</param>
-	private void CopyToBuilder(SourceBuffer buffer, int start, int len)
+	private void CopyToBuilder(int index, SourceBuffer buffer, int start, int len)
 	{
-		if (builderCopiedLen == builder.Length)
+		if (builderCopiedLen == index)
 		{
 			builder.Append(buffer.Buffer, start, len);
 			builderCopiedLen += len;
 		}
-		else if ((builderCopiedLen += len) > builder.Length)
+		else if ((index += len) > builderCopiedLen)
 		{
-			int l = builderCopiedLen - builder.Length;
-			builder.Append(buffer.Buffer, len - l, l);
+			int l = index - builderCopiedLen;
+			builder.Append(buffer.Buffer, start + len - l, l);
+			builderCopiedLen = index;
 		}
 	}
 
