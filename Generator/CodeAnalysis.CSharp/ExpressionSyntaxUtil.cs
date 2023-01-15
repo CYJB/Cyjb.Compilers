@@ -88,11 +88,19 @@ internal static class ExpressionSyntaxUtil
 			value = (exp as LiteralExpressionSyntax)!.Token.ValueText;
 			return true;
 		}
-		else
+		// 支持 a + b 的场景。
+		else if (exp.IsKind(SyntaxKind.AddExpression))
 		{
-			value = null;
-			return exp.IsKind(SyntaxKind.NullLiteralExpression);
+			BinaryExpressionSyntax addExp = (BinaryExpressionSyntax)exp;
+			if (TryGetStringLiteral(addExp.Left, out string? left) &&
+				TryGetStringLiteral(addExp.Right, out string? right))
+			{
+				value = left + right;
+				return true;
+			}
 		}
+		value = null;
+		return exp.IsKind(SyntaxKind.NullLiteralExpression);
 	}
 
 	/// <summary>
