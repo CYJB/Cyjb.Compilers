@@ -44,18 +44,17 @@ public partial class TestEscapeStrLexer
 			// 2: <str, vstr>\"
 			new TerminalData<Str>(Str.Str, action: (TestEscapeStrLexer c) => c.EndAction()),
 			// 3: <str>\\u[0-9]{4}
+			//    <str>\\x[0-9]{2}
 			new TerminalData<Str>(action: (TestEscapeStrLexer c) => c.HexEscapeAction()),
-			// 4: <str>\\x[0-9]{2}
-			new TerminalData<Str>(action: (TestEscapeStrLexer c) => c.HexEscapeAction()),
-			// 5: <str>\\n
+			// 4: <str>\\n
 			new TerminalData<Str>(action: (TestEscapeStrLexer c) => c.EscapeLFAction()),
-			// 6: <str>\\\"
+			// 5: <str>\\\"
 			new TerminalData<Str>(action: (TestEscapeStrLexer c) => c.EscapeQuoteAction()),
-			// 7: <str>\\r
+			// 6: <str>\\r
 			new TerminalData<Str>(action: (TestEscapeStrLexer c) => c.EscapeCRAction()),
-			// 8: <*>.
+			// 7: <*>.
 			new TerminalData<Str>(action: (TestEscapeStrLexer c) => c.CopyAction()),
-			// 9: <vstr>\"\"
+			// 8: <vstr>\"\"
 			new TerminalData<Str>(action: (TestEscapeStrLexer c) => c.VstrQuoteAction())
 		};
 		// 字符类信息
@@ -90,28 +89,25 @@ public partial class TestEscapeStrLexer
 		};
 		// 状态转移
 		//      0   1  2  3   4   5   6   7  8 -> Symbols
-		//  0  19  20  4  4   4   4   4   4  4
+		//  0  16  17  4  4   4   4   4   4  4
 		//  1   6   4  7  4   4   4   4   4  4
 		//  2   3   4  4  4   4   4   4   4  4
-		//  3   5                              -> 2 conflict 8
-		//  4                                  -> 8
-		//  5                                  -> 9
-		//  6                                  -> 2 conflict 8
-		//  7   8         9      10  11  12    -> 8
-		//  8                                  -> 6
+		//  3   5                              -> 2 conflict 7
+		//  4                                  -> 7
+		//  5                                  -> 8
+		//  6                                  -> 2 conflict 7
+		//  7   8         9      10  11  12    -> 7
+		//  8                                  -> 5
 		//  9                15               
 		// 10                13               
-		// 11                                  -> 5
-		// 12                                  -> 7
+		// 11                                  -> 4
+		// 12                                  -> 6
 		// 13                14               
-		// 14                                  -> 4
-		// 15                16               
-		// 16                17               
-		// 17                18               
-		// 18                                  -> 3
-		// 19                                  -> 0 conflict 8
-		// 20  21                              -> 8
-		// 21                                  -> 1
+		// 14                                  -> 3
+		// 15                10               
+		// 16                                  -> 0 conflict 7
+		// 17  18                              -> 7
+		// 18                                  -> 1
 		// 状态列表
 		DfaStateData[] states = new[]
 		{
@@ -119,36 +115,33 @@ public partial class TestEscapeStrLexer
 			new DfaStateData(9, 0),
 			new DfaStateData(12, 0),
 			new DfaStateData(14, -1, 2),
+			new DfaStateData(int.MinValue, -1, 7),
 			new DfaStateData(int.MinValue, -1, 8),
-			new DfaStateData(int.MinValue, -1, 9),
 			new DfaStateData(int.MinValue, -1, 2),
-			new DfaStateData(15, -1, 8),
-			new DfaStateData(int.MinValue, -1, 6),
+			new DfaStateData(15, -1, 7),
+			new DfaStateData(int.MinValue, -1, 5),
 			new DfaStateData(12, -1),
 			new DfaStateData(13, -1),
-			new DfaStateData(int.MinValue, -1, 5),
-			new DfaStateData(int.MinValue, -1, 7),
-			new DfaStateData(15, -1),
 			new DfaStateData(int.MinValue, -1, 4),
-			new DfaStateData(19, -1),
-			new DfaStateData(20, -1),
-			new DfaStateData(21, -1),
+			new DfaStateData(int.MinValue, -1, 6),
+			new DfaStateData(15, -1),
 			new DfaStateData(int.MinValue, -1, 3),
+			new DfaStateData(19, -1),
 			new DfaStateData(int.MinValue, -1, 0),
-			new DfaStateData(26, -1, 8),
+			new DfaStateData(24, -1, 7),
 			new DfaStateData(int.MinValue, -1, 1)
 		};
 		// 后继状态列表
 		int[] next = new[]
 		{
-			19, 20, 4, 4, 4, 4, 4, 4, 4, 6, 4, 7, 3, 4, 5, 8, 15, 13, 9, 14, 10, 11, 12, 16,
-			17, 18, 21
+			16, 17, 4, 4, 4, 4, 4, 4, 4, 6, 4, 7, 3, 4, 5, 8, 15, 13, 9, 14, 10, 11, 12, 10,
+			18
 		};
 		// 状态检查列表
 		int[] check = new[]
 		{
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 7, 9, 10, 7, 13, 7, 7, 7, 15,
-			16, 17, 20
+			17
 		};
 		// 词法分析器的数据
 		LexerData<Str> lexerData = new(contexts,

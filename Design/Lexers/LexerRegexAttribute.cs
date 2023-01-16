@@ -7,7 +7,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析的正则表达式定义。
 /// </summary>
 [Conditional("DEBUG")]
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class LexerRegexAttribute : Attribute
 {
 

@@ -108,44 +108,11 @@ internal sealed partial class LexerController : Controller
 							break;
 						}
 					case "LexerRegexAttribute":
-						{
-							AttributeArguments args = attr.GetArguments(RegexAttrModel);
-							string? name = args["name"]!.GetStringLiteral();
-							if (name.IsNullOrEmpty())
-							{
-								Context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegexName), attr);
-								break;
-							}
-							string? regex = args["regex"]!.GetStringLiteral();
-							if (regex.IsNullOrEmpty())
-							{
-								Context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegex), attr);
-								break;
-							}
-							RegexOptions regexOptions = RegexOptions.None;
-							ExpressionSyntax? exp = args["options"];
-							if (exp != null)
-							{
-								regexOptions = exp.GetEnumValue<RegexOptions>();
-							}
-							try
-							{
-								lexer.DefineRegex(name, regex, regexOptions);
-							}
-							catch (RegexParseException ex)
-							{
-								Context.AddError(Resources.InvalidRegex(regex, ex.Message), attr);
-							}
-							break;
-						}
+						ParseRegexAttribute(attr);
+						break;
 					case "LexerSymbolAttribute":
-						{
-							if (LexerSymbolAttrInfo.TryParse(Context, attr, out var info))
-							{
-								symbolInfos.Add(info);
-							}
-							break;
-						}
+						ParseSymbolAttribute(attr, null);
+						break;
 				}
 			}
 			catch (CSharpException ex)
@@ -169,30 +136,14 @@ internal sealed partial class LexerController : Controller
 			}
 			foreach (AttributeSyntax attr in member.AttributeLists.GetAttributes())
 			{
-				if (attr.GetFullName() != "LexerSymbolAttribute")
+				switch (attr.GetFullName())
 				{
-					continue;
-				}
-				if (!LexerSymbolAttrInfo.TryParse(Context, attr, out var info))
-				{
-					continue;
-				}
-				// 检查是否是可选或 params 参数
-				string methodName = method.Identifier.Text;
-				bool isValidAction = true;
-				foreach (ParameterSyntax param in method.ParameterList.Parameters)
-				{
-					if (param.Default == null && !param.IsParamsArray())
-					{
-						isValidAction = false;
-						Context.AddError(Resources.InvalidLexerSymbolAction(methodName), method);
+					case "LexerRegexAttribute":
+						ParseRegexAttribute(attr);
 						break;
-					}
-				}
-				if (isValidAction)
-				{
-					info.MethodName = methodName;
-					symbolInfos.Add(info);
+					case "LexerSymbolAttribute":
+						ParseSymbolAttribute(attr, method);
+						break;
 				}
 			}
 		}
@@ -287,6 +238,68 @@ internal sealed partial class LexerController : Controller
 			.Statement(SyntaxBuilder.Return(
 				SyntaxBuilder.CreateObject(factoryType).Argument(lexerData)))
 			.GetSyntax(Format);
+	}
+
+	/// <summary>
+	/// 解析正则表达式特性。
+	/// </summary>
+	/// <param name="attr">要解析的特性。</param>
+	private void ParseRegexAttribute(AttributeSyntax attr)
+	{
+		AttributeArguments args = attr.GetArguments(RegexAttrModel);
+		string? name = args["name"]!.GetStringLiteral();
+		if (name.IsNullOrEmpty())
+		{
+			Context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegexName), attr);
+			return;
+		}
+		string? regex = args["regex"]!.GetStringLiteral();
+		if (regex.IsNullOrEmpty())
+		{
+			Context.AddError(Resources.InvalidLexerSymbol(attr, Resources.EmptyRegex), attr);
+			return;
+		}
+		RegexOptions regexOptions = RegexOptions.None;
+		ExpressionSyntax? exp = args["options"];
+		if (exp != null)
+		{
+			regexOptions = exp.GetEnumValue<RegexOptions>();
+		}
+		try
+		{
+			lexer.DefineRegex(name, regex, regexOptions);
+		}
+		catch (RegexParseException ex)
+		{
+			Context.AddError(Resources.InvalidRegex(regex, ex.Message), attr);
+		}
+	}
+
+	/// <summary>
+	/// 解析符号特性。
+	/// </summary>
+	/// <param name="attr">要解析的特性。</param>
+	private void ParseSymbolAttribute(AttributeSyntax attr, MethodDeclarationSyntax? method)
+	{
+		if (!LexerSymbolAttrInfo.TryParse(Context, attr, out var info))
+		{
+			return;
+		}
+		if (method != null)
+		{
+			// 检查是否是可选或 params 参数
+			string methodName = method.Identifier.Text;
+			foreach (ParameterSyntax param in method.ParameterList.Parameters)
+			{
+				if (param.Default == null && !param.IsParamsArray())
+				{
+					Context.AddError(Resources.InvalidLexerSymbolAction(methodName), method);
+					return;
+				}
+			}
+			info.MethodName = methodName;
+		}
+		symbolInfos.Add(info);
 	}
 
 	/// <summary>

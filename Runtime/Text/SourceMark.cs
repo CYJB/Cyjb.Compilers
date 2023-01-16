@@ -1,4 +1,4 @@
-namespace Cyjb.Compilers.Text;
+namespace Cyjb.Text;
 
 /// <summary>
 /// 表示源文件的标记。
