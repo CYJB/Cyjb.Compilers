@@ -37,6 +37,25 @@ public class UnitTestMappedTokenizer
 	}
 
 	/// <summary>
+	/// 对 <see cref="MappedTokenizer{T}"/> 类进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestMap2()
+	{
+		ITokenizer<int> tokenizer = new EnumerableTokenizer<int>(
+			new Token<int>(0, "  ", 0..2),
+			new Token<int>(0, "baz", 2..5)
+		);
+		tokenizer = new MappedTokenizer<int>(tokenizer, new Tuple<int, int>[]
+		{
+			new Tuple<int, int>(0, 34),
+			new Tuple<int, int>(2, 34)
+		});
+		Assert.AreEqual(34..34, tokenizer.Read().Span);
+		Assert.AreEqual(34..37, tokenizer.Read().Span);
+	}
+
+	/// <summary>
 	/// 对空 map 进行测试。
 	/// </summary>
 	[TestMethod]

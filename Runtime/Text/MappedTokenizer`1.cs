@@ -30,6 +30,10 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	/// </summary>
 	private int curOffset;
 	/// <summary>
+	/// 是否将当前映射的偏移当作值来使用，适用于当前区间宽度为 0 的场景。
+	/// </summary>
+	private bool useOffsetAsValue;
+	/// <summary>
 	/// 下一索引。
 	/// </summary>
 	private int nextIndex;
@@ -125,11 +129,14 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 		{
 			nextIndex = map[mapIndex].Item1;
 			nextMappedIndex = map[mapIndex].Item2;
+			// 检查当前区间的宽度是否为 0。
+			useOffsetAsValue = (curIndex + curOffset == nextMappedIndex);
 		}
 		else
 		{
 			nextIndex = int.MaxValue;
 			nextMappedIndex = int.MaxValue;
+			useOffsetAsValue = false;
 		}
 	}
 
@@ -152,11 +159,18 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 			curOffset = nextMappedIndex - nextIndex;
 			FindNextIndex();
 		}
-		index += curOffset;
-		// 避免 index 超出 nextMappedIndex
-		if (index >= nextMappedIndex)
+		if (useOffsetAsValue)
 		{
-			index = nextMappedIndex - 1;
+			index = curOffset;
+		}
+		else
+		{
+			index += curOffset;
+			// 避免 index 超出 nextMappedIndex
+			if (index >= nextMappedIndex)
+			{
+				index = nextMappedIndex - 1;
+			}
 		}
 		return index;
 	}
