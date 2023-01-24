@@ -12,8 +12,8 @@ public sealed class AnchorExp : LexRegex
 	/// <summary>
 	/// 表示行的结尾的正则表达式。
 	/// </summary>
-	/// <remarks>同时会匹配文件结尾 EOF。</remarks>
-	internal static new readonly LexRegex EndOfLine = Alternate(
+	/// <remarks>会匹配 <c>\r</c>、<c>\n</c>、<c>\r\n</c> 或文件结尾 EOF。</remarks>
+	internal static new readonly LexRegex EndOfLine = Alternate(Symbol('\r'),
 		Concat(Symbol('\r').Optional(), Symbol('\n')), EOF);
 
 	/// <summary>
