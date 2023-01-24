@@ -136,10 +136,7 @@ public abstract class LexRegex : IEquatable<LexRegex>
 	/// <returns>表示单个字符的正则表达式。</returns>
 	public static LexRegex SymbolIgnoreCase(char ch, CultureInfo? culture)
 	{
-		if (culture == null)
-		{
-			culture = CultureInfo.CurrentCulture;
-		}
+		culture ??= CultureInfo.CurrentCulture;
 		return new LiteralExp(ch.ToString(), culture);
 	}
 
@@ -190,10 +187,7 @@ public abstract class LexRegex : IEquatable<LexRegex>
 	public static LexRegex LiteralIgnoreCase(string text, CultureInfo? culture)
 	{
 		ArgumentNullException.ThrowIfNull(text);
-		if (culture == null)
-		{
-			culture = CultureInfo.CurrentCulture;
-		}
+		culture ??= CultureInfo.CurrentCulture;
 		return new LiteralExp(text, culture);
 	}
 

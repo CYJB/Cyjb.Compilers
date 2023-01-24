@@ -31,12 +31,16 @@ public class UnitTestCharClassCollection
 		charClassCollection.Invoke("GetCharClassSet", 'A');
 		charClassCollection.Invoke("GetCharClassSet", 'B');
 		charClassCollection.Invoke("GetCharClassSet", 'C');
-		CharSet set = new();
-		set.Add('\u0268', '\u027A');
-		set.Add('\u0286');
+		CharSet set = new()
+		{
+			{ '\u0268', '\u027A' },
+			'\u0286'
+		};
 		charClassCollection.Invoke("GetCharClassSet", set);
-		set = new CharSet();
-		set.Add('\u0280', '\u028A');
+		set = new CharSet
+		{
+			{ '\u0280', '\u028A' }
+		};
 		set.Remove('\u0286');
 		charClassCollection.Invoke("GetCharClassSet", set);
 		charClassCollection.Invoke("GetCharClassSet", new CharSet("\u0281\u0284\u0288"));

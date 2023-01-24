@@ -114,10 +114,7 @@ internal sealed class MethodDeclarationBuilder
 	{
 		if (statement != null)
 		{
-			if (block == null)
-			{
-				block = new BlockBuilder();
-			}
+			block ??= new BlockBuilder();
 			block.Add(statement);
 		}
 		return this;

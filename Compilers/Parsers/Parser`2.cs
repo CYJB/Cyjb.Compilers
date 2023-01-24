@@ -120,8 +120,6 @@ public partial class Parser<T, TController>
 	public ProductionBuilder<T, TController> DefineProduction(T kind, params Variant<T, SymbolOptions>[] body)
 	{
 		Symbol<T> head = GetOrCreateSymbol(kind, SymbolType.NonTerminal);
-		// 提前记录产生式索引，避免 SymbolOptions 生成的额外产生式影响首个产生式的索引。
-		int index = productions.Count;
 		List<Symbol<T>> symbols = new();
 		SymbolOptions option = SymbolOptions.None;
 		foreach (var item in body)
@@ -145,10 +143,7 @@ public partial class Parser<T, TController>
 			symbols[^1] = ApplyOption(symbols[^1], option);
 		}
 		Production<T> production = DefineProduction(head, symbols.ToArray());
-		if (firstProduction == null)
-		{
-			firstProduction = production;
-		}
+		firstProduction ??= production;
 		return new ProductionBuilder<T, TController>(this, production);
 	}
 

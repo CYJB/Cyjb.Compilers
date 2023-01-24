@@ -3,7 +3,7 @@ namespace Cyjb.Compilers.Parsers;
 /// <summary>
 /// LR 语法分析器的动作。
 /// </summary>
-public record struct ParserAction
+public readonly record struct ParserAction
 {
 	/// <summary>
 	/// 获取表示接受的分析器动作。
