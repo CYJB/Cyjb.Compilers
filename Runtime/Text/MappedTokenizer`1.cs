@@ -16,31 +16,7 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	/// <summary>
 	/// 映射关系。
 	/// </summary>
-	private readonly Tuple<int, int>[] map;
-	/// <summary>
-	/// 映射索引。
-	/// </summary>
-	private int mapIndex = 0;
-	/// <summary>
-	/// 当前索引。
-	/// </summary>
-	private int curIndex;
-	/// <summary>
-	/// 当前映射后的偏移。
-	/// </summary>
-	private int curOffset;
-	/// <summary>
-	/// 是否将当前映射的偏移当作值来使用，适用于当前区间宽度为 0 的场景。
-	/// </summary>
-	private bool useOffsetAsValue;
-	/// <summary>
-	/// 下一索引。
-	/// </summary>
-	private int nextIndex;
-	/// <summary>
-	/// 下一映射后的索引。
-	/// </summary>
-	private int nextMappedIndex;
+	private readonly SortedLocationMap map;
 
 	/// <summary>
 	/// 词法分析错误的事件。
@@ -60,19 +36,7 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	public MappedTokenizer(ITokenizer<T> tokenizer, IEnumerable<Tuple<int, int>> map)
 	{
 		this.tokenizer = tokenizer;
-		this.map = map.ToArray();
-		Array.Sort(this.map, (left, right) => left.Item1 - right.Item1);
-		if (this.map.Length == 0)
-		{
-			curIndex = 0;
-			curOffset = 0;
-		}
-		else
-		{
-			curIndex = this.map[0].Item1;
-			curOffset = this.map[0].Item2 - curIndex;
-		}
-		FindNextIndex();
+		this.map = new SortedLocationMap(map);
 	}
 
 	/// <summary>
@@ -99,7 +63,7 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 		var (start, end) = token.Span;
 		return token with
 		{
-			Span = new TextSpan(MapIndex(start), MapIndex(end))
+			Span = new TextSpan(map.MapLocation(start), map.MapLocation(end))
 		};
 	}
 
@@ -117,62 +81,6 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	public void Reset()
 	{
 		tokenizer.Reset();
-	}
-
-	/// <summary>
-	/// 寻找下一个索引。
-	/// </summary>
-	private void FindNextIndex()
-	{
-		mapIndex++;
-		if (mapIndex < map.Length)
-		{
-			nextIndex = map[mapIndex].Item1;
-			nextMappedIndex = map[mapIndex].Item2;
-			// 检查当前区间的宽度是否为 0。
-			useOffsetAsValue = (curIndex + curOffset == nextMappedIndex);
-		}
-		else
-		{
-			nextIndex = int.MaxValue;
-			nextMappedIndex = int.MaxValue;
-			useOffsetAsValue = false;
-		}
-	}
-
-	/// <summary>
-	/// 映射指定的索引，总是按照索引从小到大的顺序调用。
-	/// </summary>
-	/// <param name="index">要映射的索引。</param>
-	/// <returns>映射后的索引。</returns>
-	private int MapIndex(int index)
-	{
-		// 在首个索引之前。
-		if (index < curIndex)
-		{
-			return index;
-		}
-		// 在当前索引范围之外，需要切换到下一索引。
-		while (index >= nextIndex)
-		{
-			curIndex = nextIndex;
-			curOffset = nextMappedIndex - nextIndex;
-			FindNextIndex();
-		}
-		if (useOffsetAsValue)
-		{
-			index = curOffset;
-		}
-		else
-		{
-			index += curOffset;
-			// 避免 index 超出 nextMappedIndex
-			if (index >= nextMappedIndex)
-			{
-				index = nextMappedIndex - 1;
-			}
-		}
-		return index;
 	}
 
 	#region IDisposable 成员
