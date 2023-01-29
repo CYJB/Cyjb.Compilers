@@ -38,7 +38,7 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			{
 				HashSet<T> result = new();
 				// 先添加当前候选
-				for (int i = curCandidateIndex; i < curCandidate.Symbols.Length; i++)
+				for (int i = curCandidateIndex; i < curCandidate.Symbols.Count; i++)
 				{
 					int acceptState = curCandidate.Symbols[i];
 					if (acceptState < 0)
@@ -86,8 +86,8 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 				// 没有合适的转移，退出。
 				break;
 			}
-			int[] symbols = Data.States[state].Symbols;
-			if (symbols.Length > 0)
+			ArraySegment<int> symbols = Data.GetSymbols(state);
+			if (symbols.Count > 0)
 			{
 				if (Data.UseShortest)
 				{
@@ -194,10 +194,10 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	/// <param name="symbols">接受状态的符号索引。</param>
 	/// <param name="target">目标向前看头状态。</param>
 	/// <returns>如果包含特定的目标，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	private static bool ContainsTrailingHead(int[] symbols, int target)
+	private static bool ContainsTrailingHead(ArraySegment<int> symbols, int target)
 	{
 		// 在当前状态中查找，从后向前找。
-		for (int i = symbols.Length - 1; i >= 0; i--)
+		for (int i = symbols.Count - 1; i >= 0; i--)
 		{
 			int idx = symbols[i];
 			if (idx >= 0)

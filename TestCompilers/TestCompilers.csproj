@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.10">
+	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.12">
 	  <GeneratePathProperty>True</GeneratePathProperty>
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

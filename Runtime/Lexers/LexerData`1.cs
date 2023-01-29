@@ -35,7 +35,7 @@ public class LexerData<T>
 	/// DFA 的状态列表。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly DfaStateData[] states;
+	private readonly int[] states;
 	/// <summary>
 	/// 下一状态列表。
 	/// </summary>
@@ -87,7 +87,7 @@ public class LexerData<T>
 	/// <param name="controllerType">词法分析控制器的类型。</param>
 	[CLSCompliant(false)]
 	public LexerData(IReadOnlyDictionary<string, ContextData>? contexts, TerminalData<T>[] terminals,
-			CharClassMap charClasses, DfaStateData[] states, int[] next, int[] check,
+			CharClassMap charClasses, int[] states, int[] next, int[] check,
 			TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
 	{
 		this.contexts = contexts ?? ContextData.Default;
@@ -119,7 +119,11 @@ public class LexerData<T>
 	/// <summary>
 	/// 获取 DFA 的状态列表。
 	/// </summary>
-	public DfaStateData[] States => states;
+	/// <remarks>假设状态数为 <c>n</c>，[<c>0</c>, <c>n</c>) 为状态数据的偏移 <c>offset</c>，
+	/// <c>offset + 0</c> 为状态的基索引，<c>offset + 1</c> 为默认状态，
+	/// <c>offset + 2</c> 为符号索引的长度，之后为符号索引列表，按符号索引排序，
+	/// 使用负数表示向前看的头状态。</remarks>
+	public int[] States => states;
 	/// <summary>
 	/// 获取下一状态列表。
 	/// </summary>
@@ -160,18 +164,37 @@ public class LexerData<T>
 	public int NextState(int state, char ch)
 	{
 		int charClass = charClasses.GetCharClass(ch);
-		DfaStateData stateData;
+		int offset;
 		int len = check.Length;
 		while (state >= 0)
 		{
-			stateData = states[state];
-			int idx = stateData.BaseIndex + charClass;
+			offset = states[state];
+			int idx = states[offset] + charClass;
 			if (idx >= 0 && idx < len && check[idx] == state)
 			{
 				return next[idx];
 			}
-			state = stateData.DefaultState;
+			state = states[offset + DfaStateData.DefaultStateOffset];
 		}
 		return DfaStateData.InvalidState;
+	}
+
+	/// <summary>
+	/// 返回指定状态对应的符号。
+	/// </summary>
+	/// <param name="state">当前状态索引。</param>
+	/// <returns><paramref name="state"/> 对应的符号。</returns>
+	public ArraySegment<int> GetSymbols(int state)
+	{
+		int offset = states[state] + DfaStateData.SymbolsOffset;
+		int count = states[offset];
+		if (count == 0)
+		{
+			return ArraySegment<int>.Empty;
+		}
+		else
+		{
+			return new ArraySegment<int>(states, offset + 1, count);
+		}
 	}
 }

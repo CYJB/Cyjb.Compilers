@@ -93,16 +93,12 @@ public partial class TestProductionLexer
 		// 6                      -> 5
 		// 7                      -> 6
 		// 状态列表
-		DfaStateData[] states = new[]
+		int[] states = new[]
 		{
-			new DfaStateData(0, -1),
-			new DfaStateData(7, -1, 0),
-			new DfaStateData(int.MinValue, -1, 1),
-			new DfaStateData(int.MinValue, -1, 2),
-			new DfaStateData(int.MinValue, -1, 3),
-			new DfaStateData(int.MinValue, -1, 4),
-			new DfaStateData(int.MinValue, -1, 5),
-			new DfaStateData(int.MinValue, -1, 6)
+			8, 11, 15, 19, 23, 27, 31, 35, 0, -1, 0, 7,
+			-1, 1, 0, int.MinValue, -1, 1, 1, int.MinValue, -1, 1, 2, int.MinValue,
+			-1, 1, 3, int.MinValue, -1, 1, 4, int.MinValue, -1, 1, 5, int.MinValue,
+			-1, 1, 6
 		};
 		// 后继状态列表
 		int[] next = new[]

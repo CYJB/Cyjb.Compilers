@@ -36,9 +36,9 @@ internal sealed class TokenizerFixedTrailing<T> : TokenizerBase<T>
 				// 没有合适的转移，退出。
 				break;
 			}
-			int[] symbols = Data.States[state].Symbols;
+			ArraySegment<int> symbols = Data.GetSymbols(state);
 			// 确定不是向前看的头状态。
-			if (symbols.Length > 0 && symbols[0] >= 0)
+			if (symbols.Count > 0 && symbols[0] >= 0)
 			{
 				lastAccept = symbols[0];
 				lastIndex = source.Index;

@@ -72,25 +72,23 @@ public partial class TestStrLexer
 		// 5                   -> 0
 		// 6  1  1  1  1  1   
 		// 状态列表
-		DfaStateData[] states = new[]
+		int[] states = new[]
 		{
-			new DfaStateData(0, -1),
-			new DfaStateData(1, -1),
-			new DfaStateData(6, -1),
-			new DfaStateData(7, -1),
-			new DfaStateData(13, -1, 0),
-			new DfaStateData(int.MinValue, -1, 0),
-			new DfaStateData(14, -1)
+			7, 10, 13, 16, 19, 23, 27, 0, -1, 0, 1, -1,
+			0, 6, -1, 0, 7, -1, 0, 13, -1, 1, 0, int.MinValue,
+			-1, 1, 0, 14, -1, 0
 		};
 		// 后继状态列表
 		int[] next = new[]
 		{
-			1, 5, 1, 6, 2, 1, 3, 4, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1
+			1, 5, 1, 6, 2, 1, 3, 4, 3, 3, 3, 3,
+			3, 3, 1, 1, 1, 1, 1
 		};
 		// 状态检查列表
 		int[] check = new[]
 		{
-			0, 1, 1, 1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 4, 6, 6, 6, 6, 6
+			0, 1, 1, 1, 0, 1, 2, 3, 3, 3, 3, 3,
+			3, 4, 6, 6, 6, 6, 6
 		};
 		// 词法分析器的数据
 		LexerData<Str> lexerData = new(null,

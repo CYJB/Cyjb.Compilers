@@ -36,8 +36,8 @@ internal sealed class TokenizerSimpler<T> : TokenizerBase<T>
 				// 没有合适的转移，退出。
 				break;
 			}
-			int[] symbols = Data.States[state].Symbols;
-			if (symbols.Length > 0)
+			ArraySegment<int> symbols = Data.GetSymbols(state);
+			if (symbols.Count > 0)
 			{
 				lastAccept = symbols[0];
 				lastIndex = source.Index;

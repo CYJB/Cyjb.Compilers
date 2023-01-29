@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Cyjb.Collections;
 using Cyjb.Text;
 
@@ -39,7 +38,7 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 			{
 				HashSet<T> result = new();
 				// 先添加当前候选
-				for (int i = curCandidateIndex; i < curCandidate.Symbols.Length; i++)
+				for (int i = curCandidateIndex; i < curCandidate.Symbols.Count; i++)
 				{
 					var kind = Data.Terminals[curCandidate.Symbols[i]].Kind;
 					if (kind.HasValue)
@@ -80,8 +79,8 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 				// 没有合适的转移，退出。
 				break;
 			}
-			int[] symbols = Data.States[state].Symbols;
-			if (symbols.Length > 0)
+			ArraySegment<int> symbols = Data.GetSymbols(state);
+			if (symbols.Count > 0)
 			{
 				if (Data.UseShortest)
 				{

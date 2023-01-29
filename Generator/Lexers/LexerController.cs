@@ -195,17 +195,17 @@ internal sealed partial class LexerController : Controller
 		var categories = DeclareCharClassCategories(data);
 		var charClassBuilder = SyntaxBuilder.CreateObject<CharClassMap>()
 			.Argument(indexes).Argument(classes).Argument(categories);
-		var states = SyntaxBuilder.DeclareLocal<DfaStateData[]>("states")
+		var states = SyntaxBuilder.DeclareLocal<int[]>("states")
 			.Comment("状态转移")
 			.Comment(lexer.GetStateDescription())
 			.Comment("状态列表")
-			.Value(StatesValue(data));
+			.Value(SyntaxBuilder.Literal(data.States, 12));
 		var next = SyntaxBuilder.DeclareLocal<int[]>("next")
 			.Comment("后继状态列表")
-			.Value(SyntaxBuilder.Literal(data.Next, 24));
+			.Value(SyntaxBuilder.Literal(data.Next, 12));
 		var check = SyntaxBuilder.DeclareLocal<int[]>("check")
 			.Comment("状态检查列表")
-			.Value(SyntaxBuilder.Literal(data.Check, 24));
+			.Value(SyntaxBuilder.Literal(data.Check, 12));
 
 		TypeBuilder lexerDataType = SyntaxBuilder.Name(typeof(LexerData<>)).TypeArgument(KindType);
 		var lexerData = SyntaxBuilder.DeclareLocal(lexerDataType, "lexerData")

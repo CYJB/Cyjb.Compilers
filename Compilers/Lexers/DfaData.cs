@@ -11,7 +11,7 @@ public sealed class DfaData
 	/// <param name="states">DFA 的状态列表。</param>
 	/// <param name="next">下一状态列表。</param>
 	/// <param name="check">状态检查。</param>
-	public DfaData(DfaStateData[] states, int[] next, int[] check)
+	public DfaData(int[] states, int[] next, int[] check)
 	{
 		States = states;
 		Next = next;
@@ -21,7 +21,7 @@ public sealed class DfaData
 	/// <summary>
 	/// 获取 DFA 的状态列表。
 	/// </summary>
-	public DfaStateData[] States { get; }
+	public int[] States { get; }
 	/// <summary>
 	/// 获取下一状态列表。
 	/// </summary>

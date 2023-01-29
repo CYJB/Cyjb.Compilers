@@ -109,38 +109,29 @@ public partial class TestEscapeStrLexer
 		// 17  18                              -> 7
 		// 18                                  -> 1
 		// 状态列表
-		DfaStateData[] states = new[]
+		int[] states = new[]
 		{
-			new DfaStateData(0, -1),
-			new DfaStateData(9, 0),
-			new DfaStateData(12, 0),
-			new DfaStateData(14, -1, 2),
-			new DfaStateData(int.MinValue, -1, 7),
-			new DfaStateData(int.MinValue, -1, 8),
-			new DfaStateData(int.MinValue, -1, 2),
-			new DfaStateData(15, -1, 7),
-			new DfaStateData(int.MinValue, -1, 5),
-			new DfaStateData(12, -1),
-			new DfaStateData(13, -1),
-			new DfaStateData(int.MinValue, -1, 4),
-			new DfaStateData(int.MinValue, -1, 6),
-			new DfaStateData(15, -1),
-			new DfaStateData(int.MinValue, -1, 3),
-			new DfaStateData(19, -1),
-			new DfaStateData(int.MinValue, -1, 0),
-			new DfaStateData(24, -1, 7),
-			new DfaStateData(int.MinValue, -1, 1)
+			19, 22, 25, 28, 32, 36, 40, 44, 48, 52, 55, 58,
+			62, 66, 69, 73, 76, 80, 84, 0, -1, 0, 9, 0,
+			0, 12, 0, 0, 14, -1, 1, 2, int.MinValue, -1, 1, 7,
+			int.MinValue, -1, 1, 8, int.MinValue, -1, 1, 2, 15, -1, 1, 7,
+			int.MinValue, -1, 1, 5, 12, -1, 0, 13, -1, 0, int.MinValue, -1,
+			1, 4, int.MinValue, -1, 1, 6, 15, -1, 0, int.MinValue, -1, 1,
+			3, 19, -1, 0, int.MinValue, -1, 1, 0, 24, -1, 1, 7,
+			int.MinValue, -1, 1, 1
 		};
 		// 后继状态列表
 		int[] next = new[]
 		{
-			16, 17, 4, 4, 4, 4, 4, 4, 4, 6, 4, 7, 3, 4, 5, 8, 15, 13, 9, 14, 10, 11, 12, 10,
+			16, 17, 4, 4, 4, 4, 4, 4, 4, 6, 4, 7,
+			3, 4, 5, 8, 15, 13, 9, 14, 10, 11, 12, 10,
 			18
 		};
 		// 状态检查列表
 		int[] check = new[]
 		{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 7, 9, 10, 7, 13, 7, 7, 7, 15,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			2, 2, 3, 7, 9, 10, 7, 13, 7, 7, 7, 15,
 			17
 		};
 		// 词法分析器的数据

@@ -94,18 +94,13 @@ internal partial class TestCalcLexer
 		// 8                            -> 7
 		// 9                          9 -> 8
 		// 状态列表
-		DfaStateData[] states = new[]
+		int[] states = new[]
 		{
-			new DfaStateData(0, -1),
-			new DfaStateData(int.MinValue, -1, 0),
-			new DfaStateData(int.MinValue, -1, 1),
-			new DfaStateData(int.MinValue, -1, 2),
-			new DfaStateData(int.MinValue, -1, 3),
-			new DfaStateData(int.MinValue, -1, 4),
-			new DfaStateData(int.MinValue, -1, 5),
-			new DfaStateData(int.MinValue, -1, 6),
-			new DfaStateData(int.MinValue, -1, 7),
-			new DfaStateData(1, -1, 8)
+			10, 13, 17, 21, 25, 29, 33, 37, 41, 45, 0, -1,
+			0, int.MinValue, -1, 1, 0, int.MinValue, -1, 1, 1, int.MinValue, -1, 1,
+			2, int.MinValue, -1, 1, 3, int.MinValue, -1, 1, 4, int.MinValue, -1, 1,
+			5, int.MinValue, -1, 1, 6, int.MinValue, -1, 1, 7, 1, -1, 1,
+			8
 		};
 		// 后继状态列表
 		int[] next = new[]

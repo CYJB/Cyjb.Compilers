@@ -51,10 +51,9 @@ public partial class TestSymbolValueLexer
 		// 0  1
 		// 1  1 -> 0
 		// 状态列表
-		DfaStateData[] states = new[]
+		int[] states = new[]
 		{
-			new DfaStateData(0, -1),
-			new DfaStateData(1, -1, 0)
+			2, 5, 0, -1, 0, 1, -1, 1, 0
 		};
 		// 后继状态列表
 		int[] next = new[]

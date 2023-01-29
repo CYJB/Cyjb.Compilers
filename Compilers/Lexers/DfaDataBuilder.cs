@@ -12,7 +12,7 @@ internal class DfaDataBuilder
 	/// <summary>
 	/// 状态数据列表。
 	/// </summary>
-	private readonly List<DfaStateData> stateDataList = new();
+	private readonly List<int> stateDataList = new();
 	/// <summary>
 	/// 状态对应的默认状态。
 	/// </summary>
@@ -33,6 +33,7 @@ internal class DfaDataBuilder
 	/// <returns>DFA 数据。</returns>
 	public DfaData Build()
 	{
+		stateDataList.AddRange(Enumerable.Repeat(0, states.Count));
 		ArrayCompress<int> compress = new(DfaStateData.InvalidState, DfaStateData.InvalidState);
 		for (int i = 0; i < states.Count; i++)
 		{
@@ -45,7 +46,14 @@ internal class DfaDataBuilder
 				// 找到合适的 next 空当。
 				baseIndex = compress.AddTransition(i, transitions);
 			}
-			stateDataList.Add(new DfaStateData(baseIndex, defaultState?.Index ?? DfaStateData.InvalidState, state.Symbols));
+			stateDataList[i] = stateDataList.Count;
+			stateDataList.Add(baseIndex);
+			stateDataList.Add(defaultState?.Index ?? DfaStateData.InvalidState);
+			stateDataList.Add(state.Symbols.Length);
+			if (state.Symbols.Length > 0)
+			{
+				stateDataList.AddRange(state.Symbols);
+			}
 		}
 		return new DfaData(stateDataList.ToArray(), compress.GetNext(), compress.GetCheck());
 	}
