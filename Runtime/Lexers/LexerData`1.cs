@@ -119,9 +119,9 @@ public class LexerData<T>
 	/// <summary>
 	/// 获取 DFA 的状态列表。
 	/// </summary>
-	/// <remarks>假设状态数为 <c>n</c>，[<c>0</c>, <c>n</c>) 为状态数据的偏移 <c>offset</c>，
-	/// <c>offset + 0</c> 为状态的基索引，<c>offset + 1</c> 为默认状态，
-	/// <c>offset + 2</c> 为符号索引的长度，之后为符号索引列表，按符号索引排序，
+	/// <remarks>假设状态数为 <c>n</c>，<c>n * 4</c> 为状态的基索引，
+	/// <c>n * 4 + 1</c> 为默认状态，<c>n * 4 + 2</c> 为符号的长度，
+	/// <c>n * 4 + 3</c> 为符号的索引。状态数据之后是符号列表，按符号索引排序，
 	/// 使用负数表示向前看的头状态。</remarks>
 	public int[] States => states;
 	/// <summary>
@@ -168,7 +168,7 @@ public class LexerData<T>
 		int len = check.Length;
 		while (state >= 0)
 		{
-			offset = states[state];
+			offset = state * 4;
 			int idx = states[offset] + charClass;
 			if (idx >= 0 && idx < len && check[idx] == state)
 			{
@@ -186,15 +186,15 @@ public class LexerData<T>
 	/// <returns><paramref name="state"/> 对应的符号。</returns>
 	public ArraySegment<int> GetSymbols(int state)
 	{
-		int offset = states[state] + DfaStateData.SymbolsOffset;
-		int count = states[offset];
+		int offset = state * 4;
+		int count = states[offset + DfaStateData.SymbolsLengthOffset];
 		if (count == 0)
 		{
 			return ArraySegment<int>.Empty;
 		}
 		else
 		{
-			return new ArraySegment<int>(states, offset + 1, count);
+			return new ArraySegment<int>(states, states[offset + DfaStateData.SymbolIndexOffset], count);
 		}
 	}
 }

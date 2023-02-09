@@ -53,7 +53,8 @@ public partial class TestSymbolValueLexer
 		// 状态列表
 		int[] states = new[]
 		{
-			2, 5, 0, -1, 0, 1, -1, 1, 0
+			0, -1, 0, 0, 1, -1, 1, 8,
+			0
 		};
 		// 后继状态列表
 		int[] next = new[]

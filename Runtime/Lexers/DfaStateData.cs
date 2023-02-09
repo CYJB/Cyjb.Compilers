@@ -14,7 +14,11 @@ public static class DfaStateData
 	/// </summary>
 	public const int DefaultStateOffset = 1;
 	/// <summary>
-	/// 符号列表的偏移。
+	/// 符号列表长度的偏移。
 	/// </summary>
-	public const int SymbolsOffset = 2;
+	public const int SymbolsLengthOffset = 2;
+	/// <summary>
+	/// 符号索引的偏移。
+	/// </summary>
+	public const int SymbolIndexOffset = 3;
 }

@@ -96,10 +96,12 @@ internal partial class TestCalcLexer
 		// 状态列表
 		int[] states = new[]
 		{
-			10, 13, 17, 21, 25, 29, 33, 37, 41, 45, 0, -1,
-			0, int.MinValue, -1, 1, 0, int.MinValue, -1, 1, 1, int.MinValue, -1, 1,
-			2, int.MinValue, -1, 1, 3, int.MinValue, -1, 1, 4, int.MinValue, -1, 1,
-			5, int.MinValue, -1, 1, 6, int.MinValue, -1, 1, 7, 1, -1, 1,
+			0, -1, 0, 0, int.MinValue, -1, 1, 40,
+			int.MinValue, -1, 1, 41, int.MinValue, -1, 1, 42,
+			int.MinValue, -1, 1, 43, int.MinValue, -1, 1, 44,
+			int.MinValue, -1, 1, 45, int.MinValue, -1, 1, 46,
+			int.MinValue, -1, 1, 47, 1, -1, 1, 48,
+			0, 1, 2, 3, 4, 5, 6, 7,
 			8
 		};
 		// 后继状态列表

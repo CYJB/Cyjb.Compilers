@@ -33,7 +33,9 @@ internal class DfaDataBuilder
 	/// <returns>DFA 数据。</returns>
 	public DfaData Build()
 	{
-		stateDataList.AddRange(Enumerable.Repeat(0, states.Count));
+		stateDataList.Clear();
+		int symbolStartIndex = states.Count * 4;
+		stateDataList.AddRange(Enumerable.Repeat(0, symbolStartIndex));
 		ArrayCompress<int> compress = new(DfaStateData.InvalidState, DfaStateData.InvalidState);
 		for (int i = 0; i < states.Count; i++)
 		{
@@ -46,13 +48,14 @@ internal class DfaDataBuilder
 				// 找到合适的 next 空当。
 				baseIndex = compress.AddTransition(i, transitions);
 			}
-			stateDataList[i] = stateDataList.Count;
-			stateDataList.Add(baseIndex);
-			stateDataList.Add(defaultState?.Index ?? DfaStateData.InvalidState);
-			stateDataList.Add(state.Symbols.Length);
-			if (state.Symbols.Length > 0)
+			int offset = i * 4;
+			stateDataList[offset] = baseIndex;
+			stateDataList[offset + DfaStateData.DefaultStateOffset] = defaultState?.Index ?? DfaStateData.InvalidState;
+			int symbolLength = state.Symbols.Length;
+			if (symbolLength > 0)
 			{
-				stateDataList.AddRange(state.Symbols);
+				stateDataList[offset + DfaStateData.SymbolsLengthOffset] = symbolLength;
+				stateDataList[offset + DfaStateData.SymbolIndexOffset] = AppendSymbols(state.Symbols, symbolStartIndex);
 			}
 		}
 		return new DfaData(stateDataList.ToArray(), compress.GetNext(), compress.GetCheck());
@@ -117,6 +120,47 @@ internal class DfaDataBuilder
 			}
 		}
 		return result;
+	}
+
+	/// <summary>
+	/// 将指定符号列表添加到状态数据列表的末尾。
+	/// </summary>
+	/// <param name="symbols">要添加的符号列表。</param>
+	/// <param name="startIndex">能够添加的起始索引。</param>
+	/// <returns>符号列表添加到的索引。</returns>
+	private int AppendSymbols(int[] symbols, int startIndex)
+	{
+		for (; startIndex < stateDataList.Count; startIndex++)
+		{
+			if (CompareSymbols(symbols, startIndex))
+			{
+				break;
+			}
+		}
+		stateDataList.AddRange(symbols.Skip(stateDataList.Count - startIndex));
+		return startIndex;
+	}
+
+	/// <summary>
+	/// 比较符号列表与指定索引的数据。
+	/// </summary>
+	/// <param name="symbols">要比较的符号列表。</param>
+	/// <param name="startIndex">要比较的数据的起始索引。</param>
+	/// <returns>如果符号列表与数据一致，返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+	private bool CompareSymbols(int[] symbols, int startIndex)
+	{
+		foreach (int i in symbols)
+		{
+			if (startIndex >= stateDataList.Count)
+			{
+				break;
+			}
+			if (i != stateDataList[startIndex])
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/// <summary>

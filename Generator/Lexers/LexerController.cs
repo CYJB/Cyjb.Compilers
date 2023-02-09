@@ -199,7 +199,7 @@ internal sealed partial class LexerController : Controller
 			.Comment("状态转移")
 			.Comment(lexer.GetStateDescription())
 			.Comment("状态列表")
-			.Value(SyntaxBuilder.Literal(data.States, 12));
+			.Value(SyntaxBuilder.Literal(data.States, 8));
 		var next = SyntaxBuilder.DeclareLocal<int[]>("next")
 			.Comment("后继状态列表")
 			.Value(SyntaxBuilder.Literal(data.Next, 12));

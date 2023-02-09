@@ -111,14 +111,17 @@ public partial class TestEscapeStrLexer
 		// 状态列表
 		int[] states = new[]
 		{
-			19, 22, 25, 28, 32, 36, 40, 44, 48, 52, 55, 58,
-			62, 66, 69, 73, 76, 80, 84, 0, -1, 0, 9, 0,
-			0, 12, 0, 0, 14, -1, 1, 2, int.MinValue, -1, 1, 7,
-			int.MinValue, -1, 1, 8, int.MinValue, -1, 1, 2, 15, -1, 1, 7,
-			int.MinValue, -1, 1, 5, 12, -1, 0, 13, -1, 0, int.MinValue, -1,
-			1, 4, int.MinValue, -1, 1, 6, 15, -1, 0, int.MinValue, -1, 1,
-			3, 19, -1, 0, int.MinValue, -1, 1, 0, 24, -1, 1, 7,
-			int.MinValue, -1, 1, 1
+			0, -1, 0, 0, 9, 0, 0, 0,
+			12, 0, 0, 0, 14, -1, 1, 76,
+			int.MinValue, -1, 1, 77, int.MinValue, -1, 1, 78,
+			int.MinValue, -1, 1, 76, 15, -1, 1, 77,
+			int.MinValue, -1, 1, 79, 12, -1, 0, 0,
+			13, -1, 0, 0, int.MinValue, -1, 1, 80,
+			int.MinValue, -1, 1, 81, 15, -1, 0, 0,
+			int.MinValue, -1, 1, 82, 19, -1, 0, 0,
+			int.MinValue, -1, 1, 83, 24, -1, 1, 77,
+			int.MinValue, -1, 1, 84, 2, 7, 8, 5,
+			4, 6, 3, 0, 1
 		};
 		// 后继状态列表
 		int[] next = new[]

@@ -95,10 +95,11 @@ public partial class TestProductionLexer
 		// 状态列表
 		int[] states = new[]
 		{
-			8, 11, 15, 19, 23, 27, 31, 35, 0, -1, 0, 7,
-			-1, 1, 0, int.MinValue, -1, 1, 1, int.MinValue, -1, 1, 2, int.MinValue,
-			-1, 1, 3, int.MinValue, -1, 1, 4, int.MinValue, -1, 1, 5, int.MinValue,
-			-1, 1, 6
+			0, -1, 0, 0, 7, -1, 1, 32,
+			int.MinValue, -1, 1, 33, int.MinValue, -1, 1, 34,
+			int.MinValue, -1, 1, 35, int.MinValue, -1, 1, 36,
+			int.MinValue, -1, 1, 37, int.MinValue, -1, 1, 38,
+			0, 1, 2, 3, 4, 5, 6
 		};
 		// 后继状态列表
 		int[] next = new[]

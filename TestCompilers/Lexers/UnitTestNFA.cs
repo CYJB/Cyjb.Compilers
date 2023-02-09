@@ -1,4 +1,3 @@
-using System;
 using Cyjb;
 using Cyjb.Compilers.Lexers;
 using Cyjb.Compilers.RegularExpressions;
@@ -56,22 +55,26 @@ public class UnitTestNFA
 
 		// 检查 DFA 数据。
 		DfaData data = dfa.GetData();
-		Assert.AreEqual(0, data.States[data.States[0]]);
-		Assert.AreEqual(-1, data.States[data.States[0] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[0] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(0, data.States[0]);
+		Assert.AreEqual(-1, data.States[0 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[0 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[0 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(2, data.States[data.States[1]]);
-		Assert.AreEqual(-1, data.States[data.States[1] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[1] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(2, data.States[4]);
+		Assert.AreEqual(-1, data.States[4 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[4 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[4 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(4, data.States[data.States[2]]);
-		Assert.AreEqual(-1, data.States[data.States[2] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[2] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(4, data.States[8]);
+		Assert.AreEqual(-1, data.States[8 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[8 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[8 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(6, data.States[data.States[3]]);
-		Assert.AreEqual(-1, data.States[data.States[3] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(1, data.States[data.States[3] + DfaStateData.SymbolsOffset]);
-		Assert.AreEqual(4, data.States[data.States[3] + DfaStateData.SymbolsOffset + 1]);
+		Assert.AreEqual(6, data.States[12]);
+		Assert.AreEqual(-1, data.States[12 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(1, data.States[12 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(16, data.States[12 + DfaStateData.SymbolIndexOffset]);
+		Assert.AreEqual(4, data.States[16]);
 
 		CollectionAssert.AreEqual(new int[] { 0, 1, 2, 1, 3, 1, 0, 1 }, data.Next);
 		CollectionAssert.AreEqual(new int[] { 0, 0, 1, 1, 2, 2, 3, 3 }, data.Check);
@@ -106,37 +109,43 @@ public class UnitTestNFA
 
 		// 检查 DFA 数据。
 		DfaData data = dfa.GetData();
-		Assert.AreEqual(0, data.States[data.States[0]]);
-		Assert.AreEqual(-1, data.States[data.States[0] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[0] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(0, data.States[0]);
+		Assert.AreEqual(-1, data.States[0 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[0 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[0 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(1, data.States[data.States[1]]);
-		Assert.AreEqual(-1, data.States[data.States[1] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[1] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(1, data.States[4]);
+		Assert.AreEqual(-1, data.States[4 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[4 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[4 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(6, data.States[data.States[2]]);
-		Assert.AreEqual(-1, data.States[data.States[2] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[2] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(6, data.States[8]);
+		Assert.AreEqual(-1, data.States[8 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[8 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[8 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(7, data.States[data.States[3]]);
-		Assert.AreEqual(-1, data.States[data.States[3] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[3] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(7, data.States[12]);
+		Assert.AreEqual(-1, data.States[12 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[12 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[12 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(13, data.States[data.States[4]]);
-		Assert.AreEqual(-1, data.States[data.States[4] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(1, data.States[data.States[4] + DfaStateData.SymbolsOffset]);
-		Assert.AreEqual(1, data.States[data.States[4] + DfaStateData.SymbolsOffset + 1]);
+		Assert.AreEqual(13, data.States[16]);
+		Assert.AreEqual(-1, data.States[16 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(1, data.States[16 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(28, data.States[16 + DfaStateData.SymbolIndexOffset]);
+		Assert.AreEqual(1, data.States[28]);
 
-		Assert.AreEqual(int.MinValue, data.States[data.States[5]]);
-		Assert.AreEqual(-1, data.States[data.States[5] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(1, data.States[data.States[5] + DfaStateData.SymbolsOffset]);
-		Assert.AreEqual(1, data.States[data.States[5] + DfaStateData.SymbolsOffset + 1]);
+		Assert.AreEqual(int.MinValue, data.States[20]);
+		Assert.AreEqual(-1, data.States[20 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(1, data.States[20 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(28, data.States[20 + DfaStateData.SymbolIndexOffset]);
 
-		Assert.AreEqual(14, data.States[data.States[6]]);
-		Assert.AreEqual(-1, data.States[data.States[6] + DfaStateData.DefaultStateOffset]);
-		Assert.AreEqual(0, data.States[data.States[6] + DfaStateData.SymbolsOffset]);
+		Assert.AreEqual(14, data.States[24]);
+		Assert.AreEqual(-1, data.States[24 + DfaStateData.DefaultStateOffset]);
+		Assert.AreEqual(0, data.States[24 + DfaStateData.SymbolsLengthOffset]);
+		Assert.AreEqual(0, data.States[24 + DfaStateData.SymbolIndexOffset]);
 
 		CollectionAssert.AreEqual(new int[] { 1, 5, 1, 6, 2, 1, 3, 4, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1 }, data.Next);
-		CollectionAssert.AreEqual(new int[] { 0, 1, 1, 1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 4, 6, 6, 6, 6, 6}, data.Check);
+		CollectionAssert.AreEqual(new int[] { 0, 1, 1, 1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 4, 6, 6, 6, 6, 6 }, data.Check);
 	}
 }
