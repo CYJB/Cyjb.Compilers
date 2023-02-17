@@ -20,11 +20,6 @@ public sealed class SourceReader : IDisposable
 	/// </summary>
 	/// <remarks>使用非 Unicode 字符 0xFFFF。</remarks>
 	public const char InvalidCharacter = char.MaxValue;
-	/// <summary>
-	/// 缓冲区的大小。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private const int BufferSize = 0x200;
 
 	/// <summary>
 	/// 返回指定的字符是否是换行符。
@@ -73,15 +68,11 @@ public sealed class SourceReader : IDisposable
 	/// <summary>
 	/// 第一块缓冲区的字符索引。
 	/// </summary>
-	private int firstIndex;
-	/// <summary>
-	/// 最后一块缓冲区的字符长度。
-	/// </summary>
-	private int lastLength;
+	private int firstIndex = 0;
 	/// <summary>
 	/// 用于构造字符串的 <see cref="StringBuilder"/> 实例。
 	/// </summary>
-	private readonly StringBuilder builder = new(BufferSize);
+	private readonly StringBuilder builder;
 	/// <summary>
 	/// 构造字符串时的起始索引。
 	/// </summary>
@@ -108,20 +99,27 @@ public sealed class SourceReader : IDisposable
 	{
 		ArgumentNullException.ThrowIfNull(reader);
 		this.reader = reader;
-		current = new SourceBuffer
+		if (reader is StringReader)
 		{
-			IsLineStart = true
-		};
+			current = new SourceStringBuffer()
+			{
+				IsLineStart = true
+			};
+			// 使用 StringReader 时，不需要使用 builder 构造字符串。
+			builder = new StringBuilder();
+		}
+		else
+		{
+			current = new SourceArrayBuffer
+			{
+				IsLineStart = true
+			};
+			builder = new(SourceBuffer.BufferSize);
+		}
 		last = current;
 		first = current;
-		firstIndex = lastLength = 0;
 	}
 
-	/// <summary>
-	/// 获取基础的字符读取器。
-	/// </summary>
-	/// <value>基础的字符读取器。如果当前读取器已被关闭，则返回 <c>null</c>。</value>
-	public TextReader? BaseReader => reader;
 	/// <summary>
 	/// 获取行列定位器。
 	/// </summary>
@@ -164,7 +162,7 @@ public sealed class SourceReader : IDisposable
 				return current.IsLineStart;
 			}
 			int idx = index - 1;
-			char ch = current.Buffer[idx];
+			char ch = current[idx];
 			if (!IsLineBreak(ch))
 			{
 				return false;
@@ -189,11 +187,11 @@ public sealed class SourceReader : IDisposable
 						// 下一块缓冲区有数据，直接后移。
 						cur = cur.Next;
 					}
-					ch = cur.Buffer[0];
+					ch = cur[0];
 				}
 				else
 				{
-					ch = current.Buffer[index];
+					ch = current[index];
 				}
 				if (ch == '\n')
 				{
@@ -275,7 +273,7 @@ public sealed class SourceReader : IDisposable
 		{
 			return InvalidCharacter;
 		}
-		return current.Buffer[index];
+		return current[index];
 	}
 
 	/// <summary>
@@ -316,7 +314,7 @@ public sealed class SourceReader : IDisposable
 			}
 			else
 			{
-				return temp.Buffer[idx];
+				return temp[idx];
 			}
 		}
 	}
@@ -341,7 +339,7 @@ public sealed class SourceReader : IDisposable
 			return InvalidCharacter;
 		}
 		globalIndex++;
-		return current.Buffer[index++];
+		return current[index++];
 	}
 
 	/// <summary>
@@ -385,7 +383,7 @@ public sealed class SourceReader : IDisposable
 			{
 				globalIndex += idx + 1;
 				index += idx;
-				return current.Buffer[index++];
+				return current[index++];
 			}
 		}
 	}
@@ -493,7 +491,7 @@ public sealed class SourceReader : IDisposable
 	{
 		while (first != current)
 		{
-			startIndex += BufferSize - firstIndex;
+			startIndex += first.Length - firstIndex;
 			firstIndex = 0;
 			first = first.Next;
 		}
@@ -517,6 +515,15 @@ public sealed class SourceReader : IDisposable
 	/// <returns>当前位置之前的数据。</returns>
 	private string ReadedText(bool save)
 	{
+		if (first is SourceStringBuffer stringBuffer)
+		{
+			string result = stringBuffer[firstIndex..index];
+			if (save)
+			{
+				firstIndex = startIndex = index;
+			}
+			return result;
+		}
 		InitBuilder();
 		// 将字符串复制到 StringBuilder 中。
 		SourceBuffer buf = first;
@@ -524,12 +531,12 @@ public sealed class SourceReader : IDisposable
 		int start = 0;
 		while (buf != current)
 		{
-			CopyToBuilder(start, buf, fIndex, BufferSize - fIndex);
-			start += BufferSize - fIndex;
+			CopyToBuilder(start, (SourceArrayBuffer)buf, fIndex, buf.Length - fIndex);
+			start += buf.Length - fIndex;
 			fIndex = 0;
 			buf = buf.Next;
 		}
-		CopyToBuilder(start, buf, fIndex, index - fIndex);
+		CopyToBuilder(start, (SourceArrayBuffer)buf, fIndex, index - fIndex);
 		builderCopiedLen = start + index - fIndex;
 		builder.Length = builderCopiedLen;
 		if (save)
@@ -576,17 +583,17 @@ public sealed class SourceReader : IDisposable
 	/// <param name="buffer">要复制字符串的缓冲区。</param>
 	/// <param name="start">要复制的起始长度。</param>
 	/// <param name="len">要复制的长度。</param>
-	private void CopyToBuilder(int index, SourceBuffer buffer, int start, int len)
+	private void CopyToBuilder(int index, SourceArrayBuffer buffer, int start, int len)
 	{
 		if (builderCopiedLen == index)
 		{
-			builder.Append(buffer.Buffer, start, len);
+			buffer.AppendToBuilder(builder, start, len);
 			builderCopiedLen += len;
 		}
 		else if ((index += len) > builderCopiedLen)
 		{
-			int l = index - builderCopiedLen;
-			builder.Append(buffer.Buffer, start + len - l, l);
+			int restLen = index - builderCopiedLen;
+			buffer.AppendToBuilder(builder, start + len - restLen, restLen);
 			builderCopiedLen = index;
 		}
 	}
@@ -674,6 +681,10 @@ public sealed class SourceReader : IDisposable
 		{
 			return string.Empty;
 		}
+		if (first is SourceStringBuffer stringBuffer)
+		{
+			return stringBuffer[index..(index + count)];
+		}
 		StringBuilder builder = new(count);
 		// 将字符串复制到 StringBuilder 中。
 		SourceBuffer buffer = current;
@@ -682,16 +693,16 @@ public sealed class SourceReader : IDisposable
 			buffer = buffer.Prev;
 		}
 		int start = index - buffer.StartIndex;
-		while (buffer != current && count >= BufferSize)
+		while (buffer != current && count >= buffer.Length)
 		{
-			builder.Append(buffer.Buffer, start, BufferSize - start);
-			count -= BufferSize - start;
+			((SourceArrayBuffer)buffer).AppendToBuilder(builder, start, buffer.Length - start);
+			count -= buffer.Length - start;
 			start = 0;
 			buffer = buffer.Next;
 		}
 		if (count > 0)
 		{
-			builder.Append(buffer.Buffer, start, count);
+			((SourceArrayBuffer)buffer).AppendToBuilder(builder, start, count);
 		}
 		return builder.ToString();
 	}
@@ -738,7 +749,7 @@ public sealed class SourceReader : IDisposable
 			{
 				return false;
 			}
-			length = lastLength;
+			length = last.Length;
 			current = last;
 		}
 		else
@@ -747,7 +758,7 @@ public sealed class SourceReader : IDisposable
 			current = current.Next;
 			if (current == last)
 			{
-				length = lastLength;
+				length = last.Length;
 			}
 		}
 		index = 0;
@@ -771,15 +782,15 @@ public sealed class SourceReader : IDisposable
 		if (length > 0)
 		{
 			int minMark = marks.Count == 0 ? int.MaxValue : marks[0].Index;
-			if (last.Next == first || last.Next.StartIndex + BufferSize > minMark)
+			if (last.Next == first || last.Next.StartIndex + SourceBuffer.BufferSize > minMark)
 			{
 				// 没有可用的空缓冲区，或者缓冲区需要未标记保留，则需要新建立一块。
-				SourceBuffer buffer = new(current, last.Next);
+				SourceBuffer buffer = new SourceArrayBuffer(current, last.Next);
 				last.Next.Prev = buffer;
 				last.Next = buffer;
 			}
 			last = last.Next;
-			last.StartIndex = last.Prev.StartIndex + BufferSize;
+			last.StartIndex = last.Prev.StartIndex + SourceBuffer.BufferSize;
 		}
 		else
 		{
@@ -794,9 +805,9 @@ public sealed class SourceReader : IDisposable
 		else
 		{
 			SourceBuffer prev = last.Prev;
-			char lastChar = prev.Buffer[BufferSize - 1];
+			char lastChar = prev[SourceBuffer.BufferSize - 1];
 			// 兼容 \r\n 的场景
-			if (IsLineBreak(lastChar) && (lastChar != '\r' || last.Buffer[0] != '\n'))
+			if (IsLineBreak(lastChar) && (lastChar != '\r' || last[0] != '\n'))
 			{
 				last.IsLineStart = true;
 			}
@@ -805,13 +816,13 @@ public sealed class SourceReader : IDisposable
 				last.IsLineStart = false;
 			}
 		}
-		lastLength = reader.ReadBlock(last.Buffer, 0, BufferSize);
-		locator?.Read(last.Buffer.AsSpan(0, lastLength));
+		last.Read(reader);
+		locator?.Read(last.Span);
 		if (length == 0)
 		{
-			length = lastLength;
+			length = last.Length;
 		}
-		return lastLength;
+		return last.Length;
 	}
 
 	/// <summary>
@@ -820,63 +831,7 @@ public sealed class SourceReader : IDisposable
 	private void PrevBuffer()
 	{
 		current = current.Prev;
-		index = length = BufferSize;
-	}
-
-	/// <summary>
-	/// 表示 <see cref="SourceReader"/> 的字符缓冲区。
-	/// </summary>
-	private sealed class SourceBuffer
-	{
-		/// <summary>
-		/// 字符缓冲区。
-		/// </summary>
-		public readonly char[] Buffer = new char[BufferSize];
-		/// <summary>
-		/// 字符缓冲区起始位置的字符索引。
-		/// </summary>
-		public int StartIndex;
-		/// <summary>
-		/// 缓冲区起始是否是行首。
-		/// </summary>
-		public bool IsLineStart = false;
-		/// <summary>
-		/// 上一个字符缓冲区。
-		/// </summary>
-		public SourceBuffer Prev;
-		/// <summary>
-		/// 下一个字符缓冲区。
-		/// </summary>
-		public SourceBuffer Next;
-
-		/// <summary>
-		/// 初始化新的字符缓冲区。
-		/// </summary>
-		public SourceBuffer()
-		{
-			Prev = this;
-			Next = this;
-		}
-
-		/// <summary>
-		/// 使用指定的下一个和上一个字符缓冲区初始化。
-		/// </summary>
-		/// <param name="prev">上一个字符缓冲区。</param>
-		/// <param name="next">下一个字符缓冲区。</param>
-		public SourceBuffer(SourceBuffer prev, SourceBuffer next)
-		{
-			Prev = prev;
-			Next = next;
-		}
-
-		/// <summary>
-		/// 返回当前对象的字符串表示形式。
-		/// </summary>
-		/// <returns>当前对象的字符串表示形式。</returns>
-		public override string ToString()
-		{
-			return $"{{{new string(Buffer.Where(ch => ch != '\0').ToArray())}}}";
-		}
+		index = length = current.Length;
 	}
 
 	#endregion // 缓冲区操作
