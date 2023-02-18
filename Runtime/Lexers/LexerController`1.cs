@@ -197,7 +197,7 @@ public class LexerController<T>
 	/// 根据当前词法分析接受结果创建 <see cref="Token{T}"/> 的新实例。
 	/// </summary>
 	/// <returns><see cref="Token{T}"/> 的新实例。</returns>
-	internal Token<T> CreateToken()
+	internal protected virtual Token<T> CreateToken()
 	{
 		return new Token<T>(Kind!.Value, Text, Span, source.Locator, Value);
 	}
