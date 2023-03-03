@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using Cyjb.Text;
 
@@ -45,6 +46,15 @@ public class LexerController<T>
 	/// 是否用户指定了接受。
 	/// </summary>
 	private bool userAccepted = false;
+	/// <summary>
+	/// 当前词法单元的文本。
+	/// </summary>
+	private string? text;
+	/// <summary>
+	/// 文本的结束索引。
+	/// </summary>
+	/// <remarks>正数表示文本的结束索引，<c>-1</c> 用户指定的文本。</remarks>
+	private int textEnd;
 
 #pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
@@ -95,7 +105,26 @@ public class LexerController<T>
 	/// <summary>
 	/// 获取或设置当前词法单元的文本。
 	/// </summary>
-	public string Text { get; set; } = string.Empty;
+	public string Text
+	{
+		get
+		{
+			if (text == null || (textEnd >= 0 && textEnd != Source.Index))
+			{
+				text = Source.ReadedText();
+			}
+			return text;
+		}
+		set
+		{
+			if (value == null)
+			{
+				return;
+			}
+			text = value;
+			textEnd = -1;
+		}
+	}
 	/// <summary>
 	/// 获取或设置当前词法单元的起始索引。
 	/// </summary>
@@ -151,25 +180,7 @@ public class LexerController<T>
 	/// <param name="terminal">当前词法单元的终结符数据。</param>
 	internal void DoAction(int start, TerminalData<T> terminal)
 	{
-		Kind = terminal.Kind;
-		Text = source.ReadedText();
-		Start = start;
-		Value = terminal.Value;
-		if (terminal.Action == null)
-		{
-			userAccepted = true;
-			IsReject = false;
-			IsRejectState = false;
-			IsMore = false;
-		}
-		else
-		{
-			userAccepted = false;
-			IsReject = false;
-			IsRejectState = false;
-			IsMore = false;
-			actionHandler(terminal.Action, this);
-		}
+		DoAction(start, terminal.Kind, terminal.Value, terminal.Action);
 	}
 
 	/// <summary>
@@ -180,23 +191,33 @@ public class LexerController<T>
 	/// <param name="action">当前要执行的动作。</param>
 	internal void DoEofAction(int start, object? value, Delegate? action)
 	{
-		Kind = Token<T>.EndOfFile;
-		Text = source.ReadedText();
+		DoAction(start, Token<T>.EndOfFile, value, action);
+	}
+
+	/// <summary>
+	/// 开始 EndOfFile 词法分析环境。
+	/// </summary>
+	/// <param name="start">当前词法单元的起始索引。</param>
+	/// <param name="kind">当前词法单元的标识符。</param>
+	/// <param name="value">当前词法单元的值。</param>
+	/// <param name="action">当前要执行的动作。</param>
+	private void DoAction(int start, T? kind, object? value, Delegate? action)
+	{
+		Kind = kind;
 		Start = start;
+		text = null;
+		textEnd = Source.Index;
 		Value = value;
+		IsReject = false;
+		IsRejectState = false;
+		IsMore = false;
 		if (action == null)
 		{
 			userAccepted = true;
-			IsReject = false;
-			IsRejectState = false;
-			IsMore = false;
 		}
 		else
 		{
 			userAccepted = false;
-			IsReject = false;
-			IsRejectState = false;
-			IsMore = false;
 			actionHandler(action, this);
 		}
 	}

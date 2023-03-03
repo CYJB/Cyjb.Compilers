@@ -142,13 +142,20 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 			}
 			if (NextToken(state))
 			{
+				// 需要先 CreateToken 确保文本已读入。
+				Token<T>? token = null;
+				if (controller.IsAccept)
+				{
+					token = controller.CreateToken();
+				}
+				// 再丢弃不需要的数据。
 				if (!controller.IsMore && !controller.IsReject)
 				{
 					source.Drop();
 				}
-				if (controller.IsAccept)
+				if (token != null)
 				{
-					return controller.CreateToken();
+					return token.Value;
 				}
 			}
 			else
