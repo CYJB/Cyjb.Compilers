@@ -19,6 +19,10 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 	/// </summary>
 	private IReadOnlySet<T>? candidates;
 	/// <summary>
+	/// 无效的状态列表。
+	/// </summary>
+	private readonly HashSet<int> invalidStates = new();
+	/// <summary>
 	/// 当前候选。
 	/// </summary>
 	private AcceptState curCandidate;
@@ -26,6 +30,7 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 	/// 当前候选索引。
 	/// </summary>
 	private int curCandidateIndex;
+
 	/// <summary>
 	/// 获取当前词法分析器剩余的候选类型。
 	/// </summary>
@@ -38,14 +43,7 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 			{
 				HashSet<T> result = new();
 				// 先添加当前候选
-				for (int i = curCandidateIndex; i < curCandidate.Symbols.Count; i++)
-				{
-					var kind = Data.Terminals[curCandidate.Symbols[i]].Kind;
-					if (kind.HasValue)
-					{
-						result.Add(kind.Value);
-					}
-				}
+				result.UnionWith(GetCandidates(curCandidate.Symbols.Skip(curCandidateIndex)));
 				result.UnionWith(stateStack.SelectMany(GetCandidates));
 				candidates = result.AsReadOnly();
 			}
@@ -108,6 +106,7 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 			}
 		}
 		// 遍历终结状态，执行相应动作。
+		invalidStates.Clear();
 		while (stateStack.Count > 0)
 		{
 			curCandidate = stateStack.Pop();
@@ -116,6 +115,10 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 			foreach (int acceptState in curCandidate.Symbols)
 			{
 				curCandidateIndex++;
+				if (invalidStates.Contains(acceptState))
+				{
+					continue;
+				}
 				// 将文本和流调整到与接受状态匹配的状态。
 				source.Index = index;
 				// 每次都需要清空候选集合，并在使用时重新计算。
@@ -125,25 +128,12 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 				{
 					return true;
 				}
+				if (Controller.IsRejectState)
+				{
+					invalidStates.Add(acceptState);
+				}
 			}
 		}
 		return false;
-	}
-
-	/// <summary>
-	/// 返回指定状态中的候选类型。
-	/// </summary>
-	/// <param name="state">要检查的状态。</param>
-	/// <returns><paramref name="state"/> 中包含的候选状态。</returns>
-	private IEnumerable<T> GetCandidates(AcceptState state)
-	{
-		foreach (int acceptState in state.Symbols)
-		{
-			var kind = Data.Terminals[acceptState].Kind;
-			if (kind.HasValue)
-			{
-				yield return kind.Value;
-			}
-		}
 	}
 }

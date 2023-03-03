@@ -19,6 +19,10 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	/// </summary>
 	private IReadOnlySet<T>? candidates;
 	/// <summary>
+	/// 无效的状态列表。
+	/// </summary>
+	private readonly HashSet<int> invalidStates = new();
+	/// <summary>
 	/// 当前候选。
 	/// </summary>
 	private AcceptState curCandidate;
@@ -26,6 +30,7 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	/// 当前候选索引。
 	/// </summary>
 	private int curCandidateIndex;
+
 	/// <summary>
 	/// 获取当前词法分析器剩余的候选类型。
 	/// </summary>
@@ -38,20 +43,7 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			{
 				HashSet<T> result = new();
 				// 先添加当前候选
-				for (int i = curCandidateIndex; i < curCandidate.Symbols.Count; i++)
-				{
-					int acceptState = curCandidate.Symbols[i];
-					if (acceptState < 0)
-					{
-						// 跳过向前看的头状态。
-						break;
-					}
-					var kind = Data.Terminals[acceptState].Kind;
-					if (kind.HasValue)
-					{
-						result.Add(kind.Value);
-					}
-				}
+				result.UnionWith(GetCandidates(curCandidate.Symbols.Skip(curCandidateIndex)));
 				result.UnionWith(stateStack.SelectMany(GetCandidates));
 				candidates = result.AsReadOnly();
 			}
@@ -121,6 +113,7 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			}
 		}
 		// 遍历终结状态，执行相应动作。
+		invalidStates.Clear();
 		while (stateStack.Count > 0)
 		{
 			curCandidate = stateStack.Pop();
@@ -133,6 +126,10 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 					// 跳过向前看的头状态。
 					break;
 				}
+				if (invalidStates.Contains(acceptState))
+				{
+					continue;
+				}
 				AdjustIndex(acceptState, startIndex, curCandidate.Index);
 				// 每次都需要清空候选集合，并在使用时重新计算。
 				candidates = null;
@@ -140,6 +137,10 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 				if (!Controller.IsReject)
 				{
 					return true;
+				}
+				if (Controller.IsRejectState)
+				{
+					invalidStates.Add(acceptState);
 				}
 			}
 		}
@@ -211,27 +212,5 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			}
 		}
 		return false;
-	}
-
-	/// <summary>
-	/// 返回指定状态中的候选类型。
-	/// </summary>
-	/// <param name="state">要检查的状态。</param>
-	/// <returns><paramref name="state"/> 中包含的候选状态。</returns>
-	private IEnumerable<T> GetCandidates(AcceptState state)
-	{
-		foreach (int acceptState in state.Symbols)
-		{
-			if (acceptState < 0)
-			{
-				// 跳过向前看的头状态。
-				break;
-			}
-			var kind = Data.Terminals[acceptState].Kind;
-			if (kind.HasValue)
-			{
-				yield return kind.Value;
-			}
-		}
 	}
 }

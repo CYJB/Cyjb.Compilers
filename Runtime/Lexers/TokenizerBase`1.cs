@@ -40,6 +40,10 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// 是否已同步共享上下文。
 	/// </summary>
 	private bool contextSynced = false;
+	/// <summary>
+	/// 已拒绝的状态列表。
+	/// </summary>
+	private readonly HashSet<int> rejectedStates = new();
 
 	/// <summary>
 	/// 词法分析错误的事件。
@@ -206,6 +210,42 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	public void Reset()
 	{
 		status = ParseStatus.Ready;
+	}
+
+	/// <summary>
+	/// 返回指定状态中的候选类型。
+	/// </summary>
+	/// <param name="state">要检查的状态。</param>
+	/// <returns><paramref name="state"/> 中包含的候选状态。</returns>
+	protected IEnumerable<T> GetCandidates(AcceptState state)
+	{
+		return GetCandidates(state.Symbols);
+	}
+
+	/// <summary>
+	/// 返回指定符号集中的候选类型。
+	/// </summary>
+	/// <param name="symbols">要检查的符号集。</param>
+	/// <returns><paramref name="symbols"/> 中包含的候选状态。</returns>
+	protected IEnumerable<T> GetCandidates(IEnumerable<int> symbols)
+	{
+		foreach (int acceptState in symbols)
+		{
+			if (acceptState < 0)
+			{
+				// 跳过向前看的头状态。
+				break;
+			}
+			if (rejectedStates.Contains(acceptState))
+			{
+				continue;
+			}
+			var kind = Data.Terminals[acceptState].Kind;
+			if (kind.HasValue)
+			{
+				yield return kind.Value;
+			}
+		}
 	}
 
 	#region IDisposable 成员

@@ -127,6 +127,10 @@ public class LexerController<T>
 	/// </summary>
 	internal bool IsReject { get; private set; }
 	/// <summary>
+	/// 获取是否拒绝了当前状态。
+	/// </summary>
+	internal bool IsRejectState { get; private set; }
+	/// <summary>
 	/// 获取下次匹配成功时，是否不替换当前的文本，而是把新的匹配追加在后面。
 	/// </summary>
 	internal bool IsMore { get; private set; }
@@ -155,12 +159,14 @@ public class LexerController<T>
 		{
 			userAccepted = true;
 			IsReject = false;
+			IsRejectState = false;
 			IsMore = false;
 		}
 		else
 		{
 			userAccepted = false;
 			IsReject = false;
+			IsRejectState = false;
 			IsMore = false;
 			actionHandler(terminal.Action, this);
 		}
@@ -182,12 +188,14 @@ public class LexerController<T>
 		{
 			userAccepted = true;
 			IsReject = false;
+			IsRejectState = false;
 			IsMore = false;
 		}
 		else
 		{
 			userAccepted = false;
 			IsReject = false;
+			IsRejectState = false;
 			IsMore = false;
 			actionHandler(action, this);
 		}
@@ -260,7 +268,8 @@ public class LexerController<T>
 	/// <summary>
 	/// 拒绝当前的匹配，并尝试寻找下一个匹配。如果找不到下一个匹配，则会返回错误。
 	/// </summary>
-	public void Reject()
+	/// <param name="options">拒绝匹配的选项。</param>
+	public void Reject(RejectOptions options = RejectOptions.Default)
 	{
 		if (!rejectable)
 		{
@@ -272,6 +281,10 @@ public class LexerController<T>
 			throw new InvalidOperationException(Resources.ConflictingAcceptAction);
 		}
 		IsReject = true;
+		if (options == RejectOptions.State)
+		{
+			IsRejectState = true;
+		}
 	}
 
 	/// <summary>
@@ -346,7 +359,7 @@ public class LexerController<T>
 
 	public void ExitContext(string label)
 	{
-		if(context.Label == label)
+		if (context.Label == label)
 		{
 			PopContext();
 		}
