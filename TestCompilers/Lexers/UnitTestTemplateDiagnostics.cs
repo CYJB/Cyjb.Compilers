@@ -64,6 +64,6 @@ public class UnitTestTemplateDiagnostics
 		myProcess.WaitForExit();
 
 		string[] expected = CultureInfo.CurrentUICulture.Name.StartsWith("zh-") ? ExpectedZH : ExpectedOther;
-		Assert.AreEqual(string.Join("\r\n", ExpectedZH).Trim(), content.Trim());
+		Assert.AreEqual(string.Join("\r\n", expected).Trim(), content.Trim());
 	}
 }
