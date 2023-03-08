@@ -2,6 +2,7 @@ Cyjb.Compilers
 ====
 
 [![](https://img.shields.io/nuget/v/Cyjb.Compilers.svg)](https://www.nuget.org/packages/Cyjb.Compilers)
+[![codecov](https://codecov.io/gh/CYJB/Cyjb.Compilers/branch/master/graph/badge.svg?token=Fp9xTPxwm9)](https://codecov.io/gh/CYJB/Cyjb.Compilers)
 
 提供编译相关功能，基于 .NET 6。
 
