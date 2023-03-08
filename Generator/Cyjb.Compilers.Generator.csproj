@@ -6,7 +6,6 @@
 	<Nullable>enable</Nullable>
 	<GenerateDocumentationFile>False</GenerateDocumentationFile>
 	<SignAssembly>True</SignAssembly>
-	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
 	<PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
 	<Description>允许根据设计时词法分析和语法分析定义，生成相应的实现。</Description>
 	<Copyright>﻿Copyright (c) 2022, CYJB</Copyright>
@@ -17,6 +16,10 @@
 	<OutputType>Exe</OutputType>
 	<Authors>CYJB</Authors>
 	<AssemblyName>Generator</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

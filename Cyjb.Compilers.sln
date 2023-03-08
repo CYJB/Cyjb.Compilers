@@ -5,15 +5,13 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers.Runtime", "Runtime\Cyjb.Compilers.Runtime.csproj", "{160E8A9F-BEDD-4F63-9084-F6E9B8C6624C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTest", "ConsoleTest\ConsoleTest.csproj", "{2DD71EB7-07CA-48BF-8717-330112AF9B53}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCompilers", "TestCompilers\TestCompilers.csproj", "{673D3BF7-7A14-47B1-A49B-E1A2A4F6A507}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers", "Compilers\Cyjb.Compilers.csproj", "{B6912ADB-4D28-4948-8389-2367683D50C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers.Generator", "Generator\Cyjb.Compilers.Generator.csproj", "{8DBCE916-4676-42A3-AF3A-D2415E2301FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cyjb.Compilers.Design", "Design\Cyjb.Compilers.Design.csproj", "{CDAE39B3-C8ED-4A3C-B8CC-54C5C2FB68A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cyjb.Compilers.Design", "Design\Cyjb.Compilers.Design.csproj", "{CDAE39B3-C8ED-4A3C-B8CC-54C5C2FB68A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +23,6 @@ Global
 		{160E8A9F-BEDD-4F63-9084-F6E9B8C6624C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{160E8A9F-BEDD-4F63-9084-F6E9B8C6624C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{160E8A9F-BEDD-4F63-9084-F6E9B8C6624C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2DD71EB7-07CA-48BF-8717-330112AF9B53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2DD71EB7-07CA-48BF-8717-330112AF9B53}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2DD71EB7-07CA-48BF-8717-330112AF9B53}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2DD71EB7-07CA-48BF-8717-330112AF9B53}.Release|Any CPU.Build.0 = Release|Any CPU
 		{673D3BF7-7A14-47B1-A49B-E1A2A4F6A507}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{673D3BF7-7A14-47B1-A49B-E1A2A4F6A507}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{673D3BF7-7A14-47B1-A49B-E1A2A4F6A507}.Release|Any CPU.ActiveCfg = Release|Any CPU

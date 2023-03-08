@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
 	<GenerateDocumentationFile>False</GenerateDocumentationFile>
 	<SignAssembly>True</SignAssembly>
-	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
 	<PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
 	<Description>提供编译器的设计时生成功能</Description>
 	<Copyright>Copyright (c) 2022, CYJB</Copyright>
@@ -20,6 +19,10 @@
 	<DevelopmentDependency>true</DevelopmentDependency>
 	<Authors>CYJB</Authors>
 	<PackageTags>Compiler, T4</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,6 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+	<CollectCoverage>true</CollectCoverage>
+	<CoverletOutputFormat>cobertura</CoverletOutputFormat>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+  	<PackageReference Include="coverlet.msbuild" Version="3.2.0">
+	  <PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
 	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.12">
 	  <GeneratePathProperty>True</GeneratePathProperty>
 	  <PrivateAssets>all</PrivateAssets>
