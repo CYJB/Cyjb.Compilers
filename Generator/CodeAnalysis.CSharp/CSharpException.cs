@@ -21,11 +21,8 @@ internal class CSharpException : Exception
 	{
 		get
 		{
-			if (resourceManager is null)
-			{
-				resourceManager = new ResourceManager("Microsoft.CodeAnalysis.CSharp.CSharpResources",
+			resourceManager ??= new ResourceManager("Microsoft.CodeAnalysis.CSharp.CSharpResources",
 					typeof(CSharpSyntaxTree).Assembly);
-			}
 			return resourceManager;
 		}
 	}
