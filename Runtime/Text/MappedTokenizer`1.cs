@@ -16,7 +16,7 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	/// <summary>
 	/// 映射关系。
 	/// </summary>
-	private readonly SortedLocationMap map;
+	private readonly LocationMap map;
 
 	/// <summary>
 	/// 词法分析错误的事件。
@@ -36,7 +36,7 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	public MappedTokenizer(ITokenizer<T> tokenizer, IEnumerable<Tuple<int, int>> map)
 	{
 		this.tokenizer = tokenizer;
-		this.map = new SortedLocationMap(map);
+		this.map = new LocationMap(map);
 	}
 
 	/// <summary>
@@ -81,6 +81,16 @@ public sealed class MappedTokenizer<T> : ITokenizer<T>
 	public void Reset()
 	{
 		tokenizer.Reset();
+	}
+
+	/// <summary>
+	/// 映射指定的位置。
+	/// </summary>
+	/// <param name="location">要映射的位置。</param>
+	/// <returns>映射后的位置。</returns>
+	public int MapLocation(int location)
+	{
+		return map.MapLocation(location);
 	}
 
 	#region IDisposable 成员
