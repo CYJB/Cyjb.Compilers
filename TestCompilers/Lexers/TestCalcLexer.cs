@@ -21,7 +21,7 @@ internal partial class TestCalcLexer : LexerController<Calc>
 	[LexerSymbol("[0-9]+", Kind = Calc.Id)]
 	public void DigitAction()
 	{
-		Accept(double.Parse(Text));
+		Accept(double.Parse(Text.AsSpan()));
 	}
 }
 

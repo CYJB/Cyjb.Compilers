@@ -52,7 +52,7 @@ public partial class TestEscapeStrLexer : LexerController<Str>
 	[LexerSymbol(@"<str>\\x[0-9]{2}")]
 	public void HexEscapeAction()
 	{
-		decodedText.Append((char)int.Parse(Text.AsSpan()[2..], NumberStyles.HexNumber));
+		decodedText.Append((char)int.Parse(Text.AsSpan(2), NumberStyles.HexNumber));
 	}
 
 	[LexerSymbol(@"<str>\\n")]

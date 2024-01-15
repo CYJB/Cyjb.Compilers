@@ -10,11 +10,6 @@ public abstract class TokenParseError : IEquatable<TokenParseError>
 	/// </summary>
 	/// <value>语法分析错误的范围。</value>
 	public abstract TextSpan Span { get; }
-	/// <summary>
-	/// 获取语法分析错误的行列位置范围。
-	/// </summary>
-	/// <value>语法分析错误的行列位置范围。</value>
-	public abstract LinePositionSpan LinePositionSpan { get; }
 
 	#region IEquatable<TokenParseError> 成员
 

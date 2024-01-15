@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Text;
 using Cyjb.Compilers;
 
 namespace Cyjb.Text;
@@ -22,65 +20,9 @@ public sealed class SourceReader : IDisposable
 	public const char InvalidCharacter = char.MaxValue;
 
 	/// <summary>
-	/// 返回指定的字符是否是换行符。
+	/// 字符缓冲区。
 	/// </summary>
-	private static bool IsLineBreak(char ch)
-	{
-		return ch is '\n' or '\r' or '\u0085' or '\u2028' or '\u2029';
-	}
-
-	/// <summary>
-	/// 当前存有数据的缓冲区的指针。
-	/// </summary>
-	private SourceBuffer current;
-	/// <summary>
-	/// 最后一个存有数据的缓冲区的指针。
-	/// </summary>
-	private SourceBuffer last;
-	/// <summary>
-	/// 第一个存有数据的缓冲区的指针。
-	/// </summary>
-	private SourceBuffer first;
-	/// <summary>
-	/// 文本的读取器。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private TextReader? reader;
-	/// <summary>
-	/// 当前缓冲区的字符索引。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private int index;
-	/// <summary>
-	/// 当前缓冲区的字符长度。
-	/// </summary>
-	private int length;
-	/// <summary>
-	/// 当前全局字符索引。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private int globalIndex;
-	/// <summary>
-	/// 可以被 Accept 的起始字符索引。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private int startIndex;
-	/// <summary>
-	/// 第一块缓冲区的字符索引。
-	/// </summary>
-	private int firstIndex = 0;
-	/// <summary>
-	/// 用于构造字符串的 <see cref="StringBuilder"/> 实例。
-	/// </summary>
-	private readonly StringBuilder builder;
-	/// <summary>
-	/// 构造字符串时的起始索引。
-	/// </summary>
-	private int builderIndex = -1;
-	/// <summary>
-	/// 已向 <see cref="builder"/> 中复制了的字符串长度。
-	/// </summary>
-	private int builderCopiedLen;
+	private readonly ISourceBuffer buffer;
 	/// <summary>
 	/// 行列定位器。
 	/// </summary>
@@ -89,39 +31,37 @@ public sealed class SourceReader : IDisposable
 	/// 标记列表。
 	/// </summary>
 	private readonly List<SourceMark> marks = new();
+	/// <summary>
+	/// 标记的起始索引。
+	/// </summary>
+	private int markIndex = int.MaxValue;
 
 	/// <summary>
 	/// 使用指定的字符读取器初始化 <see cref="SourceReader"/> 类的新实例。
 	/// </summary>
 	/// <param name="reader">用于读取源文件的字符读取器。</param>
+	/// <param name="bufferSize">读取文本的缓冲区尺寸。
+	/// 默认为 <c>0</c>，表示不限制缓冲区大小，内存消耗较大但性能高；
+	/// 其他值会限制每块缓冲区的大小，当不在使用相关 <see cref="Token{T}"/> 后可以释放缓冲区节约内容，
+	/// 缓冲区不宜设置太小，否则容易影响性能，可以考虑设置为 0x1000 或更高。
+	/// </param>
 	/// <exception cref="ArgumentNullException"><paramref name="reader"/> 为 <c>null</c>。</exception>
-	public SourceReader(TextReader reader)
+	public SourceReader(TextReader reader, int bufferSize = 0)
 	{
 		ArgumentNullException.ThrowIfNull(reader);
-		this.reader = reader;
-		if (reader is StringReader)
+		if (reader is StringReader || bufferSize <= 0 || bufferSize == int.MaxValue)
 		{
-			current = new SourceStringBuffer()
-			{
-				IsLineStart = true
-			};
-			// 使用 StringReader 时，不需要使用 builder 构造字符串。
-			builder = new StringBuilder();
+			// StringReader 已经包含了完整的字符串，没有分块读取的意义。
+			buffer = new SourceCompleteBuffer(reader);
 		}
 		else
 		{
-			current = new SourceArrayBuffer
-			{
-				IsLineStart = true
-			};
-			builder = new(SourceBuffer.BufferSize);
+			buffer = new SourcePartialBuffer(reader, bufferSize);
 		}
-		last = current;
-		first = current;
 	}
 
 	/// <summary>
-	/// 获取行列定位器。
+	/// 获取关联到的行列定位器。
 	/// </summary>
 	public LineLocator? Locator => locator;
 	/// <summary>
@@ -136,16 +76,24 @@ public sealed class SourceReader : IDisposable
 	/// <value>当前的字符索引，该索引从零开始。设置索引时，不能达到被丢弃的字符，或者超出文件结尾。</value>
 	public int Index
 	{
-		get { return globalIndex; }
+		get => buffer.Index;
 		set
 		{
-			if (value > globalIndex)
+			if (value < buffer.Index)
 			{
-				Read(value - globalIndex - 1);
+				if (value < buffer.StartIndex)
+				{
+					value = buffer.StartIndex;
+				}
+				buffer.Index = value;
 			}
-			else if (value < globalIndex)
+			else if (value > buffer.Index)
 			{
-				Unget(globalIndex - value);
+				if (value > End)
+				{
+					value = End;
+				}
+				buffer.Index = value;
 			}
 		}
 	}
@@ -153,63 +101,21 @@ public sealed class SourceReader : IDisposable
 	/// <summary>
 	/// 返回当前是否位于行首。
 	/// </summary>
-	public bool IsLineStart
-	{
-		get
-		{
-			if (index <= 0)
-			{
-				return current.IsLineStart;
-			}
-			int idx = index - 1;
-			char ch = current[idx];
-			if (!IsLineBreak(ch))
-			{
-				return false;
-			}
-			if (ch == '\r')
-			{
-				if (index == length)
-				{
-					SourceBuffer cur = current;
-					// 达到当前缓冲区结尾，加载下一缓冲区
-					if (cur == last)
-					{
-						// 下一块缓冲区没有数据，需要从基础字符读取器中读取。
-						if (PrepareBuffer() == 0)
-						{
-							return true;
-						}
-						cur = last;
-					}
-					else
-					{
-						// 下一块缓冲区有数据，直接后移。
-						cur = cur.Next;
-					}
-					ch = cur[0];
-				}
-				else
-				{
-					ch = current[index];
-				}
-				if (ch == '\n')
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-	}
+	public bool IsLineStart => buffer.IsLineStart;
 
 	/// <summary>
 	/// 开启行列定位功能，允许通过 <see cref="GetPosition"/> 获取指定索引的行列位置。
 	/// 需要在读取字符之前设置。
 	/// </summary>
 	/// <param name="tabSize">Tab 的宽度。</param>
-	public void UseLineLocator(int tabSize = 4)
+	public SourceReader UseLineLocator(int tabSize = 4)
 	{
-		locator ??= new LineLocator(tabSize);
+		if (locator == null)
+		{
+			locator = new LineLocator(tabSize);
+			buffer.SetLocator(locator);
+		}
+		return this;
 	}
 
 	/// <summary>
@@ -217,7 +123,7 @@ public sealed class SourceReader : IDisposable
 	/// </summary>
 	/// <param name="index">要检查行列位置的索引。</param>
 	/// <returns>指定索引的行列位置。</returns>
-	/// <exception cref="InvalidOperationException"></exception>
+	/// <exception cref="InvalidOperationException">未提前调用 <see cref="UseLineLocator"/>。</exception>
 	public LinePosition GetPosition(int index)
 	{
 		if (locator == null)
@@ -225,6 +131,21 @@ public sealed class SourceReader : IDisposable
 			throw new InvalidOperationException(Resources.GetPositionBeforeUse);
 		}
 		return locator.GetPosition(index);
+	}
+
+	/// <summary>
+	/// 返回指定文本范围的行列位置范围，需要提前 <see cref="UseLineLocator"/>。
+	/// </summary>
+	/// <param name="span">要检查行列位置的文本范围。</param>
+	/// <returns>指定文本范围的行列位置范围。</returns>
+	/// <exception cref="InvalidOperationException">未提前调用 <see cref="UseLineLocator"/>。</exception>
+	public LinePositionSpan GetLinePositionSpan (TextSpan span)
+	{
+		if (locator == null)
+		{
+			throw new InvalidOperationException(Resources.GetPositionBeforeUse);
+		}
+		return locator.GetSpan(span);
 	}
 
 	/// <summary>
@@ -242,12 +163,7 @@ public sealed class SourceReader : IDisposable
 	/// </summary>
 	public void Dispose()
 	{
-		if (reader != null)
-		{
-			reader.Dispose();
-			reader = null;
-			builder.Clear();
-		}
+		buffer.Dispose();
 	}
 
 	#endregion
@@ -265,58 +181,33 @@ public sealed class SourceReader : IDisposable
 	/// </overloads>
 	public char Peek()
 	{
-		if (globalIndex >= End)
+		if (buffer.Index >= End)
 		{
 			return InvalidCharacter;
 		}
-		if (index == length && !NextBuffer())
-		{
-			return InvalidCharacter;
-		}
-		return current[index];
+		return buffer.Peek(0);
 	}
 
 	/// <summary>
-	/// 返回文本读取器中之后的 <paramref name="idx"/> 索引的字符，但不使用它。<c>Peek(0)</c> 等价于 <see cref="Peek()"/>。
+	/// 返回文本读取器中之后的 <paramref name="offset"/> 偏移的字符，但不使用它。
+	/// <c>Peek(0)</c> 等价于 <see cref="Peek()"/>。
 	/// </summary>
-	/// <param name="idx">要读取的索引。</param>
-	/// <returns>文本读取器中之后的 <paramref name="idx"/> 索引的字符，或为 <see cref="InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
+	/// <param name="offset">要读取的偏移。</param>
+	/// <returns>文本读取器中之后的 <paramref name="offset"/> 偏移的字符，
+	/// 或为 <see cref="InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
 	/// <exception cref="ObjectDisposedException">当前 <see cref="SourceReader"/> 已关闭。</exception>
-	/// <exception cref="ArgumentOutOfRangeException"><paramref name="idx"/> 小于 <c>0</c>。</exception>
-	public char Peek(int idx)
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="offset"/> 小于 <c>0</c>。</exception>
+	public char Peek(int offset)
 	{
-		if (idx < 0)
+		if (offset < 0)
 		{
-			throw CommonExceptions.ArgumentNegative(idx);
+			throw CommonExceptions.ArgumentNegative(offset);
 		}
-		else if (idx == 0)
-		{
-			return Peek();
-		}
-		if (globalIndex + idx >= End)
+		if (buffer.Index + offset >= End)
 		{
 			return InvalidCharacter;
 		}
-		SourceBuffer temp = current;
-		int tempLen = length;
-		idx += index;
-		while (true)
-		{
-			if (idx >= tempLen)
-			{
-				idx -= tempLen;
-				if (temp == last && (tempLen = PrepareBuffer()) == 0)
-				{
-					// 没有可读数据了，返回。
-					return InvalidCharacter;
-				}
-				temp = temp.Next;
-			}
-			else
-			{
-				return temp[idx];
-			}
-		}
+		return buffer.Peek(offset);
 	}
 
 	/// <summary>
@@ -330,62 +221,33 @@ public sealed class SourceReader : IDisposable
 	/// </overloads>
 	public char Read()
 	{
-		if (globalIndex >= End)
+		if (buffer.Index >= End)
 		{
 			return InvalidCharacter;
 		}
-		if (index == length && !NextBuffer())
-		{
-			return InvalidCharacter;
-		}
-		globalIndex++;
-		return current[index++];
+		return buffer.Read(0);
 	}
 
 	/// <summary>
-	/// 读取文本读取器中之后的 <paramref name="idx"/> 索引的字符，并使该字符的位置提升。
+	/// 读取文本读取器中之后的 <paramref name="offset"/> 偏移的字符，并使该字符的位置提升。
 	/// <c>Read(0)</c> 等价于 <see cref="Read()"/>。
 	/// </summary>
-	/// <param name="idx">要读取的索引。</param>
-	/// <returns>文本读取器中之后的 <paramref name="idx"/> 索引的字符，
+	/// <param name="offset">要读取的偏移。</param>
+	/// <returns>文本读取器中之后的 <paramref name="offset"/> 偏移的字符，
 	/// 或为 <see cref="InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
 	/// <exception cref="ObjectDisposedException">当前 <see cref="SourceReader"/> 已关闭。</exception>
-	/// <exception cref="ArgumentOutOfRangeException"><paramref name="idx"/> 小于 <c>0</c>。</exception>
-	public char Read(int idx)
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="offset"/> 小于 <c>0</c>。</exception>
+	public char Read(int offset)
 	{
-		if (idx < 0)
+		if (offset < 0)
 		{
-			throw CommonExceptions.ArgumentNegative(idx);
+			throw CommonExceptions.ArgumentNegative(offset);
 		}
-		else if (idx == 0)
+		if (buffer.Index + offset >= End)
 		{
-			return Read();
+			offset = End - buffer.Index;
 		}
-		if (globalIndex + idx >= End)
-		{
-			return InvalidCharacter;
-		}
-		while (true)
-		{
-			if (idx >= length - index)
-			{
-				globalIndex += length - index;
-				idx -= length - index;
-				index = length;
-				if (!NextBuffer())
-				{
-					// 没有数据了，返回。
-					index = length;
-					return InvalidCharacter;
-				}
-			}
-			else
-			{
-				globalIndex += idx + 1;
-				index += idx;
-				return current[index++];
-			}
-		}
+		return buffer.Read(offset);
 	}
 
 	/// <summary>
@@ -399,23 +261,15 @@ public sealed class SourceReader : IDisposable
 	/// </overloads>
 	public bool Unget()
 	{
-		if (current != first)
+		if (buffer.Index > buffer.StartIndex)
 		{
-			if (index <= 0)
-			{
-				PrevBuffer();
-			}
-			globalIndex--;
-			index--;
+			buffer.Index--;
 			return true;
 		}
-		if (index > firstIndex)
+		else
 		{
-			globalIndex--;
-			index--;
-			return true;
+			return false;
 		}
-		return false;
 	}
 
 	/// <summary>
@@ -436,52 +290,18 @@ public sealed class SourceReader : IDisposable
 		{
 			return 0;
 		}
-		else if (count == 1)
-		{
-			return Unget() ? 1 : 0;
-		}
-		int backCount = 0;
-		while (true)
-		{
-			if (current == first)
-			{
-				int charCnt = index - firstIndex;
-				if (count > charCnt)
-				{
-					backCount += charCnt;
-					index = firstIndex;
-				}
-				else
-				{
-					backCount += count;
-					index -= count;
-				}
-				break;
-			}
-			if (count > index)
-			{
-				backCount += index;
-				count -= index;
-				PrevBuffer();
-			}
-			else
-			{
-				backCount += count;
-				index -= count;
-				break;
-			}
-		}
-		globalIndex -= backCount;
-		return backCount;
+		count = Math.Min(count, buffer.Index - buffer.StartIndex);
+		buffer.Index -= count;
+		return count;
 	}
 
 	/// <summary>
 	/// 返回当前位置之前的数据。
 	/// </summary>
 	/// <returns>当前位置之前的数据。</returns>
-	public string ReadedText()
+	public StringView GetReadedText()
 	{
-		return ReadedText(false);
+		return buffer.ReadBlock(buffer.StartIndex, buffer.Index - buffer.StartIndex);
 	}
 
 	/// <summary>
@@ -489,113 +309,43 @@ public sealed class SourceReader : IDisposable
 	/// </summary>
 	public void Drop()
 	{
-		while (first != current)
-		{
-			startIndex += first.Length - firstIndex;
-			firstIndex = 0;
-			first = first.Next;
-		}
-		startIndex += index - firstIndex;
-		firstIndex = index;
+		buffer.StartIndex = buffer.Index;
+		buffer.Free(Math.Min(buffer.StartIndex, markIndex));
 	}
 
 	/// <summary>
 	/// 将当前位置之前的数据全部丢弃，并返回被丢弃的数据。之后的 <see cref="Unget()"/> 操作至多回退到当前位置。
 	/// </summary>
 	/// <returns>当前位置之前的数据。</returns>
-	public string Accept()
+	public StringView Accept()
 	{
-		return ReadedText(true);
+		StringView text = buffer.ReadBlock(buffer.StartIndex, buffer.Index - buffer.StartIndex);
+		Drop();
+		return text;
 	}
 
 	/// <summary>
-	/// 返回当前位置之前的数据。
-	/// </summary>
-	/// <param name="save">是否需要保存位置。</param>
-	/// <returns>当前位置之前的数据。</returns>
-	private string ReadedText(bool save)
-	{
-		if (first is SourceStringBuffer stringBuffer)
-		{
-			string result = stringBuffer[firstIndex..index];
-			if (save)
-			{
-				firstIndex = startIndex = index;
-			}
-			return result;
-		}
-		InitBuilder();
-		// 将字符串复制到 StringBuilder 中。
-		SourceBuffer buf = first;
-		int fIndex = firstIndex;
-		int start = 0;
-		while (buf != current)
-		{
-			CopyToBuilder(start, (SourceArrayBuffer)buf, fIndex, buf.Length - fIndex);
-			start += buf.Length - fIndex;
-			fIndex = 0;
-			buf = buf.Next;
-		}
-		CopyToBuilder(start, (SourceArrayBuffer)buf, fIndex, index - fIndex);
-		builderCopiedLen = start + index - fIndex;
-		builder.Length = builderCopiedLen;
-		if (save)
-		{
-			first = buf;
-			firstIndex = index;
-			startIndex += builderCopiedLen;
-		}
-		return builder.ToString();
-	}
-
-	/// <summary>
-	/// 将当前位置之前的数据全部丢弃，并以 <see cref="Cyjb.Text.Token{T}"/> 的形式返回被丢弃的数据。
+	/// 将当前位置之前的数据全部丢弃，并以 <see cref="Token{T}"/> 的形式返回被丢弃的数据。
 	/// 之后的 <see cref="Unget()"/> 操作至多回退到当前位置。
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-	/// <param name="kind">返回的 <see cref="Cyjb.Text.Token{T}"/> 的标识符。</param>
-	/// <param name="value"><see cref="Cyjb.Text.Token{T}"/> 的值。</param>
+	/// <param name="kind">返回的 <see cref="Token{T}"/> 的标识符。</param>
+	/// <param name="span">词法单元的文本范围。</param>
+	/// <param name="value"><see cref="Token{T}"/> 的值。</param>
 	/// <returns>当前位置之前的数据。</returns>
-	public Token<T> AcceptToken<T>(T kind, object? value = null)
+	public Token<T> AcceptToken<T>(T kind, TextSpan? span = null, object? value = null)
 		where T : struct
 	{
-		int start = startIndex;
-		return new Token<T>(kind, Accept(), new TextSpan(start, startIndex), value);
-	}
-
-	/// <summary>
-	/// 初始化构造字符串的 <see cref="StringBuilder"/>。
-	/// </summary>
-	private void InitBuilder()
-	{
-		if (builderIndex != startIndex)
+		TextSpan tokenSpan;
+		if (span.HasValue)
 		{
-			builder.Clear();
-			builderIndex = startIndex;
-			builderCopiedLen = 0;
+			tokenSpan = span.Value;
 		}
-	}
-
-	/// <summary>
-	/// 将指定缓冲区中从指定索引开始，指定长度的字符串复制到 <see cref="builder"/> 中。
-	/// </summary>
-	/// <param name="index">当前的字符位置。</param>
-	/// <param name="buffer">要复制字符串的缓冲区。</param>
-	/// <param name="start">要复制的起始长度。</param>
-	/// <param name="len">要复制的长度。</param>
-	private void CopyToBuilder(int index, SourceArrayBuffer buffer, int start, int len)
-	{
-		if (builderCopiedLen == index)
+		else
 		{
-			buffer.AppendToBuilder(builder, start, len);
-			builderCopiedLen += len;
+			tokenSpan = new TextSpan(buffer.StartIndex, buffer.Index);
 		}
-		else if ((index += len) > builderCopiedLen)
-		{
-			int restLen = index - builderCopiedLen;
-			buffer.AppendToBuilder(builder, start + len - restLen, restLen);
-			builderCopiedLen = index;
-		}
+		return new Token<T>(kind, Accept(), tokenSpan, value);
 	}
 
 	#endregion // 读取字符
@@ -609,13 +359,17 @@ public sealed class SourceReader : IDisposable
 	/// <remarks>被标记的位置及其之后的字符可以确保能够通过 <c>ReadBlock</c> 方法读取。</remarks>
 	public SourceMark Mark()
 	{
-		SourceMark mark = new(globalIndex);
+		SourceMark mark = new(buffer.Index);
 		int index = marks.BinarySearch(mark);
 		if (index < 0)
 		{
 			index = ~index;
 		}
 		marks.Insert(index, mark);
+		if (markIndex > mark.Index)
+		{
+			markIndex = mark.Index;
+		}
 		return mark;
 	}
 
@@ -625,34 +379,60 @@ public sealed class SourceReader : IDisposable
 	/// <param name="mark">要释放的位置标记。</param>
 	public void Release(SourceMark? mark)
 	{
-		if (mark == null || !mark.Valid)
+		int index = FindMark(mark);
+		if (index < 0)
 		{
 			return;
+		}
+		mark!.Valid = false;
+		marks.RemoveAt(index);
+		if (index == 0)
+		{
+			// 丢弃不再需要的字符。
+			if (marks.Count == 0)
+			{
+				markIndex = int.MaxValue;
+				buffer.Free(buffer.StartIndex);
+			}
+			else if (marks[0].Index < buffer.StartIndex)
+			{
+				buffer.Free(marks[0].Index);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 找到指定源文件位置标记的索引。
+	/// </summary>
+	/// <param name="mark">要查找的源文件位置标记。</param>
+	/// <returns>指定源文件位置标记的索引，如果未找到则返回 <c>-1</c>。</returns>
+	private int FindMark(SourceMark? mark)
+	{
+		if (mark == null || !mark.Valid)
+		{
+			return -1;
 		}
 		int index = marks.BinarySearch(mark);
 		if (index < 0)
 		{
-			return;
+			return -1;
 		}
 		// index 可能是任何一个匹配项，因此需要在双向查找一下。
 		for (int i = index; i >= 0 && marks[i].Index == mark.Index; i--)
 		{
 			if (marks[i] == mark)
 			{
-				mark.Valid = false;
-				marks.RemoveAt(i);
-				return;
+				return i;
 			}
 		}
 		for (int i = index + 1; i < marks.Count && marks[i].Index == mark.Index; i++)
 		{
 			if (marks[i] == mark)
 			{
-				mark.Valid = false;
-				marks.RemoveAt(i);
-				return;
+				return i;
 			}
 		}
+		return -1;
 	}
 
 	/// <summary>
@@ -665,46 +445,23 @@ public sealed class SourceReader : IDisposable
 	/// </exception>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> + <paramref name="count"/>
 	/// 超出当前已读取的字符范围。</exception>
-	public string ReadBlock(int index, int count)
+	public StringView ReadBlock(int index, int count)
 	{
-		int minIndex = marks.Count == 0 ? startIndex : marks[0].Index;
+		int minIndex = marks.Count == 0 ? buffer.StartIndex : marks[0].Index;
 		// 检查 index 和 count 是否在当前范围内。
 		if (index < minIndex)
 		{
 			throw CommonExceptions.ArgumentOutOfRange(index);
 		}
-		if (index + count > globalIndex)
+		if (index + count > buffer.Index)
 		{
 			throw CommonExceptions.ArgumentOutOfRange(count);
 		}
 		if (count == 0)
 		{
-			return string.Empty;
+			return StringView.Empty;
 		}
-		if (first is SourceStringBuffer stringBuffer)
-		{
-			return stringBuffer[index..(index + count)];
-		}
-		StringBuilder builder = new(count);
-		// 将字符串复制到 StringBuilder 中。
-		SourceBuffer buffer = current;
-		while (index < buffer.StartIndex)
-		{
-			buffer = buffer.Prev;
-		}
-		int start = index - buffer.StartIndex;
-		while (buffer != current && count >= buffer.Length)
-		{
-			((SourceArrayBuffer)buffer).AppendToBuilder(builder, start, buffer.Length - start);
-			count -= buffer.Length - start;
-			start = 0;
-			buffer = buffer.Next;
-		}
-		if (count > 0)
-		{
-			((SourceArrayBuffer)buffer).AppendToBuilder(builder, start, count);
-		}
-		return builder.ToString();
+		return buffer.ReadBlock(index, count);
 	}
 
 	/// <summary>
@@ -715,7 +472,7 @@ public sealed class SourceReader : IDisposable
 	/// <returns>指定标记间的文本。</returns>
 	/// <exception cref="ArgumentException">传入的标记已被释放。</exception>
 	/// <exception cref="ArgumentOutOfRangeException">起始和结束标记的顺序不正确。</exception>
-	public string ReadBlock(SourceMark start, SourceMark end)
+	public StringView ReadBlock(SourceMark start, SourceMark end)
 	{
 		if (!start.Valid)
 		{
@@ -725,115 +482,21 @@ public sealed class SourceReader : IDisposable
 		{
 			throw new ArgumentException(Resources.InvalidSourceMark, nameof(end));
 		}
-		if (start.Index > end.Index)
+		int count = end.Index - start.Index;
+		if (count < 0)
 		{
 			throw CommonExceptions.ArgumentMinMaxValue(nameof(start), nameof(end));
 		}
-		return ReadBlock(start.Index, end.Index - start.Index);
+		else if (count == 0)
+		{
+			return StringView.Empty;
+		}
+		else
+		{
+			return buffer.ReadBlock(start.Index, count);
+		}
 	}
 
 	#endregion // 标记
-
-	#region 缓冲区操作
-
-	/// <summary>
-	/// 切换到下一块缓冲区。如果没有有效的数据，则从基础字符读取器中读取字符，并填充到缓冲区中。
-	/// </summary>
-	/// <returns>如果切换成功，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	private bool NextBuffer()
-	{
-		if (current == last)
-		{
-			// 下一块缓冲区没有数据，需要从基础字符读取器中读取。
-			if (PrepareBuffer() == 0)
-			{
-				return false;
-			}
-			length = last.Length;
-			current = last;
-		}
-		else
-		{
-			// 下一块缓冲区有数据，直接后移。
-			current = current.Next;
-			if (current == last)
-			{
-				length = last.Length;
-			}
-		}
-		index = 0;
-		return length > 0;
-	}
-
-	/// <summary>
-	/// 从基础字符读取器中读取字符，并填充到新的缓冲区中。
-	/// </summary>
-	/// <returns>从基础字符读取器中读取的字符数量。</returns>
-	private int PrepareBuffer()
-	{
-		if (reader == null)
-		{
-			throw CommonExceptions.StreamClosed(nameof(SourceReader));
-		}
-		if (reader.Peek() == -1)
-		{
-			return 0;
-		}
-		if (length > 0)
-		{
-			int minMark = marks.Count == 0 ? int.MaxValue : marks[0].Index;
-			if (last.Next == first || last.Next.StartIndex + SourceBuffer.BufferSize > minMark)
-			{
-				// 没有可用的空缓冲区，或者缓冲区需要未标记保留，则需要新建立一块。
-				SourceBuffer buffer = new SourceArrayBuffer(current, last.Next);
-				last.Next.Prev = buffer;
-				last.Next = buffer;
-			}
-			last = last.Next;
-			last.StartIndex = last.Prev.StartIndex + SourceBuffer.BufferSize;
-		}
-		else
-		{
-			// len 为 0 应仅当 last == current 时。
-		}
-		// 检查前一缓冲区最后位置的字符，确定是否是行首。
-		if (last == first)
-		{
-			// 是行首。
-			last.IsLineStart = true;
-		}
-		else
-		{
-			SourceBuffer prev = last.Prev;
-			char lastChar = prev[SourceBuffer.BufferSize - 1];
-			// 兼容 \r\n 的场景
-			if (IsLineBreak(lastChar) && (lastChar != '\r' || last[0] != '\n'))
-			{
-				last.IsLineStart = true;
-			}
-			else
-			{
-				last.IsLineStart = false;
-			}
-		}
-		last.Read(reader);
-		locator?.Read(last.Span);
-		if (length == 0)
-		{
-			length = last.Length;
-		}
-		return last.Length;
-	}
-
-	/// <summary>
-	/// 切换到上一块缓冲区。
-	/// </summary>
-	private void PrevBuffer()
-	{
-		current = current.Prev;
-		index = length = current.Length;
-	}
-
-	#endregion // 缓冲区操作
 
 }

@@ -106,7 +106,8 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 		}
 		if (status != ParseStatus.Ready)
 		{
-			return Token<T>.GetEndOfFile(source.Index);
+			controller.DoEofAction(source.Index, null, null);
+			return controller.CreateToken();
 		}
 		while (true)
 		{
@@ -114,16 +115,9 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 			if (source.Peek() == SourceReader.InvalidCharacter)
 			{
 				// 到达了流的结尾。
-				if (context.EofAction != null)
-				{
-					controller.DoEofAction(source.Index, context.EofValue, context.EofAction);
-					if (controller.IsAccept)
-					{
-						return controller.CreateToken();
-					}
-				}
+				controller.DoEofAction(source.Index, context.EofValue, context.EofAction);
 				status = ParseStatus.Finished;
-				return Token<T>.GetEndOfFile(source.Index);
+				return controller.CreateToken();
 			}
 			// 起始状态与当前上下文相关。
 			int state = context.Index;
@@ -155,20 +149,21 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 				}
 				if (token != null)
 				{
-					return token.Value;
+					return token;
 				}
 			}
 			else
 			{
 				// 到达死状态。
-				string text = source.Accept();
-				if (text.Length == 0)
+				StringView text = source.Accept();
+				if (text.IsEmpty)
 				{
 					// 如果没有匹配任何字符，强制读入一个字符，可以防止死循环出现。
 					source.Read();
 					text = source.Accept();
 				}
-				controller.EmitTokenizeError(text, new TextSpan(start, source.Index));
+				controller.Start = start;
+				controller.EmitTokenizeError(text, controller.Span);
 			}
 		}
 	}
@@ -220,21 +215,11 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	}
 
 	/// <summary>
-	/// 返回指定状态中的候选类型。
+	/// 返回指定符号列表中的候选类型。
 	/// </summary>
-	/// <param name="state">要检查的状态。</param>
-	/// <returns><paramref name="state"/> 中包含的候选状态。</returns>
-	protected IEnumerable<T> GetCandidates(AcceptState state)
-	{
-		return GetCandidates(state.Symbols);
-	}
-
-	/// <summary>
-	/// 返回指定符号集中的候选类型。
-	/// </summary>
-	/// <param name="symbols">要检查的符号集。</param>
+	/// <param name="symbols">要检查的符号列表。</param>
 	/// <returns><paramref name="symbols"/> 中包含的候选状态。</returns>
-	protected IEnumerable<T> GetCandidates(IEnumerable<int> symbols)
+	protected IEnumerable<T> GetCandidates(ArraySegment<int> symbols)
 	{
 		foreach (int acceptState in symbols)
 		{

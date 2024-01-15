@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Cyjb.Text;
 
 /// <summary>
@@ -8,11 +10,13 @@ public sealed class SourceMark : IComparable<SourceMark>
 	/// <summary>
 	/// 源文件的索引。
 	/// </summary>
-	internal readonly int index;
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private readonly int index;
 	/// <summary>
 	/// 当前标记是否有效。
 	/// </summary>
-	internal bool Valid = true;
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private bool valid = true;
 
 	/// <summary>
 	/// 使用指定的源文件索引初始化 <see cref="SourceMark"/> 类的新实例。
@@ -24,9 +28,18 @@ public sealed class SourceMark : IComparable<SourceMark>
 	}
 
 	/// <summary>
-	/// 获取对应的源文件索引。
+	/// 获取当前标记对应的源文件索引。
 	/// </summary>
 	public int Index => index;
+
+	/// <summary>
+	/// 获取当前标记是否有效。
+	/// </summary>
+	public bool Valid
+	{
+		get => valid;
+		internal set => valid = value;
+	}
 
 	#region IComparable<SourceMark> 成员
 

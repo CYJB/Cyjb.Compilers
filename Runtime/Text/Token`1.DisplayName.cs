@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace Cyjb.Text;
 
-public readonly partial struct Token<T>
+public partial class Token<T>
 {
 	/// <summary>
 	/// 词法单元类型的显示名称映射表。

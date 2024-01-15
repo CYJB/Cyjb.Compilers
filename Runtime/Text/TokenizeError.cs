@@ -18,7 +18,7 @@ public class TokenizeError : IEquatable<TokenizeError>
 	/// <param name="text">词法单元的文本。</param>
 	/// <param name="span">词法单元的范围。</param>
 	/// <param name="locator">行定位器。</param>
-	public TokenizeError(string text, TextSpan span, LineLocator? locator)
+	public TokenizeError(StringView text, TextSpan span, LineLocator? locator)
 	{
 		Text = text;
 		Span = span;
@@ -29,7 +29,7 @@ public class TokenizeError : IEquatable<TokenizeError>
 	/// 获取词法单元的文本。
 	/// </summary>
 	/// <value>词法单元的文本。</value>
-	public string Text { get; }
+	public StringView Text { get; }
 	/// <summary>
 	/// 获取词法单元的范围。
 	/// </summary>
@@ -69,7 +69,7 @@ public class TokenizeError : IEquatable<TokenizeError>
 		{
 			return false;
 		}
-		return Text == other.Text && Span == other.Span;
+		return Span == other.Span && Text == other.Text;
 	}
 
 	/// <summary>
@@ -92,7 +92,7 @@ public class TokenizeError : IEquatable<TokenizeError>
 	/// <returns>当前对象的哈希值。</returns>
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(Text, Span);
+		return HashCode.Combine(Text.GetHashCode(), Span);
 	}
 
 	/// <summary>

@@ -18,7 +18,7 @@ public sealed class EnumerableTokenizer<T> : ITokenizer<T>
 	/// <summary>
 	/// 最近一次读取的词法单元。
 	/// </summary>
-	private Token<T> lastToken;
+	private Token<T> lastToken = Token<T>.Empty;
 	/// <summary>
 	/// 解析状态。
 	/// </summary>

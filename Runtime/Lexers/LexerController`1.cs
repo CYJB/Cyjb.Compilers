@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using Cyjb.Text;
 
@@ -49,12 +48,7 @@ public class LexerController<T>
 	/// <summary>
 	/// 当前词法单元的文本。
 	/// </summary>
-	private string? text;
-	/// <summary>
-	/// 文本的结束索引。
-	/// </summary>
-	/// <remarks>正数表示文本的结束索引，<c>-1</c> 用户指定的文本。</remarks>
-	private int textEnd;
+	private StringView? text;
 
 #pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
@@ -105,25 +99,10 @@ public class LexerController<T>
 	/// <summary>
 	/// 获取或设置当前词法单元的文本。
 	/// </summary>
-	public string Text
+	public StringView Text
 	{
-		get
-		{
-			if (text == null || (textEnd >= 0 && textEnd != Source.Index))
-			{
-				text = Source.ReadedText();
-			}
-			return text;
-		}
-		set
-		{
-			if (value == null)
-			{
-				return;
-			}
-			text = value;
-			textEnd = -1;
-		}
+		get => text ?? Source.GetReadedText();
+		set => text = value;
 	}
 	/// <summary>
 	/// 获取或设置当前词法单元的起始索引。
@@ -136,7 +115,7 @@ public class LexerController<T>
 	/// <summary>
 	/// 获取当前词法单元的文本范围。
 	/// </summary>
-	public TextSpan Span => new(Start, source.Index);
+	public virtual TextSpan Span => new(Start, source.Index);
 	/// <summary>
 	/// 获取当前词法分析器剩余的候选类型。
 	/// </summary>
@@ -206,7 +185,6 @@ public class LexerController<T>
 		Kind = kind;
 		Start = start;
 		text = null;
-		textEnd = Source.Index;
 		Value = value;
 		IsReject = false;
 		IsRejectState = false;
@@ -228,7 +206,16 @@ public class LexerController<T>
 	/// <returns><see cref="Token{T}"/> 的新实例。</returns>
 	internal protected virtual Token<T> CreateToken()
 	{
-		return new Token<T>(Kind!.Value, Text, Span, source.Locator, Value);
+		if (text.HasValue)
+		{
+			// 使用自定义文本。
+			return new Token<T>(Kind!.Value, text.Value, Span, Value);
+		}
+		else
+		{
+			// 未设置文本，使用原始文本。
+			return source.AcceptToken(Kind!.Value, Span, Value);
+		}
 	}
 
 	/// <summary>
@@ -236,7 +223,7 @@ public class LexerController<T>
 	/// </summary>
 	/// <param name="text">未识别的字符串。</param>
 	/// <param name="span">未识别的字符串范围。</param>
-	internal protected virtual void EmitTokenizeError(string text, TextSpan span)
+	internal protected virtual void EmitTokenizeError(StringView text, TextSpan span)
 	{
 		tokenizer.ReportTokenizeError(new TokenizeError(text, span, source.Locator));
 	}

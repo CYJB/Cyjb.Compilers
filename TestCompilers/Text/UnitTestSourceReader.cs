@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using Cyjb;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,6 +13,8 @@ namespace TestCompilers.Text;
 [TestClass]
 public class UnitTestSourceReader
 {
+	private const int BufferLength = 0x100;
+
 	/// <summary>
 	/// 对 <see cref="SourceReader"/> 读取短文本进行测试。
 	/// </summary>
@@ -20,37 +23,37 @@ public class UnitTestSourceReader
 	[DataRow("TextReader")]
 	public void TestShortText(string type)
 	{
-		SourceReader reader = new(CreateReader(type, "1234567890"));
+		SourceReader reader = new(CreateReader(type, "1234567890"), BufferLength);
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Read());
 		Assert.AreEqual('2', reader.Peek());
 		Assert.AreEqual('2', reader.Read());
-		Assert.AreEqual("12", reader.ReadedText());
+		Assert.AreEqual("12", reader.GetReadedText());
 		Assert.IsTrue(reader.Unget());
 		Assert.IsTrue(reader.Unget());
 		Assert.IsFalse(reader.Unget());
 
 		Assert.AreEqual('2', reader.Read(1));
-		Assert.AreEqual("12", reader.ReadedText());
+		Assert.AreEqual("12", reader.GetReadedText());
 		Assert.AreEqual(2, reader.Unget(5));
 
-		Assert.AreEqual("", reader.ReadedText());
+		Assert.AreEqual("", reader.GetReadedText());
 		Assert.AreEqual('3', reader.Read(2));
-		Assert.AreEqual("123", reader.ReadedText());
+		Assert.AreEqual("123", reader.GetReadedText());
 		Assert.AreEqual("123", reader.Accept());
 
-		Assert.AreEqual("", reader.ReadedText());
+		Assert.AreEqual("", reader.GetReadedText());
 		Assert.AreEqual("", reader.Accept());
 		Assert.IsFalse(reader.Unget());
 		Assert.AreEqual(0, reader.Unget(5));
 
 		Assert.AreEqual('6', reader.Read(2));
-		Assert.AreEqual("456", reader.ReadedText());
+		Assert.AreEqual("456", reader.GetReadedText());
 		reader.Drop();
 
 		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read(10));
-		Assert.AreEqual("7890", reader.ReadedText());
+		Assert.AreEqual("7890", reader.GetReadedText());
 		Token<int> token = reader.AcceptToken(11);
 		Assert.AreEqual(11, token.Kind);
 		Assert.AreEqual("7890", token.Text);
@@ -65,48 +68,56 @@ public class UnitTestSourceReader
 	[DataRow("TextReader")]
 	public void TestLongText(string type)
 	{
-		StringBuilder builder = new(2813);
-		for (int i = 0; i < 2813; i++)
+		int len1 = BufferLength + 11;
+		int len2 = BufferLength * 3 - 53;
+		int len3 = BufferLength + 49;
+		int len4 = len2 + len3;
+		int length = len4 + 100;
+
+		StringBuilder builder = new(length);
+		for (int i = 0; i < length; i++)
 		{
 			builder.Append((char)Random.Shared.Next(char.MaxValue));
 		}
 		string text = builder.ToString();
-		SourceReader reader = new(CreateReader(type, text));
+		SourceReader reader = new(CreateReader(type, text), BufferLength);
 
 		Assert.AreEqual(text[0], reader.Peek());
 		Assert.AreEqual(text[0], reader.Peek());
 		Assert.AreEqual(text[0], reader.Read());
 		Assert.AreEqual(text[1], reader.Peek());
 		Assert.AreEqual(text[1], reader.Read());
-		Assert.AreEqual(text[..2], reader.ReadedText());
+		Assert.AreEqual(text[..2], reader.GetReadedText());
 		Assert.IsTrue(reader.Unget());
 		Assert.IsTrue(reader.Unget());
 		Assert.IsFalse(reader.Unget());
 
-		Assert.AreEqual(text[521], reader.Read(521));
-		Assert.AreEqual(text[..522], reader.ReadedText());
-		Assert.AreEqual(522, reader.Unget(530));
+		Assert.AreEqual(text[len1 - 1], reader.Read(len1 - 1));
+		Assert.AreEqual(text[..len1], reader.GetReadedText());
+		// 回退超过已读取字符个数时，只会回退到起始位置。
+		Assert.AreEqual(len1, reader.Unget(len1 + 100));
+		Assert.AreEqual("", reader.GetReadedText());
 
-		Assert.AreEqual("", reader.ReadedText());
-		Assert.AreEqual(text[1482], reader.Read(1482));
-		Assert.AreEqual(text[..1483], reader.ReadedText());
-		Assert.AreEqual(text[..1483], reader.Accept());
+		Assert.AreEqual(text[len2 - 1], reader.Read(len2 - 1));
+		Assert.AreEqual(text[..len2], reader.GetReadedText());
+		Assert.AreEqual(text[..len2], reader.Accept());
 
-		Assert.AreEqual("", reader.ReadedText());
+		// Accept 之后，无法再向前回退。
+		Assert.AreEqual("", reader.GetReadedText());
 		Assert.AreEqual("", reader.Accept());
 		Assert.IsFalse(reader.Unget());
 		Assert.AreEqual(0, reader.Unget(5));
 
-		Assert.AreEqual(text[1483 + 561], reader.Read(561));
-		Assert.AreEqual(text[1483..(1483 + 561 + 1)], reader.ReadedText());
+		Assert.AreEqual(text[len4 - 1], reader.Read(len3 - 1));
+		Assert.AreEqual(text[len2..len4], reader.GetReadedText());
 		reader.Drop();
 
-		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read(4000));
-		Assert.AreEqual(text[(1483 + 561 + 1)..], reader.ReadedText());
+		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read(length));
+		Assert.AreEqual(text[len4..], reader.GetReadedText());
 		Token<int> token = reader.AcceptToken(11);
 		Assert.AreEqual(11, token.Kind);
-		Assert.AreEqual(text[(1483 + 561 + 1)..], token.Text);
-		Assert.AreEqual(new TextSpan(1483 + 561 + 1, text.Length), token.Span);
+		Assert.AreEqual(text[len4..], token.Text);
+		Assert.AreEqual(new TextSpan(len4, text.Length), token.Span);
 	}
 
 	/// <summary>
@@ -117,14 +128,13 @@ public class UnitTestSourceReader
 	[DataRow("TextReader")]
 	public void TestIsLineStart(string type)
 	{
-		const int BufferLength = 0x200;
-		StringBuilder builder = new(1030);
+		StringBuilder builder = new(BufferLength * 2 + 3);
 		builder.Append("123\r\r456\n\n789\r\n\r\n123\r\r\n\n");
 		builder.Append('1', BufferLength - builder.Length - 1);
 		builder.Append("\r\n123");
 		builder.Append('1', BufferLength * 2 - builder.Length - 1);
 		builder.Append("\n123");
-		SourceReader reader = new(CreateReader(type, builder.ToString()));
+		SourceReader reader = new(CreateReader(type, builder.ToString()), BufferLength);
 		Assert.IsTrue(reader.IsLineStart);
 
 		Assert.AreEqual('3', reader.Read(2));
@@ -191,6 +201,79 @@ public class UnitTestSourceReader
 	}
 
 	/// <summary>
+	/// 对 <see cref="SourceReader.UseLineLocator"/> 进行测试。
+	/// </summary>
+	[DataTestMethod]
+	[DataRow("StringReader")]
+	[DataRow("TextReader")]
+	public void TestLocator(string type)
+	{
+		string text = "12\r34\n56\r\n78";
+		// 一次性读入。
+		SourceReader reader = new(CreateReader(type, text), BufferLength);
+		reader.UseLineLocator();
+
+		Assert.AreEqual('8', reader.Read(11));
+		Assert.AreEqual(new LinePosition(1, 0, 1), reader.GetPosition(0));
+		Assert.AreEqual(new LinePosition(1, 1, 2), reader.GetPosition(1));
+		Assert.AreEqual(new LinePosition(1, 2, 3), reader.GetPosition(2));
+		Assert.AreEqual(new LinePosition(2, 0, 1), reader.GetPosition(3));
+		Assert.AreEqual(new LinePosition(2, 1, 2), reader.GetPosition(4));
+		Assert.AreEqual(new LinePosition(2, 2, 3), reader.GetPosition(5));
+		Assert.AreEqual(new LinePosition(3, 0, 1), reader.GetPosition(6));
+		Assert.AreEqual(new LinePosition(3, 1, 2), reader.GetPosition(7));
+		Assert.AreEqual(new LinePosition(3, 2, 3), reader.GetPosition(8));
+		Assert.AreEqual(new LinePosition(3, 3, 3), reader.GetPosition(9));
+		Assert.AreEqual(new LinePosition(4, 0, 1), reader.GetPosition(10));
+		Assert.AreEqual(new LinePosition(4, 1, 2), reader.GetPosition(11));
+
+		// 分批读入。
+		reader = new(CreateReader(type, text), BufferLength);
+		reader.UseLineLocator();
+
+		Assert.AreEqual('2', reader.Read(1));
+		Assert.AreEqual(new LinePosition(1, 0, 1), reader.GetPosition(0));
+		Assert.AreEqual(new LinePosition(1, 1, 2), reader.GetPosition(1));
+
+		Assert.AreEqual('\r', reader.Read());
+		Assert.AreEqual(new LinePosition(1, 2, 3), reader.GetPosition(2));
+		if (type == "StringReader")
+		{
+			// StringReader 是在 Read 时即时读入的，此时还未读入下一个字符，不会直接换行。
+			Assert.AreEqual(new LinePosition(1, 3, 3), reader.GetPosition(3));
+		}
+		else
+		{
+			// TextReader 是批量读入的，这时已经读入下一个字符，已确认 \r 就是换行。
+			Assert.AreEqual(new LinePosition(2, 0, 1), reader.GetPosition(3));
+		}
+
+		Assert.AreEqual('4', reader.Read(1));
+		Assert.AreEqual(new LinePosition(2, 0, 1), reader.GetPosition(3));
+		Assert.AreEqual(new LinePosition(2, 1, 2), reader.GetPosition(4));
+
+		Assert.AreEqual('\n', reader.Read());
+		Assert.AreEqual(new LinePosition(2, 2, 3), reader.GetPosition(5));
+		Assert.AreEqual(new LinePosition(3, 0, 1), reader.GetPosition(6));
+
+		Assert.AreEqual('6', reader.Read(1));
+		Assert.AreEqual(new LinePosition(3, 0, 1), reader.GetPosition(6));
+		Assert.AreEqual(new LinePosition(3, 1, 2), reader.GetPosition(7));
+
+		Assert.AreEqual('\r', reader.Read());
+		Assert.AreEqual(new LinePosition(3, 2, 3), reader.GetPosition(8));
+		Assert.AreEqual(new LinePosition(3, 3, 3), reader.GetPosition(9));
+
+		Assert.AreEqual('\n', reader.Read());
+		Assert.AreEqual(new LinePosition(3, 3, 3), reader.GetPosition(9));
+		Assert.AreEqual(new LinePosition(4, 0, 1), reader.GetPosition(10));
+
+		Assert.AreEqual('8', reader.Read(1));
+		Assert.AreEqual(new LinePosition(4, 0, 1), reader.GetPosition(10));
+		Assert.AreEqual(new LinePosition(4, 1, 2), reader.GetPosition(11));
+	}
+
+	/// <summary>
 	/// 对 <see cref="SourceReader.End"/> 进行测试。
 	/// </summary>
 	[DataTestMethod]
@@ -198,7 +281,7 @@ public class UnitTestSourceReader
 	[DataRow("TextReader")]
 	public void TestEnd(string type)
 	{
-		SourceReader reader = new(CreateReader(type, "1234567890"));
+		SourceReader reader = new(CreateReader(type, "1234567890"), BufferLength);
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Read());
 		reader.End = 2;
@@ -226,7 +309,7 @@ public class UnitTestSourceReader
 		{
 			builder.Append("0123456789");
 		}
-		SourceReader reader = new(CreateReader(type, builder.ToString()));
+		SourceReader reader = new(CreateReader(type, builder.ToString()), BufferLength);
 		Assert.AreEqual('0', reader.Read());
 		Assert.AreEqual("0", reader.ReadBlock(0, 1));
 		Assert.AreEqual("", reader.ReadBlock(0, 0));
@@ -248,7 +331,7 @@ public class UnitTestSourceReader
 		Assert.AreEqual("1", reader.ReadBlock(1, 1));
 		Assert.AreEqual("123", reader.ReadBlock(1, 3));
 
-		string text = reader.ReadBlock(49, 13);
+		StringView text = reader.ReadBlock(49, 13);
 		Assert.AreEqual('9', text[0]);
 		Assert.AreEqual('1', text[^1]);
 

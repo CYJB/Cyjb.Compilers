@@ -96,7 +96,7 @@ public partial class UnitTestParser
 		parser.DefineProduction(ProductionKind.AltExp, ProductionKind.AltExp, ProductionKind.Or, ProductionKind.Exp)
 			.Action(c => $"({c[0].Value})|({c[2].Value})");
 		parser.DefineProduction(ProductionKind.Exp, ProductionKind.Repeat, SymbolOptions.OneOrMore)
-			.Action(c => string.Join(" ", ((IList)c[0].Value!).Cast<string>()));
+			.Action(c => string.Join(" ", ((IList)c[0].Value!).Cast<object>()));
 		parser.DefineProduction(ProductionKind.Exp, ProductionKind.Exp, ProductionKind.Repeat)
 			.Action(c => $"{c[0].Value} {c[1].Value}");
 		parser.DefineProduction(ProductionKind.Repeat, ProductionKind.Item)

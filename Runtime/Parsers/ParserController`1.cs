@@ -88,11 +88,6 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 	/// <value>语法节点的范围。</value>
 	public TextSpan Span => node.Span;
 	/// <summary>
-	/// 获取语法节点的行列位置范围。
-	/// </summary>
-	/// <value>语法节点的行列位置范围。</value>
-	public LinePositionSpan LinePositionSpan => node.LinePositionSpan;
-	/// <summary>
 	/// 获取或设置共享的上下文对象。
 	/// </summary>
 	/// <remarks>可以与外部（例如语法分析器）共享信息，
@@ -295,13 +290,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 		if (candicate != null)
 		{
 			int start = token.Span.Start;
-			token = token with
-			{
-				Kind = candicate.Kind,
-				Text = string.Empty,
-				Value = null,
-				Span = new TextSpan(start, start),
-			};
+			token = new Token<T>(candicate.Kind, StringView.Empty, new TextSpan(start, start));
 			IsMissingToken = true;
 			EmitParseError(new MissingTokenError<T>(token));
 			return true;

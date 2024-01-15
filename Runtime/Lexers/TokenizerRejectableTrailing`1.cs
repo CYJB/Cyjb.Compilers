@@ -11,9 +11,13 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	where T : struct
 {
 	/// <summary>
-	/// 接受状态的堆栈。
+	/// 接受符号的堆栈。
 	/// </summary>
-	private readonly Stack<AcceptState> stateStack = new();
+	private readonly ListStack<ArraySegment<int>> symbolStack = new();
+	/// <summary>
+	/// 接受索引的堆栈。
+	/// </summary>
+	private readonly ListStack<int> indexStack = new();
 	/// <summary>
 	/// 候选类型。
 	/// </summary>
@@ -23,13 +27,9 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	/// </summary>
 	private readonly HashSet<int> invalidStates = new();
 	/// <summary>
-	/// 当前候选。
+	/// 当前候选符号。
 	/// </summary>
-	private AcceptState curCandidate;
-	/// <summary>
-	/// 当前候选索引。
-	/// </summary>
-	private int curCandidateIndex;
+	private ArraySegment<int> curSymbols;
 
 	/// <summary>
 	/// 获取当前词法分析器剩余的候选类型。
@@ -43,8 +43,8 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			{
 				HashSet<T> result = new();
 				// 先添加当前候选
-				result.UnionWith(GetCandidates(curCandidate.Symbols.Skip(curCandidateIndex)));
-				result.UnionWith(stateStack.SelectMany(GetCandidates));
+				result.UnionWith(GetCandidates(curSymbols));
+				result.UnionWith(symbolStack.SelectMany(GetCandidates));
 				candidates = result.AsReadOnly();
 			}
 			return candidates;
@@ -68,7 +68,8 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 	/// <returns>词法单元读入是否成功。</returns>
 	protected override bool NextToken(int state)
 	{
-		stateStack.Clear();
+		symbolStack.Clear();
+		indexStack.Clear();
 		int startIndex = source.Index;
 		while (true)
 		{
@@ -109,18 +110,20 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 					}
 				}
 				// 将接受状态记录在堆栈中。
-				stateStack.Push(new AcceptState(symbols, source.Index));
+				symbolStack.Push(symbols);
+				indexStack.Push(source.Index);
 			}
 		}
 		// 遍历终结状态，执行相应动作。
 		invalidStates.Clear();
-		while (stateStack.Count > 0)
+		while (symbolStack.Count > 0)
 		{
-			curCandidate = stateStack.Pop();
-			curCandidateIndex = 0;
-			foreach (int acceptState in curCandidate.Symbols)
+			curSymbols = symbolStack.Pop();
+			int index = indexStack.Pop();
+			while (curSymbols.Count > 0)
 			{
-				curCandidateIndex++;
+				int acceptState = curSymbols[0];
+				curSymbols = curSymbols.Slice(1);
 				if (acceptState < 0)
 				{
 					// 跳过向前看的头状态。
@@ -130,7 +133,7 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 				{
 					continue;
 				}
-				AdjustIndex(acceptState, startIndex, curCandidate.Index);
+				AdjustIndex(acceptState, startIndex, index);
 				// 每次都需要清空候选集合，并在使用时重新计算。
 				candidates = null;
 				Controller.DoAction(Start, Data.Terminals[acceptState]);
@@ -175,11 +178,11 @@ internal sealed class TokenizerRejectableTrailing<T> : TokenizerBase<T>
 			{
 				// 前后长度都不固定，需要沿着堆栈向前找。
 				int target = -state - 1;
-				foreach (AcceptState s in stateStack)
+				for (int i = 0; i < symbolStack.Count; i++)
 				{
-					if (ContainsTrailingHead(s.Symbols, target))
+					if (ContainsTrailingHead(symbolStack[i], target))
 					{
-						index = s.Index;
+						index = indexStack[i];
 						break;
 					}
 				}

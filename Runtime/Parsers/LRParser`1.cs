@@ -205,24 +205,20 @@ internal sealed class LRParser<T> : ITokenParser<T>
 	{
 		int size = production.BodySize;
 		TextSpan span;
-		LineLocator? locator;
 		if (size > 0)
 		{
 			span = TextSpan.Combine(nodeStack[0].Span, nodeStack[size - 1].Span);
-			locator = nodeStack[0].Locator;
 		}
 		else if (nodeStack.Count > 0)
 		{
 			int end = nodeStack[0].Span.End;
 			span = new TextSpan(end, end);
-			locator = nodeStack[0].Locator;
 		}
 		else
 		{
 			span = new TextSpan(start, start);
-			locator = null;
 		}
-		ParserNode<T> node = new(production.Head, span, locator);
+		ParserNode<T> node = new(production.Head, span);
 		stateStack.Pop(size);
 		controller.Reduce(node, nodeStack, size, production.Action);
 		nodeStack.Push(node);
@@ -249,7 +245,7 @@ internal sealed class LRParser<T> : ITokenParser<T>
 			ProductionData<T> production = state.RecoverProduction;
 			for (int i = state.RecoverIndex; i < production.BodySize; i++)
 			{
-				nodeStack.Push(new ParserNode<T>(new Token<T>(production.Body[i], string.Empty, span))
+				nodeStack.Push(new ParserNode<T>(new Token<T>(production.Body[i], StringView.Empty, span))
 				{
 					IsMissing = true,
 				});
@@ -307,7 +303,7 @@ internal sealed class LRParser<T> : ITokenParser<T>
 			ProductionData<T> production = state.RecoverProduction;
 			for (int i = state.RecoverIndex; i < production.BodySize; i++)
 			{
-				nodeStack.Push(new ParserNode<T>(new Token<T>(production.Body[i], string.Empty, span))
+				nodeStack.Push(new ParserNode<T>(new Token<T>(production.Body[i], StringView.Empty, span))
 				{
 					IsMissing = true,
 				});

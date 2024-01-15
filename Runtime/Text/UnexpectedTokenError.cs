@@ -47,11 +47,6 @@ public class UnexpectedTokenError<T> : TokenParseError
 	/// </summary>
 	/// <value>语法分析错误的范围。</value>
 	public override TextSpan Span => token.Span;
-	/// <summary>
-	/// 获取语法分析错误的行列位置范围。
-	/// </summary>
-	/// <value>语法分析错误的行列位置范围。</value>
-	public override LinePositionSpan LinePositionSpan => token.LinePositionSpan;
 
 	/// <summary>
 	/// 返回当前对象是否等于同一类型的另一对象。

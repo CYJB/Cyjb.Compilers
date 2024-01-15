@@ -1,45 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<SignAssembly>True</SignAssembly>
-	<PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
-	<Description>提供编译相关功能</Description>
-	<Copyright>﻿Copyright (c) 2022, CYJB</Copyright>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-	<NeutralLanguage>en</NeutralLanguage>
-	<Version>$(VersionPrefix)</Version>
-	<VersionPrefix>1.0.15</VersionPrefix>
-	<RootNamespace>Cyjb.Compilers</RootNamespace>
-	<Authors>CYJB</Authors>
-	<IncludeSymbols>true</IncludeSymbols>
-	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <SignAssembly>True</SignAssembly>
+    <PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
+    <Description>提供编译相关功能</Description>
+    <Copyright>﻿Copyright (c) 2022, CYJB</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Version>$(VersionPrefix)</Version>
+    <VersionPrefix>1.0.16</VersionPrefix>
+    <RootNamespace>Cyjb.Compilers</RootNamespace>
+    <Authors>CYJB</Authors>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
-	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-
   <ItemGroup>
-	<None Include="..\.editorconfig" Link=".editorconfig" />
-	<None Include="README.md" Pack="True" PackagePath="" />
-	<None Include="LICENSE.txt" Pack="true" PackagePath="" />
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="README.md" Pack="True" PackagePath="" />
+    <None Include="LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
-
   <ItemGroup>
-	<PackageReference Include="Cyjb" Version="1.0.15">
-	  <GeneratePathProperty>True</GeneratePathProperty>
-	</PackageReference>
+    <PackageReference Include="Cyjb" Version="1.0.17">
+      <GeneratePathProperty>True</GeneratePathProperty>
+    </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Runtime\Cyjb.Compilers.Runtime.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Resources.cs">
       <DesignTime>True</DesignTime>
@@ -47,16 +41,13 @@
       <DependentUpon>Resources.tt</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Resources.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Resources.cs</LastGenOutput>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
-
 </Project>

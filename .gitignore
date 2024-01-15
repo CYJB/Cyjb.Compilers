@@ -17,4 +17,5 @@ ConsoleTest
 *.snk
 *.vspx
 *.user
+update-version.ps1
 publish.ps1

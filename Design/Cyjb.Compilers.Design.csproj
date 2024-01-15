@@ -1,54 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<GenerateDocumentationFile>False</GenerateDocumentationFile>
-	<SignAssembly>True</SignAssembly>
-	<PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
-	<Description>提供编译器的设计时生成功能</Description>
-	<Copyright>Copyright (c) 2022, CYJB</Copyright>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-	<NeutralLanguage>en</NeutralLanguage>
-	<Version>$(VersionPrefix)</Version>
-	<VersionPrefix>1.0.15</VersionPrefix>
-	<RootNamespace>Cyjb.Compilers</RootNamespace>
-	<OutputType>Library</OutputType>
-	<DevelopmentDependency>true</DevelopmentDependency>
-	<Authors>CYJB</Authors>
-	<PackageTags>Compiler, T4</PackageTags>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <SignAssembly>True</SignAssembly>
+    <PackageProjectUrl>https://github.com/CYJB/Cyjb.Compilers</PackageProjectUrl>
+    <Description>提供编译器的设计时生成功能</Description>
+    <Copyright>Copyright (c) 2022, CYJB</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Version>$(VersionPrefix)</Version>
+    <VersionPrefix>1.0.16</VersionPrefix>
+    <RootNamespace>Cyjb.Compilers</RootNamespace>
+    <OutputType>Library</OutputType>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <Authors>CYJB</Authors>
+    <PackageTags>Compiler, T4</PackageTags>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
-	<AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../CYJB_Code_Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-
   <ItemGroup>
-	<None Include="..\.editorconfig" Link=".editorconfig" />
-	<None Include="README.md" Pack="True" PackagePath="" />
-	<None Include="LICENSE.txt" Pack="true" PackagePath="" />
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="README.md" Pack="True" PackagePath="" />
+    <None Include="LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="Tools\**">
-	  <Pack>true</Pack>
-	  <PackageCopyToOutput>true</PackageCopyToOutput>
-	  <PackagePath>tools\</PackagePath>
+      <Pack>true</Pack>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+      <PackagePath>tools\</PackagePath>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="CompilerTemplate.t4" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Runtime\Cyjb.Compilers.Runtime.csproj" />
   </ItemGroup>
-
 </Project>

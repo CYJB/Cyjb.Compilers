@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,7 +39,7 @@ public partial class UnitTestLexer
 		// 终结符的定义。
 		lexer.DefineSymbol("[0-9]+").Kind(Calc.Id).Action(c =>
 		{
-			c.Value = int.Parse(c.Text);
+			c.Value = int.Parse(c.Text.AsSpan());
 			c.Accept();
 		});
 		lexer.DefineSymbol("\\+").Kind(Calc.Add);
@@ -234,11 +233,11 @@ public partial class UnitTestLexer
 		});
 		lexer.DefineSymbol(@"\\u[0-9]{4}").Context(ctxStr).Action(c =>
 		{
-			c.DecodedText.Append((char)int.Parse(c.Text.AsSpan()[2..], NumberStyles.HexNumber));
+			c.DecodedText.Append((char)int.Parse(c.Text.AsSpan(2), NumberStyles.HexNumber));
 		});
 		lexer.DefineSymbol(@"\\x[0-9]{2}").Context(ctxStr).Action(c =>
 		{
-			c.DecodedText.Append((char)int.Parse(c.Text.AsSpan()[2..], NumberStyles.HexNumber));
+			c.DecodedText.Append((char)int.Parse(c.Text.AsSpan(2), NumberStyles.HexNumber));
 		});
 		lexer.DefineSymbol(@"\\n").Context(ctxStr).Action(c =>
 		{
@@ -254,7 +253,7 @@ public partial class UnitTestLexer
 		});
 		lexer.DefineSymbol(@".").Context(ctxStr).Action(c =>
 		{
-			c.DecodedText.Append(c.Text);
+			c.DecodedText.Append(c.Text.AsSpan());
 		});
 		lexer.DefineSymbol(@"\""").Context(ctxVstr).Action(c =>
 		{
@@ -269,7 +268,7 @@ public partial class UnitTestLexer
 		});
 		lexer.DefineSymbol(@".").Context(ctxVstr).Action(c =>
 		{
-			c.DecodedText.Append(c.Text);
+			c.DecodedText.Append(c.Text.AsSpan());
 		});
 		TestEscapeString(lexer.GetFactory());
 	}

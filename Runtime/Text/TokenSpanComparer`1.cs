@@ -18,8 +18,20 @@ internal class TokenSpanComparer<T> : IComparer<Token<T>>
 	/// <param name="x">要比较的第一个对象。</param>
 	/// <param name="y">要比较的第二个对象。</param>
 	/// <returns>一个有符号整数，指示 <paramref name="x"/> 和 <paramref name="x"/> 的相对值。</returns>
-	public int Compare(Token<T> x, Token<T> y)
+	public int Compare(Token<T>? x, Token<T>? y)
 	{
+		if (ReferenceEquals(x, y))
+		{
+			return 0;
+		}
+		else if (x is null)
+		{
+			return -1;
+		}
+		else if (y is null)
+		{
+			return 1;
+		}
 		return x.Span.CompareTo(y.Span);
 	}
 }
