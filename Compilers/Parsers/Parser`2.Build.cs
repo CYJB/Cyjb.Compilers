@@ -10,6 +10,10 @@ public partial class Parser<T, TController>
 	/// </summary>
 	private readonly List<LRState<T>> states = new();
 	/// <summary>
+	/// GOTO 表的个数。
+	/// </summary>
+	private int gotoCount = 0;
+	/// <summary>
 	/// 非终结符号的 FIRST 集。
 	/// </summary>
 	private readonly Dictionary<Symbol<T>, HashSet<Symbol<T>>> firstSet = new();
@@ -139,7 +143,6 @@ public partial class Parser<T, TController>
 		}
 		// 提取产生式数据
 		List<ProductionData<T>> productionData = new();
-		int gotoCount = 0;
 		foreach (Production<T> production in productions)
 		{
 			// 只有产生式头才会有 goto 数据。

@@ -314,4 +314,24 @@ internal sealed class LRParser<T> : ITokenParser<T>
 			Reduce(production, start);
 		}
 	}
+
+	#region IDisposable 成员
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <overloads>
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// </overloads>
+	public void Dispose()
+	{
+		tokenizer.Dispose();
+		controller.Dispose();
+		GC.SuppressFinalize(this);
+	}
+
+	#endregion // IDisposable 成员
+
 }

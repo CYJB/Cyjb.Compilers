@@ -10,7 +10,7 @@ namespace Cyjb.Compilers.Parsers;
 /// 表示语法分析器的控制器。
 /// </summary>
 /// <typeparam name="T">语法节点标识符的类型，必须是一个枚举类型。</typeparam>
-public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
+public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>, IDisposable
 	where T : struct
 {
 	/// <summary>
@@ -473,5 +473,31 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 	}
 
 	#endregion // ReadOnlyListBase<Token<T>> 成员
+
+	#region IDisposable 成员
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <overloads>
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// </overloads>
+	public void Dispose()
+	{
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <param name="disposing">是否释放托管资源。</param>
+	protected virtual void Dispose(bool disposing)
+	{
+	}
+
+	#endregion // IDisposable 成员
 
 }

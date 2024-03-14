@@ -265,6 +265,7 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 		if (disposing)
 		{
 			source.Dispose();
+			controller.Dispose();
 		}
 	}
 

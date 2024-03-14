@@ -14,7 +14,7 @@ public delegate void TokenParseErrorHandler<T>(ITokenParser<T> parser, TokenPars
 /// 表示语法分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-public interface ITokenParser<T>
+public interface ITokenParser<T> : IDisposable
 	where T : struct
 {
 	/// <summary>

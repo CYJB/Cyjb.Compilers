@@ -7,7 +7,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示词法分析器的控制器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-public class LexerController<T>
+public class LexerController<T> : IDisposable
 	where T : struct
 {
 	/// <summary>
@@ -302,6 +302,32 @@ public class LexerController<T>
 	{
 		IsMore = true;
 	}
+
+	#region IDisposable 成员
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <overloads>
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// </overloads>
+	public void Dispose()
+	{
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <param name="disposing">是否释放托管资源。</param>
+	protected virtual void Dispose(bool disposing)
+	{
+	}
+
+	#endregion // IDisposable 成员
 
 	#region 上下文切换
 
