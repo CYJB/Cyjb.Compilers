@@ -1,7 +1,7 @@
-using System;
 using System.Globalization;
 using System.Text;
 using Cyjb.Compilers.Lexers;
+using Cyjb.Text;
 
 namespace TestCompilers.Lexers;
 
@@ -76,7 +76,7 @@ public partial class TestEscapeStrLexer : LexerController<Str>
 	[LexerSymbol(@"<*>.")]
 	public void CopyAction()
 	{
-		decodedText.Append(Text);
+		StringBuilderUtil.Append(decodedText, Text);
 	}
 
 	[LexerSymbol(@"<vstr>\""\""")]

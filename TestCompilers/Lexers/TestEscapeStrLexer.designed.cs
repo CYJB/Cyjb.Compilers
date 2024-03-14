@@ -123,27 +123,21 @@ public partial class TestEscapeStrLexer
 			int.MinValue, -1, 1, 84, 2, 7, 8, 5,
 			4, 6, 3, 0, 1
 		};
-		// 后继状态列表
-		int[] next = new[]
+		// 状态转移
+		int[] trans = new[]
 		{
-			16, 17, 4, 4, 4, 4, 4, 4, 4, 6, 4, 7,
-			3, 4, 5, 8, 15, 13, 9, 14, 10, 11, 12, 10,
-			18
-		};
-		// 状态检查列表
-		int[] check = new[]
-		{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-			2, 2, 3, 7, 9, 10, 7, 13, 7, 7, 7, 15,
-			17
+			0, 16, 0, 17, 0, 4, 0, 4, 0, 4, 0, 4,
+			0, 4, 0, 4, 0, 4, 1, 6, 1, 4, 1, 7,
+			2, 3, 2, 4, 3, 5, 7, 8, 9, 15, 10, 13,
+			7, 9, 13, 14, 7, 10, 7, 11, 7, 12, 15, 10,
+			17, 18
 		};
 		// 词法分析器的数据
 		LexerData<Str> lexerData = new(contexts,
 			terminals,
 			new CharClassMap(indexes, classes, categories),
 			states,
-			next,
-			check,
+			trans,
 			TrailingType.None,
 			false,
 			false,

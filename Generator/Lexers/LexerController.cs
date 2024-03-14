@@ -200,12 +200,9 @@ internal sealed partial class LexerController : Controller
 			.Comment(lexer.GetStateDescription())
 			.Comment("状态列表")
 			.Value(SyntaxBuilder.Literal(data.States, 8));
-		var next = SyntaxBuilder.DeclareLocal<int[]>("next")
-			.Comment("后继状态列表")
-			.Value(SyntaxBuilder.Literal(data.Next, 12));
-		var check = SyntaxBuilder.DeclareLocal<int[]>("check")
-			.Comment("状态检查列表")
-			.Value(SyntaxBuilder.Literal(data.Check, 12));
+		var trans = SyntaxBuilder.DeclareLocal<int[]>("trans")
+			.Comment("状态转移")
+			.Value(SyntaxBuilder.Literal(data.Trans, 12));
 
 		TypeBuilder lexerDataType = SyntaxBuilder.Name(typeof(LexerData<>)).TypeArgument(KindType);
 		var lexerData = SyntaxBuilder.DeclareLocal(lexerDataType, "lexerData")
@@ -215,8 +212,7 @@ internal sealed partial class LexerController : Controller
 				.Argument(terminals)
 				.Argument(charClassBuilder)
 				.Argument(states)
-				.Argument(next)
-				.Argument(check)
+				.Argument(trans)
 				.Argument(SyntaxBuilder.Name("TrailingType").AccessMember(data.TrailingType.ToString()))
 				.Argument(SyntaxBuilder.Literal(data.ContainsBeginningOfLine))
 				.Argument(SyntaxBuilder.Literal(rejectable))
@@ -232,8 +228,7 @@ internal sealed partial class LexerController : Controller
 			.Statement(classes)
 			.Statement(categories)
 			.Statement(states)
-			.Statement(next)
-			.Statement(check)
+			.Statement(trans)
 			.Statement(lexerData)
 			.Statement(SyntaxBuilder.Return(
 				SyntaxBuilder.CreateObject(factoryType).Argument(lexerData)))

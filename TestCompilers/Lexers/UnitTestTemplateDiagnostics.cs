@@ -20,7 +20,7 @@ public class UnitTestTemplateDiagnostics
 		"UnitTestTemplateDiagnostics.template.cs(4,14): CS8323: 命名参数“options”的使用位置不当，但后跟一个未命名参数。",
 		"UnitTestTemplateDiagnostics.template.cs(5,19): CS1525: 表达式项“Test”无效。",
 		"UnitTestTemplateDiagnostics.template.cs(6,31): CS0643: “Kind”重复命名特性参数。",
-		"UnitTestTemplateDiagnostics.template.cs(7,2): CS7036: 未提供与“LexerSymbolAttribute.LexerSymbolAttribute(String, RegexOptions)”的必需形参“regex”对应的实参。",
+		"UnitTestTemplateDiagnostics.template.cs(7,2): CS7036: 未提供与“LexerSymbolAttribute.LexerSymbolAttribute(String, RegexOptions)”的所需参数“regex”对应的参数。",
 		"UnitTestTemplateDiagnostics.template.cs(8,14): CS0030: 无法将类型“System.Int32”转换为“System.String”。",
 		"UnitTestTemplateDiagnostics.template.cs(9,32): CS0117: “RegexOptions”未包含“Test”的定义。",
 		"UnitTestTemplateDiagnostics.template.cs(10,19): CS0030: 无法将类型“System.Double”转换为“System.Text.RegularExpressions.RegexOptions”。",

@@ -37,15 +37,11 @@ public class LexerData<T>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly int[] states;
 	/// <summary>
-	/// 下一状态列表。
+	/// DFA 的状态转移。
 	/// </summary>
+	/// <remarks>使用 <c>trans[i]</c> 表示 <c>check</c>，<c>trans[i+1]</c> 表示 <c>next</c>。</remarks>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly int[] next;
-	/// <summary>
-	/// 状态检查。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly int[] check;
+	private readonly int[] trans;
 	/// <summary>
 	/// 词法分析的向前看符号的类型。
 	/// </summary>
@@ -79,23 +75,21 @@ public class LexerData<T>
 	/// <param name="terminals">终结符列表。</param>
 	/// <param name="charClasses">字符类的映射。</param>
 	/// <param name="states">DFA 的状态列表。</param>
-	/// <param name="next">下一状态列表。</param>
-	/// <param name="check">状态检查。</param>
+	/// <param name="trans">DFA 的状态转移。</param>
 	/// <param name="trailingType">向前看符号的类型。</param>
 	/// <param name="containsBeginningOfLine">是否包含行首匹配的规则。</param>
 	/// <param name="rejectable">是否用到了 Reject 动作。</param>
 	/// <param name="controllerType">词法分析控制器的类型。</param>
 	[CLSCompliant(false)]
 	public LexerData(IReadOnlyDictionary<string, ContextData>? contexts, TerminalData<T>[] terminals,
-			CharClassMap charClasses, int[] states, int[] next, int[] check,
+			CharClassMap charClasses, int[] states, int[] trans,
 			TrailingType trailingType, bool containsBeginningOfLine, bool rejectable, Type controllerType)
 	{
 		this.contexts = contexts ?? ContextData.Default;
 		this.terminals = terminals;
 		this.charClasses = charClasses;
 		this.states = states;
-		this.next = next;
-		this.check = check;
+		this.trans = trans;
 		this.trailingType = trailingType;
 		this.containsBeginningOfLine = containsBeginningOfLine;
 		this.rejectable = rejectable;
@@ -125,13 +119,9 @@ public class LexerData<T>
 	/// 使用负数表示向前看的头状态。</remarks>
 	public int[] States => states;
 	/// <summary>
-	/// 获取下一状态列表。
+	/// 获取 DF 的状态转移。
 	/// </summary>
-	public int[] Next => next;
-	/// <summary>
-	/// 获取状态检查。
-	/// </summary>
-	public int[] Check => check;
+	public int[] Trans => trans;
 	/// <summary>
 	/// 获取词法分析的向前看符号的类型。
 	/// </summary>
@@ -165,14 +155,14 @@ public class LexerData<T>
 	{
 		int charClass = charClasses.GetCharClass(ch);
 		int offset;
-		int len = check.Length;
+		int len = trans.Length;
 		while (state >= 0)
 		{
 			offset = state * 4;
-			int idx = states[offset] + charClass;
-			if (idx >= 0 && idx < len && check[idx] == state)
+			int idx = (states[offset] + charClass) * 2;
+			if (idx >= 0 && idx < len && trans[idx] == state)
 			{
-				return next[idx];
+				return trans[idx + 1];
 			}
 			state = states[offset + DfaStateData.DefaultStateOffset];
 		}

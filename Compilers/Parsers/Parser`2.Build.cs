@@ -1,4 +1,5 @@
 using System.Text;
+using Cyjb.Collections;
 
 namespace Cyjb.Compilers.Parsers;
 
@@ -163,14 +164,14 @@ public partial class Parser<T, TController>
 				list.Add(new KeyValuePair<int, int>(state.Index, nextState.Index));
 			}
 		}
-		ArrayCompress<T> gotoCompress = new(ParserData.InvalidState, Symbol<T>.EndOfFile.Kind);
+		TripleArrayCompress<T, int> gotoCompress = new(Symbol<T>.EndOfFile.Kind, ParserData.InvalidState);
 		Dictionary<T, int> gotoMap = new();
 		foreach (var (kind, transition) in gotoTransitions)
 		{
-			gotoMap[kind] = gotoCompress.AddTransition(kind, transition);
+			gotoMap[kind] = gotoCompress.AddNode(kind, transition);
 		}
 		return new ParserData<T>(productionData.ToArray(), startStates, states.ToArray(),
-			gotoMap, gotoCompress.GetNext(), gotoCompress.GetCheck());
+			gotoMap, gotoCompress.Next.ToArray(), gotoCompress.Check.ToArray());
 	}
 
 	/// <summary>

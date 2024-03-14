@@ -104,23 +104,18 @@ internal partial class TestCalcLexer
 			0, 1, 2, 3, 4, 5, 6, 7,
 			8
 		};
-		// 后继状态列表
-		int[] next = new[]
+		// 状态转移
+		int[] trans = new[]
 		{
-			1, 2, 3, 4, 5, 6, 7, 8, 9, 9
-		};
-		// 状态检查列表
-		int[] check = new[]
-		{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 9
+			0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6,
+			0, 7, 0, 8, 0, 9, 9, 9
 		};
 		// 词法分析器的数据
 		LexerData<Calc> lexerData = new(null,
 			terminals,
 			new CharClassMap(indexes, classes, categories),
 			states,
-			next,
-			check,
+			trans,
 			TrailingType.None,
 			false,
 			false,

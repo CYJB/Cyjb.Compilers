@@ -9,13 +9,11 @@ public sealed class DfaData
 	/// 使用指定的数据初始化 <see cref="DfaData"/> 类的新实例。
 	/// </summary>
 	/// <param name="states">DFA 的状态列表。</param>
-	/// <param name="next">下一状态列表。</param>
-	/// <param name="check">状态检查。</param>
-	public DfaData(int[] states, int[] next, int[] check)
+	/// <param name="trans">DFA 的状态转移。</param>
+	public DfaData(int[] states, int[] trans)
 	{
 		States = states;
-		Next = next;
-		Check = check;
+		Trans = trans;
 	}
 
 	/// <summary>
@@ -23,11 +21,8 @@ public sealed class DfaData
 	/// </summary>
 	public int[] States { get; }
 	/// <summary>
-	/// 获取下一状态列表。
+	/// 获取 DFA 的状态转移。
 	/// </summary>
-	public int[] Next { get; }
-	/// <summary>
-	/// 获取状态检查。
-	/// </summary>
-	public int[] Check { get; }
+	/// <remarks>使用 <c>trans[i]</c> 表示 <c>check</c>，<c>trans[i+1]</c> 表示 <c>next</c>。</remarks>
+	public int[] Trans { get; }
 }

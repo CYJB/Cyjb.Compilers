@@ -28,7 +28,7 @@
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Cyjb" Version="1.0.17">
+    <PackageReference Include="Cyjb" Version="1.0.22">
       <GeneratePathProperty>True</GeneratePathProperty>
     </PackageReference>
   </ItemGroup>

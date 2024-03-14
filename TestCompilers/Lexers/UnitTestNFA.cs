@@ -76,8 +76,8 @@ public class UnitTestNFA
 		Assert.AreEqual(16, data.States[12 + DfaStateData.SymbolIndexOffset]);
 		Assert.AreEqual(4, data.States[16]);
 
-		CollectionAssert.AreEqual(new int[] { 0, 1, 2, 1, 3, 1, 0, 1 }, data.Next);
-		CollectionAssert.AreEqual(new int[] { 0, 0, 1, 1, 2, 2, 3, 3 }, data.Check);
+		CollectionAssert.AreEqual(new int[] {
+			0, 0, 0, 1, 1, 2, 1, 1, 2, 3, 2, 1, 3, 0, 3, 1 }, data.Trans);
 	}
 
 	/// <summary>
@@ -145,7 +145,9 @@ public class UnitTestNFA
 		Assert.AreEqual(0, data.States[24 + DfaStateData.SymbolsLengthOffset]);
 		Assert.AreEqual(0, data.States[24 + DfaStateData.SymbolIndexOffset]);
 
-		CollectionAssert.AreEqual(new int[] { 1, 5, 1, 6, 2, 1, 3, 4, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1 }, data.Next);
-		CollectionAssert.AreEqual(new int[] { 0, 1, 1, 1, 0, 1, 2, 3, 3, 3, 3, 3, 3, 4, 6, 6, 6, 6, 6 }, data.Check);
+		CollectionAssert.AreEqual(new int[] {
+			0, 1, 1, 5, 1, 1, 1, 6, 0, 2, 1, 1, 2, 3, 3, 4,
+			3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 3, 6, 1, 6, 1,
+			6, 1, 6, 1, 6, 1 }, data.Trans);
 	}
 }

@@ -1,3 +1,5 @@
+using Cyjb.Collections;
+
 namespace Cyjb.Compilers.Lexers;
 
 /// <summary>
@@ -36,7 +38,7 @@ internal class DfaDataBuilder
 		stateDataList.Clear();
 		int symbolStartIndex = states.Count * 4;
 		stateDataList.AddRange(Enumerable.Repeat(0, symbolStartIndex));
-		ArrayCompress<int> compress = new(DfaStateData.InvalidState, DfaStateData.InvalidState);
+		TripleArrayCompress<int> compress = new(DfaStateData.InvalidState);
 		for (int i = 0; i < states.Count; i++)
 		{
 			DfaState state = states[i];
@@ -46,7 +48,7 @@ internal class DfaDataBuilder
 			if (transitions.Length > 0)
 			{
 				// 找到合适的 next 空当。
-				baseIndex = compress.AddTransition(i, transitions);
+				baseIndex = compress.AddNode(i, transitions);
 			}
 			int offset = i * 4;
 			stateDataList[offset] = baseIndex;
@@ -58,7 +60,15 @@ internal class DfaDataBuilder
 				stateDataList[offset + DfaStateData.SymbolIndexOffset] = AppendSymbols(state.Symbols, symbolStartIndex);
 			}
 		}
-		return new DfaData(stateDataList.ToArray(), compress.GetNext(), compress.GetCheck());
+		// 将 Check 和 Next 拼接到同一个数组内，内存的局部性会让性能更高。
+		int transLen = compress.Next.Count * 2;
+		int[] trans = new int[transLen];
+		for (int i = 0, j = 0; i < compress.Next.Count; i++)
+		{
+			trans[j++] = compress.Check[i];
+			trans[j++] = compress.Next[i];
+		}
+		return new DfaData(stateDataList.ToArray(), trans);
 	}
 
 	/// <summary>

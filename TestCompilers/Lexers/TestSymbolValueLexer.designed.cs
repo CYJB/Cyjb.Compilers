@@ -56,23 +56,17 @@ public partial class TestSymbolValueLexer
 			0, -1, 0, 0, 1, -1, 1, 8,
 			0
 		};
-		// 后继状态列表
-		int[] next = new[]
+		// 状态转移
+		int[] trans = new[]
 		{
-			1, 1
-		};
-		// 状态检查列表
-		int[] check = new[]
-		{
-			0, 1
+			0, 1, 1, 1
 		};
 		// 词法分析器的数据
 		LexerData<Calc> lexerData = new(null,
 			terminals,
 			new CharClassMap(indexes, classes, null),
 			states,
-			next,
-			check,
+			trans,
 			TrailingType.None,
 			false,
 			false,

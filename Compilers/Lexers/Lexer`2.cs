@@ -253,7 +253,7 @@ public class Lexer<T, TController>
 		dfa = nfa.BuildDFA(headCount, rejectable);
 		TerminalData<T>[] terminals = this.terminals.Select(t => t.GetData()).ToArray();
 		DfaData data = dfa.GetData();
-		return new LexerData<T>(contexts, terminals, dfa.GetCharClassMap(), data.States, data.Next, data.Check,
+		return new LexerData<T>(contexts, terminals, dfa.GetCharClassMap(), data.States, data.Trans,
 			trailingType, containsBeginningOfLine, rejectable, typeof(TController));
 	}
 

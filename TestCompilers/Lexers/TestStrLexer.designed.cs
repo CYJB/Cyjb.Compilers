@@ -79,25 +79,20 @@ public partial class TestStrLexer
 			13, -1, 1, 28, int.MinValue, -1, 1, 28,
 			14, -1, 0, 0, 0
 		};
-		// 后继状态列表
-		int[] next = new[]
+		// 状态转移
+		int[] trans = new[]
 		{
-			1, 5, 1, 6, 2, 1, 3, 4, 3, 3, 3, 3,
-			3, 3, 1, 1, 1, 1, 1
-		};
-		// 状态检查列表
-		int[] check = new[]
-		{
-			0, 1, 1, 1, 0, 1, 2, 3, 3, 3, 3, 3,
-			3, 4, 6, 6, 6, 6, 6
+			0, 1, 1, 5, 1, 1, 1, 6, 0, 2, 1, 1,
+			2, 3, 3, 4, 3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 4, 3, 6, 1, 6, 1, 6, 1, 6, 1,
+			6, 1
 		};
 		// 词法分析器的数据
 		LexerData<Str> lexerData = new(null,
 			terminals,
 			new CharClassMap(indexes, classes, categories),
 			states,
-			next,
-			check,
+			trans,
 			TrailingType.None,
 			false,
 			false,
