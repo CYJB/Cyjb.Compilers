@@ -76,7 +76,7 @@ public partial class TestStrLexer
 		{
 			0, -1, 0, 0, 1, -1, 0, 0,
 			6, -1, 0, 0, 7, -1, 0, 0,
-			13, -1, 1, 28, int.MinValue, -1, 1, 28,
+			13, -1, 1, 28, short.MinValue, -1, 1, 28,
 			14, -1, 0, 0, 0
 		};
 		// 状态转移

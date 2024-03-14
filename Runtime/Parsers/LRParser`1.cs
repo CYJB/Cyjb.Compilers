@@ -222,7 +222,7 @@ internal sealed class LRParser<T> : ITokenParser<T>
 		stateStack.Pop(size);
 		controller.Reduce(node, nodeStack, size, production.Action);
 		nodeStack.Push(node);
-		stateStack.Push(data.Goto(stateStack.Peek(), production.Head));
+		stateStack.Push(data.Goto(stateStack.Peek(), production.HeadIndex));
 	}
 
 	/// <summary>

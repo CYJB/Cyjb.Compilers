@@ -257,17 +257,12 @@ internal sealed partial class ParserController : Controller
 			.Statement(states);
 		FillStates(data, factoryMethod);
 
-		TypeBuilder gotoMapType = SyntaxBuilder.Name(typeof(Dictionary<,>))
-			.TypeArgument(KindType).TypeArgument<int>();
-		var gotoMap = SyntaxBuilder.DeclareLocal(gotoMapType, "gotoMap")
-			.Comment("转移数据")
-			.Value(KindMap(data.GotoMap));
-		var gotoNext = SyntaxBuilder.DeclareLocal<int[]>("gotoNext")
-			.Comment("转移的目标")
-			.Value(SyntaxBuilder.Literal(data.GotoNext, 24));
-		var gotoCheck = SyntaxBuilder.DeclareLocal(SyntaxBuilder.Name(KindType).Array(), "gotoCheck")
-			.Comment("转移的检查")
-			.Value(GotoCheck(data.GotoCheck));
+		var gotoMap = SyntaxBuilder.DeclareLocal<int[]>("gotoMap")
+			.Comment("GOTO 表的起始索引")
+			.Value(SyntaxBuilder.Literal(data.GotoMap, 24));
+		var gotoTrans = SyntaxBuilder.DeclareLocal<int[]>("gotoTrans")
+			.Comment("GOTO 表的转移")
+			.Value(SyntaxBuilder.Literal(data.GotoTrans, 24));
 
 		var parserDataType = SyntaxBuilder.Name(typeof(ParserData<>)).TypeArgument(KindType);
 		var parserData = SyntaxBuilder.DeclareLocal(parserDataType, "parserData")
@@ -277,8 +272,7 @@ internal sealed partial class ParserController : Controller
 				.Argument(startStates)
 				.Argument(states)
 				.Argument(gotoMap)
-				.Argument(gotoNext)
-				.Argument(gotoCheck)
+				.Argument(gotoTrans)
 			);
 
 		var factoryType = SyntaxBuilder.Name(typeof(ParserFactory<,>))
@@ -286,8 +280,7 @@ internal sealed partial class ParserController : Controller
 
 		yield return factoryMethod
 			.Statement(gotoMap)
-			.Statement(gotoNext)
-			.Statement(gotoCheck)
+			.Statement(gotoTrans)
 			.Statement(parserData)
 			.Statement(SyntaxBuilder.Return(
 				SyntaxBuilder.CreateObject(factoryType).Argument(parserData)))

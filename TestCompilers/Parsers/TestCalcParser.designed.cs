@@ -32,40 +32,48 @@ public partial class TestCalcParser
 		// 产生式数据
 		ProductionData<Calc>[] productions = new[]
 		{
-			new ProductionData<Calc>(Calc.E,
+			new ProductionData<Calc>(0,
+				Calc.E,
 				(TestCalcParser c) => c.IdAction(),
 				Calc.Id),
-			new ProductionData<Calc>(Calc.E,
+			new ProductionData<Calc>(0,
+				Calc.E,
 				(TestCalcParser c) => c.BinaryAction(),
 				Calc.E,
 				Calc.Add,
 				Calc.E),
-			new ProductionData<Calc>(Calc.E,
+			new ProductionData<Calc>(0,
+				Calc.E,
 				(TestCalcParser c) => c.BinaryAction(),
 				Calc.E,
 				Calc.Sub,
 				Calc.E),
-			new ProductionData<Calc>(Calc.E,
+			new ProductionData<Calc>(0,
+				Calc.E,
 				(TestCalcParser c) => c.BinaryAction(),
 				Calc.E,
 				Calc.Mul,
 				Calc.E),
-			new ProductionData<Calc>(Calc.E,
+			new ProductionData<Calc>(0,
+				Calc.E,
 				(TestCalcParser c) => c.BinaryAction(),
 				Calc.E,
 				Calc.Div,
 				Calc.E),
-			new ProductionData<Calc>(Calc.E,
+			new ProductionData<Calc>(0,
+				Calc.E,
 				(TestCalcParser c) => c.BinaryAction(),
 				Calc.E,
 				Calc.Pow,
 				Calc.E),
-			new ProductionData<Calc>(Calc.E,
+			new ProductionData<Calc>(0,
+				Calc.E,
 				(TestCalcParser c) => c.BraceAction(),
 				Calc.LBrace,
 				Calc.E,
 				Calc.RBrace),
-			new ProductionData<Calc>(symbol_1,
+			new ProductionData<Calc>(1,
+				symbol_1,
 				null,
 				Calc.E)
 		};
@@ -373,111 +381,22 @@ public partial class TestCalcParser
 			expecting_3,
 			productions[6],
 			3);
-		// 转移数据
-		Dictionary<Calc, int> gotoMap = new()
+		// GOTO 表的起始索引
+		int[] gotoMap = new[]
 		{
-			 { Calc.Add, 18 },
-			 { Calc.Sub, 32 },
-			 { Calc.Mul, 38 },
-			 { Calc.Div, 52 },
-			 { Calc.Pow, 58 },
-			 { Calc.Id, 9 },
-			 { Calc.E, 0 },
-			 { Calc.LBrace, 18 },
-			 { Calc.RBrace, -8 }
+			0, short.MinValue
 		};
-		// 转移的目标
-		int[] gotoNext = new[]
+		// GOTO 表的转移
+		int[] gotoTrans = new[]
 		{
-			1, 15, -1, 9, 10, 11, 12, 13, 14, 2, -1, -1, 2, 2, 2, 2, 2, 2, 3, 4, -1, 3, 3, 3,
-			3, 3, 3, 4, 4, 4, 4, 4, 4, 5, -1, -1, -1, -1, -1, 6, -1, 5, 5, 5, 5, 5, 5, 6,
-			6, 6, 6, 6, 6, 7, -1, -1, -1, -1, -1, 8, -1, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8,
-			8
-		};
-		// 转移的检查
-		Calc[] gotoCheck = new[]
-		{
-			Calc.E,
-			Calc.RBrace,
-			endOfFile,
-			Calc.E,
-			Calc.E,
-			Calc.E,
-			Calc.E,
-			Calc.E,
-			Calc.E,
-			Calc.Id,
-			endOfFile,
-			endOfFile,
-			Calc.Id,
-			Calc.Id,
-			Calc.Id,
-			Calc.Id,
-			Calc.Id,
-			Calc.Id,
-			Calc.LBrace,
-			Calc.Add,
-			endOfFile,
-			Calc.LBrace,
-			Calc.LBrace,
-			Calc.LBrace,
-			Calc.LBrace,
-			Calc.LBrace,
-			Calc.LBrace,
-			Calc.Add,
-			Calc.Add,
-			Calc.Add,
-			Calc.Add,
-			Calc.Add,
-			Calc.Add,
-			Calc.Sub,
-			endOfFile,
-			endOfFile,
-			endOfFile,
-			endOfFile,
-			endOfFile,
-			Calc.Mul,
-			endOfFile,
-			Calc.Sub,
-			Calc.Sub,
-			Calc.Sub,
-			Calc.Sub,
-			Calc.Sub,
-			Calc.Sub,
-			Calc.Mul,
-			Calc.Mul,
-			Calc.Mul,
-			Calc.Mul,
-			Calc.Mul,
-			Calc.Mul,
-			Calc.Div,
-			endOfFile,
-			endOfFile,
-			endOfFile,
-			endOfFile,
-			endOfFile,
-			Calc.Pow,
-			endOfFile,
-			Calc.Div,
-			Calc.Div,
-			Calc.Div,
-			Calc.Div,
-			Calc.Div,
-			Calc.Div,
-			Calc.Pow,
-			Calc.Pow,
-			Calc.Pow,
-			Calc.Pow,
-			Calc.Pow,
-			Calc.Pow
+			0, 1, -1, -1, -1, -1, 0, 9, 0, 10, 0, 11, 0, 12, 0, 13, 0, 14
 		};
 		// 语法分析器的数据
 		ParserData<Calc> parserData = new(productions,
 			null,
 			states,
 			gotoMap,
-			gotoNext,
-			gotoCheck);
+			gotoTrans);
 		return new ParserFactory<Calc, TestCalcParser>(parserData);
 	}
 }

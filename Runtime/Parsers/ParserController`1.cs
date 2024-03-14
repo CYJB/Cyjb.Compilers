@@ -210,7 +210,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 		int prevState = -1;
 		int curState = stateStack[0];
 		HashSet<T> follows = new();
-		T prevHead = default;
+		int prevHeadIndex = 0;
 		while (true)
 		{
 			ParserStateData<T> stateData = data.States[curState];
@@ -222,7 +222,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 			}
 			else
 			{
-				followState = data.Goto(curState, prevHead);
+				followState = data.Goto(curState, prevHeadIndex);
 				// 在前一状态已被规约后，定点会向后移动一个位，因此索引要 +1。
 				index++;
 			}
@@ -231,7 +231,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 				follows.UnionWith(data.GetExpecting(followState));
 			}
 			index += stateData.RecoverIndex;
-			prevHead = stateData.RecoverProduction.Head;
+			prevHeadIndex = stateData.RecoverProduction.HeadIndex;
 			prevState = curState;
 			if (index >= stateStack.Count)
 			{
@@ -348,7 +348,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>
 				case ParserActionType.Reduce:
 					ProductionData<T> production = data.Productions[action.Index];
 					top += production.BodySize;
-					state = data.Goto(stateStack[top], production.Head);
+					state = data.Goto(stateStack[top], production.HeadIndex);
 					top--;
 					break;
 				default:

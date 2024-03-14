@@ -33,48 +33,60 @@ internal partial class TestProductionParser
 		// 产生式数据
 		ProductionData<ProductionKind>[] productions = new[]
 		{
-			new ProductionData<ProductionKind>(ProductionKind.AltExp,
+			new ProductionData<ProductionKind>(0,
+				ProductionKind.AltExp,
 				(TestProductionParser c) => c.OrAction(),
 				ProductionKind.AltExp,
 				ProductionKind.Or,
 				ProductionKind.Exp),
-			new ProductionData<ProductionKind>(symbol_1,
+			new ProductionData<ProductionKind>(1,
+				symbol_1,
 				ProductionAction.More,
 				ProductionKind.Repeat),
-			new ProductionData<ProductionKind>(symbol_1,
+			new ProductionData<ProductionKind>(1,
+				symbol_1,
 				ProductionAction.More,
 				symbol_1,
 				ProductionKind.Repeat),
-			new ProductionData<ProductionKind>(ProductionKind.Exp,
+			new ProductionData<ProductionKind>(2,
+				ProductionKind.Exp,
 				(TestProductionParser c) => c.ExpressionAction(),
 				symbol_1),
-			new ProductionData<ProductionKind>(ProductionKind.Item,
+			new ProductionData<ProductionKind>(3,
+				ProductionKind.Item,
 				(TestProductionParser c) => c.CopyTextAction(),
 				ProductionKind.Id),
-			new ProductionData<ProductionKind>(ProductionKind.AltExp,
+			new ProductionData<ProductionKind>(0,
+				ProductionKind.AltExp,
 				(TestProductionParser c) => c.CopyValueAction(),
 				ProductionKind.Exp),
-			new ProductionData<ProductionKind>(ProductionKind.Repeat,
+			new ProductionData<ProductionKind>(4,
+				ProductionKind.Repeat,
 				(TestProductionParser c) => c.CopyValueAction(),
 				ProductionKind.Item),
-			new ProductionData<ProductionKind>(ProductionKind.Item,
+			new ProductionData<ProductionKind>(3,
+				ProductionKind.Item,
 				(TestProductionParser c) => c.BraceAction(),
 				ProductionKind.LBrace,
 				ProductionKind.AltExp,
 				ProductionKind.RBrace),
-			new ProductionData<ProductionKind>(ProductionKind.Repeat,
+			new ProductionData<ProductionKind>(4,
+				ProductionKind.Repeat,
 				(TestProductionParser c) => c.RepeatAction(),
 				ProductionKind.Item,
 				ProductionKind.Plus),
-			new ProductionData<ProductionKind>(ProductionKind.Repeat,
+			new ProductionData<ProductionKind>(4,
+				ProductionKind.Repeat,
 				(TestProductionParser c) => c.RepeatAction(),
 				ProductionKind.Item,
 				ProductionKind.Star),
-			new ProductionData<ProductionKind>(ProductionKind.Repeat,
+			new ProductionData<ProductionKind>(4,
+				ProductionKind.Repeat,
 				(TestProductionParser c) => c.RepeatAction(),
 				ProductionKind.Item,
 				ProductionKind.Question),
-			new ProductionData<ProductionKind>(symbol_2,
+			new ProductionData<ProductionKind>(5,
+				symbol_2,
 				null,
 				ProductionKind.AltExp)
 		};
@@ -350,73 +362,23 @@ internal partial class TestProductionParser
 			expecting_5,
 			productions[7],
 			3);
-		// 转移数据
-		Dictionary<ProductionKind, int> gotoMap = new()
+		// GOTO 表的起始索引
+		int[] gotoMap = new[]
 		{
-			 { symbol_1, 3 },
-			 { ProductionKind.AltExp, 0 },
-			 { ProductionKind.Or, 3 },
-			 { ProductionKind.Exp, 1 },
-			 { ProductionKind.Repeat, 12 },
-			 { ProductionKind.Item, 14 },
-			 { ProductionKind.Id, 23 },
-			 { ProductionKind.LBrace, 25 },
-			 { ProductionKind.RBrace, 0 },
-			 { ProductionKind.Plus, -3 },
-			 { ProductionKind.Star, 0 },
-			 { ProductionKind.Question, 1 }
+			0, 3, 1, 14, 12, short.MinValue
 		};
-		// 转移的目标
-		int[] gotoNext = new[]
+		// GOTO 表的转移
+		int[] gotoTrans = new[]
 		{
-			1, 2, 10, 3, 8, 11, 12, 13, 2, 14, 3, 3, 4, 15, 5, 9, 8, 5, -1, 4, 4, 5, 5, 6,
-			-1, 7, 6, -1, 7, -1, 6, 6, 7, 7
-		};
-		// 转移的检查
-		ProductionKind[] gotoCheck = new[]
-		{
-			ProductionKind.AltExp,
-			ProductionKind.Exp,
-			ProductionKind.Plus,
-			symbol_1,
-			ProductionKind.Or,
-			ProductionKind.Star,
-			ProductionKind.Question,
-			ProductionKind.AltExp,
-			ProductionKind.Exp,
-			ProductionKind.Exp,
-			symbol_1,
-			symbol_1,
-			ProductionKind.Repeat,
-			ProductionKind.RBrace,
-			ProductionKind.Item,
-			ProductionKind.Repeat,
-			ProductionKind.Or,
-			ProductionKind.Item,
-			endOfFile,
-			ProductionKind.Repeat,
-			ProductionKind.Repeat,
-			ProductionKind.Item,
-			ProductionKind.Item,
-			ProductionKind.Id,
-			endOfFile,
-			ProductionKind.LBrace,
-			ProductionKind.Id,
-			endOfFile,
-			ProductionKind.LBrace,
-			endOfFile,
-			ProductionKind.Id,
-			ProductionKind.Id,
-			ProductionKind.LBrace,
-			ProductionKind.LBrace
+			0, 1, 2, 2, -1, -1, 1, 3, -1, -1, -1, -1, -1, -1, 0, 13, 2, 2, 2, 14, 1, 3, 1, 3,
+			4, 4, -1, -1, 3, 5, 4, 9, -1, -1, 3, 5, -1, -1, 4, 4, 4, 4, 3, 5, 3, 5
 		};
 		// 语法分析器的数据
 		ParserData<ProductionKind> parserData = new(productions,
 			null,
 			states,
 			gotoMap,
-			gotoNext,
-			gotoCheck);
+			gotoTrans);
 		return new ParserFactory<ProductionKind, TestProductionParser>(parserData);
 	}
 }

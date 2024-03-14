@@ -53,9 +53,9 @@ internal static class SyntaxBuilder
 	/// <returns>指定 <see cref="int"/> 的字面量表达式。</returns>
 	public static ExpressionBuilder Literal(int value)
 	{
-		if (value == int.MinValue)
+		if (value == short.MinValue)
 		{
-			return Name("int.MinValue");
+			return Name("short.MinValue");
 		}
 		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(value));
 	}

@@ -17,6 +17,7 @@ internal sealed partial class ParserController
 		{
 			var productionBuilder = SyntaxBuilder.CreateObject(productionType).ArgumentWrap(1);
 			builder.Initializer(productionBuilder);
+			productionBuilder.Argument(SyntaxBuilder.Literal(production.HeadIndex));
 			productionBuilder.Argument(production.Head.Syntax);
 			if (production.Action == null)
 			{

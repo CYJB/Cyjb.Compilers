@@ -54,7 +54,7 @@ internal sealed class Production<T>
 	/// <returns>当前产生式的数据。</returns>
 	public ProductionData<T> GetData()
 	{
-		return new ProductionData<T>(Head.Kind, Action, Body.Select(s => s.Kind).ToArray());
+		return new ProductionData<T>(Head.Index, Head.Kind, Action, Body.Select(s => s.Kind).ToArray());
 	}
 
 	/// <summary>

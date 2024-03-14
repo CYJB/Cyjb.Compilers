@@ -193,7 +193,10 @@ public partial class Parser<T, TController>
 	/// <returns>指定标识符类型的符号。</returns>
 	private Symbol<T> CreateTempSymbol(string name)
 	{
-		Symbol<T> symbol = new(kindConverter(tempSymbolIndex), name) { Type = SymbolType.NonTerminal };
+		Symbol<T> symbol = new(kindConverter(tempSymbolIndex), name)
+		{
+			Type = SymbolType.NonTerminal
+		};
 		tempSymbolIndex--;
 		symbols[symbol.Kind] = symbol;
 		return symbol;

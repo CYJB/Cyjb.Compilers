@@ -30,17 +30,12 @@ public sealed class ParserData<T>
 	/// GOTO 表的起始索引。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly Dictionary<T, int> gotoMap;
+	private readonly int[] gotoMap;
 	/// <summary>
-	/// GOTO 的下一状态。
+	/// GOTO 表的状态转移。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly int[] gotoNext;
-	/// <summary>
-	/// GOTO 的状态检查。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly T[] gotoCheck;
+	private readonly int[] gotoTrans;
 
 	/// <summary>
 	/// 使用指定的语法分析器数据初始化 <see cref="ParserData{T}"/> 类的新实例。
@@ -49,17 +44,15 @@ public sealed class ParserData<T>
 	/// <param name="startStates">起始状态集合。</param>
 	/// <param name="states">状态列表。</param>
 	/// <param name="gotoMap">GOTO 表的起始索引。</param>
-	/// <param name="gotoNext">GOTO 的下一状态。</param>
-	/// <param name="gotoCheck">GOTO 的状态检查。</param>
+	/// <param name="gotoTrans">GOTO 表的状态转移。</param>
 	public ParserData(ProductionData<T>[] productions, Dictionary<T, int>? startStates,
-		ParserStateData<T>[] states, Dictionary<T, int> gotoMap, int[] gotoNext, T[] gotoCheck)
+		ParserStateData<T>[] states, int[] gotoMap, int[] gotoTrans)
 	{
 		this.productions = productions;
 		this.startStates = startStates;
 		this.states = states;
 		this.gotoMap = gotoMap;
-		this.gotoNext = gotoNext;
-		this.gotoCheck = gotoCheck;
+		this.gotoTrans = gotoTrans;
 	}
 
 	/// <summary>
@@ -77,15 +70,11 @@ public sealed class ParserData<T>
 	/// <summary>
 	/// 获取 GOTO 表的起始索引。
 	/// </summary>
-	public Dictionary<T, int> GotoMap => gotoMap;
+	public int[] GotoMap => gotoMap;
 	/// <summary>
-	/// 获取 GOTO 的下一状态。
+	/// 获取 GOTO 表的状态转移。
 	/// </summary>
-	public int[] GotoNext => gotoNext;
-	/// <summary>
-	/// 获取 GOTO 的状态检查。
-	/// </summary>
-	public T[] GotoCheck => gotoCheck;
+	public int[] GotoTrans => gotoTrans;
 
 	/// <summary>
 	/// 获取指定状态在指定终结符上的动作。
@@ -102,17 +91,14 @@ public sealed class ParserData<T>
 	/// 返回指定状态使用指定非终结符转移后的状态。
 	/// </summary>
 	/// <param name="state">当前状态。</param>
-	/// <param name="kind">转移的非终结符。</param>
+	/// <param name="index">转移的非终结符索引。</param>
 	/// <returns>转以后的状态，使用 <c>-1</c> 表示没有找到合适的状态。</returns>
-	public int Goto(int state, T kind)
+	public int Goto(int state, int index)
 	{
-		if (gotoMap.TryGetValue(kind, out int idx))
+		state = (state + gotoMap[index]) * 2;
+		if (state >= 0 && state < gotoTrans.Length && gotoTrans[state] == index)
 		{
-			idx += state;
-			if (idx >= 0 && idx < gotoNext.Length && EqualityComparer<T>.Default.Equals(kind, gotoCheck[idx]))
-			{
-				return gotoNext[idx];
-			}
+			return gotoTrans[state + 1];
 		}
 		return ParserData.InvalidState;
 	}

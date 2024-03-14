@@ -19,17 +19,24 @@ public sealed class ProductionData<T>
 	/// <summary>
 	/// 使用产生式的数据初始化 <see cref="ProductionData{T}"/> 类的新实例。
 	/// </summary>
+	/// <param name="headIndex">产生式头的索引。</param>
 	/// <param name="head">产生式头。</param>
 	/// <param name="action">产生式对应的动作。</param>
 	/// <param name="body">产生式体。</param>
-	public ProductionData(T head, Delegate? action, params T[] body)
+	public ProductionData(int headIndex, T head, Delegate? action, params T[] body)
 	{
+		HeadIndex = headIndex;
 		Head = head;
 		Action = action;
 		Body = body;
 		bodySize = body.Length;
 	}
 
+	/// <summary>
+	/// 获取产生式头的索引。
+	/// </summary>
+	/// <value>产生式头的索引。</value>
+	public int HeadIndex { get; }
 	/// <summary>
 	/// 获取产生式头。
 	/// </summary>

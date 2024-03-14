@@ -96,9 +96,9 @@ public partial class TestProductionLexer
 		int[] states = new[]
 		{
 			0, -1, 0, 0, 7, -1, 1, 32,
-			int.MinValue, -1, 1, 33, int.MinValue, -1, 1, 34,
-			int.MinValue, -1, 1, 35, int.MinValue, -1, 1, 36,
-			int.MinValue, -1, 1, 37, int.MinValue, -1, 1, 38,
+			short.MinValue, -1, 1, 33, short.MinValue, -1, 1, 34,
+			short.MinValue, -1, 1, 35, short.MinValue, -1, 1, 36,
+			short.MinValue, -1, 1, 37, short.MinValue, -1, 1, 38,
 			0, 1, 2, 3, 4, 5, 6
 		};
 		// 状态转移

@@ -139,13 +139,19 @@ public partial class Parser<T, TController>
 		}
 		// 提取产生式数据
 		List<ProductionData<T>> productionData = new();
+		int gotoCount = 0;
 		foreach (Production<T> production in productions)
 		{
+			// 只有产生式头才会有 goto 数据。
+			if (production.Head.Index < 0)
+			{
+				production.Head.Index = gotoCount++;
+			}
 			productionData.Add(production.GetData());
 		}
 		// 提取状态数据
 		List<ParserStateData<T>> states = new();
-		Dictionary<T, List<KeyValuePair<int, int>>> gotoTransitions = new();
+		Dictionary<int, List<KeyValuePair<int, int>>> gotoTransitions = new();
 		int stateCount = this.states.Count;
 		foreach (LRState<T> state in this.states)
 		{
@@ -156,22 +162,39 @@ public partial class Parser<T, TController>
 			// 提取 GOTO 信息
 			foreach (var (symbol, nextState) in state.Gotos)
 			{
-				if (!gotoTransitions.TryGetValue(symbol.Kind, out List<KeyValuePair<int, int>>? list))
+				if (symbol.Index < 0)
+				{
+					// 不是非终结符，忽略。
+					continue;
+				}
+				if (!gotoTransitions.TryGetValue(symbol.Index, out List<KeyValuePair<int, int>>? list))
 				{
 					list = new List<KeyValuePair<int, int>>(stateCount);
-					gotoTransitions[symbol.Kind] = list;
+					gotoTransitions[symbol.Index] = list;
 				}
 				list.Add(new KeyValuePair<int, int>(state.Index, nextState.Index));
 			}
 		}
-		TripleArrayCompress<T, int> gotoCompress = new(Symbol<T>.EndOfFile.Kind, ParserData.InvalidState);
-		Dictionary<T, int> gotoMap = new();
-		foreach (var (kind, transition) in gotoTransitions)
+		TripleArrayCompress<int> gotoCompress = new(ParserData.InvalidState);
+		int[] gotoMap = new int[gotoCount];
+		// 这里使用 short.MinValue 作为默认基线，原因是
+		// charClass 可能的范围是 [-1, char.MaxValue]，与 short.MinVaue 相加再 * 2
+		// 后仍能确保是负数且不会溢出 int 范围。
+		gotoMap.Fill(short.MinValue);
+		foreach (var (index, transition) in gotoTransitions)
 		{
-			gotoMap[kind] = gotoCompress.AddNode(kind, transition);
+			gotoMap[index] = gotoCompress.AddNode(index, transition);
+		}
+		// 将 Check 和 Next 拼接到同一个数组内，内存的局部性会让性能更高。
+		int transLen = gotoCompress.Next.Count * 2;
+		int[] gotoTrans = new int[transLen];
+		for (int i = 0, j = 0; i < gotoCompress.Next.Count; i++)
+		{
+			gotoTrans[j++] = gotoCompress.Check[i];
+			gotoTrans[j++] = gotoCompress.Next[i];
 		}
 		return new ParserData<T>(productionData.ToArray(), startStates, states.ToArray(),
-			gotoMap, gotoCompress.Next.ToArray(), gotoCompress.Check.ToArray());
+			gotoMap, gotoTrans);
 	}
 
 	/// <summary>

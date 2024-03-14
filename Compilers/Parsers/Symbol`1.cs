@@ -39,14 +39,20 @@ internal sealed class Symbol<T>
 	/// <summary>
 	/// 使用指定的符号索引初始化 <see cref="Symbol{T}"/> 类的新实例。
 	/// </summary>
-	/// <param name="kind">当前符号的类型。</param>
+	/// <param name="kind">符号的类型。</param>
 	/// <param name="name">当前符号的名称。</param>
 	public Symbol(T kind, string name)
 	{
+		Index = -1;
 		Kind = kind;
 		Name = name;
 	}
 
+	/// <summary>
+	/// 获取或设置当前符号的索引。
+	/// </summary>
+	/// <value>当前符号的索引。</value>
+	public int Index { get; set; }
 	/// <summary>
 	/// 获取当前符号的类型。
 	/// </summary>

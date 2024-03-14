@@ -44,7 +44,10 @@ internal class DfaDataBuilder
 			DfaState state = states[i];
 			DfaState? defaultState = GetDefaultState(i);
 			KeyValuePair<int, int>[] transitions = state.GetTransitions(defaultState);
-			int baseIndex = int.MinValue;
+			// 这里使用 short.MinValue 作为默认基线，原因是
+			// charClass 可能的范围是 [-1, char.MaxValue]，与 short.MinVaue 相加再 * 2
+			// 后仍能确保是负数且不会溢出 int 范围。
+			int baseIndex = short.MinValue;
 			if (transitions.Length > 0)
 			{
 				// 找到合适的 next 空当。

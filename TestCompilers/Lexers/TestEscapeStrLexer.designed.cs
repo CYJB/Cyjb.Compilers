@@ -113,14 +113,14 @@ public partial class TestEscapeStrLexer
 		{
 			0, -1, 0, 0, 9, 0, 0, 0,
 			12, 0, 0, 0, 14, -1, 1, 76,
-			int.MinValue, -1, 1, 77, int.MinValue, -1, 1, 78,
-			int.MinValue, -1, 1, 76, 15, -1, 1, 77,
-			int.MinValue, -1, 1, 79, 12, -1, 0, 0,
-			13, -1, 0, 0, int.MinValue, -1, 1, 80,
-			int.MinValue, -1, 1, 81, 15, -1, 0, 0,
-			int.MinValue, -1, 1, 82, 19, -1, 0, 0,
-			int.MinValue, -1, 1, 83, 24, -1, 1, 77,
-			int.MinValue, -1, 1, 84, 2, 7, 8, 5,
+			short.MinValue, -1, 1, 77, short.MinValue, -1, 1, 78,
+			short.MinValue, -1, 1, 76, 15, -1, 1, 77,
+			short.MinValue, -1, 1, 79, 12, -1, 0, 0,
+			13, -1, 0, 0, short.MinValue, -1, 1, 80,
+			short.MinValue, -1, 1, 81, 15, -1, 0, 0,
+			short.MinValue, -1, 1, 82, 19, -1, 0, 0,
+			short.MinValue, -1, 1, 83, 24, -1, 1, 77,
+			short.MinValue, -1, 1, 84, 2, 7, 8, 5,
 			4, 6, 3, 0, 1
 		};
 		// 状态转移

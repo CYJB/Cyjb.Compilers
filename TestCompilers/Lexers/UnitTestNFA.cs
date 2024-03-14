@@ -135,7 +135,7 @@ public class UnitTestNFA
 		Assert.AreEqual(28, data.States[16 + DfaStateData.SymbolIndexOffset]);
 		Assert.AreEqual(1, data.States[28]);
 
-		Assert.AreEqual(int.MinValue, data.States[20]);
+		Assert.AreEqual(short.MinValue, data.States[20]);
 		Assert.AreEqual(-1, data.States[20 + DfaStateData.DefaultStateOffset]);
 		Assert.AreEqual(1, data.States[20 + DfaStateData.SymbolsLengthOffset]);
 		Assert.AreEqual(28, data.States[20 + DfaStateData.SymbolIndexOffset]);
