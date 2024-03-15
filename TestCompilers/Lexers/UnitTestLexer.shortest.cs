@@ -17,7 +17,8 @@ public partial class UnitTestLexer
 		lexer.DefineSymbol(@"ab+").Kind(TestKind.A).UseShortest();
 		var factory = lexer.GetFactory();
 
-		var tokenizer = factory.CreateTokenizer("abbbb");
+		var tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("abbbb");
 		Assert.AreEqual(new Token<TestKind>(TestKind.A, "ab", new TextSpan(0, 2)), tokenizer.Read());
 
 		// 向前看。
@@ -25,7 +26,8 @@ public partial class UnitTestLexer
 		lexer.DefineSymbol(@"a.+/b").Kind(TestKind.A).UseShortest();
 		factory = lexer.GetFactory();
 
-		tokenizer = factory.CreateTokenizer("abbbb");
+		tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("abbbb");
 		Assert.AreEqual(new Token<TestKind>(TestKind.A, "ab", new TextSpan(0, 2)), tokenizer.Read());
 
 		// 可拒绝。
@@ -43,7 +45,8 @@ public partial class UnitTestLexer
 		});
 		factory = lexer.GetFactory(true);
 
-		tokenizer = factory.CreateTokenizer("abbbb");
+		tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("abbbb");
 		Assert.AreEqual(new Token<TestKind>(TestKind.A, "abbb", new TextSpan(0, 4)), tokenizer.Read());
 
 		// 向前看+可拒绝。
@@ -61,7 +64,8 @@ public partial class UnitTestLexer
 		});
 		factory = lexer.GetFactory(true);
 
-		tokenizer = factory.CreateTokenizer("abbbb");
+		tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("abbbb");
 		Assert.AreEqual(new Token<TestKind>(TestKind.A, "abbb", new TextSpan(0, 4)), tokenizer.Read());
 	}
 }

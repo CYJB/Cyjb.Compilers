@@ -63,7 +63,8 @@ public partial class UnitTestLexer
 		});
 		var factory = lexer.GetFactory(true);
 
-		var tokenizer = factory.CreateTokenizer("abccc");
+		var tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("abccc");
 		Assert.AreEqual(new Token<TestKind>(TestKind.C, "abc", new TextSpan(0, 3)), tokenizer.Read());
 	}
 
@@ -123,7 +124,8 @@ public partial class UnitTestLexer
 		});
 		var factory = lexer.GetFactory(true);
 
-		var tokenizer = factory.CreateTokenizer("abccc");
+		var tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("abccc");
 		Assert.AreEqual(new Token<TestKind>(TestKind.C, "abc", new TextSpan(0, 3)), tokenizer.Read());
 	}
 
@@ -143,7 +145,8 @@ public partial class UnitTestLexer
 		lexer.DefineSymbol(@"a").Kind(TestKind.B);
 		var factory = lexer.GetFactory(true);
 
-		var tokenizer = factory.CreateTokenizer("aaaa");
+		var tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("aaaa");
 		Assert.AreEqual(new Token<TestKind>(TestKind.B, "a", new TextSpan(0, 1)), tokenizer.Read());
 		Assert.AreEqual(4, count);
 
@@ -157,7 +160,8 @@ public partial class UnitTestLexer
 		lexer2.DefineSymbol(@"a").Kind(TestKind.B);
 		factory = lexer2.GetFactory(true);
 
-		tokenizer = factory.CreateTokenizer("aaaa");
+		tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("aaaa");
 		Assert.AreEqual(new Token<TestKind>(TestKind.B, "a", new TextSpan(0, 1)), tokenizer.Read());
 		Assert.AreEqual(1, count);
 	}

@@ -1,5 +1,3 @@
-using Cyjb.Text;
-
 namespace Cyjb.Compilers.Parsers;
 
 /// <summary>
@@ -10,10 +8,8 @@ public interface IParserFactory<T>
 	where T : struct
 {
 	/// <summary>
-	/// 创建分析指定的词法单元序列语法分析器。
+	/// 创建语法分析器。
 	/// </summary>
-	/// <param name="tokens">要分析的词法单元序列。</param>
-	/// <returns>指定词法单元序列的语法分析器。</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="tokens"/> 为 <c>null</c>。</exception>
-	ITokenParser<T> CreateParser(ITokenizer<T> tokens);
+	/// <returns>已创建的语法分析器。</returns>
+	LRParser<T> CreateParser();
 }

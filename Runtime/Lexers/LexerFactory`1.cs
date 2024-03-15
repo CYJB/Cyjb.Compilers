@@ -1,5 +1,3 @@
-using Cyjb.Text;
-
 namespace Cyjb.Compilers.Lexers;
 
 /// <summary>
@@ -38,51 +36,14 @@ public sealed class LexerFactory<T> : ILexerFactory<T>
 	}
 
 	/// <summary>
-	/// 创建分析指定源文件的词法分析器。
+	/// 创建词法分析器。
 	/// </summary>
-	/// <param name="source">要读取的源文件。</param>
-	/// <returns>指定源文件的词法分析器。</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-	/// <overloads>
-	/// <summary>
-	/// 创建分析指定源文件的词法分析器。
-	/// </summary>
-	/// </overloads>
-	public ITokenizer<T> CreateTokenizer(string source)
+	/// <returns>已创建的词法分析器。</returns>
+	public LexerTokenizer<T> CreateTokenizer()
 	{
-		ArgumentNullException.ThrowIfNull(source);
-		return CreateTokenizer(new SourceReader(new StringReader(source)));
-	}
-
-	/// <summary>
-	/// 创建分析指定源文件的词法分析器。
-	/// </summary>
-	/// <param name="source">要读取的源文件。</param>
-	/// <returns>指定源文件的词法分析器。</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-	public ITokenizer<T> CreateTokenizer(SourceReader source)
-	{
-		ArgumentNullException.ThrowIfNull(source);
 		LexerController<T> controller = new();
-		controller.Init(source, lexerData.Contexts, actionHandler, lexerData.Rejectable);
-		if (lexerData.Rejectable)
-		{
-			if (lexerData.TrailingType == TrailingType.None)
-			{
-				return new TokenizerRejectable<T>(lexerData, controller, source);
-			}
-		}
-		else
-		{
-			if (lexerData.TrailingType == TrailingType.None)
-			{
-				return new TokenizerSimpler<T>(lexerData, controller, source);
-			}
-			else if (lexerData.TrailingType == TrailingType.Fixed)
-			{
-				return new TokenizerFixedTrailing<T>(lexerData, controller, source);
-			}
-		}
-		return new TokenizerRejectableTrailing<T>(lexerData, controller, source);
+		LexerTokenizer<T> tokenizer = LexerTokenizer<T>.Create(lexerData, controller);
+		controller.Init(tokenizer, lexerData.Contexts, actionHandler, lexerData.Rejectable);
+		return tokenizer;
 	}
 }

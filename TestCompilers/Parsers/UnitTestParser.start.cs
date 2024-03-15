@@ -14,15 +14,15 @@ public partial class UnitTestParser
 	{
 		ITokenizer<TestKind> tokens = new EnumerableTokenizer<TestKind>(new Token<TestKind>[]
 		{
-			new Token<TestKind>(TestKind.Te, "e"),
-			new Token<TestKind>(TestKind.Tc, "c"),
-			new Token<TestKind>(TestKind.Td, "d"),
-			new Token<TestKind>(TestKind.Ta, "a"),
-			new Token<TestKind>(TestKind.Tb, "b"),
-			new Token<TestKind>(TestKind.Te, "e"),
-			new Token<TestKind>(TestKind.Te, "e"),
-			new Token<TestKind>(TestKind.Tc, "c"),
-			new Token<TestKind>(TestKind.Td, "d"),
+			new(TestKind.Te, "e"),
+			new(TestKind.Tc, "c"),
+			new(TestKind.Td, "d"),
+			new(TestKind.Ta, "a"),
+			new(TestKind.Tb, "b"),
+			new(TestKind.Te, "e"),
+			new(TestKind.Te, "e"),
+			new(TestKind.Tc, "c"),
+			new(TestKind.Td, "d"),
 		});
 
 		Parser<TestKind> parser = new();
@@ -37,7 +37,8 @@ public partial class UnitTestParser
 		parser.AddStart(TestKind.C, ParseOptions.ScanToMatch);
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
-		ITokenParser<TestKind> tokenParser = factory.CreateParser(tokens);
+		var tokenParser = factory.CreateParser();
+		tokenParser.Load(tokens);
 		tokenParser.ParseError += (parser, error) =>
 		{
 			Assert.Fail("不应产生分析错误");

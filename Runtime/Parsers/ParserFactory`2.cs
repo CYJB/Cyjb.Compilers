@@ -1,5 +1,3 @@
-using Cyjb.Text;
-
 namespace Cyjb.Compilers.Parsers;
 
 /// <summary>
@@ -35,16 +33,14 @@ public sealed class ParserFactory<T, TController> : IParserFactory<T>
 	}
 
 	/// <summary>
-	/// 创建分析指定的词法单元序列语法分析器。
+	/// 创建语法分析器。
 	/// </summary>
-	/// <param name="tokenizer">要分析的词法单元序列。</param>
-	/// <returns>指定词法单元序列的语法分析器。</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="tokenizer"/> 为 <c>null</c>。</exception>
-	public ITokenParser<T> CreateParser(ITokenizer<T> tokenizer)
+	/// <returns>已创建的语法分析器。</returns>
+	public LRParser<T> CreateParser()
 	{
-		ArgumentNullException.ThrowIfNull(tokenizer);
 		TController controller = new();
-		controller.Init(parserData, tokenizer, actionHandler);
-		return new LRParser<T>(parserData, tokenizer, controller);
+		LRParser<T> parser = new(parserData, controller);
+		controller.Init(parserData, parser, actionHandler);
+		return parser;
 	}
 }

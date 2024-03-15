@@ -8,7 +8,7 @@ namespace Cyjb.Compilers.Parsers;
 /// 表示 LR 词法单元分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，必须是一个枚举类型。</typeparam>
-internal sealed class LRParser<T> : ITokenParser<T>
+public sealed class LRParser<T> : ITokenParser<T>
 	where T : struct
 {
 	/// <summary>
@@ -18,7 +18,7 @@ internal sealed class LRParser<T> : ITokenParser<T>
 	/// <summary>
 	/// 词法分析器。
 	/// </summary>
-	private readonly ITokenizer<T> tokenizer;
+	private ITokenizer<T> tokenizer = EmptyTokenizer<T>.Empty;
 	/// <summary>
 	/// 语法节点堆栈。
 	/// </summary>
@@ -50,14 +50,11 @@ internal sealed class LRParser<T> : ITokenParser<T>
 	/// 使用指定的 LR 规则和词法分析器初始化 <see cref="LRParser{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="data">LR 语法分析器的规则。</param>
-	/// <param name="tokenizer">词法分析器。</param>
 	/// <param name="controller">语法分析控制器。</param>
-	internal LRParser(ParserData<T> data, ITokenizer<T> tokenizer, ParserController<T> controller)
+	internal LRParser(ParserData<T> data, ParserController<T> controller)
 	{
 		this.data = data;
-		this.tokenizer = tokenizer;
 		this.controller = controller;
-		controller.SetParser(this);
 	}
 
 	/// <summary>
@@ -80,8 +77,30 @@ internal sealed class LRParser<T> : ITokenParser<T>
 	}
 
 	/// <summary>
+	/// 加载指定的词法分析器。
+	/// </summary>
+	/// <param name="tokenizer">要加载的词法分析器。</param>
+	/// <exception cref="ArgumentNullException"><paramref name="tokenizer"/> 为 <c>null</c>。</exception>
+	public void Load(ITokenizer<T> tokenizer)
+	{
+		ArgumentNullException.ThrowIfNull(tokenizer);
+		if (this.tokenizer == tokenizer)
+		{
+			// 不重复加载。
+			return;
+		}
+		this.tokenizer = tokenizer;
+		// 重置状态。
+		nodeStack.Clear();
+		stateStack.Clear();
+		status = ParseStatus.Ready;
+		controller.Load(tokenizer);
+	}
+
+	/// <summary>
 	/// 使用默认的目标类型分析当前词法单元序列。
 	/// </summary>
+	/// <returns>语法分析的结果。</returns>
 	public ParserNode<T> Parse()
 	{
 		return ParseTokens(0);
@@ -91,6 +110,7 @@ internal sealed class LRParser<T> : ITokenParser<T>
 	/// 使用指定的目标类型分析当前词法单元序列。
 	/// </summary>
 	/// <param name="target">目标类型。</param>
+	/// <returns>语法分析的结果。</returns>
 	public ParserNode<T> Parse(T target)
 	{
 		int initialState = 0;

@@ -31,7 +31,7 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>, IDisposable
 	/// 词法分析器。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private ITokenizer<T> tokenizer;
+	private ITokenizer<T> tokenizer = EmptyTokenizer<T>.Empty;
 	/// <summary>
 	/// 动作的处理器。
 	/// </summary>
@@ -69,13 +69,24 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>, IDisposable
 	/// 设置指定的词法分析控制器信息。
 	/// </summary>
 	/// <param name="data">语法规则数据。</param>
-	/// <param name="tokenizer">词法分析器。</param>
+	/// <param name="parser">语法分析器。</param>
 	/// <param name="actionHandler">动作的处理器。</param>
-	internal void Init(ParserData<T> data, ITokenizer<T> tokenizer, Func<Delegate, ParserController<T>, object?> actionHandler)
+	internal void Init(ParserData<T> data, LRParser<T> parser, Func<Delegate, ParserController<T>, object?> actionHandler)
 	{
 		this.data = data;
-		this.tokenizer = tokenizer;
+		this.parser = parser;
+		stateStack = parser.StateStack;
 		this.actionHandler = actionHandler;
+	}
+
+	/// <summary>
+	/// 加载指定的词法分析器。
+	/// </summary>
+	/// <param name="tokenizer">要加载的词法分析器。</param>
+	internal void Load(ITokenizer<T> tokenizer)
+	{
+		this.tokenizer = tokenizer;
+		TokenizerLoaded();
 	}
 
 	/// <summary>
@@ -104,13 +115,15 @@ public class ParserController<T> : ReadOnlyListBase<ParserNode<T>>, IDisposable
 	protected ParserData<T> Data => data;
 
 	/// <summary>
-	/// 设置关联到的语法分析器。
+	/// 已加载词法分析器。
 	/// </summary>
-	/// <param name="parser">关联到的语法分析器。</param>
-	internal void SetParser(LRParser<T> parser)
+	protected void TokenizerLoaded()
 	{
-		this.parser = parser;
-		stateStack = parser.StateStack;
+		// 重置状态。
+		tokenCache.Clear();
+		nodes.Clear();
+		node = new(Token<T>.GetEndOfFile(0));
+		hiddenTokens.Clear();
 	}
 
 	/// <summary>

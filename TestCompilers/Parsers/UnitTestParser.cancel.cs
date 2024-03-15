@@ -14,12 +14,12 @@ public partial class UnitTestParser
 	{
 		ITokenizer<TestKind> tokens = new EnumerableTokenizer<TestKind>(new Token<TestKind>[]
 		{
-			new Token<TestKind>(TestKind.Te, "e"),
-			new Token<TestKind>(TestKind.Te, "e"),
-			new Token<TestKind>(TestKind.Tc, "c"),
-			new Token<TestKind>(TestKind.Td, "d"),
-			new Token<TestKind>(TestKind.Ta, "a"),
-			new Token<TestKind>(TestKind.Tb, "b"),
+			new(TestKind.Te, "e"),
+			new(TestKind.Te, "e"),
+			new(TestKind.Tc, "c"),
+			new(TestKind.Td, "d"),
+			new(TestKind.Ta, "a"),
+			new(TestKind.Tb, "b"),
 		});
 
 		Parser<TestKind> parser = new();
@@ -31,7 +31,8 @@ public partial class UnitTestParser
 			.Action(c => $"C[{c[0].Text}]");
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
-		ITokenParser<TestKind> tokenParser = factory.CreateParser(tokens);
+		LRParser<TestKind> tokenParser = factory.CreateParser();
+		tokenParser.Load(tokens);
 		tokenParser.ParseError += (parser, error) =>
 		{
 			parser.Cancel();

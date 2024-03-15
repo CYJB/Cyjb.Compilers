@@ -1,5 +1,4 @@
 using Cyjb.Collections;
-using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
 
@@ -7,7 +6,7 @@ namespace Cyjb.Compilers.Lexers;
 /// 表示支持 Reject 动作的词法分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
+internal sealed class TokenizerRejectable<T> : LexerTokenizer<T>
 	where T : struct
 {
 	/// <summary>
@@ -56,9 +55,8 @@ internal sealed class TokenizerRejectable<T> : TokenizerBase<T>
 	/// </summary>
 	/// <param name="lexerData">要使用的词法分析器的数据。</param>
 	/// <param name="controller">词法分析控制器。</param>
-	/// <param name="reader">要使用的源文件读取器。</param>
-	public TokenizerRejectable(LexerData<T> lexerData, LexerController<T> controller, SourceReader reader) :
-		base(lexerData, controller, reader)
+	public TokenizerRejectable(LexerData<T> lexerData, LexerController<T> controller) :
+		base(lexerData, controller)
 	{ }
 
 	/// <summary>

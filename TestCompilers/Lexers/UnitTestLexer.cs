@@ -25,7 +25,8 @@ public partial class UnitTestLexer
 		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
 		var factory = lexer.GetFactory();
 
-		var tokenizer = factory.CreateTokenizer("____");
+		var tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("____");
 		Assert.AreEqual(new Token<TestKind>(TestKind.A, "____", new TextSpan(0, 4)), tokenizer.Read());
 		Assert.AreEqual(Token<TestKind>.GetEndOfFile(4), tokenizer.Read());
 	}
@@ -70,8 +71,9 @@ public partial class UnitTestLexer
 	/// <param name="factory">词法分析器的工厂。</param>
 	private static void TestCalc(ILexerFactory<Calc> factory)
 	{
-		string source = "1 + 20 * 3 / 4*(5+6)";
-		ITokenizer<Calc> tokenizer = factory.CreateTokenizer(source);
+		LexerTokenizer<Calc> tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("1 + 20 * 3 / 4*(5+6)");
+
 		Assert.AreEqual(ParseStatus.Ready, tokenizer.Status);
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), tokenizer.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), tokenizer.Read());
@@ -89,9 +91,9 @@ public partial class UnitTestLexer
 		Assert.AreEqual(Token<Calc>.GetEndOfFile(20), tokenizer.Read());
 		Assert.AreEqual(ParseStatus.Finished, tokenizer.Status);
 
-		ITokenizer<Calc> errorTokenizer = factory.CreateTokenizer("1ss");
+		tokenizer.Load("1ss");
 		int errorIndex = 0;
-		errorTokenizer.TokenizeError += (tokenizer, error) =>
+		tokenizer.TokenizeError += (tokenizer, error) =>
 		{
 			if (errorIndex == 0)
 			{
@@ -103,8 +105,8 @@ public partial class UnitTestLexer
 			}
 			errorIndex++;
 		};
-		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), errorTokenizer.Read());
-		Assert.AreEqual(Token<Calc>.GetEndOfFile(3), errorTokenizer.Read());
+		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), tokenizer.Read());
+		Assert.AreEqual(Token<Calc>.GetEndOfFile(3), tokenizer.Read());
 		Assert.AreEqual(2, errorIndex);
 	}
 
@@ -139,8 +141,8 @@ public partial class UnitTestLexer
 	/// <param name="factory">词法分析器的工厂。</param>
 	private static void TestSymbolValue(ILexerFactory<Calc> factory)
 	{
-		string source = "20";
-		ITokenizer<Calc> tokenizer = factory.CreateTokenizer(source);
+		LexerTokenizer<Calc> tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("20");
 		Assert.AreEqual(ParseStatus.Ready, tokenizer.Status);
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "20", new TextSpan(0, 2), 111), tokenizer.Read());
 		Assert.AreEqual(Token<Calc>.GetEndOfFile(2), tokenizer.Read());
@@ -179,8 +181,9 @@ public partial class UnitTestLexer
 	/// <param name="factory">词法分析器的工厂。</param>
 	private static void TestString(ILexerFactory<Str> factory)
 	{
-		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		ITokenizer<Str> tokenizer = factory.CreateTokenizer(source);
+		LexerTokenizer<Str> tokenizer = factory.CreateTokenizer();
+		tokenizer.Load(@"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""");
+
 		Assert.AreEqual(new Token<Str>(Str.Str, @"""abcd\n\r""", new TextSpan(0, 10)), tokenizer.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, @"""aabb\""ccd\u0045\x47""", new TextSpan(10, 31)), tokenizer.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, @"@""abcd\n\r""", new TextSpan(31, 42)), tokenizer.Read());
@@ -288,8 +291,9 @@ public partial class UnitTestLexer
 	/// <param name="factory">词法分析器的工厂。</param>
 	private static void TestEscapeString(ILexerFactory<Str> factory)
 	{
-		string source = @"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""";
-		ITokenizer<Str> tokenizer = factory.CreateTokenizer(source);
+		LexerTokenizer<Str> tokenizer = factory.CreateTokenizer();
+		tokenizer.Load(@"""abcd\n\r""""aabb\""ccd\u0045\x47""@""abcd\n\r""@""aabb\""""ccd\u0045\x47""");
+
 		Assert.AreEqual(new Token<Str>(Str.Str, "abcd\n\r", new TextSpan(0, 10)), tokenizer.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, "aabb\"ccd\u0045\x47", new TextSpan(10, 31)), tokenizer.Read());
 		Assert.AreEqual(new Token<Str>(Str.Str, @"abcd\n\r", new TextSpan(31, 42)), tokenizer.Read());
@@ -332,8 +336,9 @@ public partial class UnitTestLexer
 	/// <param name="factory">词法分析器的工厂。</param>
 	private static void TestProuction(ILexerFactory<ProductionKind> factory)
 	{
-		string source = "A B21 381 D  * E+(F G2)* ";
-		ITokenizer<ProductionKind> tokenizer = factory.CreateTokenizer(source);
+		LexerTokenizer<ProductionKind> tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("A B21 381 D  * E+(F G2)* ");
+
 		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "A", new TextSpan(0, 1)), tokenizer.Read());
 		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "B21", new TextSpan(2, 5)), tokenizer.Read());
 		Assert.AreEqual(new Token<ProductionKind>(ProductionKind.Id, "381", new TextSpan(6, 9)), tokenizer.Read());

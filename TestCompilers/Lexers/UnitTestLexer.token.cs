@@ -31,7 +31,8 @@ public partial class UnitTestLexer
 		});
 		var factory = lexer.GetFactory();
 
-		var tokenizer = factory.CreateTokenizer("axbcd");
+		var tokenizer = factory.CreateTokenizer();
+		tokenizer.Load("axbcd");
 		Assert.AreEqual(new Token<TestKind>(TestKind.A, "XXX", new TextSpan(0, 2)), tokenizer.Read());
 		Assert.AreEqual(new Token<TestKind>(TestKind.B, "bc", new TextSpan(2, 4)), tokenizer.Read());
 	}

@@ -1,5 +1,3 @@
-using Cyjb.Text;
-
 namespace Cyjb.Compilers.Lexers;
 
 /// <summary>
@@ -10,23 +8,8 @@ public interface ILexerFactory<T>
 	where T : struct
 {
 	/// <summary>
-	/// 创建分析指定源文件的词法分析器。
+	/// 创建词法分析器。
 	/// </summary>
-	/// <param name="source">要读取的源文件。</param>
-	/// <returns>指定源文件的词法分析器。</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-	/// <overloads>
-	/// <summary>
-	/// 创建分析指定源文件的词法分析器。
-	/// </summary>
-	/// </overloads>
-	ITokenizer<T> CreateTokenizer(string source);
-
-	/// <summary>
-	/// 创建分析指定源文件的词法分析器。
-	/// </summary>
-	/// <param name="source">要读取的源文件。</param>
-	/// <returns>指定源文件的词法分析器。</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
-	ITokenizer<T> CreateTokenizer(SourceReader source);
+	/// <returns>已创建的词法分析器。</returns>
+	LexerTokenizer<T> CreateTokenizer();
 }

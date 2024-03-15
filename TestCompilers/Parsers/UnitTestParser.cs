@@ -63,21 +63,22 @@ public partial class UnitTestParser
 	{
 		ITokenizer<Calc> tokenizer = new EnumerableTokenizer<Calc>(new Token<Calc>[]
 		{
-			new Token<Calc>(Calc.Id, "1", 1.0),
-			new Token<Calc>(Calc.Add, "+"),
-			new Token<Calc>(Calc.Id, "20", 20.0),
-			new Token<Calc>(Calc.Mul, "*"),
-			new Token<Calc>(Calc.Id, "3", 3.0),
-			new Token<Calc>(Calc.Div, "/"),
-			new Token<Calc>(Calc.Id, "4", 4.0),
-			new Token<Calc>(Calc.Mul, "*"),
-			new Token<Calc>(Calc.LBrace, "("),
-			new Token<Calc>(Calc.Id, "5", 5.0),
-			new Token<Calc>(Calc.Add, "+"),
-			new Token<Calc>(Calc.Id, "6", 6.0),
-			new Token<Calc>(Calc.RBrace, ")"),
+			new(Calc.Id, "1", 1.0),
+			new(Calc.Add, "+"),
+			new(Calc.Id, "20", 20.0),
+			new(Calc.Mul, "*"),
+			new(Calc.Id, "3", 3.0),
+			new(Calc.Div, "/"),
+			new(Calc.Id, "4", 4.0),
+			new(Calc.Mul, "*"),
+			new(Calc.LBrace, "("),
+			new(Calc.Id, "5", 5.0),
+			new(Calc.Add, "+"),
+			new(Calc.Id, "6", 6.0),
+			new(Calc.RBrace, ")"),
 		});
-		ITokenParser<Calc> parser = factory.CreateParser(tokenizer);
+		var parser = factory.CreateParser();
+		parser.Load(tokenizer);
 		Assert.AreEqual(ParseStatus.Ready, parser.Status);
 		Assert.AreEqual(166.0, parser.Parse().Value);
 		Assert.AreEqual(ParseStatus.Finished, parser.Status);
@@ -133,23 +134,24 @@ public partial class UnitTestParser
 	{
 		ITokenizer<ProductionKind> tokenizer = new EnumerableTokenizer<ProductionKind>(new Token<ProductionKind>[]
 		{
-			new Token<ProductionKind>(ProductionKind.Id, "A"),
-			new Token<ProductionKind>(ProductionKind.Id, "B"),
-			new Token<ProductionKind>(ProductionKind.Star, "*"),
-			new Token<ProductionKind>(ProductionKind.Id, "C"),
-			new Token<ProductionKind>(ProductionKind.Id, "D"),
-			new Token<ProductionKind>(ProductionKind.LBrace, "("),
-			new Token<ProductionKind>(ProductionKind.Id, "E"),
-			new Token<ProductionKind>(ProductionKind.Id, "F"),
-			new Token<ProductionKind>(ProductionKind.Or, "|"),
-			new Token<ProductionKind>(ProductionKind.Id, "E2"),
-			new Token<ProductionKind>(ProductionKind.Id, "F2"),
-			new Token<ProductionKind>(ProductionKind.RBrace, ")"),
-			new Token<ProductionKind>(ProductionKind.Plus, "+"),
-			new Token<ProductionKind>(ProductionKind.Id, "G"),
-			new Token<ProductionKind>(ProductionKind.Question, "?"),
+			new(ProductionKind.Id, "A"),
+			new(ProductionKind.Id, "B"),
+			new(ProductionKind.Star, "*"),
+			new(ProductionKind.Id, "C"),
+			new(ProductionKind.Id, "D"),
+			new(ProductionKind.LBrace, "("),
+			new(ProductionKind.Id, "E"),
+			new(ProductionKind.Id, "F"),
+			new(ProductionKind.Or, "|"),
+			new(ProductionKind.Id, "E2"),
+			new(ProductionKind.Id, "F2"),
+			new(ProductionKind.RBrace, ")"),
+			new(ProductionKind.Plus, "+"),
+			new(ProductionKind.Id, "G"),
+			new(ProductionKind.Question, "?"),
 		});
-		ITokenParser<ProductionKind> parser = factory.CreateParser(tokenizer);
+		var parser = factory.CreateParser();
+		parser.Load(tokenizer);
 		Assert.AreEqual(ParseStatus.Ready, parser.Status);
 		Assert.AreEqual("A B* C D ((E F)|(E2 F2))+ G?", parser.Parse().Value);
 		Assert.AreEqual(ParseStatus.Finished, parser.Status);
@@ -169,9 +171,10 @@ public partial class UnitTestParser
 
 		ITokenizer<TestKind> tokenizer = new EnumerableTokenizer<TestKind>(new Token<TestKind>[]
 		{
-			new Token<TestKind>(TestKind.B, "1", new TextSpan(10, 11)),
+			new(TestKind.B, "1", new TextSpan(10, 11)),
 		});
-		ITokenParser<TestKind> tokenParser = factory.CreateParser(tokenizer);
+		var tokenParser = factory.CreateParser();
+		tokenParser.Load(tokenizer);
 		Assert.AreEqual(new TextSpan(10, 11), tokenParser.Parse().Span);
 	}
 }

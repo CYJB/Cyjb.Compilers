@@ -1,3 +1,4 @@
+using Cyjb.Compilers.Lexers;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,8 +12,9 @@ public partial class UnitTestLexer
 	[TestMethod]
 	public void TestCancel()
 	{
-		string source = "1 + 20 * 3 / 4*(5+6)";
-		ITokenizer<Calc> tokenizer = TestCalcLexer.Factory.CreateTokenizer(source);
+		LexerTokenizer<Calc> tokenizer = TestCalcLexer.Factory.CreateTokenizer();
+		tokenizer.Load("1 + 20 * 3 / 4*(5+6)");
+
 		Assert.AreEqual(ParseStatus.Ready, tokenizer.Status);
 		Assert.AreEqual(new Token<Calc>(Calc.Id, "1", new TextSpan(0, 1), 1), tokenizer.Read());
 		Assert.AreEqual(new Token<Calc>(Calc.Add, "+", new TextSpan(2, 3)), tokenizer.Read());

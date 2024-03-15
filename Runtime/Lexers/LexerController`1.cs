@@ -13,12 +13,12 @@ public class LexerController<T> : IDisposable
 	/// <summary>
 	/// 关联到的词法分析器。
 	/// </summary>
-	private TokenizerBase<T> tokenizer;
+	private LexerTokenizer<T> tokenizer;
 	/// <summary>
 	/// 要扫描的源文件。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private SourceReader source;
+	private SourceReader source = SourceReader.Empty;
 	/// <summary>
 	/// 当前词法分析的上下文。
 	/// </summary>
@@ -62,14 +62,14 @@ public class LexerController<T> : IDisposable
 	/// <summary>
 	/// 设置指定的词法分析控制器信息。
 	/// </summary>
-	/// <param name="source">源文件读取器。</param>
+	/// <param name="tokenizer">关联到的词法分析器。</param>
 	/// <param name="contexts">词法分析的上下文。</param>
 	/// <param name="actionHandler">动作的处理器。</param>
 	/// <param name="rejectable">是否允许 Reject 动作。</param>
-	internal void Init(SourceReader source, IReadOnlyDictionary<string, ContextData> contexts,
+	internal void Init(LexerTokenizer<T> tokenizer, IReadOnlyDictionary<string, ContextData> contexts,
 		Action<Delegate, LexerController<T>> actionHandler, bool rejectable)
 	{
-		this.source = source;
+		this.tokenizer = tokenizer;
 		this.contexts = contexts;
 		context = contexts[InitialContext];
 		this.actionHandler = actionHandler;
@@ -85,7 +85,18 @@ public class LexerController<T> : IDisposable
 	/// 获取要扫描的源文件。
 	/// </summary>
 	/// <value>要扫描的源文件。</value>
-	public SourceReader Source => source;
+	public SourceReader Source
+	{
+		get => source;
+		internal set
+		{
+			if (source != value)
+			{
+				source = value;
+				SourceLoaded();
+			}
+		}
+	}
 	/// <summary>
 	/// 获取或设置共享的上下文对象。
 	/// </summary>
@@ -144,15 +155,6 @@ public class LexerController<T> : IDisposable
 	internal bool IsMore { get; private set; }
 
 	/// <summary>
-	/// 设置关联到的词法分析器。
-	/// </summary>
-	/// <param name="tokenizer">关联到的词法分析器。</param>
-	internal void SetTokenizer(TokenizerBase<T> tokenizer)
-	{
-		this.tokenizer = tokenizer;
-	}
-
-	/// <summary>
 	/// 开始一个新的词法分析环境。
 	/// </summary>
 	/// <param name="start">当前词法单元的起始索引。</param>
@@ -198,6 +200,14 @@ public class LexerController<T> : IDisposable
 			userAccepted = false;
 			actionHandler(action, this);
 		}
+	}
+
+	/// <summary>
+	/// 已加载源读取器。
+	/// </summary>
+	protected virtual void SourceLoaded()
+	{
+		contextStack.Clear();
 	}
 
 	/// <summary>

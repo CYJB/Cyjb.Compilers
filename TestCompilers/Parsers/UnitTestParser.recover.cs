@@ -115,8 +115,11 @@ public partial class UnitTestParser
 
 	private void TestRecover(string expected, string input, params TokenParseError[] errors)
 	{
-		ITokenizer<TestKind> tokenizer = recoverLexerFactory!.CreateTokenizer(input);
-		ITokenParser<TestKind> tokenParser = recoverParserFactory!.CreateParser(tokenizer);
+		LexerTokenizer<TestKind> tokenizer = recoverLexerFactory!.CreateTokenizer();
+		tokenizer.Load(input);
+
+		var tokenParser = recoverParserFactory!.CreateParser();
+		tokenParser.Load(tokenizer);
 		int index = 0;
 		tokenParser.ParseError += (_, error) =>
 		{

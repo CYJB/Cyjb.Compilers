@@ -22,7 +22,8 @@ public partial class UnitTestParser
 			.Action(c => "()");
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
-		ITokenParser<TestKind> tokenParser = factory.CreateParser(GetTestOptionTokenizer());
+		var tokenParser = factory.CreateParser();
+		tokenParser.Load(GetTestOptionTokenizer());
 		int errorCount = 0;
 		tokenParser.ParseError += (parser, error) =>
 		{
@@ -54,7 +55,8 @@ public partial class UnitTestParser
 		parser.AddStart(TestKind.A, ParseOptions.ScanToMatch);
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
-		ITokenParser<TestKind> tokenParser = factory.CreateParser(GetTestOptionTokenizer());
+		var tokenParser = factory.CreateParser();
+		tokenParser.Load(GetTestOptionTokenizer());
 		tokenParser.ParseError += (parser, error) =>
 		{
 			Assert.Fail("不应产生分析错误");
@@ -83,7 +85,8 @@ public partial class UnitTestParser
 		parser.AddStart(TestKind.A, ParseOptions.ScanToFirstMatch);
 		IParserFactory<TestKind> factory = parser.GetFactory();
 
-		ITokenParser<TestKind> tokenParser = factory.CreateParser(GetTestOptionTokenizer());
+		var tokenParser = factory.CreateParser();
+		tokenParser.Load(GetTestOptionTokenizer());
 		tokenParser.ParseError += (parser, error) =>
 		{
 			Assert.Fail("不应该出发 ParseError");
@@ -103,10 +106,10 @@ public partial class UnitTestParser
 	{
 		return new EnumerableTokenizer<TestKind>(new Token<TestKind>[]
 		{
-			new Token<TestKind>(TestKind.Ta, "a"),
-			new Token<TestKind>(TestKind.Tb, "b"),
-			new Token<TestKind>(TestKind.Ta, "a"),
-			new Token<TestKind>(TestKind.Tb, "b"),
+			new(TestKind.Ta, "a"),
+			new(TestKind.Tb, "b"),
+			new(TestKind.Ta, "a"),
+			new(TestKind.Tb, "b"),
 		});
 	}
 }

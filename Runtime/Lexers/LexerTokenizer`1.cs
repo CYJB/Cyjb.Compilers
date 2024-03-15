@@ -6,12 +6,41 @@ using Cyjb.Text;
 namespace Cyjb.Compilers.Lexers;
 
 /// <summary>
-/// 表示词法分析器的基类。
+/// 表示词法分析器。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-internal abstract class TokenizerBase<T> : ITokenizer<T>
+public abstract class LexerTokenizer<T> : ITokenizer<T>
 	where T : struct
 {
+	/// <summary>
+	/// 创建词法分析器。
+	/// </summary>
+	/// <param name="lexerData">词法分析器数据。</param>
+	/// <param name="controller">词法分析器的控制器。</param>
+	/// <returns>词法分析器。</returns>
+	internal static LexerTokenizer<T> Create(LexerData<T> lexerData, LexerController<T> controller)
+	{
+		if (lexerData.Rejectable)
+		{
+			if (lexerData.TrailingType == TrailingType.None)
+			{
+				return new TokenizerRejectable<T>(lexerData, controller);
+			}
+		}
+		else
+		{
+			if (lexerData.TrailingType == TrailingType.None)
+			{
+				return new TokenizerSimpler<T>(lexerData, controller);
+			}
+			else if (lexerData.TrailingType == TrailingType.Fixed)
+			{
+				return new TokenizerFixedTrailing<T>(lexerData, controller);
+			}
+		}
+		return new TokenizerRejectableTrailing<T>(lexerData, controller);
+	}
+
 	/// <summary>
 	/// 词法分析器的数据。
 	/// </summary>
@@ -25,7 +54,8 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	/// <summary>
 	/// 源码读取器。
 	/// </summary>
-	protected readonly SourceReader source;
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	protected SourceReader source = SourceReader.Empty;
 	/// <summary>
 	/// 解析状态。
 	/// </summary>
@@ -51,17 +81,46 @@ internal abstract class TokenizerBase<T> : ITokenizer<T>
 	public event TokenizeErrorHandler<T>? TokenizeError;
 
 	/// <summary>
-	/// 使用给定的词法分析器信息初始化 <see cref="TokenizerBase{T}"/> 类的新实例。
+	/// 使用给定的词法分析器信息初始化 <see cref="LexerTokenizer{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="data">要使用的词法分析器数据。</param>
 	/// <param name="controller">词法分析控制器。</param>
-	/// <param name="source">要使用的源文件读取器。</param>
-	protected TokenizerBase(LexerData<T> data, LexerController<T> controller, SourceReader source)
+	protected LexerTokenizer(LexerData<T> data, LexerController<T> controller)
 	{
 		this.data = data;
 		this.controller = controller;
+	}
+
+	/// <summary>
+	/// 加载指定的源码。
+	/// </summary>
+	/// <param name="source">要加载的源码。</param>
+	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
+	public void Load(string source)
+	{
+		ArgumentNullException.ThrowIfNull(source);
+		Load(new SourceReader(new StringReader(source)));
+	}
+
+	/// <summary>
+	/// 加载指定的源读取器。
+	/// </summary>
+	/// <param name="source">要加载的源读取器。</param>
+	/// <exception cref="ArgumentNullException"><paramref name="source"/> 为 <c>null</c>。</exception>
+	public void Load(SourceReader source)
+	{
+		ArgumentNullException.ThrowIfNull(source);
+		if (this.source == source)
+		{
+			// 相同源不重复加载。
+			return;
+		}
 		this.source = source;
-		controller.SetTokenizer(this);
+		// 重置状态。
+		status = ParseStatus.Ready;
+		rejectedStates.Clear();
+		start = 0;
+		controller.Source = source;
 	}
 
 	/// <summary>

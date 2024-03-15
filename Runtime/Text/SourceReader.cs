@@ -18,6 +18,10 @@ public sealed class SourceReader : IDisposable
 	/// </summary>
 	/// <remarks>使用非 Unicode 字符 0xFFFF。</remarks>
 	public const char InvalidCharacter = char.MaxValue;
+	/// <summary>
+	/// 空的源文件读取器。
+	/// </summary>
+	internal static readonly SourceReader Empty = new(new StringReader(string.Empty));
 
 	/// <summary>
 	/// 字符缓冲区。
@@ -108,6 +112,7 @@ public sealed class SourceReader : IDisposable
 	/// 需要在读取字符之前设置。
 	/// </summary>
 	/// <param name="tabSize">Tab 的宽度。</param>
+	/// <returns>当前源读取器。</returns>
 	public SourceReader UseLineLocator(int tabSize = 4)
 	{
 		if (locator == null)
