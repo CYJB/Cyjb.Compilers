@@ -36,7 +36,7 @@ public class UnitTestTemplateDiagnostics
 		"UnitTestTemplateDiagnostics.template.cs(4,14): CS8323: Named argument 'options' is used out-of-position but is followed by an unnamed argument.",
 		"UnitTestTemplateDiagnostics.template.cs(5,19): CS1525: Invalid expression term 'Test'.",
 		"UnitTestTemplateDiagnostics.template.cs(6,31): CS0643: 'Kind' duplicate named attribute argument.",
-		"UnitTestTemplateDiagnostics.template.cs(7,2): CS7036: There is no argument given that corresponds to the required formal parameter 'regex' of 'LexerSymbolAttribute.LexerSymbolAttribute(String, RegexOptions)'.",
+		"UnitTestTemplateDiagnostics.template.cs(7,2): CS7036: There is no argument given that corresponds to the required parameter 'regex' of 'LexerSymbolAttribute.LexerSymbolAttribute(String, RegexOptions)'.",
 		"UnitTestTemplateDiagnostics.template.cs(8,14): CS0030: Cannot convert type 'System.Int32' to 'System.String'.",
 		"UnitTestTemplateDiagnostics.template.cs(9,32): CS0117: 'RegexOptions' does not contain a definition for 'Test'.",
 		"UnitTestTemplateDiagnostics.template.cs(10,19): CS0030: Cannot convert type 'System.Double' to 'System.Text.RegularExpressions.RegexOptions'.",
