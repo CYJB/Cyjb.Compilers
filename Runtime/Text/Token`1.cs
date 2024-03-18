@@ -65,25 +65,25 @@ public partial class Token<T> : IEquatable<Token<T>>
 	}
 
 	/// <summary>
-	/// 获取词法单元的类型。
+	/// 获取或设置词法单元的类型。
 	/// </summary>
 	/// <value>词法单元的类型。</value>
-	public T Kind { get; }
+	public T Kind { get; set; }
 	/// <summary>
-	/// 获取词法单元的文本。
+	/// 获取或设置词法单元的文本。
 	/// </summary>
 	/// <value>词法单元的文本。</value>
-	public StringView Text { get; }
+	public StringView Text { get; set; }
 	/// <summary>
-	/// 获取词法单元的范围。
+	/// 获取或设置词法单元的范围。
 	/// </summary>
 	/// <value>词法单元的范围。</value>
-	public TextSpan Span { get; }
+	public TextSpan Span { get; set; }
 	/// <summary>
-	/// 获取词法单元的值。
+	/// 获取或设置词法单元的值。
 	/// </summary>
 	/// <value>词法单元的值。</value>
-	public object? Value { get; init; }
+	public object? Value { get; set; }
 	/// <summary>
 	/// 获取当前是否是表示文件结束的词法单元。
 	/// </summary>
