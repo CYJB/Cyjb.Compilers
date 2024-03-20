@@ -16,6 +16,92 @@ public class UnitTestSourceReader
 	private const int BufferLength = 0x100;
 
 	/// <summary>
+	/// 对 <see cref="SourceReader"/> 的字符串构造函数进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestCtorString()
+	{
+		SourceReader reader = new("1234567890");
+		Assert.AreEqual('1', reader.Peek());
+		Assert.AreEqual('1', reader.Peek());
+		Assert.AreEqual('1', reader.Read());
+		Assert.AreEqual('2', reader.Peek());
+		Assert.AreEqual('2', reader.Read());
+		Assert.AreEqual("12", reader.GetReadedText());
+		Assert.IsTrue(reader.Unget());
+		Assert.IsTrue(reader.Unget());
+		Assert.IsFalse(reader.Unget());
+
+		Assert.AreEqual('2', reader.Read(1));
+		Assert.AreEqual("12", reader.GetReadedText());
+		Assert.AreEqual(2, reader.Unget(5));
+
+		Assert.AreEqual("", reader.GetReadedText());
+		Assert.AreEqual('3', reader.Read(2));
+		Assert.AreEqual("123", reader.GetReadedText());
+		Assert.AreEqual("123", reader.Accept());
+
+		Assert.AreEqual("", reader.GetReadedText());
+		Assert.AreEqual("", reader.Accept());
+		Assert.IsFalse(reader.Unget());
+		Assert.AreEqual(0, reader.Unget(5));
+
+		Assert.AreEqual('6', reader.Read(2));
+		Assert.AreEqual("456", reader.GetReadedText());
+		reader.Drop();
+
+		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read(10));
+		Assert.AreEqual("7890", reader.GetReadedText());
+		Token<int> token = reader.AcceptToken(11);
+		Assert.AreEqual(11, token.Kind);
+		Assert.AreEqual("7890", token.Text);
+		Assert.AreEqual(new TextSpan(6, 10), token.Span);
+	}
+
+	/// <summary>
+	/// 对 <see cref="SourceReader"/> 的字符串视图构造函数进行测试。
+	/// </summary>
+	[TestMethod]
+	public void TestCtorStringView()
+	{
+		SourceReader reader = new("a1234567890b".AsView(1, 10));
+		Assert.AreEqual('1', reader.Peek());
+		Assert.AreEqual('1', reader.Peek());
+		Assert.AreEqual('1', reader.Read());
+		Assert.AreEqual('2', reader.Peek());
+		Assert.AreEqual('2', reader.Read());
+		Assert.AreEqual("12", reader.GetReadedText());
+		Assert.IsTrue(reader.Unget());
+		Assert.IsTrue(reader.Unget());
+		Assert.IsFalse(reader.Unget());
+
+		Assert.AreEqual('2', reader.Read(1));
+		Assert.AreEqual("12", reader.GetReadedText());
+		Assert.AreEqual(2, reader.Unget(5));
+
+		Assert.AreEqual("", reader.GetReadedText());
+		Assert.AreEqual('3', reader.Read(2));
+		Assert.AreEqual("123", reader.GetReadedText());
+		Assert.AreEqual("123", reader.Accept());
+
+		Assert.AreEqual("", reader.GetReadedText());
+		Assert.AreEqual("", reader.Accept());
+		Assert.IsFalse(reader.Unget());
+		Assert.AreEqual(0, reader.Unget(5));
+
+		Assert.AreEqual('6', reader.Read(2));
+		Assert.AreEqual("456", reader.GetReadedText());
+		reader.Drop();
+
+		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read(10));
+		Assert.AreEqual("7890", reader.GetReadedText());
+		Token<int> token = reader.AcceptToken(11);
+		Assert.AreEqual(11, token.Kind);
+		Assert.AreEqual("7890", token.Text);
+		Assert.AreEqual(new TextSpan(6, 10), token.Span);
+	}
+
+	/// <summary>
 	/// 对 <see cref="SourceReader"/> 读取短文本进行测试。
 	/// </summary>
 	[DataTestMethod]

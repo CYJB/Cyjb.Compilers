@@ -12,7 +12,7 @@
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <NeutralLanguage>en</NeutralLanguage>
     <Version>$(VersionPrefix)</Version>
-    <VersionPrefix>1.0.18</VersionPrefix>
+    <VersionPrefix>1.0.19</VersionPrefix>
     <RootNamespace>Cyjb.Compilers</RootNamespace>
     <Authors>CYJB</Authors>
     <PackageTags>Compiler</PackageTags>
@@ -28,7 +28,7 @@
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Cyjb" Version="1.0.22">
+    <PackageReference Include="Cyjb" Version="1.0.23">
       <GeneratePathProperty>True</GeneratePathProperty>
     </PackageReference>
   </ItemGroup>

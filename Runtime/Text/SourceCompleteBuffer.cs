@@ -19,6 +19,14 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private int index = 0;
 	/// <summary>
+	/// 可读取的起始位置。
+	/// </summary>
+	private readonly int offset = 0;
+	/// <summary>
+	/// 可读取的文本长度。
+	/// </summary>
+	private readonly int length;
+	/// <summary>
 	/// 关联到的行列定位器。
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -35,6 +43,26 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	public SourceCompleteBuffer(TextReader reader)
 	{
 		text = reader.ReadToEnd();
+		length = text.Length;
+	}
+
+	/// <summary>
+	/// 使用指定的文本内容初始化 <see cref="SourceCompleteBuffer"/> 类的新实例。
+	/// </summary>
+	/// <param name="text">文本内容。</param>
+	public SourceCompleteBuffer(string text)
+	{
+		this.text = text;
+		length = text.Length;
+	}
+
+	/// <summary>
+	/// 使用指定的字符串视图初始化 <see cref="SourceCompleteBuffer"/> 类的新实例。
+	/// </summary>
+	/// <param name="view">字符串视图。</param>
+	public SourceCompleteBuffer(StringView view)
+	{
+		view.GetOrigin(out text, out offset, out length);
 	}
 
 	/// <summary>
@@ -51,9 +79,9 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 		get => index;
 		set
 		{
-			if (value >= text.Length)
+			if (value >= length)
 			{
-				index = text.Length;
+				index = length;
 			}
 			else
 			{
@@ -73,7 +101,7 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 			{
 				return true;
 			}
-			char ch = text[index - 1];
+			char ch = text[index + offset - 1];
 			if (!Utils.IsLineBreak(ch))
 			{
 				return false;
@@ -81,13 +109,13 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 			// 兼容 \r\n 的场景。
 			if (ch == '\r')
 			{
-				if (index == text.Length)
+				if (index == length)
 				{
 					return true;
 				}
 				else
 				{
-					ch = text[index];
+					ch = text[index + offset];
 				}
 				if (ch == '\n')
 				{
@@ -101,7 +129,7 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	/// 获取字符缓冲区的总字符长度。
 	/// </summary>
 	/// <remarks>仅包含已读取到缓冲区的字符，可能仍有字符尚未被读取到缓冲区。</remarks>
-	public int Length => text.Length;
+	public int Length => length;
 
 	/// <summary>
 	/// 获取指定索引的字符。
@@ -109,7 +137,7 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	/// <param name="index">要检查的字符索引。</param>
 	/// <returns>指定索引的字符。</returns>
 	/// <remarks>调用方确保 <paramref name="index"/> 在 <see cref="StartIndex"/> 和 <see cref="Index"/> 之间。</remarks>
-	public char this[int index] => text[index];
+	public char this[int index] => text[index + offset];
 
 	/// <summary>
 	/// 设置关联到的行列定位器。
@@ -128,12 +156,12 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	public char Read(int offset)
 	{
 		index += offset;
-		if (index >= text.Length)
+		if (index >= length)
 		{
-			index = text.Length;
+			index = length;
 			return SourceReader.InvalidCharacter;
 		}
-		char ch = text[index++];
+		char ch = text[index++ + this.offset];
 		ReadToLocator();
 		return ch;
 	}
@@ -146,9 +174,9 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	public char Peek(int offset)
 	{
 		int idx = index + offset;
-		if (idx < text.Length)
+		if (idx < length)
 		{
-			return text[idx];
+			return text[idx + this.offset];
 		}
 		else
 		{
@@ -165,7 +193,7 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	/// <remarks>调用方确保 <paramref name="start"/> 和 <paramref name="count"/> 在有效范围之内。</remarks>
 	public StringView ReadBlock(int start, int count)
 	{
-		return text.AsView(start, count);
+		return text.AsView(start + offset, count);
 	}
 
 	/// <summary>
@@ -181,7 +209,7 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	{
 		if (index > locatedIndex)
 		{
-			locator!.Read(text.AsSpan(locatedIndex, index - locatedIndex));
+			locator!.Read(text.AsSpan(locatedIndex + offset, index - locatedIndex));
 			locatedIndex = index;
 		}
 	}

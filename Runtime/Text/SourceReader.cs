@@ -65,6 +65,26 @@ public sealed class SourceReader : IDisposable
 	}
 
 	/// <summary>
+	/// 使用指定的文本内容初始化 <see cref="SourceReader"/> 类的新实例。
+	/// </summary>
+	/// <param name="text">文本内容。</param>
+	/// <exception cref="ArgumentNullException"><paramref name="text"/> 为 <c>null</c>。</exception>
+	public SourceReader(string text)
+	{
+		ArgumentNullException.ThrowIfNull(text);
+		buffer = new SourceCompleteBuffer(text);
+	}
+
+	/// <summary>
+	/// 使用指定的字符串视图初始化 <see cref="SourceReader"/> 类的新实例。
+	/// </summary>
+	/// <param name="view">字符串视图。</param>
+	public SourceReader(StringView view)
+	{
+		buffer = new SourceCompleteBuffer(view);
+	}
+
+	/// <summary>
 	/// 获取关联到的行列定位器。
 	/// </summary>
 	public LineLocator? Locator => locator;
@@ -144,7 +164,7 @@ public sealed class SourceReader : IDisposable
 	/// <param name="span">要检查行列位置的文本范围。</param>
 	/// <returns>指定文本范围的行列位置范围。</returns>
 	/// <exception cref="InvalidOperationException">未提前调用 <see cref="UseLineLocator"/>。</exception>
-	public LinePositionSpan GetLinePositionSpan (TextSpan span)
+	public LinePositionSpan GetLinePositionSpan(TextSpan span)
 	{
 		if (locator == null)
 		{
