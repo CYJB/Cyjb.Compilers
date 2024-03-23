@@ -78,35 +78,11 @@ internal sealed partial class LexerController : Controller
 						rejectable = true;
 						break;
 					case "LexerContextAttribute":
-						{
-							AttributeArguments args = attr.GetArguments(ContextAttrModel);
-							ExpressionSyntax labelExp = args["label"]!;
-							string? label = labelExp.GetStringLiteral();
-							if (label.IsNullOrEmpty())
-							{
-								Context.AddError(Resources.InvalidLexerContext(label), labelExp);
-							}
-							else
-							{
-								lexer.DefineContext(label);
-							}
-							break;
-						}
+						ParseContextAttribute(attr, false);
+						break;
 					case "LexerInclusiveContextAttribute":
-						{
-							AttributeArguments args = attr.GetArguments(InclusiveContextAttrModel);
-							ExpressionSyntax labelExp = args["label"]!;
-							string? label = labelExp.GetStringLiteral();
-							if (label.IsNullOrEmpty())
-							{
-								Context.AddError(Resources.InvalidLexerContext(label), labelExp);
-							}
-							else
-							{
-								lexer.DefineInclusiveContext(label);
-							}
-							break;
-						}
+						ParseContextAttribute(attr, true);
+						break;
 					case "LexerRegexAttribute":
 						ParseRegexAttribute(attr);
 						break;
@@ -174,7 +150,7 @@ internal sealed partial class LexerController : Controller
 			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
 		// 如果只包含默认上下文，那么不需要创建 contexts 变量。
 		LocalDeclarationStatementBuilder? contexts = null;
-		if (data.Contexts.Count > 1)
+		if (data.Contexts.Count > 1 || data.Contexts.Values.Any((context) => context.EofAction != null))
 		{
 			contexts = SyntaxBuilder.DeclareLocal<Dictionary<string, ContextData>>("contexts")
 				.Comment("上下文数据")
@@ -233,6 +209,31 @@ internal sealed partial class LexerController : Controller
 			.Statement(SyntaxBuilder.Return(
 				SyntaxBuilder.CreateObject(factoryType).Argument(lexerData)))
 			.GetSyntax(Format);
+	}
+
+	/// <summary>
+	/// 解析上下文特性。
+	/// </summary>
+	/// <param name="attr">要解析的特性。</param>
+	/// <param name="inclusive">是否是包含型。</param>
+	private void ParseContextAttribute(AttributeSyntax attr, bool inclusive)
+	{
+		AttributeArguments args = attr.GetArguments(inclusive ? InclusiveContextAttrModel : ContextAttrModel);
+		ExpressionSyntax labelExp = args["label"]!;
+		string? label = labelExp.GetStringLiteral();
+		if (label.IsNullOrEmpty())
+		{
+			Context.AddError(Resources.InvalidLexerContext(label), labelExp);
+			return;
+		}
+		if (inclusive)
+		{
+			lexer.DefineInclusiveContext(label);
+		}
+		else
+		{
+			lexer.DefineContext(label);
+		}
 	}
 
 	/// <summary>

@@ -8,9 +8,9 @@
     ".NETCoreApp,Version=v6.0": {
       "Generator/1.0.0": {
         "dependencies": {
-          "Cyjb": "1.0.22",
-          "Cyjb.Compilers": "1.0.18",
-          "Cyjb.Compilers.Design": "1.0.18",
+          "Cyjb": "1.0.23",
+          "Cyjb.Compilers": "1.0.19",
+          "Cyjb.Compilers.Design": "1.0.19",
           "Microsoft.CodeAnalysis.CSharp": "4.8.0"
         },
         "runtime": {
@@ -22,11 +22,11 @@
           }
         }
       },
-      "Cyjb/1.0.22": {
+      "Cyjb/1.0.23": {
         "runtime": {
           "lib/net6.0/Cyjb.dll": {
-            "assemblyVersion": "1.0.22.0",
-            "fileVersion": "1.0.22.0"
+            "assemblyVersion": "1.0.23.0",
+            "fileVersion": "1.0.23.0"
           }
         },
         "resources": {
@@ -166,10 +166,10 @@
         }
       },
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
-      "Cyjb.Compilers/1.0.18": {
+      "Cyjb.Compilers/1.0.19": {
         "dependencies": {
-          "Cyjb": "1.0.22",
-          "Cyjb.Compilers.Runtime": "1.0.18"
+          "Cyjb": "1.0.23",
+          "Cyjb.Compilers.Runtime": "1.0.19"
         },
         "runtime": {
           "Cyjb.Compilers.dll": {}
@@ -180,17 +180,17 @@
           }
         }
       },
-      "Cyjb.Compilers.Design/1.0.18": {
+      "Cyjb.Compilers.Design/1.0.19": {
         "dependencies": {
-          "Cyjb.Compilers.Runtime": "1.0.18"
+          "Cyjb.Compilers.Runtime": "1.0.19"
         },
         "runtime": {
           "Cyjb.Compilers.Design.dll": {}
         }
       },
-      "Cyjb.Compilers.Runtime/1.0.18": {
+      "Cyjb.Compilers.Runtime/1.0.19": {
         "dependencies": {
-          "Cyjb": "1.0.22"
+          "Cyjb": "1.0.23"
         },
         "runtime": {
           "Cyjb.Compilers.Runtime.dll": {}
@@ -209,12 +209,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Cyjb/1.0.22": {
+    "Cyjb/1.0.23": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-7Q6sPZa2i/o/iuiIzbpGKrAnAX5Kmsjj/DUQIqc3qqBMx55pJTaGRhOOBPZvfX4S+zcz0W34MHWHeF5ZrHQL/A==",
-      "path": "cyjb/1.0.22",
-      "hashPath": "cyjb.1.0.22.nupkg.sha512"
+      "sha512": "sha512-X+90xoZjC8nO43Pgo1dStmkdN6tWVThf9dK2NS5Jtc7dcFJuZhfK/zLfKrPIJEjsIzZA+dQllwFVcrbSEmcr5g==",
+      "path": "cyjb/1.0.23",
+      "hashPath": "cyjb.1.0.23.nupkg.sha512"
     },
     "Microsoft.CodeAnalysis.Analyzers/3.3.4": {
       "type": "package",
@@ -258,17 +258,17 @@
       "path": "system.runtime.compilerservices.unsafe/6.0.0",
       "hashPath": "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
     },
-    "Cyjb.Compilers/1.0.18": {
+    "Cyjb.Compilers/1.0.19": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "Cyjb.Compilers.Design/1.0.18": {
+    "Cyjb.Compilers.Design/1.0.19": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "Cyjb.Compilers.Runtime/1.0.18": {
+    "Cyjb.Compilers.Runtime/1.0.19": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
