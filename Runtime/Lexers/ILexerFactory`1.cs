@@ -12,4 +12,10 @@ public interface ILexerFactory<T>
 	/// </summary>
 	/// <returns>已创建的词法分析器。</returns>
 	LexerTokenizer<T> CreateTokenizer();
+
+	/// <summary>
+	/// 创建词法分析运行器。
+	/// </summary>
+	/// <returns>已创建的词法分析运行器。</returns>
+	LexerRunner<T> CreateRunner();
 }

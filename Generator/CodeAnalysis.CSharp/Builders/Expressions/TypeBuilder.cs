@@ -81,7 +81,7 @@ internal sealed class TypeBuilder : ExpressionBuilder
 				Enumerable.Repeat(SyntaxFactory.OmittedArraySizeExpression(), rank)));
 		if (syntax is ArrayTypeSyntax arrayType)
 		{
-			arrayType.AddRankSpecifiers(rankSpecifier);
+			syntax = arrayType.AddRankSpecifiers(rankSpecifier);
 		}
 		else
 		{

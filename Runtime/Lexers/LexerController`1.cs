@@ -10,15 +10,11 @@ namespace Cyjb.Compilers.Lexers;
 public class LexerController<T> : IDisposable
 	where T : struct
 {
+
 	/// <summary>
 	/// 关联到的词法分析器。
 	/// </summary>
-	private LexerTokenizer<T> tokenizer;
-	/// <summary>
-	/// 要扫描的源文件。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private SourceReader source = SourceReader.Empty;
+	private LexerCore<T> core;
 	/// <summary>
 	/// 当前词法分析的上下文。
 	/// </summary>
@@ -33,6 +29,11 @@ public class LexerController<T> : IDisposable
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private Action<Delegate, LexerController<T>> actionHandler;
+	/// <summary>
+	/// 要扫描的源文件。
+	/// </summary>
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private SourceReader source = SourceReader.Empty;
 	/// <summary>
 	/// 上下文的堆栈。
 	/// </summary>
@@ -60,20 +61,26 @@ public class LexerController<T> : IDisposable
 #pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
 	/// <summary>
-	/// 设置指定的词法分析控制器信息。
+	/// 设置指定的词法分析器核心信息。
 	/// </summary>
-	/// <param name="tokenizer">关联到的词法分析器。</param>
+	/// <param name="core">词法分析器的核心。</param>
 	/// <param name="contexts">词法分析的上下文。</param>
-	/// <param name="actionHandler">动作的处理器。</param>
 	/// <param name="rejectable">是否允许 Reject 动作。</param>
-	internal void Init(LexerTokenizer<T> tokenizer, IReadOnlyDictionary<string, ContextData> contexts,
-		Action<Delegate, LexerController<T>> actionHandler, bool rejectable)
+	internal void SetCore(LexerCore<T> core, IReadOnlyDictionary<string, ContextData> contexts, bool rejectable)
 	{
-		this.tokenizer = tokenizer;
+		this.core = core;
 		this.contexts = contexts;
 		context = contexts[InitialContext];
-		this.actionHandler = actionHandler;
 		this.rejectable = rejectable;
+	}
+
+	/// <summary>
+	/// 获取或设置动作的处理器。
+	/// </summary>
+	public Action<Delegate, LexerController<T>> ActionHandler
+	{
+		get => actionHandler;
+		set => actionHandler = value;
 	}
 
 	/// <summary>
@@ -112,7 +119,7 @@ public class LexerController<T> : IDisposable
 	/// </summary>
 	public StringView Text
 	{
-		get => text ?? Source.GetReadedText();
+		get => text ?? source.GetReadedText();
 		set => text = value;
 	}
 	/// <summary>
@@ -131,7 +138,7 @@ public class LexerController<T> : IDisposable
 	/// 获取当前词法分析器剩余的候选类型。
 	/// </summary>
 	/// <remarks>仅在允许 Reject 动作的词法分析器中，返回剩余的候选类型。</remarks>
-	public IReadOnlySet<T> Candidates => tokenizer.Candidates;
+	public IReadOnlySet<T> Candidates => core.Candidates;
 
 	/// <summary>
 	/// 获取当前的上下文数据。
@@ -229,13 +236,14 @@ public class LexerController<T> : IDisposable
 	}
 
 	/// <summary>
-	/// 触发词法分析错误的事件。
+	/// 创建词法分析错误。
 	/// </summary>
 	/// <param name="text">未识别的字符串。</param>
 	/// <param name="span">未识别的字符串范围。</param>
-	internal protected virtual void EmitTokenizeError(StringView text, TextSpan span)
+	/// <returns>词法分析错误，如果返回 <c>null</c> 则不触发错误。</returns>
+	internal protected virtual TokenizeError? CreateTokenizeError(StringView text, TextSpan span)
 	{
-		tokenizer.ReportTokenizeError(new TokenizeError(text, span, source.Locator));
+		return new TokenizeError(text, span, source.Locator);
 	}
 
 	/// <summary>

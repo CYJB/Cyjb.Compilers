@@ -9,8 +9,8 @@
       "Generator/1.0.0": {
         "dependencies": {
           "Cyjb": "1.0.23",
-          "Cyjb.Compilers": "1.0.19",
-          "Cyjb.Compilers.Design": "1.0.19",
+          "Cyjb.Compilers": "1.0.20",
+          "Cyjb.Compilers.Design": "1.0.20",
           "Microsoft.CodeAnalysis.CSharp": "4.8.0"
         },
         "runtime": {
@@ -166,10 +166,10 @@
         }
       },
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
-      "Cyjb.Compilers/1.0.19": {
+      "Cyjb.Compilers/1.0.20": {
         "dependencies": {
           "Cyjb": "1.0.23",
-          "Cyjb.Compilers.Runtime": "1.0.19"
+          "Cyjb.Compilers.Runtime": "1.0.20"
         },
         "runtime": {
           "Cyjb.Compilers.dll": {}
@@ -180,15 +180,15 @@
           }
         }
       },
-      "Cyjb.Compilers.Design/1.0.19": {
+      "Cyjb.Compilers.Design/1.0.20": {
         "dependencies": {
-          "Cyjb.Compilers.Runtime": "1.0.19"
+          "Cyjb.Compilers.Runtime": "1.0.20"
         },
         "runtime": {
           "Cyjb.Compilers.Design.dll": {}
         }
       },
-      "Cyjb.Compilers.Runtime/1.0.19": {
+      "Cyjb.Compilers.Runtime/1.0.20": {
         "dependencies": {
           "Cyjb": "1.0.23"
         },
@@ -258,17 +258,17 @@
       "path": "system.runtime.compilerservices.unsafe/6.0.0",
       "hashPath": "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
     },
-    "Cyjb.Compilers/1.0.19": {
+    "Cyjb.Compilers/1.0.20": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "Cyjb.Compilers.Design/1.0.19": {
+    "Cyjb.Compilers.Design/1.0.20": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "Cyjb.Compilers.Runtime/1.0.19": {
+    "Cyjb.Compilers.Runtime/1.0.20": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

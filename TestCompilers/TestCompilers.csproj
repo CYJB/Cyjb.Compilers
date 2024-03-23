@@ -45,6 +45,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TestCalcLexer.designed.cs</LastGenOutput>
     </None>
+    <None Update="Lexers\TestCalcRunnerLexer.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestCalcRunnerLexer.designed.cs</LastGenOutput>
+    </None>
     <None Update="Lexers\TestEscapeStrLexer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TestEscapeStrLexer.designed.cs</LastGenOutput>
@@ -79,6 +83,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TestCalcLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\TestCalcRunnerLexer.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestCalcRunnerLexer.tt</DependentUpon>
     </Compile>
     <Compile Update="Lexers\TestEscapeStrLexer.designed.cs">
       <DesignTime>True</DesignTime>

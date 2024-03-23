@@ -34,7 +34,7 @@ public sealed class SourceReader : IDisposable
 	/// <summary>
 	/// 标记列表。
 	/// </summary>
-	private readonly List<SourceMark> marks = new();
+	private List<SourceMark>? marks;
 	/// <summary>
 	/// 标记的起始索引。
 	/// </summary>
@@ -385,6 +385,7 @@ public sealed class SourceReader : IDisposable
 	public SourceMark Mark()
 	{
 		SourceMark mark = new(buffer.Index);
+		marks ??= new List<SourceMark>();
 		int index = marks.BinarySearch(mark);
 		if (index < 0)
 		{
@@ -410,7 +411,7 @@ public sealed class SourceReader : IDisposable
 			return;
 		}
 		mark!.Valid = false;
-		marks.RemoveAt(index);
+		marks!.RemoveAt(index);
 		if (index == 0)
 		{
 			// 丢弃不再需要的字符。
@@ -433,7 +434,7 @@ public sealed class SourceReader : IDisposable
 	/// <returns>指定源文件位置标记的索引，如果未找到则返回 <c>-1</c>。</returns>
 	private int FindMark(SourceMark? mark)
 	{
-		if (mark == null || !mark.Valid)
+		if (marks == null || mark == null || !mark.Valid)
 		{
 			return -1;
 		}
@@ -472,7 +473,7 @@ public sealed class SourceReader : IDisposable
 	/// 超出当前已读取的字符范围。</exception>
 	public StringView ReadBlock(int index, int count)
 	{
-		int minIndex = marks.Count == 0 ? buffer.StartIndex : marks[0].Index;
+		int minIndex = marks?.Count == 0 ? buffer.StartIndex : marks![0].Index;
 		// 检查 index 和 count 是否在当前范围内。
 		if (index < minIndex)
 		{

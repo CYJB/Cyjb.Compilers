@@ -41,9 +41,23 @@ public sealed class LexerFactory<T> : ILexerFactory<T>
 	/// <returns>已创建的词法分析器。</returns>
 	public LexerTokenizer<T> CreateTokenizer()
 	{
-		LexerController<T> controller = new();
-		LexerTokenizer<T> tokenizer = LexerTokenizer<T>.Create(lexerData, controller);
-		controller.Init(tokenizer, lexerData.Contexts, actionHandler, lexerData.Rejectable);
-		return tokenizer;
+		LexerController<T> controller = new()
+		{
+			ActionHandler = actionHandler
+		};
+		return new LexerTokenizer<T>(lexerData, controller);
+	}
+
+	/// <summary>
+	/// 创建词法分析运行器。
+	/// </summary>
+	/// <returns>已创建的词法分析运行器。</returns>
+	public LexerRunner<T> CreateRunner()
+	{
+		LexerController<T> controller = new()
+		{
+			ActionHandler = actionHandler
+		};
+		return new LexerRunner<T>(lexerData, controller);
 	}
 }

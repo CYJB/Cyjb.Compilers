@@ -14,7 +14,6 @@ public sealed class LexerFactory<T, TController> : ILexerFactory<T>
 	where T : struct
 	where TController : LexerController<T>, new()
 {
-
 	/// <summary>
 	/// 动作处理器。
 	/// </summary>
@@ -44,9 +43,23 @@ public sealed class LexerFactory<T, TController> : ILexerFactory<T>
 	/// <returns>已创建的词法分析器。</returns>
 	public LexerTokenizer<T> CreateTokenizer()
 	{
-		TController controller = new();
-		LexerTokenizer<T> tokenizer = LexerTokenizer<T>.Create(lexerData, controller);
-		controller.Init(tokenizer, lexerData.Contexts, actionHandler, lexerData.Rejectable);
-		return tokenizer;
+		TController controller = new()
+		{
+			ActionHandler = actionHandler
+		};
+		return new LexerTokenizer<T>(lexerData, controller);
+	}
+
+	/// <summary>
+	/// 创建词法分析运行器。
+	/// </summary>
+	/// <returns>已创建的词法分析运行器。</returns>
+	public LexerRunner<T> CreateRunner()
+	{
+		TController controller = new()
+		{
+			ActionHandler = actionHandler
+		};
+		return new LexerRunner<T>(lexerData, controller);
 	}
 }
