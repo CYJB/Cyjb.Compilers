@@ -31,10 +31,6 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private LineLocator? locator;
-	/// <summary>
-	/// 已读取到 Locator 中的索引。
-	/// </summary>
-	private int locatedIndex = int.MaxValue;
 
 	/// <summary>
 	/// 使用指定的文本读取器初始化 <see cref="SourceCompleteBuffer"/> 类的新实例。
@@ -87,7 +83,6 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 			{
 				index = value;
 			}
-			ReadToLocator();
 		}
 	}
 	/// <summary>
@@ -145,7 +140,8 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	public void SetLocator(LineLocator locator)
 	{
 		this.locator = locator;
-		locatedIndex = 0;
+		// 总是在关联的时候一次性完成读取。
+		locator.Read(text.AsSpan(offset, length));
 	}
 
 	/// <summary>
@@ -162,7 +158,6 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 			return SourceReader.InvalidCharacter;
 		}
 		char ch = text[index++ + this.offset];
-		ReadToLocator();
 		return ch;
 	}
 
@@ -201,18 +196,6 @@ internal sealed class SourceCompleteBuffer : ISourceBuffer
 	/// </summary>
 	/// <param name="index">要释放的字符起始索引。</param>
 	public void Free(int index) { }
-
-	/// <summary>
-	/// 将文本读取到行列定位器。
-	/// </summary>
-	private void ReadToLocator()
-	{
-		if (index > locatedIndex)
-		{
-			locator!.Read(text.AsSpan(locatedIndex + offset, index - locatedIndex));
-			locatedIndex = index;
-		}
-	}
 
 	#region IDisposable 成员
 
