@@ -88,7 +88,8 @@ internal class DfaDataBuilder
 			// 转移个数过少，不检测默认状态。
 			return null;
 		}
-		int maxCount = 0;
+		// 至少要求 70% 的覆盖。
+		int maxCount = (int)(transCount * 0.7);
 		DfaState? result = null;
 		if (defaults.TryGetValue(state, out DefaultState? defaultState))
 		{
