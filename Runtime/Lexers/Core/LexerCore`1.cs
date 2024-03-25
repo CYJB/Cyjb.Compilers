@@ -116,12 +116,14 @@ internal abstract class LexerCore<T>
 	/// <summary>
 	/// 返回指定符号列表中的候选类型。
 	/// </summary>
+	/// <param name="states">状态列表。</param>
 	/// <param name="symbols">要检查的符号列表。</param>
-	/// <returns><paramref name="symbols"/> 中包含的候选状态。</returns>
-	protected IEnumerable<T> GetCandidates(ArraySegment<int> symbols)
+	/// <param name="candidates">候选状态集合。</param>
+	protected void GetCandidates(int[] states, ValueTuple<int, int> symbols, HashSet<T> candidates)
 	{
-		foreach (int acceptState in symbols)
+		for (int i = symbols.Item1; i < symbols.Item2; i++)
 		{
+			int acceptState = states[i];
 			if (acceptState < 0)
 			{
 				// 跳过向前看的头状态。
@@ -134,7 +136,7 @@ internal abstract class LexerCore<T>
 			var kind = data.Terminals[acceptState].Kind;
 			if (kind.HasValue)
 			{
-				yield return kind.Value;
+				candidates.Add(kind.Value);
 			}
 		}
 	}

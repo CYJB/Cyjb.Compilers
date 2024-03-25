@@ -12,7 +12,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// <summary>
 	/// 接受符号的堆栈。
 	/// </summary>
-	private readonly ListStack<ArraySegment<int>> symbolStack = new();
+	private readonly ListStack<ValueTuple<int, int>> symbolStack = new();
 	/// <summary>
 	/// 接受索引的堆栈。
 	/// </summary>
@@ -20,7 +20,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// <summary>
 	/// 候选类型。
 	/// </summary>
-	private IReadOnlySet<T>? candidates;
+	private readonly HashSet<T> candidates = new();
 	/// <summary>
 	/// 无效的状态列表。
 	/// </summary>
@@ -28,7 +28,11 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// <summary>
 	/// 当前候选符号。
 	/// </summary>
-	private ArraySegment<int> curSymbols;
+	private ValueTuple<int, int> curSymbols;
+	/// <summary>
+	/// 是否需要重新计算候选类型。
+	/// </summary>
+	private bool isCandidatesValid = false;
 
 	/// <summary>
 	/// 使用给定的词法分析器信息初始化 <see cref="RejectableTrailingCore{T}"/> 类的新实例。
@@ -47,13 +51,17 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	{
 		get
 		{
-			if (candidates == null)
+			if (!isCandidatesValid)
 			{
-				HashSet<T> result = new();
+				isCandidatesValid = true;
+				candidates.Clear();
+				int[] states = data.States;
 				// 先添加当前候选
-				result.UnionWith(GetCandidates(curSymbols));
-				result.UnionWith(symbolStack.SelectMany(GetCandidates));
-				candidates = result.AsReadOnly();
+				GetCandidates(states, curSymbols, candidates);
+				for (int i = 0; i < symbolStack.Count; i++)
+				{
+					GetCandidates(states, symbolStack[i], candidates);
+				}
 			}
 			return candidates;
 		}
@@ -70,6 +78,8 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 		symbolStack.Clear();
 		indexStack.Clear();
 		int startIndex = source.Index;
+		int symbolStart = 0, symbolEnd = 0;
+		int[] states = data.States;
 		while (true)
 		{
 			state = NextState(state);
@@ -78,18 +88,19 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 				// 没有合适的转移，退出。
 				break;
 			}
-			ArraySegment<int> symbols = data.GetSymbols(state);
-			if (symbols.Count > 0)
+			if (data.GetSymbols(state, ref symbolStart, ref symbolEnd))
 			{
 				if (data.UseShortest)
 				{
 					// 保存流的索引，避免被误修改影响后续匹配。
 					int originIndex = source.Index;
 					// 最短匹配时不需要生成候选列表。
-					candidates = SetUtil.Empty<T>();
+					candidates.Clear();
+					isCandidatesValid = true;
 					// 使用最短匹配时，需要先调用 Action。
-					foreach (int acceptState in symbols)
+					for (int i = symbolStart; i < symbolEnd; i++)
 					{
+						int acceptState = states[i];
 						// 跳过向前看的头状态。
 						if (acceptState < 0)
 						{
@@ -109,7 +120,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 					}
 				}
 				// 将接受状态记录在堆栈中。
-				symbolStack.Push(symbols);
+				symbolStack.Push(new ValueTuple<int, int>(symbolStart, symbolEnd));
 				indexStack.Push(source.Index);
 			}
 		}
@@ -119,10 +130,10 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 		{
 			curSymbols = symbolStack.Pop();
 			int index = indexStack.Pop();
-			while (curSymbols.Count > 0)
+			while (curSymbols.Item1 < curSymbols.Item2)
 			{
-				int acceptState = curSymbols[0];
-				curSymbols = curSymbols.Slice(1);
+				int acceptState = states[curSymbols.Item1];
+				curSymbols.Item1++;
 				if (acceptState < 0)
 				{
 					// 跳过向前看的头状态。
@@ -134,7 +145,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 				}
 				AdjustIndex(acceptState, startIndex, index);
 				// 每次都需要清空候选集合，并在使用时重新计算。
-				candidates = null;
+				isCandidatesValid = false;
 				controller.DoAction(start, data.Terminals[acceptState]);
 				if (!controller.IsReject)
 				{
@@ -158,6 +169,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	private void AdjustIndex(int state, int startIndex, int index)
 	{
 		TerminalData<T> terminal = data.Terminals[state];
+		int[] states = data.States;
 		int? trailing = terminal.Trailing;
 		if (trailing.HasValue)
 		{
@@ -179,7 +191,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 				int target = -state - 1;
 				for (int i = 0; i < symbolStack.Count; i++)
 				{
-					if (ContainsTrailingHead(symbolStack[i], target))
+					if (ContainsTrailingHead(states, symbolStack[i], target))
 					{
 						index = indexStack[i];
 						break;
@@ -194,15 +206,16 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// <summary>
 	/// 返回指定的接受状态的符号索引中是否包含特定的向前看头状态。
 	/// </summary>
+	/// <param name="states">状态列表。</param>
 	/// <param name="symbols">接受状态的符号索引。</param>
 	/// <param name="target">目标向前看头状态。</param>
 	/// <returns>如果包含特定的目标，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	private static bool ContainsTrailingHead(ArraySegment<int> symbols, int target)
+	private static bool ContainsTrailingHead(int[] states, ValueTuple<int, int> symbols, int target)
 	{
 		// 在当前状态中查找，从后向前找。
-		for (int i = symbols.Count - 1; i >= 0; i--)
+		for (int i = symbols.Item2 - 1; i >= symbols.Item1; i--)
 		{
-			int idx = symbols[i];
+			int idx = states[i];
 			if (idx >= 0)
 			{
 				// 前面的状态已经不可能是向前看头状态了，所以直接退出。

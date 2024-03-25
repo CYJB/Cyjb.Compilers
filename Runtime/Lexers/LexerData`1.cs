@@ -170,6 +170,29 @@ public class LexerData<T>
 	}
 
 	/// <summary>
+	/// 返回指定状态对应的符号索引。
+	/// </summary>
+	/// <param name="state">当前状态索引。</param>
+	/// <param name="start">起始索引（包含）。</param>
+	/// <param name="end">结束索引（不含）。</param>
+	/// <returns>是否找到了符号索引。</returns>
+	public bool GetSymbols(int state, ref int start, ref int end)
+	{
+		int offset = state * 4;
+		int count = states[offset + DfaStateData.SymbolsLengthOffset];
+		if (count == 0)
+		{
+			return false;
+		}
+		else
+		{
+			start = states[offset + DfaStateData.SymbolIndexOffset];
+			end = start + count;
+			return true;
+		}
+	}
+
+	/// <summary>
 	/// 返回指定状态对应的符号。
 	/// </summary>
 	/// <param name="state">当前状态索引。</param>
