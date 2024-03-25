@@ -323,16 +323,8 @@ public class UnitTestSourceReader
 
 		Assert.AreEqual('\r', reader.Read());
 		Assert.AreEqual(new LinePosition(1, 2, 3), reader.GetPosition(2));
-		if (type == "StringReader")
-		{
-			// StringReader 是在 Read 时即时读入的，此时还未读入下一个字符，不会直接换行。
-			Assert.AreEqual(new LinePosition(1, 3, 3), reader.GetPosition(3));
-		}
-		else
-		{
-			// TextReader 是批量读入的，这时已经读入下一个字符，已确认 \r 就是换行。
-			Assert.AreEqual(new LinePosition(2, 0, 1), reader.GetPosition(3));
-		}
+		// 现在总是批量读入的，这时已经读入下一个字符，已确认 \r 就是换行。
+		Assert.AreEqual(new LinePosition(2, 0, 1), reader.GetPosition(3));
 
 		Assert.AreEqual('4', reader.Read(1));
 		Assert.AreEqual(new LinePosition(2, 0, 1), reader.GetPosition(3));

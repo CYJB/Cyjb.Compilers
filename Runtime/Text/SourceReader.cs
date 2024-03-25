@@ -473,7 +473,15 @@ public sealed class SourceReader : IDisposable
 	/// 超出当前已读取的字符范围。</exception>
 	public StringView ReadBlock(int index, int count)
 	{
-		int minIndex = marks?.Count == 0 ? buffer.StartIndex : marks![0].Index;
+		int minIndex;
+		if (marks == null || marks.Count == 0)
+		{
+			minIndex = 0;
+		}
+		else
+		{
+			minIndex = marks[0].Index;
+		}
 		// 检查 index 和 count 是否在当前范围内。
 		if (index < minIndex)
 		{
