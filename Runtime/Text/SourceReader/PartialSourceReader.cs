@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Cyjb.Text;
@@ -10,31 +9,20 @@ namespace Cyjb.Text;
 /// 而是每次创建新的缓冲区，并在相关 Token 均被释放后自动回收。
 /// <see href="https://www.cnblogs.com/cyjb/p/LexerInputBuffer.html"/>
 /// </remarks>
-internal sealed class SourcePartialBuffer : ISourceBuffer
+internal sealed class PartialSourceReader : SourceReader
 {
 	/// <summary>
 	/// 文本的读取器。
 	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private TextReader? reader;
 	/// <summary>
 	/// 缓冲区的大小。
 	/// </summary>
 	private readonly int bufferSize;
 	/// <summary>
-	/// 当前读取的位置。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private int index = 0;
-	/// <summary>
 	/// 字符缓冲区的总字符长度。
 	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private int length = 0;
-	/// <summary>
-	/// 关联到的行列定位器。
-	/// </summary>
-	private LineLocator? locator;
 	/// <summary>
 	/// 是否已经全部读取完毕。
 	/// </summary>
@@ -71,11 +59,11 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 	private int readedStart;
 
 	/// <summary>
-	/// 使用指定的文本读取器初始化 <see cref="SourcePartialBuffer"/> 类的新实例。
+	/// 使用指定的文本读取器初始化 <see cref="PartialSourceReader"/> 类的新实例。
 	/// </summary>
 	/// <param name="reader">文本读取器。</param>
 	/// <param name="bufferSize">缓冲区的大小。</param>
-	public SourcePartialBuffer(TextReader reader, int bufferSize)
+	public PartialSourceReader(TextReader reader, int bufferSize)
 	{
 		this.reader = reader;
 		this.bufferSize = bufferSize;
@@ -84,44 +72,9 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 	}
 
 	/// <summary>
-	/// 获取或设置读取的起始位置。
-	/// </summary>
-	public int StartIndex { get; set; }
-	/// <summary>
-	/// 获取或设置当前读取的位置。
-	/// </summary>
-	/// <remarks><see cref="Index"/> 可以设置为大于 <see cref="Length"/> 的值，此时会尝试将更多字符读取到缓冲区中。
-	/// 如果没有更多可以读取的字符，那么 <see cref="Index"/> 会被设置为 <see cref="Length"/>。</remarks>
-	public int Index
-	{
-		get => index;
-		set
-		{
-			if (index == value)
-			{
-				return;
-			}
-			EnsureBuffer(ref value);
-			// 之前已确保 value 不会超出有效范围。
-			currentIndex += value - index;
-			index = value;
-			// 调整当前缓冲区的位置。
-			while (currentIndex < 0)
-			{
-				current = current.Prev;
-				currentIndex += bufferSize;
-			}
-			while (currentIndex >= bufferSize)
-			{
-				current = current.Next;
-				currentIndex -= bufferSize;
-			}
-		}
-	}
-	/// <summary>
 	/// 获取当前位置是否位于行首。
 	/// </summary>
-	public bool IsLineStart
+	public override bool IsLineStart
 	{
 		get
 		{
@@ -137,7 +90,7 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 			// 兼容 \r\n 的场景。
 			if (ch == '\r')
 			{
-				if (index == length)
+				if (curIndex == length)
 				{
 					// 达到当前缓冲区结尾，尝试加载下一缓冲区。
 					if (current == last && !PrepareBuffer())
@@ -148,7 +101,7 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 				}
 				else
 				{
-					ch = current.Text[index];
+					ch = current.Text[curIndex];
 				}
 				if (ch == '\n')
 				{
@@ -158,80 +111,52 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 			return true;
 		}
 	}
-	/// <summary>
-	/// 获取字符缓冲区的总字符长度。
-	/// </summary>
-	/// <remarks>仅包含已读取到缓冲区的字符，可能仍有字符尚未被读取到缓冲区。</remarks>
-	public int Length => length;
 
 	/// <summary>
-	/// 获取指定索引的字符。
+	/// 返回下一个可用的字符，但不使用它。
 	/// </summary>
-	/// <param name="index">要检查的字符索引。</param>
-	/// <returns>指定索引的字符。</returns>
-	/// <remarks>调用方确保 <paramref name="index"/> 在 <see cref="StartIndex"/> 和 <see cref="Index"/> 之间。</remarks>
-	public char this[int index]
+	/// <returns>表示下一个要读取的字符的整数，或者如果没有要读取的字符，则为
+	/// <see cref="SourceReader.InvalidCharacter"/>。</returns>
+	/// <overloads>
+	/// <summary>
+	/// 返回之后可用的字符，但不使用它。
+	/// </summary>
+	/// </overloads>
+	public override char Peek()
 	{
-		get
+		if (!EnsureBuffer(ref curIndex))
 		{
-			// 从 first 开始查找。
-			Buffer buffer = first;
-			index -= buffer.StartIndex;
-			while (index >= bufferSize)
-			{
-				buffer = buffer.Next;
-				index -= bufferSize;
-			}
-			return buffer.Text[index];
+			// idx 已经超出有效范围。
+			return InvalidCharacter;
+		}
+		// 之前已确保 value 不会超出有效范围。
+		if (currentIndex >= bufferSize)
+		{
+			return current.Next.Text[0];
+		}
+		else
+		{
+			return current.Text[currentIndex];
 		}
 	}
 
 	/// <summary>
-	/// 设置关联到的行列定位器。
+	/// 返回文本读取器中之后的 <paramref name="offset"/> 偏移的字符，但不使用它。
+	/// <c>Peek(0)</c> 等价于 <see cref="Peek()"/>。
 	/// </summary>
-	public void SetLocator(LineLocator locator)
+	/// <param name="offset">要读取的偏移。</param>
+	/// <returns>文本读取器中之后的 <paramref name="offset"/> 偏移的字符，
+	/// 或为 <see cref="SourceReader.InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
+	public override char Peek(int offset)
 	{
-		this.locator = locator;
-	}
-
-	/// <summary>
-	/// 返回 <see cref="Index"/> 之后 <paramref name="offset"/> 偏移的字符。
-	/// </summary>
-	/// <param name="offset">要读取的位置偏移。</param>
-	/// <returns><see cref="Index"/> 之后 <paramref name="offset"/> 偏移的字符。</returns>
-	public char Read(int offset)
-	{
-		index += offset;
-		if (!EnsureBuffer(ref index))
-		{
-			// index 已经超出有效范围。
-			return SourceReader.InvalidCharacter;
-		}
-		currentIndex += offset;
-		while (currentIndex >= bufferSize)
-		{
-			current = current.Next;
-			currentIndex -= bufferSize;
-		}
-		index++;
-		return current.Text[currentIndex++];
-	}
-
-	/// <summary>
-	/// 返回 <see cref="Index"/> 之后 <paramref name="offset"/> 偏移的字符，但不提升索引。
-	/// </summary>
-	/// <param name="offset">要读取的位置偏移。</param>
-	/// <returns><see cref="Index"/> 之后 <paramref name="offset"/> 偏移的字符。</returns>
-	public char Peek(int offset)
-	{
-		int idx = index + offset;
+		int idx = curIndex + offset;
 		if (!EnsureBuffer(ref idx))
 		{
 			// idx 已经超出有效范围。
-			return SourceReader.InvalidCharacter;
+			return InvalidCharacter;
 		}
 		// 之前已确保 value 不会超出有效范围。
-		idx += currentIndex - index;
+		idx += currentIndex - curIndex;
 		Buffer buffer = current;
 		while (idx >= bufferSize)
 		{
@@ -242,13 +167,99 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 	}
 
 	/// <summary>
+	/// 读取文本读取器中的下一个字符并使该字符的位置提升一个字符。
+	/// </summary>
+	/// <returns>文本读取器中的下一个字符，或为 <see cref="SourceReader.InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
+	/// <overloads>
+	/// <summary>
+	/// 返回之后可用的字符，并使该字符的位置提升。
+	/// </summary>
+	/// </overloads>
+	public override char Read()
+	{
+		if (!EnsureBuffer(ref curIndex))
+		{
+			// index 已经超出有效范围。
+			return InvalidCharacter;
+		}
+		curIndex++;
+		if (currentIndex >= bufferSize)
+		{
+			current = current.Next;
+			currentIndex -= bufferSize;
+		}
+		return current.Text[currentIndex++];
+	}
+
+	/// <summary>
+	/// 读取文本读取器中之后的 <paramref name="offset"/> 偏移的字符，并使该字符的位置提升。
+	/// <c>Read(0)</c> 等价于 <see cref="Read()"/>。
+	/// </summary>
+	/// <param name="offset">要读取的偏移。</param>
+	/// <returns>文本读取器中之后的 <paramref name="offset"/> 偏移的字符，
+	/// 或为 <see cref="SourceReader.InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
+	public override char Read(int offset)
+	{
+		curIndex += offset;
+		if (!EnsureBuffer(ref curIndex))
+		{
+			// index 已经超出有效范围。
+			return InvalidCharacter;
+		}
+		currentIndex += offset;
+		while (currentIndex >= bufferSize)
+		{
+			current = current.Next;
+			currentIndex -= bufferSize;
+		}
+		curIndex++;
+		return current.Text[currentIndex++];
+	}
+
+	/// <summary>
+	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+	/// </summary>
+	/// <param name="disposing">是否释放托管资源。</param>
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing && reader != null)
+		{
+			reader.Dispose();
+			reader = null;
+		}
+	}
+
+	/// <summary>
+	/// 设置当前的字符索引。
+	/// </summary>
+	/// <param name="value">当前的字符索引，该索引从零开始。设置索引时，不能达到被丢弃的字符，或者超出文件结尾。</param>
+	protected override void SetIndex(int value)
+	{
+		EnsureBuffer(ref value);
+		// 之前已确保 value 不会超出有效范围。
+		currentIndex += value - curIndex;
+		curIndex = value;
+		// 调整当前缓冲区的位置。
+		while (currentIndex < 0)
+		{
+			current = current.Prev;
+			currentIndex += bufferSize;
+		}
+		while (currentIndex >= bufferSize)
+		{
+			current = current.Next;
+			currentIndex -= bufferSize;
+		}
+	}
+
+	/// <summary>
 	/// 读取指定范围的文本。
 	/// </summary>
 	/// <param name="start">起始索引。</param>
 	/// <param name="count">要读取的文本长度。</param>
 	/// <returns>读取到的文本。</returns>
 	/// <remarks>调用方确保 <paramref name="start"/> 和 <paramref name="count"/> 在有效范围之内。</remarks>
-	public StringView ReadBlock(int start, int count)
+	protected override StringView ReadBlockInternal(int start, int count)
 	{
 		if (readedText != null && readedStart == start && readedText.Length == count)
 		{
@@ -297,7 +308,7 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 	/// 释放指定索引之前的字符，释放后的字符无法再被读取。
 	/// </summary>
 	/// <param name="index">要释放的字符起始索引。</param>
-	public void Free(int index)
+	protected override void Free(int index)
 	{
 		freeIndex = index;
 		while (index >= first.StartIndex + bufferSize)
@@ -370,26 +381,10 @@ internal sealed class SourcePartialBuffer : ISourceBuffer
 			Buffer buffer = new(reader, bufferSize, last);
 			last = buffer;
 		}
-		locator?.Read(last.Text.AsSpan(0, last.Length));
+		sourceLocator?.Read(last.Text.AsSpan(0, last.Length));
 		length += last.Length;
 		return true;
 	}
-
-	#region IDisposable 成员
-
-	/// <summary>
-	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
-	/// </summary>
-	public void Dispose()
-	{
-		if (reader != null)
-		{
-			reader.Dispose();
-			reader = null;
-		}
-	}
-
-	#endregion
 
 	/// <summary>
 	/// 表示 <see cref="SourcePartialBuffer"/> 的字符缓冲区。

@@ -19,9 +19,9 @@ public class UnitTestSourceReader
 	/// 对 <see cref="SourceReader"/> 的字符串构造函数进行测试。
 	/// </summary>
 	[TestMethod]
-	public void TestCtorString()
+	public void TestCreateString()
 	{
-		SourceReader reader = new("1234567890");
+		SourceReader reader = SourceReader.Create("1234567890");
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Read());
@@ -62,9 +62,9 @@ public class UnitTestSourceReader
 	/// 对 <see cref="SourceReader"/> 的字符串视图构造函数进行测试。
 	/// </summary>
 	[TestMethod]
-	public void TestCtorStringView()
+	public void TestCreateStringView()
 	{
-		SourceReader reader = new("a1234567890b".AsView(1, 10));
+		SourceReader reader = SourceReader.Create("a1234567890b".AsView(1, 10));
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Read());
@@ -109,7 +109,7 @@ public class UnitTestSourceReader
 	[DataRow("TextReader")]
 	public void TestShortText(string type)
 	{
-		SourceReader reader = new(CreateReader(type, "1234567890"), BufferLength);
+		SourceReader reader = SourceReader.Create(CreateReader(type, "1234567890"), BufferLength);
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Read());
@@ -166,7 +166,7 @@ public class UnitTestSourceReader
 			builder.Append((char)Random.Shared.Next(char.MaxValue));
 		}
 		string text = builder.ToString();
-		SourceReader reader = new(CreateReader(type, text), BufferLength);
+		SourceReader reader = SourceReader.Create(CreateReader(type, text), BufferLength);
 
 		Assert.AreEqual(text[0], reader.Peek());
 		Assert.AreEqual(text[0], reader.Peek());
@@ -220,7 +220,7 @@ public class UnitTestSourceReader
 		builder.Append("\r\n123");
 		builder.Append('1', BufferLength * 2 - builder.Length - 1);
 		builder.Append("\n123");
-		SourceReader reader = new(CreateReader(type, builder.ToString()), BufferLength);
+		SourceReader reader = SourceReader.Create(CreateReader(type, builder.ToString()), BufferLength);
 		Assert.IsTrue(reader.IsLineStart);
 
 		Assert.AreEqual('3', reader.Read(2));
@@ -296,7 +296,7 @@ public class UnitTestSourceReader
 	{
 		string text = "12\r34\n56\r\n78";
 		// 一次性读入。
-		SourceReader reader = new(CreateReader(type, text), BufferLength);
+		SourceReader reader = SourceReader.Create(CreateReader(type, text), BufferLength);
 		reader.UseLineLocator();
 
 		Assert.AreEqual('8', reader.Read(11));
@@ -314,7 +314,7 @@ public class UnitTestSourceReader
 		Assert.AreEqual(new LinePosition(4, 1, 2), reader.GetPosition(11));
 
 		// 分批读入。
-		reader = new(CreateReader(type, text), BufferLength);
+		reader = SourceReader.Create(CreateReader(type, text), BufferLength);
 		reader.UseLineLocator();
 
 		Assert.AreEqual('2', reader.Read(1));
@@ -352,29 +352,6 @@ public class UnitTestSourceReader
 	}
 
 	/// <summary>
-	/// 对 <see cref="SourceReader.End"/> 进行测试。
-	/// </summary>
-	[DataTestMethod]
-	[DataRow("StringReader")]
-	[DataRow("TextReader")]
-	public void TestEnd(string type)
-	{
-		SourceReader reader = new(CreateReader(type, "1234567890"), BufferLength);
-		Assert.AreEqual('1', reader.Peek());
-		Assert.AreEqual('1', reader.Read());
-		reader.End = 2;
-		Assert.AreEqual('2', reader.Peek());
-		Assert.AreEqual('2', reader.Read());
-		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Peek());
-		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read());
-		reader.End = 3;
-		Assert.AreEqual('3', reader.Peek());
-		Assert.AreEqual('3', reader.Read());
-		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Peek());
-		Assert.AreEqual(SourceReader.InvalidCharacter, reader.Read());
-	}
-
-	/// <summary>
 	/// 对 <see cref="SourceReader.Mark"/> 进行测试。
 	/// </summary>
 	[DataTestMethod]
@@ -387,7 +364,7 @@ public class UnitTestSourceReader
 		{
 			builder.Append("0123456789");
 		}
-		SourceReader reader = new(CreateReader(type, builder.ToString()), BufferLength);
+		SourceReader reader = SourceReader.Create(CreateReader(type, builder.ToString()), BufferLength);
 		Assert.AreEqual('0', reader.Read());
 		Assert.AreEqual("0", reader.ReadBlock(0, 1));
 		Assert.AreEqual("", reader.ReadBlock(0, 0));

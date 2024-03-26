@@ -55,7 +55,7 @@ public sealed class LexerRunner<T> : IDisposable
 	public void Parse(string source)
 	{
 		ArgumentNullException.ThrowIfNull(source);
-		Parse(new SourceReader(new StringReader(source)));
+		Parse(SourceReader.Create(source));
 	}
 
 	/// <summary>

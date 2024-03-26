@@ -59,16 +59,7 @@ public sealed class LexerTokenizer<T> : ITokenizer<T>
 	public void Load(string source)
 	{
 		ArgumentNullException.ThrowIfNull(source);
-		Load(new SourceReader(source));
-	}
-
-	/// <summary>
-	/// 加载指定的源码。
-	/// </summary>
-	/// <param name="source">要加载的源码。</param>
-	public void Load(StringView source)
-	{
-		Load(new SourceReader(source));
+		Load(SourceReader.Create(source));
 	}
 
 	/// <summary>
