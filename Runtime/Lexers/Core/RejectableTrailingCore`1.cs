@@ -10,13 +10,9 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	where T : struct
 {
 	/// <summary>
-	/// 接受符号的堆栈。
+	/// 候选状态的堆栈。
 	/// </summary>
-	private readonly ListStack<ValueTuple<int, int>> symbolStack = new();
-	/// <summary>
-	/// 接受索引的堆栈。
-	/// </summary>
-	private readonly ListStack<int> indexStack = new();
+	private readonly ListStack<StateInfo> stateStack = new();
 	/// <summary>
 	/// 候选类型。
 	/// </summary>
@@ -26,9 +22,9 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// </summary>
 	private readonly HashSet<int> invalidStates = new();
 	/// <summary>
-	/// 当前候选符号。
+	/// 当前候选状态。
 	/// </summary>
-	private ValueTuple<int, int> curSymbols;
+	private StateInfo curState;
 	/// <summary>
 	/// 是否需要重新计算候选类型。
 	/// </summary>
@@ -57,10 +53,10 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 				candidates.Clear();
 				int[] states = data.States;
 				// 先添加当前候选
-				GetCandidates(states, curSymbols, candidates);
-				for (int i = 0; i < symbolStack.Count; i++)
+				GetCandidates(states, curState, candidates);
+				for (int i = 0; i < stateStack.Count; i++)
 				{
-					GetCandidates(states, symbolStack[i], candidates);
+					GetCandidates(states, stateStack[i], candidates);
 				}
 			}
 			return candidates;
@@ -75,8 +71,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// <returns>词法单元读入是否成功。</returns>
 	public override bool NextToken(int state, int start)
 	{
-		symbolStack.Clear();
-		indexStack.Clear();
+		stateStack.Clear();
 		int startIndex = source.Index;
 		int symbolStart = 0, symbolEnd = 0;
 		int[] states = data.States;
@@ -120,20 +115,19 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 					}
 				}
 				// 将接受状态记录在堆栈中。
-				symbolStack.Push(new ValueTuple<int, int>(symbolStart, symbolEnd));
-				indexStack.Push(source.Index);
+				stateStack.Push(new StateInfo(source.Index, symbolStart, symbolEnd));
 			}
 		}
 		// 遍历终结状态，执行相应动作。
 		invalidStates.Clear();
-		while (symbolStack.Count > 0)
+		while (stateStack.Count > 0)
 		{
-			curSymbols = symbolStack.Pop();
-			int index = indexStack.Pop();
-			while (curSymbols.Item1 < curSymbols.Item2)
+			curState = stateStack.Pop();
+			int index = curState.Index;
+			while (curState.SymbolStart < curState.SymbolEnd)
 			{
-				int acceptState = states[curSymbols.Item1];
-				curSymbols.Item1++;
+				int acceptState = states[curState.SymbolStart];
+				curState.SymbolStart++;
 				if (acceptState < 0)
 				{
 					// 跳过向前看的头状态。
@@ -189,11 +183,12 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 			{
 				// 前后长度都不固定，需要沿着堆栈向前找。
 				int target = -state - 1;
-				for (int i = 0; i < symbolStack.Count; i++)
+				for (int i = 0; i < stateStack.Count; i++)
 				{
-					if (ContainsTrailingHead(states, symbolStack[i], target))
+					StateInfo info = stateStack[i];
+					if (ContainsTrailingHead(states, info, target))
 					{
-						index = indexStack[i];
+						index = info.Index;
 						break;
 					}
 				}
@@ -207,13 +202,13 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// 返回指定的接受状态的符号索引中是否包含特定的向前看头状态。
 	/// </summary>
 	/// <param name="states">状态列表。</param>
-	/// <param name="symbols">接受状态的符号索引。</param>
+	/// <param name="state">接受状态。</param>
 	/// <param name="target">目标向前看头状态。</param>
 	/// <returns>如果包含特定的目标，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	private static bool ContainsTrailingHead(int[] states, ValueTuple<int, int> symbols, int target)
+	private static bool ContainsTrailingHead(int[] states, StateInfo state, int target)
 	{
 		// 在当前状态中查找，从后向前找。
-		for (int i = symbols.Item2 - 1; i >= symbols.Item1; i--)
+		for (int i = state.SymbolEnd - 1; i >= state.SymbolStart; i--)
 		{
 			int idx = states[i];
 			if (idx >= 0)

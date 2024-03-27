@@ -117,11 +117,11 @@ internal abstract class LexerCore<T>
 	/// 返回指定符号列表中的候选类型。
 	/// </summary>
 	/// <param name="states">状态列表。</param>
-	/// <param name="symbols">要检查的符号列表。</param>
+	/// <param name="state">要检查的状态信息。</param>
 	/// <param name="candidates">候选状态集合。</param>
-	protected void GetCandidates(int[] states, ValueTuple<int, int> symbols, HashSet<T> candidates)
+	protected void GetCandidates(int[] states, StateInfo state, HashSet<T> candidates)
 	{
-		for (int i = symbols.Item1; i < symbols.Item2; i++)
+		for (int i = state.SymbolStart; i < state.SymbolEnd; i++)
 		{
 			int acceptState = states[i];
 			if (acceptState < 0)
