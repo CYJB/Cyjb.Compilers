@@ -45,6 +45,14 @@ internal abstract class LexerCore<T>
 	/// </summary>
 	protected readonly LexerData<T> data;
 	/// <summary>
+	/// DFA 的状态列表。
+	/// </summary>
+	protected readonly int[] states;
+	/// <summary>
+	/// 词法分析的终结符列表。
+	/// </summary>
+	protected readonly TerminalData<T>[] terminals;
+	/// <summary>
 	/// 当前词法分析器的控制器。
 	/// </summary>
 	protected readonly LexerController<T> controller;
@@ -66,6 +74,8 @@ internal abstract class LexerCore<T>
 	{
 		this.data = data;
 		this.controller = controller;
+		states = data.States;
+		terminals = data.Terminals;
 		controller.SetCore(this, data.Contexts, data.Rejectable);
 	}
 

@@ -74,7 +74,6 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 		stateStack.Clear();
 		int startIndex = source.Index;
 		int symbolStart = 0, symbolEnd = 0;
-		int[] states = data.States;
 		while (true)
 		{
 			state = NextState(state);
@@ -89,9 +88,6 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 				{
 					// 保存流的索引，避免被误修改影响后续匹配。
 					int originIndex = source.Index;
-					// 最短匹配时不需要生成候选列表。
-					candidates.Clear();
-					isCandidatesValid = true;
 					// 使用最短匹配时，需要先调用 Action。
 					for (int i = symbolStart; i < symbolEnd; i++)
 					{
@@ -101,9 +97,12 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 						{
 							break;
 						}
-						var terminal = data.Terminals[acceptState];
+						var terminal = terminals[acceptState];
 						if (terminal.UseShortest)
 						{
+							// 最短匹配时不需要生成候选列表。
+							candidates.Clear();
+							isCandidatesValid = true;
 							AdjustIndex(acceptState, startIndex, originIndex);
 							controller.DoAction(start, terminal);
 							if (!controller.IsReject)
@@ -111,6 +110,12 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 								return true;
 							}
 							source.Index = originIndex;
+							symbolStart++;
+						}
+						else
+						{
+							// 向前看符号会排在普通符号的前面，这里可以直接退出匹配。
+							break;
 						}
 					}
 				}
@@ -140,7 +145,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 				AdjustIndex(acceptState, startIndex, index);
 				// 每次都需要清空候选集合，并在使用时重新计算。
 				isCandidatesValid = false;
-				controller.DoAction(start, data.Terminals[acceptState]);
+				controller.DoAction(start, terminals[acceptState]);
 				if (!controller.IsReject)
 				{
 					return true;
@@ -162,8 +167,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// <param name="index">当前索引。</param>
 	private void AdjustIndex(int state, int startIndex, int index)
 	{
-		TerminalData<T> terminal = data.Terminals[state];
-		int[] states = data.States;
+		TerminalData<T> terminal = terminals[state];
 		int? trailing = terminal.Trailing;
 		if (trailing.HasValue)
 		{
@@ -186,7 +190,7 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 				for (int i = 0; i < stateStack.Count; i++)
 				{
 					StateInfo info = stateStack[i];
-					if (ContainsTrailingHead(states, info, target))
+					if (ContainsTrailingHead(info, target))
 					{
 						index = info.Index;
 						break;
@@ -201,11 +205,10 @@ internal sealed class RejectableTrailingCore<T> : LexerCore<T>
 	/// <summary>
 	/// 返回指定的接受状态的符号索引中是否包含特定的向前看头状态。
 	/// </summary>
-	/// <param name="states">状态列表。</param>
 	/// <param name="state">接受状态。</param>
 	/// <param name="target">目标向前看头状态。</param>
 	/// <returns>如果包含特定的目标，则为 <c>true</c>；否则为 <c>false</c>。</returns>
-	private static bool ContainsTrailingHead(int[] states, StateInfo state, int target)
+	private bool ContainsTrailingHead(StateInfo state, int target)
 	{
 		// 在当前状态中查找，从后向前找。
 		for (int i = state.SymbolEnd - 1; i >= state.SymbolStart; i--)

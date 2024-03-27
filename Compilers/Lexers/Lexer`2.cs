@@ -252,6 +252,47 @@ public class Lexer<T, TController>
 		}
 		dfa = nfa.BuildDFA(headCount, rejectable);
 		TerminalData<T>[] terminals = this.terminals.Select(t => t.GetData()).ToArray();
+		if (terminals.Any(t => t.UseShortest))
+		{
+			// 如果包含最短匹配的状态，那么需要调整 DFA 的符号顺序，将最短匹配的符号排在前面。
+			foreach (DfaState state in dfa)
+			{
+				Array.Sort(state.Symbols, (int x, int y) =>
+				{
+					if (x < 0)
+					{
+						if (y < 0)
+						{
+							return x - y;
+						}
+						else
+						{
+							return 1;
+						}
+					}
+					else if (y < 0)
+					{
+						return -1;
+					}
+					if (terminals[x].UseShortest)
+					{
+						if (terminals[y].UseShortest)
+						{
+							return x - y;
+						}
+						else
+						{
+							return -1;
+						}
+					}
+					else if (terminals[y].UseShortest)
+					{
+						return 1;
+					}
+					return x - y;
+				});
+			}
+		}
 		DfaData data = dfa.GetData();
 		return new LexerData<T>(contexts, terminals, dfa.GetCharClassMap(), data.States, data.Trans,
 			trailingType, containsBeginningOfLine, rejectable, typeof(TController));

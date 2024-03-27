@@ -163,13 +163,13 @@ internal class DfaDataBuilder
 	/// <returns>如果符号列表与数据一致，返回 <c>true</c>；否则返回 <c>false</c>。</returns>
 	private bool CompareSymbols(int[] symbols, int startIndex)
 	{
-		foreach (int i in symbols)
+		for (int i = 0; i < symbols.Length; i++)
 		{
-			if (startIndex >= stateDataList.Count)
+			if (startIndex + i >= stateDataList.Count)
 			{
 				break;
 			}
-			if (i != stateDataList[startIndex])
+			if (symbols[i] != stateDataList[startIndex + i])
 			{
 				return false;
 			}

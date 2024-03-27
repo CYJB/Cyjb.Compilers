@@ -72,7 +72,6 @@ internal sealed class RejectableCore<T> : LexerCore<T>
 	public override bool NextToken(int state, int start)
 	{
 		stateStack.Clear();
-		int[] states = data.States;
 		int symbolStart = 0, symbolEnd = 0;
 		while (true)
 		{
@@ -88,21 +87,26 @@ internal sealed class RejectableCore<T> : LexerCore<T>
 				{
 					// 保存流的索引，避免被误修改影响后续匹配。
 					int originIndex = source.Index;
-					// 最短匹配时不需要生成候选列表。
-					candidates.Clear();
-					isCandidatesValid = true;
 					// 使用最短匹配时，需要先调用 Action。
 					for (int i = symbolStart; i < symbolEnd; i++)
 					{
-						var terminal = data.Terminals[states[i]];
+						var terminal = terminals[states[i]];
 						if (terminal.UseShortest)
 						{
+							// 最短匹配时不需要生成候选列表。
+							candidates.Clear();
+							isCandidatesValid = true;
 							controller.DoAction(start, terminal);
 							if (!controller.IsReject)
 							{
 								return true;
 							}
 							source.Index = originIndex;
+						}
+						else
+						{
+							// 向前看符号会排在普通符号的前面，这里可以直接退出匹配。
+							break;
 						}
 					}
 				}
@@ -128,7 +132,7 @@ internal sealed class RejectableCore<T> : LexerCore<T>
 				source.Index = index;
 				// 每次都需要清空候选集合，并在使用时重新计算。
 				isCandidatesValid = false;
-				controller.DoAction(start, data.Terminals[acceptState]);
+				controller.DoAction(start, terminals[acceptState]);
 				if (!controller.IsReject)
 				{
 					return true;

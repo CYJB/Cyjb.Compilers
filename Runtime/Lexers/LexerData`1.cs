@@ -191,23 +191,4 @@ public class LexerData<T>
 			return true;
 		}
 	}
-
-	/// <summary>
-	/// 返回指定状态对应的符号。
-	/// </summary>
-	/// <param name="state">当前状态索引。</param>
-	/// <returns><paramref name="state"/> 对应的符号。</returns>
-	public ArraySegment<int> GetSymbols(int state)
-	{
-		int offset = state * 4;
-		int count = states[offset + DfaStateData.SymbolsLengthOffset];
-		if (count == 0)
-		{
-			return ArraySegment<int>.Empty;
-		}
-		else
-		{
-			return new ArraySegment<int>(states, states[offset + DfaStateData.SymbolIndexOffset], count);
-		}
-	}
 }

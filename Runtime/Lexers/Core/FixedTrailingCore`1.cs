@@ -26,7 +26,6 @@ internal sealed class FixedTrailingCore<T> : LexerCore<T>
 	{
 		// 最后一次匹配的符号和文本索引。
 		int lastAccept = -1, lastIndex = source.Index;
-		int[] states = data.States;
 		int symbolStart = 0, symbolEnd = 0;
 		while (true)
 		{
@@ -42,7 +41,7 @@ internal sealed class FixedTrailingCore<T> : LexerCore<T>
 				lastAccept = states[symbolStart];
 				lastIndex = source.Index;
 				// 使用最短匹配时，可以直接返回。
-				if (data.UseShortest && data.Terminals[lastAccept].UseShortest)
+				if (data.UseShortest && terminals[lastAccept].UseShortest)
 				{
 					break;
 				}
@@ -50,7 +49,7 @@ internal sealed class FixedTrailingCore<T> : LexerCore<T>
 		}
 		if (lastAccept >= 0)
 		{
-			TerminalData<T> terminal = data.Terminals[lastAccept];
+			TerminalData<T> terminal = terminals[lastAccept];
 			if (terminal.Trailing.HasValue)
 			{
 				// 是向前看状态。

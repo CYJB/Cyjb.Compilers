@@ -26,7 +26,6 @@ internal sealed class BasicCore<T> : LexerCore<T>
 	{
 		// 最后一次匹配的符号和文本索引。
 		int lastAccept = -1, lastIndex = source.Index;
-		int[] states = data.States;
 		int symbolStart = 0, symbolEnd = 0;
 		while (true)
 		{
@@ -41,7 +40,7 @@ internal sealed class BasicCore<T> : LexerCore<T>
 				lastAccept = states[symbolStart];
 				lastIndex = source.Index;
 				// 使用最短匹配时，可以直接返回。
-				if (data.UseShortest && data.Terminals[lastAccept].UseShortest)
+				if (data.UseShortest && terminals[lastAccept].UseShortest)
 				{
 					break;
 				}
@@ -51,7 +50,7 @@ internal sealed class BasicCore<T> : LexerCore<T>
 		{
 			// 将流调整到与接受状态匹配的状态。
 			source.Index = lastIndex;
-			controller.DoAction(start, data.Terminals[lastAccept]);
+			controller.DoAction(start, terminals[lastAccept]);
 			return true;
 		}
 		return false;
