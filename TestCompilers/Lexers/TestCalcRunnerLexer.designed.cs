@@ -19,6 +19,7 @@ internal partial class TestCalcRunnerLexer
 	/// <summary>
 	/// 词法分析器的工厂。
 	/// </summary>
+	[CompilerGeneratedAttribute]
 	public static readonly ILexerFactory<Calc> Factory = CreateLexerFactory();
 
 	/// <summary>

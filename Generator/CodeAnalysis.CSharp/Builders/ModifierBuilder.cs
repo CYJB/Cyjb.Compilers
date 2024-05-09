@@ -36,6 +36,10 @@ internal sealed class ModifierBuilder
 	/// <returns>修饰符的节点列表。</returns>
 	public SyntaxTokenList GetSyntax(SyntaxFormat format)
 	{
+		if (modifiers.Count == 0)
+		{
+			return SyntaxFactory.TokenList();
+		}
 		List<SyntaxToken> tokens = new();
 		bool isFirst = true;
 		foreach (SyntaxKind modifier in modifiers)

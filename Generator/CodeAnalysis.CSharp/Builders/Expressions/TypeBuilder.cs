@@ -9,7 +9,6 @@ namespace Cyjb.CodeAnalysis.CSharp;
 /// </summary>
 internal sealed class TypeBuilder : ExpressionBuilder
 {
-
 	/// <summary>
 	/// 类型语法单元。
 	/// </summary>

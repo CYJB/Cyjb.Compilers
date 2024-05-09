@@ -18,6 +18,7 @@ public partial class TestProductionLexer
 { 	/// <summary>
 	/// 词法分析器的工厂。
 	/// </summary>
+	[CompilerGeneratedAttribute]
 	public static readonly ILexerFactory<ProductionKind> Factory = CreateLexerFactory();
 
 	/// <summary>

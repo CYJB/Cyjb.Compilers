@@ -18,7 +18,7 @@ internal abstract class Controller
 	{
 		Context = context;
 		Name = syntax.Identifier.ToString();
-		ControllerType = SyntaxBuilder.Name(Name);
+		ControllerType = Name.AsName();
 		if (syntax.TypeParameterList != null)
 		{
 			foreach (TypeParameterSyntax typeParam in syntax.TypeParameterList.Parameters)

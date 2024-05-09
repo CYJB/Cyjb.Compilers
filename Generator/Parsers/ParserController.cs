@@ -210,27 +210,28 @@ internal sealed partial class ParserController : Controller
 	public override IEnumerable<MemberDeclarationSyntax> Generate()
 	{
 		ParserData<SymbolKind> data = parser.GetData();
-		TypeBuilder factoryInterfaceType = SyntaxBuilder.Name(typeof(IParserFactory<>))
+		TypeBuilder factoryInterfaceType = typeof(IParserFactory<>).AsName()
 			.TypeArgument(KindType);
 		// 工厂成员声明
 		yield return SyntaxBuilder.DeclareField(factoryInterfaceType, "Factory")
 				.Modifier(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword, SyntaxKind.ReadOnlyKeyword)
 				.Comment("语法分析器的工厂。")
-				.Value(SyntaxBuilder.Name("CreateParserFactory").Invoke())
+				.Attribute(typeof(CompilerGeneratedAttribute))
+				.Value("CreateParserFactory".AsName().Invoke())
 				.GetSyntax(Format)
 				.AddTrailingTrivia(Format.EndOfLine);
 
 		// 工厂方法
 		var factoryMethod = SyntaxBuilder.DeclareMethod(factoryInterfaceType, "CreateParserFactory")
 			.Comment("创建语法分析器的工厂。")
-			.Attribute(SyntaxBuilder.Attribute<CompilerGeneratedAttribute>())
+			.Attribute(typeof(CompilerGeneratedAttribute))
 			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
 		// 如果只包含一个起始符号，那么不需要创建 startStates 变量。
 		bool hasStartState = data.StartStates?.Count > 1;
 		LocalDeclarationStatementBuilder? startStates = null;
 		if (hasStartState)
 		{
-			TypeBuilder startStatesType = SyntaxBuilder.Name(typeof(Dictionary<,>))
+			TypeBuilder startStatesType = typeof(Dictionary<,>).AsName()
 				.TypeArgument(KindType).TypeArgument(typeof(int));
 			startStates = SyntaxBuilder.DeclareLocal(startStatesType, "startStates")
 				.Comment("上下文数据")
@@ -239,19 +240,19 @@ internal sealed partial class ParserController : Controller
 		}
 		// 符号声明，索引小于 -1 的是临时符号。
 		factoryMethod.Statement(SyntaxBuilder.DeclareLocal(KindType, "endOfFile")
-			.Value(SyntaxBuilder.Literal(-1).Parenthesized().Cast(KindType))
+			.Value(((ExpressionBuilder)(-1)).Parenthesized().Cast(KindType))
 			.Comment("临时符号"));
 		foreach (SymbolKind symbol in GetTempKinds(data))
 		{
 			StatementBuilder builder = SyntaxBuilder.DeclareLocal(KindType, symbol.ToString())
-				.Value(SyntaxBuilder.Literal(symbol.Index).Parenthesized().Cast(KindType));
+				.Value(((ExpressionBuilder)symbol.Index).Parenthesized().Cast(KindType));
 			factoryMethod.Statement(builder);
 		}
 		var productions = DeclareProductions(data);
-		NameBuilder stateType = SyntaxBuilder.Name(typeof(ParserStateData<>)).TypeArgument(KindType);
+		NameBuilder stateType = typeof(ParserStateData<>).AsName().TypeArgument(KindType);
 		var states = SyntaxBuilder.DeclareLocal(stateType.Clone().Array(), "states")
 			.Comment("状态数据")
-			.Value(SyntaxBuilder.CreateArray(stateType).Rank(data.States.Length));
+			.Value(ExpressionBuilder.CreateArray(stateType).Rank(data.States.Length));
 		factoryMethod
 			.Statement(productions)
 			.Statement(states);
@@ -259,15 +260,15 @@ internal sealed partial class ParserController : Controller
 
 		var gotoMap = SyntaxBuilder.DeclareLocal<int[]>("gotoMap")
 			.Comment("GOTO 表的起始索引")
-			.Value(SyntaxBuilder.Literal(data.GotoMap, 24));
+			.Value(data.GotoMap.AsLiteral(24));
 		var gotoTrans = SyntaxBuilder.DeclareLocal<int[]>("gotoTrans")
 			.Comment("GOTO 表的转移")
-			.Value(SyntaxBuilder.Literal(data.GotoTrans, 24));
+			.Value(data.GotoTrans.AsLiteral(24));
 
-		var parserDataType = SyntaxBuilder.Name(typeof(ParserData<>)).TypeArgument(KindType);
+		var parserDataType = typeof(ParserData<>).AsName().TypeArgument(KindType);
 		var parserData = SyntaxBuilder.DeclareLocal(parserDataType, "parserData")
 			.Comment("语法分析器的数据")
-			.Value(SyntaxBuilder.CreateObject().ArgumentWrap(1)
+			.Value(ExpressionBuilder.CreateObject().ArgumentWrap(1)
 				.Argument(productions)
 				.Argument(startStates)
 				.Argument(states)
@@ -275,7 +276,7 @@ internal sealed partial class ParserController : Controller
 				.Argument(gotoTrans)
 			);
 
-		var factoryType = SyntaxBuilder.Name(typeof(ParserFactory<,>))
+		var factoryType = typeof(ParserFactory<,>).AsName()
 			.TypeArgument(KindType).TypeArgument(ControllerType);
 
 		yield return factoryMethod
@@ -283,7 +284,7 @@ internal sealed partial class ParserController : Controller
 			.Statement(gotoTrans)
 			.Statement(parserData)
 			.Statement(SyntaxBuilder.Return(
-				SyntaxBuilder.CreateObject(factoryType).Argument(parserData)))
+				ExpressionBuilder.CreateObject(factoryType).Argument(parserData)))
 			.GetSyntax(Format);
 	}
 

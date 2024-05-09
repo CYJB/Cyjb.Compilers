@@ -19,6 +19,7 @@ public partial class TestStrLexer
 	/// <summary>
 	/// 词法分析器的工厂。
 	/// </summary>
+	[CompilerGeneratedAttribute]
 	public static readonly ILexerFactory<Str> Factory = CreateLexerFactory();
 
 	/// <summary>

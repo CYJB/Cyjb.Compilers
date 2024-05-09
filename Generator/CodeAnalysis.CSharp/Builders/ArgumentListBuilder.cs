@@ -36,6 +36,20 @@ internal sealed class ArgumentListBuilder
 	/// <summary>
 	/// 添加指定的实参。
 	/// </summary>
+	/// <param name="expressions">参数表达式。</param>
+	/// <returns>当前实参列表构造器。</returns>
+	public ArgumentListBuilder Add(params ExpressionBuilder[] expressions)
+	{
+		foreach (ExpressionBuilder exp in expressions)
+		{
+			arguments.Add(new ArgumentBuilder(exp));
+		}
+		return this;
+	}
+
+	/// <summary>
+	/// 添加指定的实参。
+	/// </summary>
 	/// <param name="expression">参数表达式。</param>
 	/// <param name="name">参数的名称。</param>
 	/// <returns>当前实参列表构造器。</returns>

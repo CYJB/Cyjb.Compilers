@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Cyjb.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -23,6 +24,10 @@ internal sealed partial class LexerController : Controller
 	/// <see cref="LexerRegexAttribute"/> 的模型。
 	/// </summary>
 	private static readonly AttributeModel RegexAttrModel = AttributeModel.From<LexerRegexAttribute>();
+	/// <summary>
+	/// 生成的 LexerCore 类名。
+	/// </summary>
+	private const string LexerCoreClassName = "LexerCore";
 
 	/// <summary>
 	/// 词法分析是否用到了 Reject 动作。
@@ -132,72 +137,66 @@ internal sealed partial class LexerController : Controller
 	public override IEnumerable<MemberDeclarationSyntax> Generate()
 	{
 		AddSymbols();
-		LexerData<SymbolKind> data = lexer.GetData(rejectable);
-		NameBuilder factoryInterfaceType = SyntaxBuilder.Name(typeof(ILexerFactory<>))
-			.TypeArgument(KindType);
+		NameBuilder factoryInterfaceType = typeof(ILexerFactory<>).AsName().TypeArgument(KindType);
 		// 工厂成员声明
 		yield return SyntaxBuilder.DeclareField(factoryInterfaceType, "Factory")
 				.Modifier(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword, SyntaxKind.ReadOnlyKeyword)
 				.Comment("词法分析器的工厂。")
-				.Value(SyntaxBuilder.Name("CreateLexerFactory").Invoke())
+				.Attribute(typeof(CompilerGeneratedAttribute))
+				.Value("CreateLexerFactory".AsName().Invoke())
 				.GetSyntax(Format)
 				.AddTrailingTrivia(Format.EndOfLine);
 
 		// 工厂方法
 		var factoryMethod = SyntaxBuilder.DeclareMethod(factoryInterfaceType, "CreateLexerFactory")
 			.Comment("创建词法分析器的工厂。")
-			.Attribute(SyntaxBuilder.Attribute<CompilerGeneratedAttribute>())
+			.Attribute(typeof(CompilerGeneratedAttribute))
 			.Modifier(SyntaxKind.PrivateKeyword, SyntaxKind.StaticKeyword);
+		LexerData<SymbolKind> data = lexer.GetData(rejectable);
 		// 如果只包含默认上下文，那么不需要创建 contexts 变量。
-		LocalDeclarationStatementBuilder? contexts = null;
-		if (data.Contexts.Count > 1 || data.Contexts.Values.Any((context) => context.EofAction != null))
-		{
-			contexts = SyntaxBuilder.DeclareLocal<Dictionary<string, ContextData>>("contexts")
-				.Comment("上下文数据")
-				.Value(ContextsValue(data));
-		}
-		TypeBuilder terminalsType = SyntaxBuilder.Name(typeof(TerminalData<>)).TypeArgument(KindType).Array();
+		var contexts = GetContextDeclaration(data.Contexts);
+		TypeBuilder terminalsType = typeof(TerminalData<>).AsName().TypeArgument(KindType).Array();
 		var terminals = SyntaxBuilder.DeclareLocal(terminalsType, "terminals")
 			.Comment("终结符数据")
-			.Value(TerminalsValue(data, lexer.TerminalMerge, symbolInfos));
+			.Value(TerminalsValue(data.Terminals, lexer.TerminalMerge, symbolInfos));
 		var indexes = SyntaxBuilder.DeclareLocal<uint[]>("indexes")
 				.Comment("字符类信息")
 				.Comment(lexer.GetCharClassDescription())
 				.Comment("字符类索引")
-				.Value(SyntaxBuilder.Literal(data.CharClasses.Indexes, 8));
+				.Value(data.CharClasses.Indexes.AsLiteral(8));
 		var classes = SyntaxBuilder.DeclareLocal<int[]>("classes")
 			.Comment("字符类列表")
-			.Value(SyntaxBuilder.Literal(data.CharClasses.CharClasses, 24));
+			.Value(data.CharClasses.CharClasses.AsLiteral(24));
 		var categories = DeclareCharClassCategories(data);
-		var charClassBuilder = SyntaxBuilder.CreateObject<CharClassMap>()
+		var charClassBuilder = ExpressionBuilder.CreateObject<CharClassMap>()
 			.Argument(indexes).Argument(classes).Argument(categories);
 		var states = SyntaxBuilder.DeclareLocal<int[]>("states")
 			.Comment("状态转移")
 			.Comment(lexer.GetStateDescription())
 			.Comment("状态列表")
-			.Value(SyntaxBuilder.Literal(data.States, 8));
+			.Value(data.States.AsLiteral(8));
 		var trans = SyntaxBuilder.DeclareLocal<int[]>("trans")
 			.Comment("状态转移")
-			.Value(SyntaxBuilder.Literal(data.Trans, 12));
+			.Value(data.Trans.AsLiteral(12));
 
-		TypeBuilder lexerDataType = SyntaxBuilder.Name(typeof(LexerData<>)).TypeArgument(KindType);
+		TypeBuilder lexerDataType = typeof(LexerData<>).AsName().TypeArgument(KindType);
 		var lexerData = SyntaxBuilder.DeclareLocal(lexerDataType, "lexerData")
 			.Comment("词法分析器的数据")
-			.Value(SyntaxBuilder.CreateObject().ArgumentWrap(1)
+			.Value(ExpressionBuilder.CreateObject().ArgumentWrap(1)
 				.Argument(contexts)
 				.Argument(terminals)
 				.Argument(charClassBuilder)
 				.Argument(states)
 				.Argument(trans)
-				.Argument(SyntaxBuilder.Name("TrailingType").AccessMember(data.TrailingType.ToString()))
-				.Argument(SyntaxBuilder.Literal(data.ContainsBeginningOfLine))
-				.Argument(SyntaxBuilder.Literal(rejectable))
-				.Argument(SyntaxBuilder.TypeOf(ControllerType)));
+				.Argument("TrailingType".AsName().AccessMember(data.TrailingType.ToString()))
+				.Argument(data.ContainsBeginningOfLine)
+				.Argument(rejectable)
+				.Argument(ExpressionBuilder.TypeOf(ControllerType)));
 
-		NameBuilder factoryType = SyntaxBuilder.Name(typeof(LexerFactory<,>))
+		NameBuilder factoryType = typeof(LexerFactory<,>).AsName()
 			.TypeArgument(KindType).TypeArgument(ControllerType);
 
-		yield return factoryMethod
+		factoryMethod
 			.Statement(contexts)
 			.Statement(terminals)
 			.Statement(indexes)
@@ -207,8 +206,8 @@ internal sealed partial class LexerController : Controller
 			.Statement(trans)
 			.Statement(lexerData)
 			.Statement(SyntaxBuilder.Return(
-				SyntaxBuilder.CreateObject(factoryType).Argument(lexerData)))
-			.GetSyntax(Format);
+				ExpressionBuilder.CreateObject(factoryType).Argument(lexerData)));
+		yield return factoryMethod.GetSyntax(Format);
 	}
 
 	/// <summary>
@@ -367,5 +366,40 @@ internal sealed partial class LexerController : Controller
 				Context.AddError(ex.Message, info.Syntax);
 			}
 		}
+	}
+
+	/// <summary>
+	/// 返回上下文数据的声明。
+	/// </summary>
+	/// <param name="Contexts">上下文数据。</param>
+	/// <returns>上下文数据的声明。</returns>
+	private LocalDeclarationStatementBuilder? GetContextDeclaration(IReadOnlyDictionary<string, ContextData> contexts)
+	{
+		if (contexts.Count == 1 && contexts.Values.All((context) => context.EofAction == null))
+		{
+			// 只有默认上下文且没有 Eof 动作，那么不需要生成上下文数据。
+			return null;
+		}
+		var contextsValue = ExpressionBuilder.CreateObject().InitializerWrap(1);
+		// 按照索引顺序生成上下文
+		foreach (var pair in contexts.OrderBy(pair => pair.Value.Index))
+		{
+			var contextBuilder = ExpressionBuilder.CreateObject<ContextData>()
+				.Argument(pair.Value.Index)
+				.Argument(GetContextKey(pair.Value.Label));
+			if (pair.Value.EofAction != null)
+			{
+				contextBuilder.Argument(ExpressionBuilder.Lambda()
+					.Parameter("c", Name)
+					.Body("c".AsName().AccessMember(actionMap[pair.Value.EofAction]).Invoke())
+				);
+			}
+			contextsValue.Initializer(ExpressionBuilder.InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
+				.Add(GetContextKey(pair.Key))
+				.Add(contextBuilder));
+		}
+		return SyntaxBuilder.DeclareLocal<Dictionary<string, ContextData>>("contexts")
+			.Comment("上下文数据")
+			.Value(contextsValue);
 	}
 }

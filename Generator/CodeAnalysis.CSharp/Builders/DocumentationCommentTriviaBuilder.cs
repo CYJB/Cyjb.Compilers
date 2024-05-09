@@ -187,9 +187,11 @@ internal sealed class DocumentationCommentTriviaBuilder
 	private static SyntaxList<XmlNodeSyntax> GetExteriorList(XmlNodeSyntaxOrString[] nodes,
 		XmlTextSyntax newLine, XmlTextSyntax startExterior)
 	{
-		List<XmlNodeSyntax> list = new();
-		list.Add(newLine);
-		list.Add(startExterior);
+		List<XmlNodeSyntax> list = new()
+		{
+			newLine,
+			startExterior
+		};
 		list.AddRange(nodes.Select(node => node.Node));
 		list.Add(newLine);
 		list.Add(startExterior);

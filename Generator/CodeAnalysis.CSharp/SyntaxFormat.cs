@@ -87,6 +87,15 @@ internal sealed class SyntaxFormat
 	}
 
 	/// <summary>
+	/// 返回深度减少 1 的格式信息。
+	/// </summary>
+	/// <returns>深度减少 1 的格式信息。</returns>
+	public SyntaxFormat DecDepth()
+	{
+		return new SyntaxFormat(indent, endOfLine, depth - 1, indentations);
+	}
+
+	/// <summary>
 	/// 返回设置了指定深度的格式信息。
 	/// </summary>
 	/// <param name="depth">深度信息。</param>

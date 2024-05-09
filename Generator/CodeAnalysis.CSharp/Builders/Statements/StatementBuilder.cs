@@ -1,3 +1,4 @@
+using Cyjb.Compilers.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,31 +13,16 @@ internal abstract class StatementBuilder
 	/// <summary>
 	/// 语句的注释。
 	/// </summary>
-	private readonly List<string> comments = new();
+	internal protected readonly List<string> comments = new();
 
 	/// <summary>
-	/// 设置语句的注释。
+	/// 返回为当前语句添加标签的语句。
 	/// </summary>
-	/// <param name="comment">注释的内容。</param>
-	/// <returns>当前变量声明语句构造器。</returns>
-	public StatementBuilder Comment(string? comment)
+	/// <param name="label">标签的标识符。</param>
+	/// <returns>标签语句。</returns>
+	public LabeledStatementBuilder Labeled(string label)
 	{
-		if (comment == null)
-		{
-			return this;
-		}
-		// 支持带换行的注释
-		string[] lines = comment.Split(Environment.NewLine);
-		// 移除最后的换行
-		if (lines[^1].Length == 0)
-		{
-			comments.AddRange(lines[0..^1]);
-		}
-		else
-		{
-			comments.AddRange(lines);
-		}
-		return this;
+		return new LabeledStatementBuilder(label, this);
 	}
 
 	/// <summary>
@@ -63,5 +49,39 @@ internal abstract class StatementBuilder
 			}
 		}
 		yield return format.Indentation;
+	}
+}
+
+/// <summary>
+/// 提供语句构造器的辅助功能。
+/// </summary>
+internal static class StatementBuilderUtil
+{
+	/// <summary>
+	/// 设置语句的注释。
+	/// </summary>
+	/// <typeparam name="T">语句的类型。</typeparam>
+	/// <param name="builder">成员声明构造器。</param>
+	/// <param name="comment">注释的内容。</param>
+	/// <returns>当前语句构造器。</returns>
+	public static T Comment<T>(this T builder, string? comment)
+		where T : StatementBuilder
+	{
+		if (comment == null)
+		{
+			return builder;
+		}
+		// 支持带换行的注释
+		string[] lines = comment.Split(Environment.NewLine);
+		// 移除最后的换行
+		if (lines[^1].Length == 0)
+		{
+			builder.comments.AddRange(lines[0..^1]);
+		}
+		else
+		{
+			builder.comments.AddRange(lines);
+		}
+		return builder;
 	}
 }

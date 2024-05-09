@@ -23,17 +23,6 @@ internal sealed class ReturnStatementBuilder : StatementBuilder
 	}
 
 	/// <summary>
-	/// 设置语句的注释。
-	/// </summary>
-	/// <param name="comment">注释的内容。</param>
-	/// <returns>当前变量声明语句构造器。</returns>
-	public new ReturnStatementBuilder Comment(string? comment)
-	{
-		base.Comment(comment);
-		return this;
-	}
-
-	/// <summary>
 	/// 构造返回语句。
 	/// </summary>
 	/// <param name="format">语法的格式信息。</param>

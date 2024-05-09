@@ -1,3 +1,4 @@
+using Cyjb.Compilers.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,164 +10,12 @@ namespace Cyjb.CodeAnalysis.CSharp;
 /// </summary>
 internal static class SyntaxBuilder
 {
-
-	#region Expression
-
-	/// <summary>
-	/// 返回指定字符串的字面量表达式。
-	/// </summary>
-	/// <param name="value">字面量的值。</param>
-	/// <returns>指定字符串的字面量表达式。</returns>
-	public static ExpressionBuilder Literal(string? value)
-	{
-		if (value == null)
-		{
-			return SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression);
-		}
-		else
-		{
-			return SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(value));
-		}
-	}
-
-	/// <summary>
-	/// 返回指定 <see cref="bool"/> 的字面量表达式。
-	/// </summary>
-	/// <param name="value">字面量的值。</param>
-	/// <returns>指定 <see cref="bool"/> 的字面量表达式。</returns>
-	public static ExpressionBuilder Literal(bool value)
-	{
-		if (value)
-		{
-			return SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression);
-		}
-		else
-		{
-			return SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression);
-		}
-	}
-
-	/// <summary>
-	/// 返回指定 <see cref="int"/> 的字面量表达式。
-	/// </summary>
-	/// <param name="value">字面量的值。</param>
-	/// <returns>指定 <see cref="int"/> 的字面量表达式。</returns>
-	public static ExpressionBuilder Literal(int value)
-	{
-		if (value == short.MinValue)
-		{
-			return Name("short.MinValue");
-		}
-		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(value));
-	}
-
-	/// <summary>
-	/// 返回指定 <see cref="uint"/> 的字面量表达式。
-	/// </summary>
-	/// <param name="value">字面量的值。</param>
-	/// <returns>指定 <see cref="uint"/> 的字面量表达式。</returns>
-	public static ExpressionBuilder Literal(uint value)
-	{
-		if (value == uint.MaxValue)
-		{
-			return Name("uint.MaxValue");
-		}
-		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(value));
-	}
-
-	/// <summary>
-	/// 返回指定 <see cref="int[]"/> 的字面量数组表达式。
-	/// </summary>
-	/// <param name="value">字面量的值。</param>
-	/// <param name="wrap">换行情况。</param>
-	/// <returns>指定 <see cref="int[]"/> 的字面量数组表达式。</returns>
-	public static ExpressionBuilder Literal(IEnumerable<int> value, int wrap = 0)
-	{
-		var builder = CreateArray().InitializerWrap(wrap);
-		bool isEmpty = true;
-		foreach (int item in value)
-		{
-			builder.Initializer(Literal(item));
-			isEmpty = false;
-		}
-		if (isEmpty)
-		{
-			return Name("Array").Qualifier("System").AccessMember("Empty<int>").Invoke();
-		}
-		else
-		{
-			return builder;
-		}
-	}
-
-	/// <summary>
-	/// 返回指定 <see cref="uint[]"/> 的字面量数组表达式。
-	/// </summary>
-	/// <param name="value">字面量的值。</param>
-	/// <param name="wrap">换行情况。</param>
-	/// <returns>指定 <see cref="uint[]"/> 的字面量数组表达式。</returns>
-	public static ExpressionBuilder Literal(IEnumerable<uint> value, int wrap = 0)
-	{
-		var builder = CreateArray().InitializerWrap(wrap);
-		bool isEmpty = true;
-		foreach (uint item in value)
-		{
-			builder.Initializer(Literal(item));
-			isEmpty = false;
-		}
-		if (isEmpty)
-		{
-			return Name("Array").Qualifier("System").AccessMember("Empty<uint>").Invoke();
-		}
-		else
-		{
-			return builder;
-		}
-	}
-
-	/// <summary>
-	/// 创建 typeof 表达式。
-	/// </summary>
-	/// <param name="type">类型。</param>
-	/// <returns>typeof 表达式。</returns>
-	public static TypeOfExpressionBuilder TypeOf(TypeBuilder type) => new(type);
-
-	/// <summary>
-	/// 创建名称构造器。
-	/// </summary>
-	/// <param name="name">名称。</param>
-	/// <returns>名称构造器。</returns>
-	public static NameBuilder Name(string name) => new(name);
-
-	/// <summary>
-	/// 创建名称构造器。
-	/// </summary>
-	/// <param name="type">要提取名称的类型。</param>
-	/// <returns>名称构造器。</returns>
-	public static NameBuilder Name(Type type) => new(type);
-
-	/// <summary>
-	/// 创建名称构造器。
-	/// </summary>
-	/// <typeparam name="T">要提取名称的类型。</typeparam>
-	/// <returns>名称构造器。</returns>
-	public static NameBuilder Name<T>() => new(typeof(T));
-
-	/// <summary>
-	/// 创建类型构造器。
-	/// </summary>
-	/// <param name="type">类型。</param>
-	/// <returns>类型构造器。</returns>
-	public static TypeBuilder Type(string type) => new(type);
-
 	/// <summary>
 	/// 创建类型构造器。
 	/// </summary>
 	/// <typeparam name="T">类型。</typeparam>
 	/// <returns>类型构造器。</returns>
 	public static TypeBuilder Type<T>() => new(typeof(T));
-
-	#endregion // Expression
 
 	/// <summary>
 	/// 创建 using 指令。
@@ -221,41 +70,27 @@ internal static class SyntaxBuilder
 		return SyntaxFactory.SeparatedList<TNode>(list);
 	}
 
-	#region Builder
+	/// <summary>
+	/// 创建特性的构造器。
+	/// </summary>
+	/// <param name="name">特性的名称。</param>
+	/// <returns>特性的构造器。</returns>
+	public static AttributeBuilder Attribute(NameBuilder name) => new(name);
 
 	/// <summary>
-	/// 创建初始化表达式的构造器。
+	/// 创建特性的构造器。
 	/// </summary>
-	/// <param name="kind">初始化表达式的类型。</param>
-	/// <returns>初始化表达式的构造器。</returns>
-	public static InitializerExpressionBuilder InitializerExpression(SyntaxKind kind) => new(kind);
+	/// <typeparam name="T">特性的类型。</typeparam>
+	/// <returns>特性的构造器。</returns>
+	public static AttributeBuilder Attribute<T>() => new(typeof(T));
+
+	#region Statement
 
 	/// <summary>
-	/// 创建对象创建表达式的构造器。
+	/// 创建语句块的构造器。
 	/// </summary>
-	/// <param name="type">对象的类型。</param>
-	/// <returns>对象创建表达式的构造器。</returns>
-	public static ObjectCreationExpressionBuilder CreateObject(TypeBuilder? type = null) => new(type);
-
-	/// <summary>
-	/// 创建对象创建表达式的构造器。
-	/// </summary>
-	/// <typeparam name="T">对象的类型。</typeparam>
-	/// <returns>对象创建表达式的构造器。</returns>
-	public static ObjectCreationExpressionBuilder CreateObject<T>() => new(Type<T>());
-
-	/// <summary>
-	/// 创建数组创建表达式的构造器。
-	/// </summary>
-	/// <param name="type">数组元素的类型。</param>
-	/// <returns>数组创建表达式的构造器。</returns>
-	public static ArrayCreationExpressionBuilder CreateArray(TypeBuilder? type = null) => new(type);
-
-	/// <summary>
-	/// 创建 Lambda 表达式的构造器。
-	/// </summary>
-	/// <returns>Lambda 表达式的构造器。</returns>
-	public static LambdaExpressionBuilder Lambda() => new();
+	/// <returns>语句块的构造器。</returns>
+	public static BlockBuilder Block() => new();
 
 	/// <summary>
 	/// 创建变量声明语句的构造器。
@@ -281,18 +116,46 @@ internal static class SyntaxBuilder
 	public static ReturnStatementBuilder Return(ExpressionBuilder expression) => new(expression);
 
 	/// <summary>
-	/// 创建特性的构造器。
+	/// 创建 if 语句的构造器。
 	/// </summary>
-	/// <param name="name">特性的名称。</param>
-	/// <returns>特性的构造器。</returns>
-	public static AttributeBuilder Attribute(NameBuilder name) => new(name);
+	/// <returns>if 语句的构造器。</returns>
+	public static IfStatementBuilder If(ExpressionBuilder condition) => new(condition);
 
 	/// <summary>
-	/// 创建特性的构造器。
+	/// 创建 while 语句的构造器。
 	/// </summary>
-	/// <param name="name">特性的名称。</param>
-	/// <returns>特性的构造器。</returns>
-	public static AttributeBuilder Attribute<T>() => new(typeof(T));
+	/// <param name="condition">while 语句的条件表达式。</param>
+	/// <returns>while 语句的构造器。</returns>
+	public static WhileStatementBuilder While(ExpressionBuilder condition) => new(condition);
+
+	/// <summary>
+	/// 创建 switch 语句的构造器。
+	/// </summary>
+	/// <param name="condition">switch 语句的条件表达式。</param>
+	/// <returns>switch 语句的构造器。</returns>
+	public static SwitchStatementBuilder Switch(ExpressionBuilder expression) => new(expression);
+
+	/// <summary>
+	/// 创建 switch 语句的段构造器。
+	/// </summary>
+	/// <returns>switch 语句的段构造器。</returns>
+	public static SwitchSectionBuilder SwitchSection() => new();
+
+	/// <summary>
+	/// 创建 break 语句的构造器。
+	/// </summary>
+	/// <returns>break 语句的构造器。</returns>
+	public static BreakStatementBuilder Break() => new();
+
+	/// <summary>
+	/// 创建 goto 语句的构造器。
+	/// </summary>
+	/// <returns>goto 语句的构造器。</returns>
+	public static GotoStatementBuilder Goto(string identifier) => new(identifier);
+
+	#endregion // Statement
+
+	#region Declaration
 
 	/// <summary>
 	/// 创建字段声明的构造器。
@@ -303,6 +166,14 @@ internal static class SyntaxBuilder
 	public static FieldDeclarationBuilder DeclareField(TypeBuilder type, string name) => new(type, name);
 
 	/// <summary>
+	/// 创建字段声明的构造器。
+	/// </summary>
+	/// <typeparam name="T">字段的类型。</typeparam>
+	/// <param name="name">字段的名称。</param>
+	/// <returns>字段声明的构造器。</returns>
+	public static FieldDeclarationBuilder DeclareField<T>(string name) => new(Type<T>(), name);
+
+	/// <summary>
 	/// 创建方法声明的构造器。
 	/// </summary>
 	/// <param name="returnType">方法的返回值类型。</param>
@@ -311,6 +182,21 @@ internal static class SyntaxBuilder
 	public static MethodDeclarationBuilder DeclareMethod(TypeBuilder returnType, string name) =>
 		new(returnType, name);
 
-	#endregion // Builder
+	/// <summary>
+	/// 创建构造函数声明的构造器。
+	/// </summary>
+	/// <param name="name">构造函数的名称。</param>
+	/// <returns>构造函数声明的构造器。</returns>
+	public static ConstructorDeclarationBuilder DeclareConstructor(string name) =>
+		new(name);
+
+	/// <summary>
+	/// 创建类声明的构造器。
+	/// </summary>
+	/// <param name="name">类的名称。</param>
+	/// <returns>类声明的构造器。</returns>
+	public static ClassDeclarationBuilder DeclareClass(string name) => new(name);
+
+	#endregion // Declaration
 
 }

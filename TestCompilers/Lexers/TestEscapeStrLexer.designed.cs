@@ -19,6 +19,7 @@ public partial class TestEscapeStrLexer
 	/// <summary>
 	/// 词法分析器的工厂。
 	/// </summary>
+	[CompilerGeneratedAttribute]
 	public static readonly ILexerFactory<Str> Factory = CreateLexerFactory();
 
 	/// <summary>
@@ -111,15 +112,15 @@ public partial class TestEscapeStrLexer
 		// 状态列表
 		int[] states = new[]
 		{
-			0, -1, 0, 0, 9, 0, 0, 0,
-			12, 0, 0, 0, 14, -1, 1, 76,
+			0, -1, 0, 0, 9, -1, 0, 0,
+			18, 0, 0, 0, 20, -1, 1, 76,
 			short.MinValue, -1, 1, 77, short.MinValue, -1, 1, 78,
-			short.MinValue, -1, 1, 76, 15, -1, 1, 77,
-			short.MinValue, -1, 1, 79, 12, -1, 0, 0,
-			13, -1, 0, 0, short.MinValue, -1, 1, 80,
-			short.MinValue, -1, 1, 81, 15, -1, 0, 0,
-			short.MinValue, -1, 1, 82, 19, -1, 0, 0,
-			short.MinValue, -1, 1, 83, 24, -1, 1, 77,
+			short.MinValue, -1, 1, 76, 21, -1, 1, 77,
+			short.MinValue, -1, 1, 79, 18, -1, 0, 0,
+			19, -1, 0, 0, short.MinValue, -1, 1, 80,
+			short.MinValue, -1, 1, 81, 21, -1, 0, 0,
+			short.MinValue, -1, 1, 82, 25, -1, 0, 0,
+			short.MinValue, -1, 1, 83, 30, -1, 1, 77,
 			short.MinValue, -1, 1, 84, 2, 7, 8, 5,
 			4, 6, 3, 0, 1
 		};
@@ -128,6 +129,7 @@ public partial class TestEscapeStrLexer
 		{
 			0, 16, 0, 17, 0, 4, 0, 4, 0, 4, 0, 4,
 			0, 4, 0, 4, 0, 4, 1, 6, 1, 4, 1, 7,
+			1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4,
 			2, 3, 2, 4, 3, 5, 7, 8, 9, 15, 10, 13,
 			7, 9, 13, 14, 7, 10, 7, 11, 7, 12, 15, 10,
 			17, 18

@@ -62,6 +62,10 @@ internal sealed class ParameterListBuilder
 	/// <returns>形参列表。</returns>
 	public ParameterListSyntax GetSyntax(SyntaxFormat format)
 	{
+		if (parameters.Count == 0)
+		{
+			return SyntaxFactory.ParameterList();
+		}
 		return SyntaxFactory.ParameterList(SyntaxBuilder.SeparatedList(
 			parameters.Select(arg => arg.GetSyntax(format)), format));
 	}

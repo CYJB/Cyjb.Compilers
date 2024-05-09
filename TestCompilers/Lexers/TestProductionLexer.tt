@@ -1,1 +1,1 @@
-<#@ include file="$(PkgCyjb_Compilers_Design)\content\CompilerTemplate.t4" #>
+<#@ include file="..\CompilerTemplate.t4" #>

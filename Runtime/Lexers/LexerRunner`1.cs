@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Cyjb.Text;
 
 namespace Cyjb.Compilers.Lexers;
@@ -7,38 +6,21 @@ namespace Cyjb.Compilers.Lexers;
 /// 词法分析运行器，适合直接在词法分析控制器中执行逻辑而不生成 <see cref="Token{T}"/> 的场景。
 /// </summary>
 /// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
-public sealed class LexerRunner<T> : IDisposable
+public sealed class LexerRunner<T>
 	where T : struct
 {
 	/// <summary>
 	/// 词法分析器的核心。
 	/// </summary>
 	private readonly LexerCore<T> core;
-	/// <summary>
-	/// 当前词法分析器的控制器。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly LexerController<T> controller;
-	/// <summary>
-	/// 源码读取器。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private SourceReader source = SourceReader.Empty;
-	/// <summary>
-	/// 当前词法单元的起始位置。
-	/// </summary>
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private int start;
 
 	/// <summary>
-	/// 使用指定的词法分析数据初始化 <see cref="LexerRunner{T}"/> 类的新实例。
+	/// 使用指定的词法分析器核心初始化 <see cref="LexerRunner{T}"/> 类的新实例。
 	/// </summary>
-	/// <param name="lexerData">词法分析器数据。</param>
-	/// <param name="controller">词法分析控制器。</param>
-	internal LexerRunner(LexerData<T> lexerData, LexerController<T> controller)
+	/// <param name="lexerCore">词法分析器核心。</param>
+	internal LexerRunner(LexerCore<T> lexerCore)
 	{
-		core = LexerCore<T>.Create(lexerData, controller);
-		this.controller = controller;
+		core = lexerCore;
 	}
 
 	/// <summary>
@@ -66,16 +48,13 @@ public sealed class LexerRunner<T> : IDisposable
 	public void Parse(SourceReader source)
 	{
 		ArgumentNullException.ThrowIfNull(source);
-		// 释放旧的源码读取器。
-		this.source.Dispose();
-		// 开始新的读取。
-		this.source = source;
-		start = 0;
+		LexerController<T> controller = core.Controller;
 		if (controller.SharedContext != SharedContext)
 		{
 			controller.SharedContext = SharedContext;
 		}
 		core.Load(source);
+		int start = 0;
 		while (source.Peek() != SourceReader.InvalidCharacter)
 		{
 			// 起始状态与当前上下文相关。
@@ -116,16 +95,10 @@ public sealed class LexerRunner<T> : IDisposable
 		}
 		// 到达了流的结尾。
 		ContextData context = controller.CurrentContext;
-		controller.DoEofAction(source.Index, context.EofValue, context.EofAction);
-	}
+		controller.DoAction(source.Index, Token<T>.EndOfFile, context.EofValue, context.EofAction);
 
-	/// <summary>
-	/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
-	/// </summary>
-	public void Dispose()
-	{
+		// 释放数据。
 		source.Dispose();
 		controller.Dispose();
-		GC.SuppressFinalize(this);
 	}
 }

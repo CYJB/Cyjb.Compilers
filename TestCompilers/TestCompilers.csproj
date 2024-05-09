@@ -10,9 +10,6 @@
 
   <ItemGroup>
     <Compile Remove="Lexers\UnitTestTemplateDiagnostics.template.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="Lexers\UnitTestTemplateDiagnostics.template.cs" />
   </ItemGroup>
 
@@ -20,11 +17,6 @@
   	<PackageReference Include="coverlet.msbuild" Version="3.2.0">
 	  <PrivateAssets>all</PrivateAssets>
 	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	</PackageReference>
-	<PackageReference Include="Cyjb.Compilers.Design" Version="1.0.12">
-	  <GeneratePathProperty>True</GeneratePathProperty>
-	  <PrivateAssets>all</PrivateAssets>
-	  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	</PackageReference>
 	<PackageReference Include="Cyjb.Test" Version="1.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
@@ -38,9 +30,26 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Compilers\Cyjb.Compilers.csproj" />
+    <ProjectReference Include="..\Design\Cyjb.Compilers.Design.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Lexers\Shortest\TestShortestLexer1.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestShortestLexer1.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\Shortest\TestShortestLexer2.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestShortestLexer2.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\Shortest\TestShortestLexer3.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestShortestLexer3.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\Shortest\TestShortestLexer4.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestShortestLexer4.designed.cs</LastGenOutput>
+    </None>
     <None Update="Lexers\TestCalcLexer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TestCalcLexer.designed.cs</LastGenOutput>
@@ -65,6 +74,22 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TestSymbolValueLexer.designed.cs</LastGenOutput>
     </None>
+    <None Update="Lexers\Trailing\TestTrailingLexer1.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestTrailingLexer1.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\Trailing\TestTrailingLexer2.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestTrailingLexer2.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\Trailing\TestTrailingLexer3.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestTrailingLexer3.designed.cs</LastGenOutput>
+    </None>
+    <None Update="Lexers\Trailing\TestTrailingLexerEOL.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestTrailingLexerEOL.designed.cs</LastGenOutput>
+    </None>
     <None Update="Lexers\UnitTestTemplateDiagnostics.template.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -79,6 +104,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Lexers\Shortest\TestShortestLexer1.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestShortestLexer1.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\Shortest\TestShortestLexer2.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestShortestLexer2.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\Shortest\TestShortestLexer3.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestShortestLexer3.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\Shortest\TestShortestLexer4.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestShortestLexer4.tt</DependentUpon>
+    </Compile>
     <Compile Update="Lexers\TestCalcLexer.designed.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -108,6 +153,26 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TestSymbolValueLexer.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\Trailing\TestTrailingLexer1.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestTrailingLexer1.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\Trailing\TestTrailingLexer2.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestTrailingLexer2.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\Trailing\TestTrailingLexer3.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestTrailingLexer3.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Lexers\Trailing\TestTrailingLexerEOL.designed.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestTrailingLexerEOL.tt</DependentUpon>
     </Compile>
     <Compile Update="Parsers\TestCalcParser.designed.cs">
       <DesignTime>True</DesignTime>

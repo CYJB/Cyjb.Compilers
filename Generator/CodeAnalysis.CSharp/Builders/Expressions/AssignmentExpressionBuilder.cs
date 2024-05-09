@@ -10,20 +10,20 @@ namespace Cyjb.CodeAnalysis.CSharp;
 internal class AssignmentExpressionBuilder : ExpressionBuilder
 {
 	/// <summary>
-	/// 赋值语句的类型。
+	/// 赋值表达式的类型。
 	/// </summary>
 	private readonly SyntaxKind kind;
 	/// <summary>
-	/// 赋值语句左侧的表达式。
+	/// 赋值表达式左侧的表达式。
 	/// </summary>
 	private readonly ExpressionBuilder left;
 	/// <summary>
-	/// 赋值语句右侧的表达式。
+	/// 赋值表达式右侧的表达式。
 	/// </summary>
 	private readonly ExpressionBuilder right;
 
 	/// <summary>
-	/// 使用指定的表达式初始化 <see cref="TypeOfExpressionBuilder"/> 类的新实例。
+	/// 使用指定的表达式初始化 <see cref="AssignmentExpressionBuilder"/> 类的新实例。
 	/// </summary>
 	/// <param name="kind">表达式的类型。</param>
 	/// <param name="left">左侧的表达式。</param>

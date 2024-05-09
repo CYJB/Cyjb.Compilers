@@ -17,12 +17,12 @@ internal sealed partial class LexerController
 		{
 			return null;
 		}
-		var categories = SyntaxBuilder.CreateObject().InitializerWrap(1);
+		var categories = ExpressionBuilder.CreateObject().InitializerWrap(1);
 		foreach (var pair in data.CharClasses.Categories!)
 		{
-			categories.Initializer(SyntaxBuilder.InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
+			categories.Initializer(ExpressionBuilder.InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
 				.Add(SyntaxBuilder.Type<UnicodeCategory>().AccessMember(pair.Key.ToString()))
-				.Add(SyntaxBuilder.Literal(pair.Value)));
+				.Add(pair.Value));
 		}
 		return SyntaxBuilder.DeclareLocal<Dictionary<UnicodeCategory, int>>("categories")
 			.Comment("字符类 Unicode 类别")

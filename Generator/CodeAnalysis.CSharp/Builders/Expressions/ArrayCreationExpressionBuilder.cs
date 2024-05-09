@@ -49,7 +49,10 @@ internal sealed class ArrayCreationExpressionBuilder : ExpressionBuilder
 	/// <returns>当前数组创建表达式构造器。</returns>
 	public ArrayCreationExpressionBuilder Rank(params int[] ranks)
 	{
-		this.ranks.AddRange(ranks.Select(rank => SyntaxBuilder.Literal(rank)));
+		for (int i = 0; i < ranks.Length; i++)
+		{
+			this.ranks.Add(ranks[i]);
+		}
 		return this;
 	}
 

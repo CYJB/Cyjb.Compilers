@@ -8,19 +8,19 @@ internal sealed partial class LexerController
 	/// <summary>
 	/// 返回指定词法分析器数据的终结符数据。
 	/// </summary>
-	/// <param name="data">词法分析器数据。</param>
+	/// <param name="terminals">终结符数据。</param>
 	/// <param name="terminalMerge">终结符的合并信息。</param>
 	/// <param name="symbols">符号信息列表。</param>
 	/// <returns>终结符数据。</returns>
-	private ExpressionBuilder TerminalsValue(LexerData<SymbolKind> data,
+	private ExpressionBuilder TerminalsValue(TerminalData<SymbolKind>[] terminals,
 		Dictionary<int, List<int>> terminalMerge, List<LexerSymbolAttrInfo> symbols)
 	{
-		TypeBuilder terminalType = SyntaxBuilder.Name(typeof(TerminalData<>)).TypeArgument(KindType);
-		var builder = SyntaxBuilder.CreateArray().InitializerWrap(1);
-		for (int i = 0; i < data.Terminals.Length; i++)
+		TypeBuilder terminalType = typeof(TerminalData<>).AsName().TypeArgument(KindType);
+		var builder = ExpressionBuilder.CreateArray().InitializerWrap(1);
+		for (int i = 0; i < terminals.Length; i++)
 		{
-			TerminalData<SymbolKind> terminal = data.Terminals[i];
-			var terminalBuilder = SyntaxBuilder.CreateObject(terminalType);
+			TerminalData<SymbolKind> terminal = terminals[i];
+			var terminalBuilder = ExpressionBuilder.CreateObject(terminalType);
 			builder.Initializer(terminalBuilder);
 			AddSymbolComment(terminalBuilder, i, terminalMerge, symbols);
 			bool argContinues = true;
@@ -53,9 +53,9 @@ internal sealed partial class LexerController
 			}
 			else
 			{
-				var action = SyntaxBuilder.Lambda()
-					.Parameter("c", SyntaxBuilder.Name(Name))
-					.Body(SyntaxBuilder.Name("c").AccessMember(actionMap[terminal.Action]).Invoke());
+				var action = ExpressionBuilder.Lambda()
+					.Parameter("c", Name)
+					.Body("c".AsName().AccessMember(actionMap[terminal.Action]).Invoke());
 				if (argContinues)
 				{
 					terminalBuilder.Argument(action);
@@ -71,7 +71,7 @@ internal sealed partial class LexerController
 			}
 			else
 			{
-				var trailing = SyntaxBuilder.Literal(terminal.Trailing.Value);
+				var trailing = terminal.Trailing.Value;
 				if (argContinues)
 				{
 					terminalBuilder.Argument(trailing);
@@ -85,11 +85,11 @@ internal sealed partial class LexerController
 			{
 				if (argContinues)
 				{
-					terminalBuilder.Argument(SyntaxBuilder.Literal(true));
+					terminalBuilder.Argument(true);
 				}
 				else
 				{
-					terminalBuilder.Argument(SyntaxBuilder.Literal(true), "useShortest");
+					terminalBuilder.Argument(true, "useShortest");
 				}
 			}
 		}

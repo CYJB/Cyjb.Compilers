@@ -10,9 +10,8 @@ namespace Cyjb.Compilers.Lexers;
 public class LexerController<T> : IDisposable
 	where T : struct
 {
-
 	/// <summary>
-	/// 关联到的词法分析器。
+	/// 关联到的词法分析器核心。
 	/// </summary>
 	private LexerCore<T> core;
 	/// <summary>
@@ -162,34 +161,13 @@ public class LexerController<T> : IDisposable
 	internal bool IsMore { get; private set; }
 
 	/// <summary>
-	/// 开始一个新的词法分析环境。
-	/// </summary>
-	/// <param name="start">当前词法单元的起始索引。</param>
-	/// <param name="terminal">当前词法单元的终结符数据。</param>
-	internal void DoAction(int start, TerminalData<T> terminal)
-	{
-		DoAction(start, terminal.Kind, terminal.Value, terminal.Action);
-	}
-
-	/// <summary>
-	/// 开始 EndOfFile 词法分析环境。
-	/// </summary>
-	/// <param name="start">当前词法单元的起始索引。</param>
-	/// <param name="value">当前词法单元的值。</param>
-	/// <param name="action">当前要执行的动作。</param>
-	internal void DoEofAction(int start, object? value, Delegate? action)
-	{
-		DoAction(start, Token<T>.EndOfFile, value, action);
-	}
-
-	/// <summary>
-	/// 开始 EndOfFile 词法分析环境。
+	/// 执行指定的词法单元动作。
 	/// </summary>
 	/// <param name="start">当前词法单元的起始索引。</param>
 	/// <param name="kind">当前词法单元的标识符。</param>
 	/// <param name="value">当前词法单元的值。</param>
 	/// <param name="action">当前要执行的动作。</param>
-	private void DoAction(int start, T? kind, object? value, Delegate? action)
+	internal void DoAction(int start, T? kind, object? value, Delegate? action)
 	{
 		Kind = kind;
 		Start = start;

@@ -1,0 +1,60 @@
+<#
+/**
+ * 生成词法分析器或语法分析器的实现。
+ */
+#>
+<#@ template language="C#" hostspecific="true" #>
+<#@output extension=".designed.cs" encoding="UTF-8"#>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Runtime" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="VSLangProj" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.CodeDom.Compiler" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#
+	string toolPath = Host.ResolveAssemblyReference(@"Generator\bin\Release\net6.0\Generator.dll");
+	string filePath = Host.TemplateFile.Replace(".tt", ".cs");
+	try
+	{
+		using System.Diagnostics.Process myProcess = new();
+		myProcess.StartInfo.UseShellExecute = false;
+		myProcess.StartInfo.RedirectStandardOutput = true;
+		myProcess.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
+		myProcess.StartInfo.FileName = "dotnet";
+		myProcess.StartInfo.Arguments = $"\"{Path.GetFullPath(toolPath)}\" \"{Path.GetFullPath(filePath)}\"";
+		myProcess.StartInfo.CreateNoWindow = true;
+		myProcess.Start();
+		string content = myProcess.StandardOutput.ReadToEnd();
+		myProcess.WaitForExit();
+
+		if (content.StartsWith(Path.GetFileName(filePath)))
+		{
+			// 包含异常
+			string[] lines = content.Trim().Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+			Regex errorRegex = new Regex(@"^.+\((\d+),(\d+)\): (.+)$");
+			foreach(string line in lines)
+			{
+				Match match = errorRegex.Match(line);
+				if (match.Success) {
+					string lineNum = match.Groups[1].Captures[0].Value;
+					string colNum = match.Groups[2].Captures[0].Value;
+					string message = match.Groups[3].Captures[0].Value;
+					Errors.Add(new CompilerError(filePath, int.Parse(lineNum), int.Parse(colNum), "", message));
+				}
+			}
+			Write("// 生成异常");
+		} else {
+			Write(content);
+		}
+	}
+	catch (Exception e)
+	{
+		Error($"执行 {toolPath} 失败：{e.Message}");
+	}
+#>
+

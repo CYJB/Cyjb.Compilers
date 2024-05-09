@@ -7,20 +7,12 @@ namespace Cyjb.CodeAnalysis.CSharp;
 /// <summary>
 /// 字段声明的构造器。
 /// </summary>
-internal sealed class FieldDeclarationBuilder
+internal sealed class FieldDeclarationBuilder : MemberDeclarationBuilder
 {
 	/// <summary>
 	/// 字段的名称。
 	/// </summary>
 	private readonly string fieldName;
-	/// <summary>
-	/// 文档注释的构造器。
-	/// </summary>
-	private readonly DocumentationCommentTriviaBuilder commentBuilder = new();
-	/// <summary>
-	/// 字段的修饰符构造器。
-	/// </summary>
-	private readonly ModifierBuilder modifiers = new();
 	/// <summary>
 	/// 字段的类型。
 	/// </summary>
@@ -42,37 +34,6 @@ internal sealed class FieldDeclarationBuilder
 	}
 
 	/// <summary>
-	/// 设置字段的文档注释。
-	/// </summary>
-	/// <param name="summary">摘要文档。</param>
-	public FieldDeclarationBuilder Comment(params XmlNodeSyntaxOrString[] summary)
-	{
-		commentBuilder.Summary(summary);
-		return this;
-	}
-
-	/// <summary>
-	/// 设置字段的文档注释。
-	/// </summary>
-	/// <param name="action">文档注释处理器。</param>
-	public FieldDeclarationBuilder Comment(Action<DocumentationCommentTriviaBuilder> action)
-	{
-		action(commentBuilder);
-		return this;
-	}
-
-	/// <summary>
-	/// 设置字段的修饰符。
-	/// </summary>
-	/// <param name="modifiers">要设置的修饰符。</param>
-	/// <returns>当前字段声明构造器。</returns>
-	public FieldDeclarationBuilder Modifier(params SyntaxKind[] modifiers)
-	{
-		this.modifiers.Add(modifiers);
-		return this;
-	}
-
-	/// <summary>
 	/// 设置字段的初始值。
 	/// </summary>
 	/// <param name="value">字段的初始值。</param>
@@ -88,9 +49,10 @@ internal sealed class FieldDeclarationBuilder
 	/// </summary>
 	/// <param name="format">语法的格式信息。</param>
 	/// <returns>字段声明语法节点。</returns>
-	public FieldDeclarationSyntax GetSyntax(SyntaxFormat format)
+	public override FieldDeclarationSyntax GetSyntax(SyntaxFormat format)
 	{
-		SyntaxTokenList modifierTokens = modifiers.GetSyntax(format);
+		SyntaxList<AttributeListSyntax> attributeLists = attributes.GetSyntax(format);
+		SyntaxTokenList modifiers = this.modifiers.GetSyntax(format);
 		VariableDeclaratorSyntax declarator = SyntaxFactory.VariableDeclarator(fieldName);
 		if (value != null)
 		{
@@ -105,11 +67,10 @@ internal sealed class FieldDeclarationBuilder
 		}
 
 		FieldDeclarationSyntax syntax = SyntaxFactory.FieldDeclaration(
-			new SyntaxList<AttributeListSyntax>(),
-			modifierTokens,
+			attributeLists, modifiers,
 			SyntaxFactory.VariableDeclaration(
 				type.GetSyntax(format)
-					.WithLeadingTrivia(modifiers.Count > 0 ? SyntaxFactory.Space : format.Indentation),
+					.WithLeadingTrivia(this.modifiers.Count > 0 ? SyntaxFactory.Space : format.Indentation),
 				SyntaxFactory.SingletonSeparatedList(declarator.WithLeadingTrivia(SyntaxFactory.Space))
 			),
 			SyntaxFactory.Token(SyntaxKind.SemicolonToken).WithTrailingTrivia(format.EndOfLine)

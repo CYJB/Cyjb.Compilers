@@ -47,7 +47,9 @@ public sealed class LexerFactory<T, TController> : ILexerFactory<T>
 		{
 			ActionHandler = actionHandler
 		};
-		return new LexerTokenizer<T>(lexerData, controller);
+		LexerCore<T> core = LexerCore<T>.Create(lexerData, controller);
+		controller.SetCore(core, lexerData.Contexts, lexerData.Rejectable);
+		return new LexerTokenizer<T>(core);
 	}
 
 	/// <summary>
@@ -60,6 +62,8 @@ public sealed class LexerFactory<T, TController> : ILexerFactory<T>
 		{
 			ActionHandler = actionHandler
 		};
-		return new LexerRunner<T>(lexerData, controller);
+		LexerCore<T> core = LexerCore<T>.Create(lexerData, controller);
+		controller.SetCore(core, lexerData.Contexts, lexerData.Rejectable);
+		return new LexerRunner<T>(core);
 	}
 }

@@ -13,16 +13,16 @@ internal sealed partial class ParserController
 	/// <param name="method">方法声明。</param>
 	private void FillStates(ParserData<SymbolKind> data, MethodDeclarationBuilder method)
 	{
-		NameBuilder stateType = SyntaxBuilder.Name(typeof(ParserStateData<>)).TypeArgument(KindType);
+		NameBuilder stateType = typeof(ParserStateData<>).AsName().TypeArgument(KindType);
 		Dictionary<IReadOnlyDictionary<SymbolKind, ParserAction>, LocalDeclarationStatementBuilder> actions =
 			new(DictionaryEqualityComparer<SymbolKind, ParserAction>.Default);
 		Dictionary<IReadOnlySet<SymbolKind>, LocalDeclarationStatementBuilder> expectings =
 			new(SetEqualityComparer<SymbolKind>.Default);
 		int actionIndex = 1;
 		int expectingIndex = 1;
-		NameBuilder actionsType = SyntaxBuilder.Name(typeof(Dictionary<,>))
+		NameBuilder actionsType = typeof(Dictionary<,>).AsName()
 			.TypeArgument(KindType).TypeArgument<ParserAction>();
-		NameBuilder expectingType = SyntaxBuilder.Name(typeof(HashSet<>)).TypeArgument(KindType);
+		NameBuilder expectingType = typeof(HashSet<>).AsName().TypeArgument(KindType);
 		for (int i = 0; i < data.States.Length; i++)
 		{
 			ParserStateData<SymbolKind> state = data.States[i];
@@ -45,16 +45,15 @@ internal sealed partial class ParserController
 				method.Statement(expectingDecl);
 				comment = null;
 			}
-			method.Statement(SyntaxBuilder.Name("states").AccessElement(SyntaxBuilder.Literal(i))
-				.Assign(SyntaxKind.SimpleAssignmentExpression,
-					SyntaxBuilder.CreateObject(stateType).ArgumentWrap(1)
-						.Argument(actionDecl)
-						.Argument(GetAction(state.DefaultAction))
-						.Argument(expectingDecl)
-						.Argument(GetProduction(data, i))
-						.Argument(SyntaxBuilder.Literal(state.RecoverIndex))
+			method.Statement("states".AsName().AccessElement(i)
+				.Assign(ExpressionBuilder.CreateObject(stateType).ArgumentWrap(1)
+					.Argument(actionDecl)
+					.Argument(GetAction(state.DefaultAction))
+					.Argument(expectingDecl)
+					.Argument(GetProduction(data, i))
+					.Argument(state.RecoverIndex)
 				)
-				.Statement().Comment(comment));
+				.AsStatement().Comment(comment));
 		}
 	}
 
@@ -65,10 +64,10 @@ internal sealed partial class ParserController
 	/// <returns>创建指定动作字典的表达式。</returns>
 	private static ExpressionBuilder GetActions(IReadOnlyDictionary<SymbolKind, ParserAction> actions)
 	{
-		var builder = SyntaxBuilder.CreateObject().InitializerWrap(1);
+		var builder = ExpressionBuilder.CreateObject().InitializerWrap(1);
 		foreach (var (key, value) in actions)
 		{
-			var pair = SyntaxBuilder.InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
+			var pair = ExpressionBuilder.InitializerExpression(SyntaxKind.ComplexElementInitializerExpression)
 				.Add(key.Syntax).Add(GetAction(value));
 			builder.Initializer(pair);
 		}
@@ -86,9 +85,9 @@ internal sealed partial class ParserController
 		{
 			ParserActionType.Accept => SyntaxBuilder.Type<ParserAction>().AccessMember("Accept"),
 			ParserActionType.Shift => SyntaxBuilder.Type<ParserAction>()
-				.AccessMember("Shift").Invoke(SyntaxBuilder.Literal(action.Index)),
+				.AccessMember("Shift").Invoke(action.Index),
 			ParserActionType.Reduce => SyntaxBuilder.Type<ParserAction>()
-				.AccessMember("Reduce").Invoke(SyntaxBuilder.Literal(action.Index)),
+				.AccessMember("Reduce").Invoke(action.Index),
 			_ => SyntaxBuilder.Type<ParserAction>().AccessMember("Error"),
 		};
 	}
@@ -100,7 +99,7 @@ internal sealed partial class ParserController
 	/// <returns>创建指定预期词法单元集合的表达式。</returns>
 	private static ExpressionBuilder GetExpecting(IReadOnlySet<SymbolKind> expecting)
 	{
-		var builder = SyntaxBuilder.CreateObject().InitializerWrap(1);
+		var builder = ExpressionBuilder.CreateObject().InitializerWrap(1);
 		foreach (SymbolKind kind in expecting)
 		{
 			builder.Initializer(kind.Syntax);
@@ -117,7 +116,7 @@ internal sealed partial class ParserController
 	private static ExpressionBuilder GetProduction(ParserData<SymbolKind> data, int stateIndex)
 	{
 		int index = Array.IndexOf(data.Productions, data.States[stateIndex].RecoverProduction);
-		return SyntaxBuilder.Name("productions").AccessElement(SyntaxBuilder.Literal(index));
+		return "productions".AsName().AccessElement(index);
 	}
 }
 

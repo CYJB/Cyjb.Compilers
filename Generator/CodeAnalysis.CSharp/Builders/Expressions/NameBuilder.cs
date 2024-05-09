@@ -210,3 +210,24 @@ internal sealed class NameBuilder : ExpressionBuilder
 		return new NameBuilder(type);
 	}
 }
+
+/// <summary>
+/// 提供名称表达式的构造器的辅助功能。
+/// </summary>
+internal static class NameBuilderUtil
+{
+	/// <summary>
+	/// 创建名称构造器。
+	/// </summary>
+	/// <param name="name">名称。</param>
+	/// <returns>名称构造器。</returns>
+	public static NameBuilder AsName(this string name) => new(name);
+
+	/// <summary>
+	/// 创建名称构造器。
+	/// </summary>
+	/// <param name="type">要提取名称的类型。</param>
+	/// <returns>名称构造器。</returns>
+	public static NameBuilder AsName(this Type type) => new(type);
+}
+

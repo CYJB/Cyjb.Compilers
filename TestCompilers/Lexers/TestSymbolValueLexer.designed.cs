@@ -18,6 +18,7 @@ public partial class TestSymbolValueLexer
 	/// <summary>
 	/// 词法分析器的工厂。
 	/// </summary>
+	[CompilerGeneratedAttribute]
 	public static readonly ILexerFactory<Calc> Factory = CreateLexerFactory();
 
 	/// <summary>

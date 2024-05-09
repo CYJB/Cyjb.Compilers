@@ -41,14 +41,13 @@ public sealed class LexerTokenizer<T> : ITokenizer<T>
 	public event TokenizeErrorHandler<T>? TokenizeError;
 
 	/// <summary>
-	/// 使用给定的词法分析器信息初始化 <see cref="LexerTokenizer{T}"/> 类的新实例。
+	/// 使用指定的词法分析器核心初始化 <see cref="LexerTokenizer{T}"/> 类的新实例。
 	/// </summary>
-	/// <param name="data">要使用的词法分析器数据。</param>
-	/// <param name="controller">词法分析控制器。</param>
-	internal LexerTokenizer(LexerData<T> data, LexerController<T> controller)
+	/// <param name="lexerCore">词法分析器核心。</param>
+	internal LexerTokenizer(LexerCore<T> lexerCore)
 	{
-		core = LexerCore<T>.Create(data, controller);
-		this.controller = controller;
+		core = lexerCore;
+		controller = lexerCore.Controller;
 	}
 
 	/// <summary>
@@ -105,7 +104,7 @@ public sealed class LexerTokenizer<T> : ITokenizer<T>
 		}
 		if (status != ParseStatus.Ready)
 		{
-			controller.DoEofAction(source.Index, null, null);
+			controller.DoAction(source.Index, Token<T>.EndOfFile, null, null);
 			return controller.CreateToken();
 		}
 		while (true)
@@ -114,7 +113,7 @@ public sealed class LexerTokenizer<T> : ITokenizer<T>
 			if (source.Peek() == SourceReader.InvalidCharacter)
 			{
 				// 到达了流的结尾。
-				controller.DoEofAction(source.Index, context.EofValue, context.EofAction);
+				controller.DoAction(source.Index, Token<T>.EndOfFile, context.EofValue, context.EofAction);
 				status = ParseStatus.Finished;
 				return controller.CreateToken();
 			}

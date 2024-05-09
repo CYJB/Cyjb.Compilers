@@ -11,7 +11,7 @@ internal sealed partial class ParserController
 	/// <returns>转移检查数据。</returns>
 	private static ExpressionBuilder GotoCheck(SymbolKind[] gotoCheck)
 	{
-		var builder = SyntaxBuilder.CreateArray().InitializerWrap(1);
+		var builder = ExpressionBuilder.CreateArray().InitializerWrap(1);
 		foreach (SymbolKind value in gotoCheck)
 		{
 			builder.Initializer(value.Syntax);

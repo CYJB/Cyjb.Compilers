@@ -47,17 +47,6 @@ internal sealed class LocalDeclarationStatementBuilder : StatementBuilder
 	}
 
 	/// <summary>
-	/// 设置语句的注释。
-	/// </summary>
-	/// <param name="comment">注释的内容。</param>
-	/// <returns>当前变量声明语句构造器。</returns>
-	public new LocalDeclarationStatementBuilder Comment(string? comment)
-	{
-		base.Comment(comment);
-		return this;
-	}
-
-	/// <summary>
 	/// 获取变量的名称。
 	/// </summary>
 	public string Name => name;

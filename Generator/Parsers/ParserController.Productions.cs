@@ -11,17 +11,17 @@ internal sealed partial class ParserController
 	/// <returns>产生式数据声明语句。</returns>
 	private LocalDeclarationStatementBuilder DeclareProductions(ParserData<SymbolKind> data)
 	{
-		TypeBuilder productionType = SyntaxBuilder.Name(typeof(ProductionData<>)).TypeArgument(KindType);
-		var builder = SyntaxBuilder.CreateArray().InitializerWrap(1);
+		TypeBuilder productionType = typeof(ProductionData<>).AsName().TypeArgument(KindType);
+		var builder = ExpressionBuilder.CreateArray().InitializerWrap(1);
 		foreach (ProductionData<SymbolKind> production in data.Productions)
 		{
-			var productionBuilder = SyntaxBuilder.CreateObject(productionType).ArgumentWrap(1);
+			var productionBuilder = ExpressionBuilder.CreateObject(productionType).ArgumentWrap(1);
 			builder.Initializer(productionBuilder);
-			productionBuilder.Argument(SyntaxBuilder.Literal(production.HeadIndex));
+			productionBuilder.Argument(production.HeadIndex);
 			productionBuilder.Argument(production.Head.Syntax);
 			if (production.Action == null)
 			{
-				productionBuilder.Argument(SyntaxBuilder.Literal(null));
+				productionBuilder.Argument(ExpressionBuilder.Null());
 			}
 			else if (production.Action == ProductionAction.Optional)
 			{
@@ -33,9 +33,9 @@ internal sealed partial class ParserController
 			}
 			else
 			{
-				var action = SyntaxBuilder.Lambda()
+				var action = ExpressionBuilder.Lambda()
 					.Parameter("c", Name)
-					.Body(SyntaxBuilder.Name("c").AccessMember(actionMap[production.Action]).Invoke());
+					.Body("c".AsName().AccessMember(actionMap[production.Action]).Invoke());
 				productionBuilder.Argument(action);
 			}
 			foreach (SymbolKind kind in production.Body)

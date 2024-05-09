@@ -55,11 +55,11 @@ internal sealed class ObjectCreationExpressionBuilder : ExpressionBuilder
 	{
 		if (variable == null)
 		{
-			arguments.Add(SyntaxBuilder.Literal(null));
+			arguments.Add(ExpressionBuilder.Null());
 		}
 		else
 		{
-			arguments.Add(SyntaxBuilder.Name(variable.Name));
+			arguments.Add(variable.Name.AsName());
 		}
 		return this;
 	}
