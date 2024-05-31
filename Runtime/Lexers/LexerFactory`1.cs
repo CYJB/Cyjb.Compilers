@@ -38,14 +38,15 @@ public sealed class LexerFactory<T> : ILexerFactory<T>
 	/// <summary>
 	/// 创建词法分析器。
 	/// </summary>
+	/// <param name="debug">是否需要打印调试信息。</param>
 	/// <returns>已创建的词法分析器。</returns>
-	public LexerTokenizer<T> CreateTokenizer()
+	public LexerTokenizer<T> CreateTokenizer(bool debug = false)
 	{
 		LexerController<T> controller = new()
 		{
 			ActionHandler = actionHandler
 		};
-		LexerCore<T> core = LexerCore<T>.Create(lexerData, controller);
+		LexerCore<T> core = LexerCore<T>.Create(lexerData, controller, debug);
 		controller.SetCore(core, lexerData.Contexts, lexerData.Rejectable);
 		return new LexerTokenizer<T>(core);
 	}
@@ -53,14 +54,15 @@ public sealed class LexerFactory<T> : ILexerFactory<T>
 	/// <summary>
 	/// 创建词法分析运行器。
 	/// </summary>
+	/// <param name="debug">是否需要打印调试信息。</param>
 	/// <returns>已创建的词法分析运行器。</returns>
-	public LexerRunner<T> CreateRunner()
+	public LexerRunner<T> CreateRunner(bool debug = false)
 	{
 		LexerController<T> controller = new()
 		{
 			ActionHandler = actionHandler
 		};
-		LexerCore<T> core = LexerCore<T>.Create(lexerData, controller);
+		LexerCore<T> core = LexerCore<T>.Create(lexerData, controller, debug);
 		controller.SetCore(core, lexerData.Contexts, lexerData.Rejectable);
 		return new LexerRunner<T>(core);
 	}

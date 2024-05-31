@@ -10,12 +10,14 @@ public interface ILexerFactory<T>
 	/// <summary>
 	/// 创建词法分析器。
 	/// </summary>
+	/// <param name="debug">是否需要打印调试信息。</param>
 	/// <returns>已创建的词法分析器。</returns>
-	LexerTokenizer<T> CreateTokenizer();
+	LexerTokenizer<T> CreateTokenizer(bool debug = false);
 
 	/// <summary>
 	/// 创建词法分析运行器。
 	/// </summary>
+	/// <param name="debug">是否需要打印调试信息。</param>
 	/// <returns>已创建的词法分析运行器。</returns>
-	LexerRunner<T> CreateRunner();
+	LexerRunner<T> CreateRunner(bool debug = false);
 }

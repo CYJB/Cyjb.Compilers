@@ -15,28 +15,57 @@ internal abstract class LexerCore<T>
 	/// </summary>
 	/// <param name="lexerData">词法分析器数据。</param>
 	/// <param name="controller">词法分析器的控制器。</param>
+	/// <param name="debug">是否需要打印调试信息。</param>
 	/// <returns>词法分析器核心。</returns>
-	internal static LexerCore<T> Create(LexerData<T> lexerData, LexerController<T> controller)
+	internal static LexerCore<T> Create(LexerData<T> lexerData, LexerController<T> controller, bool debug)
 	{
 		if (lexerData.Rejectable)
 		{
 			if (lexerData.TrailingType == TrailingType.None)
 			{
-				return new RejectableCore<T>(lexerData, controller);
+				if (debug)
+				{
+					return new RejectableDebugCore<T>(lexerData, controller);
+				}
+				else
+				{
+					return new RejectableCore<T>(lexerData, controller);
+				}
 			}
 		}
 		else
 		{
 			if (lexerData.TrailingType == TrailingType.None)
 			{
-				return new BasicCore<T>(lexerData, controller);
+				if (debug)
+				{
+					return new BasicDebugCore<T>(lexerData, controller);
+				}
+				else
+				{
+					return new BasicCore<T>(lexerData, controller);
+				}
 			}
 			else if (lexerData.TrailingType == TrailingType.Fixed)
 			{
-				return new FixedTrailingCore<T>(lexerData, controller);
+				if (debug)
+				{
+					return new FixedTrailingDebugCore<T>(lexerData, controller);
+				}
+				else
+				{
+					return new FixedTrailingCore<T>(lexerData, controller);
+				}
 			}
 		}
-		return new RejectableTrailingCore<T>(lexerData, controller);
+		if (debug)
+		{
+			return new RejectableTrailingDebugCore<T>(lexerData, controller);
+		}
+		else
+		{
+			return new RejectableTrailingCore<T>(lexerData, controller);
+		}
 	}
 
 	/// <summary>
@@ -234,6 +263,49 @@ internal abstract class LexerCore<T>
 	}
 
 	/// <summary>
+	/// 执行已添加的终结符动作，并输出调试信息。
+	/// </summary>
+	/// <param name="start">当前词法单元的起始位置。</param>
+	/// <returns>词法单元读入是否成功。</returns>
+	protected bool RunTerminalsDebug(int start)
+	{
+		rejectedTerminals.Clear();
+		for (; terminalStackCount > 0; terminalStackCount--)
+		{
+			LexerStateInfo info = terminalStack[terminalStackCount - 1]!;
+			int sourceIndex = info.SourceIndex;
+			while (info.TerminalStart < info.TerminalEnd)
+			{
+				int terminalIndex = terminals[info.TerminalStart];
+				info.TerminalStart++;
+				if (rejectedTerminals.Contains(terminalIndex))
+				{
+					continue;
+				}
+				// 每次都需要清空候选集合，并在使用时重新计算。
+				isCandidatesValid = false;
+				DoAction(start, sourceIndex, terminalData[terminalIndex]);
+				if (controller.IsReject)
+				{
+					Console.WriteLine("  Match rejected {0}..{1} [{2}] {3}",
+						start, sourceIndex, terminalIndex, terminalData[terminalIndex].Kind);
+				}
+				else
+				{
+					Console.WriteLine("  Match {0}..{1} [{2}] {3}",
+						start, sourceIndex, terminalIndex, terminalData[terminalIndex].Kind);
+					return true;
+				}
+				if (controller.IsRejectState)
+				{
+					rejectedTerminals.Add(terminalIndex);
+				}
+			}
+		}
+		return false;
+	}
+
+	/// <summary>
 	/// 执行已添加的终结符动作。
 	/// </summary>
 	/// <param name="start">当前词法单元的起始位置。</param>
@@ -265,6 +337,56 @@ internal abstract class LexerCore<T>
 				DoAction(start, endIndex, terminalData[terminalIndex]);
 				if (!controller.IsReject)
 				{
+					return true;
+				}
+				if (controller.IsRejectState)
+				{
+					rejectedTerminals.Add(terminalIndex);
+				}
+			}
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// 执行已添加的终结符动作，并输出调试信息。
+	/// </summary>
+	/// <param name="start">当前词法单元的起始位置。</param>
+	/// <param name="startSourceIndex">当前源码的起始位置。</param>
+	/// <returns>词法单元读入是否成功。</returns>
+	protected bool RunTerminalsDebugWithTrailing(int start, int startSourceIndex)
+	{
+		rejectedTerminals.Clear();
+		for (; terminalStackCount > 0; terminalStackCount--)
+		{
+			LexerStateInfo info = terminalStack[terminalStackCount - 1]!;
+			int sourceIndex = info.SourceIndex;
+			while (info.TerminalStart < info.TerminalEnd)
+			{
+				int terminalIndex = terminals[info.TerminalStart];
+				info.TerminalStart++;
+				if (terminalIndex < 0)
+				{
+					// 跳过向前看的头状态。
+					break;
+				}
+				if (rejectedTerminals.Contains(terminalIndex))
+				{
+					continue;
+				}
+				int endIndex = GetTrailingIndex(terminalIndex, startSourceIndex, sourceIndex);
+				// 每次都需要清空候选集合，并在使用时重新计算。
+				isCandidatesValid = false;
+				DoAction(start, endIndex, terminalData[terminalIndex]);
+				if (controller.IsReject)
+				{
+					Console.WriteLine("  Match rejected {0}..{1} [{2}] {3}",
+						start, endIndex, terminalIndex, terminalData[terminalIndex].Kind);
+				}
+				else
+				{
+					Console.WriteLine("  Match {0}..{1} [{2}] {3}",
+						start, endIndex, terminalIndex, terminalData[terminalIndex].Kind);
 					return true;
 				}
 				if (controller.IsRejectState)
@@ -366,5 +488,23 @@ internal abstract class LexerCore<T>
 			}
 		}
 		return false;
+	}
+
+	/// <summary>
+	/// 打印已读取的文本。
+	/// </summary>
+	protected void PrintReadedText()
+	{
+		StringView view = source.GetReadedText();
+		string text;
+		if (view.Length <= 50)
+		{
+			text = view.ToString();
+		}
+		else
+		{
+			text = view[..24] + ".." + view[^24];
+		}
+		Console.WriteLine("read {0}..{1}: \"{2}\"", source.Index - view.Length, source.Index, text);
 	}
 }
