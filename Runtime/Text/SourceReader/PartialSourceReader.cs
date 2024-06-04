@@ -41,10 +41,6 @@ internal sealed class PartialSourceReader : SourceReader
 	/// </summary>
 	private Buffer first;
 	/// <summary>
-	/// 当前缓冲区的字符索引。
-	/// </summary>
-	private int currentIndex;
-	/// <summary>
 	/// 被释放的索引。
 	/// </summary>
 	private int freeIndex;
@@ -78,11 +74,12 @@ internal sealed class PartialSourceReader : SourceReader
 	{
 		get
 		{
-			if (currentIndex <= 0)
+			int idx = curIndex - current.StartIndex;
+			if (idx <= 0)
 			{
 				return current.IsLineStart;
 			}
-			char ch = current.Text[currentIndex - 1];
+			char ch = current.Text[idx - 1];
 			if (!Utils.IsLineBreak(ch))
 			{
 				return false;
@@ -130,13 +127,14 @@ internal sealed class PartialSourceReader : SourceReader
 			return InvalidCharacter;
 		}
 		// 之前已确保 value 不会超出有效范围。
-		if (currentIndex >= bufferSize)
+		int idx = curIndex - current.StartIndex;
+		if (idx >= bufferSize)
 		{
 			return current.Next.Text[0];
 		}
 		else
 		{
-			return current.Text[currentIndex];
+			return current.Text[idx];
 		}
 	}
 
@@ -156,7 +154,7 @@ internal sealed class PartialSourceReader : SourceReader
 			return InvalidCharacter;
 		}
 		// 之前已确保 value 不会超出有效范围。
-		idx += currentIndex - curIndex;
+		idx -= current.StartIndex;
 		Buffer buffer = current;
 		while (idx >= bufferSize)
 		{
@@ -182,13 +180,13 @@ internal sealed class PartialSourceReader : SourceReader
 			// index 已经超出有效范围。
 			return InvalidCharacter;
 		}
-		curIndex++;
-		if (currentIndex >= bufferSize)
+		int idx = (curIndex++) - current.StartIndex;
+		if (idx >= bufferSize)
 		{
 			current = current.Next;
-			currentIndex -= bufferSize;
+			idx -= bufferSize;
 		}
-		return current.Text[currentIndex++];
+		return current.Text[idx];
 	}
 
 	/// <summary>
@@ -206,14 +204,109 @@ internal sealed class PartialSourceReader : SourceReader
 			// index 已经超出有效范围。
 			return InvalidCharacter;
 		}
-		currentIndex += offset;
-		while (currentIndex >= bufferSize)
+		int idx = (curIndex++) - current.StartIndex;
+		while (idx >= bufferSize)
 		{
 			current = current.Next;
-			currentIndex -= bufferSize;
+			idx -= bufferSize;
 		}
-		curIndex++;
-		return current.Text[currentIndex++];
+		return current.Text[idx];
+	}
+
+	/// <summary>
+	/// 从当前位置查找指定字符的偏移，使用指定的起始偏移开始。
+	/// </summary>
+	/// <param name="ch">要查找的字符。</param>
+	/// <param name="start">要查找的起始偏移。</param>
+	/// <returns>如果找到字符，则为 <paramref name="ch"/> 从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="start"/>
+	/// 小于零或大于剩余字符数。</exception>
+	public override int IndexOf(char ch, int start)
+	{
+		if (start < 0)
+		{
+			throw CommonExceptions.ArgumentIndexOutOfRange(start);
+		}
+		int idx = curIndex + start;
+		if (!EnsureBuffer(ref idx))
+		{
+			// 已经超出有效范围。
+			return -1;
+		}
+		Buffer buffer = current;
+		idx -= current.StartIndex;
+		int offset = current.StartIndex - curIndex;
+		while (idx >= bufferSize)
+		{
+			buffer = buffer.Next;
+			idx -= bufferSize;
+			offset += bufferSize;
+		}
+		while (true)
+		{
+			int index = buffer.Text.IndexOf(ch, idx);
+			if (index >= 0)
+			{
+				return index + offset;
+			}
+			offset += bufferSize;
+			idx = 0;
+			if (buffer.Next == buffer && !PrepareBuffer())
+			{
+				// 已经超出有效范围。
+				return -1;
+			}
+			buffer = buffer.Next;
+		}
+	}
+
+	/// <summary>
+	/// 从当前位置查找指定字符数组中的任意字符的偏移，使用指定的起始偏移开始。
+	/// </summary>
+	/// <param name="anyOf">要查找的字符数组。</param>
+	/// <param name="start">要查找的起始偏移。</param>
+	/// <returns>如果找到 <paramref name="anyOf"/> 中的任意字符，则为该字符从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="start"/>
+	/// 小于零或大于剩余字符数。</exception>
+	public override int IndexOfAny(char[] anyOf, int start)
+	{
+		if (start < 0)
+		{
+			throw CommonExceptions.ArgumentIndexOutOfRange(start);
+		}
+		int idx = curIndex + start;
+		if (!EnsureBuffer(ref idx))
+		{
+			// 已经超出有效范围。
+			return -1;
+		}
+		Buffer buffer = current;
+		idx -= current.StartIndex;
+		int offset = current.StartIndex - curIndex;
+		while (idx >= bufferSize)
+		{
+			buffer = buffer.Next;
+			idx -= bufferSize;
+			offset += bufferSize;
+		}
+		while (true)
+		{
+			int index = buffer.Text.IndexOfAny(anyOf, idx);
+			if (index >= 0)
+			{
+				return index + offset;
+			}
+			offset += bufferSize;
+			idx = 0;
+			if (buffer.Next == buffer && !PrepareBuffer())
+			{
+				// 已经超出有效范围。
+				return -1;
+			}
+			buffer = buffer.Next;
+		}
 	}
 
 	/// <summary>
@@ -237,18 +330,24 @@ internal sealed class PartialSourceReader : SourceReader
 	{
 		EnsureBuffer(ref value);
 		// 之前已确保 value 不会超出有效范围。
-		currentIndex += value - curIndex;
 		curIndex = value;
 		// 调整当前缓冲区的位置。
-		while (currentIndex < 0)
+		int idx = curIndex - current.StartIndex;
+		if (idx < 0)
 		{
-			current = current.Prev;
-			currentIndex += bufferSize;
+			while (idx < 0)
+			{
+				current = current.Prev;
+				idx += bufferSize;
+			}
 		}
-		while (currentIndex >= bufferSize)
+		else
 		{
-			current = current.Next;
-			currentIndex -= bufferSize;
+			while (idx >= bufferSize)
+			{
+				current = current.Next;
+				idx -= bufferSize;
+			}
 		}
 	}
 
@@ -387,7 +486,7 @@ internal sealed class PartialSourceReader : SourceReader
 	}
 
 	/// <summary>
-	/// 表示 <see cref="SourcePartialBuffer"/> 的字符缓冲区。
+	/// 表示 <see cref="PartialSourceReader"/> 的字符缓冲区。
 	/// </summary>
 	private sealed class Buffer
 	{

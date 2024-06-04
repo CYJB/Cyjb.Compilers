@@ -153,6 +153,52 @@ internal sealed class StringSourceReader : SourceReader
 	}
 
 	/// <summary>
+	/// 从当前位置查找指定字符的偏移，使用指定的起始偏移开始。
+	/// </summary>
+	/// <param name="ch">要查找的字符。</param>
+	/// <param name="start">要查找的起始偏移。</param>
+	/// <returns>如果找到字符，则为 <paramref name="ch"/> 从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="start"/>
+	/// 小于零或大于剩余字符数。</exception>
+	public override int IndexOf(char ch, int start)
+	{
+		if (start < 0 || (start += curIndex) > length)
+		{
+			throw CommonExceptions.ArgumentIndexOutOfRange(start);
+		}
+		int idx = source.IndexOf(ch, start);
+		if (idx >= 0)
+		{
+			idx -= curIndex;
+		}
+		return idx;
+	}
+
+	/// <summary>
+	/// 从当前位置查找指定字符数组中的任意字符的偏移，使用指定的起始偏移开始。
+	/// </summary>
+	/// <param name="anyOf">要查找的字符数组。</param>
+	/// <param name="start">要查找的起始偏移。</param>
+	/// <returns>如果找到 <paramref name="anyOf"/> 中的任意字符，则为该字符从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="start"/>
+	/// 小于零或大于剩余字符数。</exception>
+	public override int IndexOfAny(char[] anyOf, int start)
+	{
+		if (start < 0 || (start += curIndex) > length)
+		{
+			throw CommonExceptions.ArgumentIndexOutOfRange(start);
+		}
+		int idx = source.IndexOfAny(anyOf, start);
+		if (idx >= 0)
+		{
+			idx -= curIndex;
+		}
+		return idx;
+	}
+
+	/// <summary>
 	/// 读取指定范围的文本。
 	/// </summary>
 	/// <param name="start">起始索引。</param>

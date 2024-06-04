@@ -152,7 +152,8 @@ public abstract class SourceReader : IDisposable
 	public int Index
 	{
 		get => curIndex;
-		set {
+		set
+		{
 			if (curIndex != value)
 			{
 				SetIndex(value);
@@ -303,6 +304,50 @@ public abstract class SourceReader : IDisposable
 		SetIndex(curIndex - count);
 		return count;
 	}
+
+	/// <summary>
+	/// 从当前位置查找指定字符的偏移。
+	/// </summary>
+	/// <param name="ch">要查找的字符。</param>
+	/// <returns>如果找到字符，则为 <paramref name="ch"/> 从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	public int IndexOf(char ch)
+	{
+		return IndexOf(ch, 0);
+	}
+
+	/// <summary>
+	/// 从当前位置查找指定字符的偏移，使用指定的起始偏移开始。
+	/// </summary>
+	/// <param name="ch">要查找的字符。</param>
+	/// <param name="start">要查找的起始偏移。</param>
+	/// <returns>如果找到字符，则为 <paramref name="ch"/> 从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="start"/>
+	/// 小于零或大于剩余字符数。</exception>
+	public abstract int IndexOf(char ch, int start);
+
+	/// <summary>
+	/// 从当前位置查找指定字符数组中的任意字符的偏移，使用指定的起始偏移开始。
+	/// </summary>
+	/// <param name="anyOf">要查找的字符数组。</param>
+	/// <returns>如果找到 <paramref name="anyOf"/> 中的任意字符，则为该字符从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	public int IndexOfAny(char[] anyOf)
+	{
+		return IndexOfAny(anyOf, 0);
+	}
+
+	/// <summary>
+	/// 从当前位置查找指定字符数组中的任意字符的偏移，使用指定的起始偏移开始。
+	/// </summary>
+	/// <param name="anyOf">要查找的字符数组。</param>
+	/// <param name="start">要查找的起始偏移。</param>
+	/// <returns>如果找到 <paramref name="anyOf"/> 中的任意字符，则为该字符从当前位置开始的偏移；
+	/// 如果未找到，则返回 <c>-1</c>。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="start"/>
+	/// 小于零或大于剩余字符数。</exception>
+	public abstract int IndexOfAny(char[] anyOf, int start);
 
 	/// <summary>
 	/// 返回当前位置之前的数据。

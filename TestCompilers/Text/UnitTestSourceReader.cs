@@ -4,6 +4,7 @@ using System.Text;
 using Cyjb;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TestCompilers.Text;
 
@@ -106,10 +107,12 @@ public class UnitTestSourceReader
 	/// </summary>
 	[DataTestMethod]
 	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
 	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
 	public void TestShortText(string type)
 	{
-		SourceReader reader = SourceReader.Create(CreateReader(type, "1234567890"), BufferLength);
+		SourceReader reader = CreateSourceReader(type, "1234567890");
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Peek());
 		Assert.AreEqual('1', reader.Read());
@@ -151,7 +154,9 @@ public class UnitTestSourceReader
 	/// </summary>
 	[DataTestMethod]
 	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
 	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
 	public void TestLongText(string type)
 	{
 		int len1 = BufferLength + 11;
@@ -166,7 +171,7 @@ public class UnitTestSourceReader
 			builder.Append((char)Random.Shared.Next(char.MaxValue));
 		}
 		string text = builder.ToString();
-		SourceReader reader = SourceReader.Create(CreateReader(type, text), BufferLength);
+		SourceReader reader = CreateSourceReader(type, text);
 
 		Assert.AreEqual(text[0], reader.Peek());
 		Assert.AreEqual(text[0], reader.Peek());
@@ -207,11 +212,94 @@ public class UnitTestSourceReader
 	}
 
 	/// <summary>
+	/// 对 <see cref="SourceReader.IndexOf"/> 进行测试。
+	/// </summary>
+	[DataTestMethod]
+	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
+	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
+	public void TestIndexOf(string type)
+	{
+		// abcdabcd01234....45|61...17|89s
+		StringBuilder builder = new(BufferLength * 2 + 3);
+		builder.Append("abcdabcd0123");
+		builder.Append('4', BufferLength - builder.Length - 1);
+		builder.Append("56");
+		builder.Append('1', BufferLength * 2 - builder.Length - 1);
+		builder.Append("789s");
+		string text = builder.ToString();
+
+		SourceReader reader = CreateSourceReader(type, text);
+		Assert.AreEqual(0, reader.IndexOf('a'));
+		Assert.AreEqual(1, reader.IndexOf('b'));
+		Assert.AreEqual(2, reader.IndexOf('c'));
+		Assert.AreEqual(3, reader.IndexOf('d'));
+		Assert.AreEqual(8, reader.IndexOf('0'));
+		Assert.AreEqual(BufferLength - 1, reader.IndexOf('5'));
+		Assert.AreEqual(BufferLength, reader.IndexOf('6'));
+		Assert.AreEqual(BufferLength * 2 - 1, reader.IndexOf('7'));
+		Assert.AreEqual(BufferLength * 2, reader.IndexOf('8'));
+		Assert.AreEqual(BufferLength * 2 + 2, reader.IndexOf('s'));
+		Assert.AreEqual(-1, reader.IndexOf('x'));
+
+		reader.Read(2);
+		Assert.AreEqual(1, reader.IndexOf('a'));
+		Assert.AreEqual(2, reader.IndexOf('b'));
+		Assert.AreEqual(3, reader.IndexOf('c'));
+		Assert.AreEqual(0, reader.IndexOf('d'));
+		Assert.AreEqual(5, reader.IndexOf('0'));
+		Assert.AreEqual(BufferLength - 4, reader.IndexOf('5'));
+		Assert.AreEqual(BufferLength - 3, reader.IndexOf('6'));
+		Assert.AreEqual(BufferLength * 2 - 4, reader.IndexOf('7'));
+		Assert.AreEqual(BufferLength * 2 - 3, reader.IndexOf('8'));
+		Assert.AreEqual(BufferLength * 2 - 1, reader.IndexOf('s'));
+		Assert.AreEqual(-1, reader.IndexOf('x'));
+
+		reader = CreateSourceReader(type, text);
+		reader.Read(2);
+		Assert.AreEqual(-1, reader.IndexOf('x'));
+		Assert.AreEqual(BufferLength * 2 - 1, reader.IndexOf('s'));
+		Assert.AreEqual(BufferLength * 2 - 3, reader.IndexOf('8'));
+		Assert.AreEqual(BufferLength * 2 - 4, reader.IndexOf('7'));
+		Assert.AreEqual(BufferLength - 3, reader.IndexOf('6'));
+		Assert.AreEqual(BufferLength - 4, reader.IndexOf('5'));
+		Assert.AreEqual(5, reader.IndexOf('0'));
+		Assert.AreEqual(0, reader.IndexOf('d'));
+		Assert.AreEqual(3, reader.IndexOf('c'));
+		Assert.AreEqual(2, reader.IndexOf('b'));
+		Assert.AreEqual(1, reader.IndexOf('a'));
+
+		reader = CreateSourceReader(type, text);
+		Assert.AreEqual(4, reader.IndexOf('a', 1));
+		Assert.AreEqual(1, reader.IndexOf('b', 1));
+		Assert.AreEqual(-1, reader.IndexOf('c', 7));
+		Assert.AreEqual(8, reader.IndexOf('0', 7));
+		Assert.AreEqual(BufferLength + 1, reader.IndexOf('1', BufferLength + 1));
+		Assert.AreEqual(BufferLength * 2, reader.IndexOf('8', BufferLength + 1));
+		Assert.AreEqual(-1, reader.IndexOf('x', 1));
+
+		reader = CreateSourceReader(type, text);
+		Assert.AreEqual(1, reader.IndexOfAny(new char[] { 'c', 'b' }));
+		Assert.AreEqual(11, reader.IndexOfAny(new char[] { '3', 'x' }));
+		Assert.AreEqual(BufferLength * 2, reader.IndexOfAny(new char[] { '8', '9', 's' }));
+		Assert.AreEqual(-1, reader.IndexOfAny(new char[] { 'x', 'y' }));
+
+		reader = CreateSourceReader(type, text);
+		Assert.AreEqual(-1, reader.IndexOfAny(new char[] { 'x', 'y' }));
+		Assert.AreEqual(11, reader.IndexOfAny(new char[] { '3', 'x' }));
+		Assert.AreEqual(BufferLength + 1, reader.IndexOfAny(new char[] { '1', '7' }, BufferLength));
+		Assert.AreEqual(1, reader.IndexOfAny(new char[] { 'c', 'b' }));
+	}
+
+	/// <summary>
 	/// 对 <see cref="SourceReader.IsLineStart"/> 进行测试。
 	/// </summary>
 	[DataTestMethod]
 	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
 	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
 	public void TestIsLineStart(string type)
 	{
 		StringBuilder builder = new(BufferLength * 2 + 3);
@@ -220,7 +308,7 @@ public class UnitTestSourceReader
 		builder.Append("\r\n123");
 		builder.Append('1', BufferLength * 2 - builder.Length - 1);
 		builder.Append("\n123");
-		SourceReader reader = SourceReader.Create(CreateReader(type, builder.ToString()), BufferLength);
+		SourceReader reader = CreateSourceReader(type, builder.ToString());
 		Assert.IsTrue(reader.IsLineStart);
 
 		Assert.AreEqual('3', reader.Read(2));
@@ -291,12 +379,14 @@ public class UnitTestSourceReader
 	/// </summary>
 	[DataTestMethod]
 	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
 	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
 	public void TestLocator(string type)
 	{
 		string text = "12\r34\n56\r\n78";
 		// 一次性读入。
-		SourceReader reader = SourceReader.Create(CreateReader(type, text), BufferLength);
+		SourceReader reader = CreateSourceReader(type, text);
 		reader.UseLineLocator();
 
 		Assert.AreEqual('8', reader.Read(11));
@@ -314,7 +404,7 @@ public class UnitTestSourceReader
 		Assert.AreEqual(new LinePosition(4, 1, 2), reader.GetPosition(11));
 
 		// 分批读入。
-		reader = SourceReader.Create(CreateReader(type, text), BufferLength);
+		reader = CreateSourceReader(type, text);
 		reader.UseLineLocator();
 
 		Assert.AreEqual('2', reader.Read(1));
@@ -356,7 +446,9 @@ public class UnitTestSourceReader
 	/// </summary>
 	[DataTestMethod]
 	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
 	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
 	public void TestMark(string type)
 	{
 		StringBuilder builder = new(1030);
@@ -364,7 +456,7 @@ public class UnitTestSourceReader
 		{
 			builder.Append("0123456789");
 		}
-		SourceReader reader = SourceReader.Create(CreateReader(type, builder.ToString()), BufferLength);
+		SourceReader reader = CreateSourceReader(type, builder.ToString());
 		Assert.AreEqual('0', reader.Read());
 		Assert.AreEqual("0", reader.ReadBlock(0, 1));
 		Assert.AreEqual("", reader.ReadBlock(0, 0));
@@ -408,16 +500,21 @@ public class UnitTestSourceReader
 		Assert.ThrowsException<ArgumentOutOfRangeException>(() => reader.ReadBlock(mark3, mark1));
 	}
 
-	private static TextReader CreateReader(string type, string text)
+	/// <summary>
+	/// 创建指定类型的源码读取器。
+	/// </summary>
+	/// <param name="type">源码读取器的类型。</param>
+	/// <param name="text">要读取的文本。</param>
+	/// <returns>源码读取器。</returns>
+	private static SourceReader CreateSourceReader(string type, string text)
 	{
-		if (type == "StringReader")
+		return type switch
 		{
-			return new StringReader(text);
-		}
-		else
-		{
-			return new TestReader(text);
-		}
+			"StringReader" => SourceReader.Create(text),
+			"StringViewReader" => SourceReader.Create(("foo" + text + "bar").AsView(3, text.Length)),
+			"ShortTextReader" => SourceReader.Create(new TestReader(text), BufferLength),
+			_ => SourceReader.Create(new TestReader(text), 0x1000000),
+		};
 	}
 
 	/// <summary>
