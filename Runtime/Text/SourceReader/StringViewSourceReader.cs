@@ -177,15 +177,14 @@ internal sealed class StringViewSourceReader : SourceReader
 	/// 小于零或大于剩余字符数。</exception>
 	public override int IndexOf(char ch, int start)
 	{
-		int index = curIndex + this.start;
-		if (start < 0 || (start += index) > length)
+		if (start < 0 || (start += curIndex) > length)
 		{
 			throw CommonExceptions.ArgumentIndexOutOfRange(start);
 		}
-		int idx = source.IndexOf(ch, start);
+		int idx = source.IndexOf(ch, start + this.start, length - start);
 		if (idx >= 0)
 		{
-			idx -= index;
+			idx -= this.start + curIndex;
 		}
 		return idx;
 	}
@@ -201,15 +200,14 @@ internal sealed class StringViewSourceReader : SourceReader
 	/// 小于零或大于剩余字符数。</exception>
 	public override int IndexOfAny(char[] anyOf, int start)
 	{
-		int index = curIndex + this.start;
-		if (start < 0 || (start += index) > length)
+		if (start < 0 || (start += curIndex) > length)
 		{
 			throw CommonExceptions.ArgumentIndexOutOfRange(start);
 		}
-		int idx = source.IndexOfAny(anyOf, start);
+		int idx = source.IndexOfAny(anyOf, start + this.start, length - start);
 		if (idx >= 0)
 		{
-			idx -= index;
+			idx -= this.start + curIndex;
 		}
 		return idx;
 	}
