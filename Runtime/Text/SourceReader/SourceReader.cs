@@ -264,6 +264,19 @@ public abstract class SourceReader : IDisposable
 	public abstract char Read(int offset);
 
 	/// <summary>
+	/// 读取到当前行的结束位置。
+	/// </summary>
+	/// <param name="containsLineSeparator">是否包含行分隔符。</param>
+	/// <returns>文本读取器到行末的文本。</returns>
+	public abstract StringView ReadLine(bool containsLineSeparator = true);
+
+	/// <summary>
+	/// 读取到文本的结束位置。
+	/// </summary>
+	/// <returns>文本读取器到结束位置的文本。</returns>
+	public abstract StringView ReadToEnd();
+
+	/// <summary>
 	/// 回退最后被读取的字符，只有之前的数据未被丢弃时才可以进行回退。
 	/// </summary>
 	/// <returns>如果回退成功，则为 <c>true</c>；否则为 <c>false</c>。</returns>

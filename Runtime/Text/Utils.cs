@@ -6,6 +6,11 @@ namespace Cyjb.Text;
 internal static class Utils
 {
 	/// <summary>
+	/// 换行的字符。
+	/// </summary>
+	public static char[] NewLineChars = { '\r', '\n' };
+
+	/// <summary>
 	/// 返回指定的字符是否是换行符。
 	/// </summary>
 	public static bool IsLineBreak(char ch)

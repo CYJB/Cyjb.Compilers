@@ -67,6 +67,10 @@ public class LexerData<T>
 	/// </summary>
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly bool useShortest;
+	/// <summary>
+	/// 字符类的映射。
+	/// </summary>
+	private readonly int[] charClassMap = new int[0x10000];
 
 	/// <summary>
 	/// 使用指定的词法分析器数据初始化 <see cref="LexerData{T}"/> 类的新实例。
@@ -95,6 +99,7 @@ public class LexerData<T>
 		this.rejectable = rejectable;
 		this.controllerType = controllerType;
 		useShortest = terminals.Any(t => t.UseShortest);
+		Array.Fill(charClassMap, -2);
 	}
 
 	/// <summary>
@@ -153,14 +158,18 @@ public class LexerData<T>
 	/// <returns>转以后的状态，使用 <c>-1</c> 表示没有找到合适的状态。</returns>
 	public int NextState(int state, char ch)
 	{
-		int charClass = charClasses.GetCharClass(ch);
+		int charClass = charClassMap[ch];
+		if (charClass == -2)
+		{
+			charClass = charClasses.GetCharClass(ch);
+			charClassMap[ch] = charClass;
+		}
 		int offset;
-		int len = trans.Length;
 		while (state >= 0)
 		{
 			offset = state * 4;
 			int idx = (states[offset] + charClass) * 2;
-			if (idx >= 0 && idx < len && trans[idx] == state)
+			if (idx >= 0 && idx < trans.Length && trans[idx] == state)
 			{
 				return trans[idx + 1];
 			}

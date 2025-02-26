@@ -118,7 +118,7 @@ internal sealed class StringViewSourceReader : SourceReader
 			throw CommonExceptions.ArgumentNegative(offset);
 		}
 		int idx = curIndex + offset;
-		if (idx < length)
+		if (idx >= 0 || idx < length)
 		{
 			return source[idx + start];
 		}
@@ -157,13 +157,58 @@ internal sealed class StringViewSourceReader : SourceReader
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="offset"/> 小于 <c>0</c>。</exception>
 	public override char Read(int offset)
 	{
+		if (offset < 0)
+		{
+			throw CommonExceptions.ArgumentNegative(offset);
+		}
 		curIndex += offset;
-		if (curIndex >= length)
+		if (curIndex < 0 || curIndex >= length)
 		{
 			curIndex = length;
 			return InvalidCharacter;
 		}
 		return source[curIndex++ + start];
+	}
+
+	/// <summary>
+	/// 读取到当前行的结束位置。
+	/// </summary>
+	/// <param name="containsLineSeparator">是否包含行分隔符。</param>
+	/// <returns>文本读取器到行末的文本。</returns>
+	public override StringView ReadLine(bool containsLineSeparator = true)
+	{
+		int curStart = curIndex + start;
+		int idx = source.IndexOfAny(Utils.NewLineChars, curStart, length - curIndex);
+		if (idx < 0)
+		{
+			// 返回剩余字符。
+			idx = length + start;
+			containsLineSeparator = false;
+		}
+		int len = idx - curStart;
+		if (containsLineSeparator)
+		{
+			len++;
+			if (source[idx] == '\r' && idx + 1 - start < length && source[idx + 1] == '\n')
+			{
+				len++;
+			}
+		}
+		StringView result = source.AsView(curStart, len);
+		curIndex += len;
+		return result;
+	}
+
+	/// <summary>
+	/// 读取到文本的结束位置。
+	/// </summary>
+	/// <returns>文本读取器到结束位置的文本。</returns>
+	public override StringView ReadToEnd()
+	{
+		int len = length - curIndex;
+		StringView result = source.AsView(curIndex + start, len);
+		curIndex = length;
+		return result;
 	}
 
 	/// <summary>

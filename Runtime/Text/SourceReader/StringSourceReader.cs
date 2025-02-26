@@ -105,8 +105,12 @@ internal sealed class StringSourceReader : SourceReader
 	/// 或为 <see cref="SourceReader.InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
 	public override char Peek(int offset)
 	{
+		if (offset < 0)
+		{
+			throw CommonExceptions.ArgumentNegative(offset);
+		}
 		int idx = curIndex + offset;
-		if (idx < length)
+		if (idx >= 0 && idx < length)
 		{
 			return source[idx];
 		}
@@ -143,13 +147,56 @@ internal sealed class StringSourceReader : SourceReader
 	/// 或为 <see cref="SourceReader.InvalidCharacter"/>（如果没有更多的可用字符）。</returns>
 	public override char Read(int offset)
 	{
+		if (offset < 0)
+		{
+			throw CommonExceptions.ArgumentNegative(offset);
+		}
 		curIndex += offset;
-		if (curIndex >= length)
+		if (curIndex < 0 || curIndex >= length)
 		{
 			curIndex = length;
 			return InvalidCharacter;
 		}
 		return source[curIndex++];
+	}
+
+	/// <summary>
+	/// 读取到当前行的结束位置。
+	/// </summary>
+	/// <param name="containsLineSeparator">是否包含行分隔符。</param>
+	/// <returns>文本读取器到行末的文本。</returns>
+	public override StringView ReadLine(bool containsLineSeparator = true)
+	{
+		int idx = source.IndexOfAny(Utils.NewLineChars, curIndex);
+		if (idx < 0)
+		{
+			// 返回剩余字符。
+			idx = length;
+			containsLineSeparator = false;
+		}
+		int len = idx - curIndex;
+		if (containsLineSeparator)
+		{
+			len++;
+			if (source[idx] == '\r' && idx + 1 < length && source[idx + 1] == '\n')
+			{
+				len++;
+			}
+		}
+		StringView result = source.AsView(curIndex, len);
+		curIndex += len;
+		return result;
+	}
+
+	/// <summary>
+	/// 读取到文本的结束位置。
+	/// </summary>
+	/// <returns>文本读取器到结束位置的文本。</returns>
+	public override StringView ReadToEnd()
+	{
+		StringView result = source.AsView(curIndex);
+		curIndex = length;
+		return result;
 	}
 
 	/// <summary>

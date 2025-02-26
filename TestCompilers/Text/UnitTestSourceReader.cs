@@ -293,6 +293,100 @@ public class UnitTestSourceReader
 	}
 
 	/// <summary>
+	/// 对 <see cref="SourceReader.ReadLine"/> 进行测试。
+	/// </summary>
+	[DataTestMethod]
+	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
+	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
+	public void TestReadLine(string type)
+	{
+		// 0123\r4567\r\n890\nabcd....4|...|123\r\n45
+		StringBuilder builder = new(BufferLength * 2 + 7);
+		builder.Append("0123\r4567\r\n890\nabcd");
+		string midText = new StringBuilder()
+			.Append('4', BufferLength - builder.Length - 1)
+			.Append('x', BufferLength)
+			.ToString();
+		builder.Append(midText);
+		builder.Append("123\r\n45");
+		string text = builder.ToString();
+
+		SourceReader reader = CreateSourceReader(type, text);
+		Assert.AreEqual("0123\r", reader.ReadLine());
+		Assert.AreEqual(5, reader.Index);
+		Assert.AreEqual("4567", reader.ReadLine(false));
+		Assert.AreEqual(9, reader.Index);
+		Assert.AreEqual("\r\n", reader.ReadLine());
+		Assert.AreEqual(11, reader.Index);
+		Assert.AreEqual("890\n", reader.ReadLine());
+		Assert.AreEqual(15, reader.Index);
+		Assert.AreEqual("abcd" + midText + "123\r\n", reader.ReadLine());
+		Assert.AreEqual(BufferLength * 2 + 4, reader.Index);
+		Assert.AreEqual("45", reader.ReadLine());
+		Assert.AreEqual(text.Length, reader.Index);
+	}
+
+	/// <summary>
+	/// 对 <see cref="SourceReader.ReadLine"/> 进行测试（/r 结束）。
+	/// </summary>
+	[DataTestMethod]
+	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
+	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
+	public void TestReadLine2(string type)
+	{
+		// ....|0123\r
+		string text = new StringBuilder(BufferLength + 5)
+			.Append('x', BufferLength)
+			.Append("0123\r").ToString();
+
+		SourceReader reader = CreateSourceReader(type, text);
+		Assert.AreEqual('x', reader.Read());
+		Assert.AreEqual(1, reader.Index);
+		Assert.AreEqual(text.Substring(1), reader.ReadLine());
+		Assert.AreEqual(BufferLength + 5, reader.Index);
+	}
+
+	/// <summary>
+	/// 对 <see cref="SourceReader.ReadToEnd"/> 进行测试。
+	/// </summary>
+	[DataTestMethod]
+	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
+	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
+	public void TestReadToEnd(string type)
+	{
+		string text = "0123";
+		SourceReader reader = CreateSourceReader(type, text);
+		Assert.AreEqual('0', reader.Read());
+		Assert.AreEqual("123", reader.ReadToEnd());
+	}
+
+	/// <summary>
+	/// 对 <see cref="SourceReader.ReadLine"/> 进行测试（跨缓存）。
+	/// </summary>
+	[DataTestMethod]
+	[DataRow("StringReader")]
+	[DataRow("StringViewReader")]
+	[DataRow("TextReader")]
+	[DataRow("ShortTextReader")]
+	public void TestReadToEnd2(string type)
+	{
+		// ....|0123
+		string text = new StringBuilder(BufferLength + 4)
+			.Append('x', BufferLength)
+			.Append("0123")
+			.ToString();
+		SourceReader reader = CreateSourceReader(type, text);
+		Assert.AreEqual('x', reader.Read());
+		Assert.AreEqual(text.Substring(1), reader.ReadToEnd());
+	}
+
+	/// <summary>
 	/// 对 <see cref="SourceReader.IsLineStart"/> 进行测试。
 	/// </summary>
 	[DataTestMethod]
