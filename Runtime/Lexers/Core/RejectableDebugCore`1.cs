@@ -63,12 +63,14 @@ internal sealed class RejectableDebugCore<T> : LexerCore<T>
 							SetCandidatesEmpty();
 							if (DoAction(start, originIndex, terminal))
 							{
+								PrintReadedText();
 								Console.WriteLine("  Match shortest {0}..{1} [{2}] {3}",
 									startIndex, originIndex, states[i], terminal.Kind);
 								return true;
 							}
 							else
 							{
+								PrintReadedText();
 								Console.WriteLine("  Match shortest failed {0}..{1} [{2}] {3}",
 									startIndex, originIndex, states[i], terminal.Kind);
 							}

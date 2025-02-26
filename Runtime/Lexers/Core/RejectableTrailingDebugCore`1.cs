@@ -70,12 +70,14 @@ internal sealed class RejectableTrailingDebugCore<T> : LexerCore<T>
 							int endIndex = GetTrailingIndex(acceptState, startIndex, originIndex);
 							if (DoAction(start, endIndex, terminal))
 							{
+								PrintReadedText();
 								Console.WriteLine("  Match shortest {0}..{1} [{2}] {3}",
 									startIndex, endIndex, acceptState, terminal.Kind);
 								return true;
 							}
 							else
 							{
+								PrintReadedText();
 								Console.WriteLine("  Match shortest failed {0}..{1} [{2}] {3}",
 									startIndex, originIndex, states[i], terminal.Kind);
 							}

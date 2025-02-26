@@ -57,7 +57,7 @@ public abstract class LexRegex : IEquatable<LexRegex>
 	#region 静态方法
 
 	/// <summary>
-	/// 表示文件结束的正则表达式，只能用于先前看表达式中。
+	/// 表示文件结束的正则表达式，只能用于向前看表达式中。
 	/// </summary>
 	public static readonly EndOfFileExp EOF = new ();
 

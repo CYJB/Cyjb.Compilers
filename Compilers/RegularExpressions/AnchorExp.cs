@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Text;
-using Cyjb.Text;
 
 namespace Cyjb.Compilers.RegularExpressions;
 
