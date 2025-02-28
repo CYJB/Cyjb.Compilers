@@ -118,7 +118,7 @@ internal sealed class StringViewSourceReader : SourceReader
 			throw CommonExceptions.ArgumentNegative(offset);
 		}
 		int idx = curIndex + offset;
-		if (idx >= 0 || idx < length)
+		if (idx >= 0 && idx < length)
 		{
 			return source[idx + start];
 		}

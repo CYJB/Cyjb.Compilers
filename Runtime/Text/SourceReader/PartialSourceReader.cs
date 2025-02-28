@@ -398,7 +398,7 @@ internal sealed class PartialSourceReader : SourceReader
 	/// 释放指定索引之前的字符，释放后的字符无法再被读取。
 	/// </summary>
 	/// <param name="index">要释放的字符起始索引。</param>
-	protected override void Free(int index)
+	protected override void FreeInternal(int index)
 	{
 		freeIndex = index;
 		while (index >= first.StartIndex + bufferSize)

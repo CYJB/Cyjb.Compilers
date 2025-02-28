@@ -121,19 +121,15 @@ public abstract class SourceReader : IDisposable
 	/// <summary>
 	/// 读取的起始位置。
 	/// </summary>
-	protected int startIndex = 0;
+	private int startIndex = 0;
+	/// <summary>
+	/// 字符被释放的起始位置。
+	/// </summary>
+	private int freedIndex = 0;
 	/// <summary>
 	/// 行列定位器。
 	/// </summary>
 	protected LineLocator? sourceLocator;
-	/// <summary>
-	/// 标记列表。
-	/// </summary>
-	private List<SourceMark>? marks;
-	/// <summary>
-	/// 标记的起始索引。
-	/// </summary>
-	private int markIndex = int.MaxValue;
 
 	/// <summary>
 	/// 初始化 <see cref="SourceReader"/> 类的新实例。
@@ -157,6 +153,24 @@ public abstract class SourceReader : IDisposable
 			if (curIndex != value)
 			{
 				SetIndex(value);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 获取或设置读取的起始字符索引。
+	/// </summary>
+	/// <value>读取的起始字符索引，该索引从零开始。设置索引时，不能达到被释放的字符，或者超出文件结尾。</value>
+	/// <remarks>在调用 <see cref="Unget()"/>、<see cref="Accept"/> 等方法时，均不能超过
+	/// <see cref="StartIndex"/> 表示的索引。</remarks>
+	public int StartIndex
+	{
+		get => startIndex;
+		set
+		{
+			if (value >= freedIndex && value <= curIndex)
+			{
+				startIndex = value;
 			}
 		}
 	}
@@ -216,8 +230,6 @@ public abstract class SourceReader : IDisposable
 	{
 		Dispose();
 	}
-
-	#region 读取字符
 
 	/// <summary>
 	/// 返回下一个可用的字符，但不使用它。
@@ -363,36 +375,57 @@ public abstract class SourceReader : IDisposable
 	public abstract int IndexOfAny(char[] anyOf, int start);
 
 	/// <summary>
-	/// 返回当前位置之前的数据。
+	/// 返回从 <see cref="StartIndex"/> 到 <see cref="Index"/> 的数据。
 	/// </summary>
-	/// <returns>当前位置之前的数据。</returns>
+	/// <returns>从 <see cref="StartIndex"/> 到 <see cref="Index"/> 的数据。</returns>
 	public StringView GetReadedText()
 	{
 		return ReadBlockInternal(startIndex, curIndex - startIndex);
 	}
 
 	/// <summary>
-	/// 将当前位置之前的数据全部丢弃，之后的 <see cref="Unget()"/> 操作至多回退到当前位置。
+	/// 读取指定范围的文本。
 	/// </summary>
-	public void Drop()
+	/// <param name="index">起始索引。</param>
+	/// <param name="count">要读取的长度。</param>
+	/// <returns>指定范围的文本。</returns>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> 所在的位置已被丢弃。
+	/// </exception>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> + <paramref name="count"/>
+	/// 超出当前已读取的字符范围。</exception>
+	public StringView GetText(int index, int count)
 	{
-		startIndex = curIndex;
-		Free(Math.Min(startIndex, markIndex));
+		// 检查 index 和 count 是否在当前范围内。
+		if (index < freedIndex)
+		{
+			throw CommonExceptions.ArgumentOutOfRange(index);
+		}
+		if (index + count > curIndex)
+		{
+			throw CommonExceptions.ArgumentOutOfRange(count);
+		}
+		if (count == 0)
+		{
+			return StringView.Empty;
+		}
+		return ReadBlockInternal(index, count);
 	}
 
 	/// <summary>
-	/// 将当前位置之前的数据全部丢弃，并返回被丢弃的数据。之后的 <see cref="Unget()"/> 操作至多回退到当前位置。
+	/// 返回 <see cref="StartIndex"/> 到 <see cref="Index"/> 之间的数据，并将 <see cref="StartIndex"/>
+	/// 设置为当前位置。之后的 <see cref="Unget()"/> 操作至多回退到当前位置。
 	/// </summary>
 	/// <returns>当前位置之前的数据。</returns>
 	public StringView Accept()
 	{
 		StringView text = ReadBlockInternal(startIndex, curIndex - startIndex);
-		Drop();
+		startIndex = curIndex;
 		return text;
 	}
 
 	/// <summary>
-	/// 将当前位置之前的数据全部丢弃，并以 <see cref="Token{T}"/> 的形式返回被丢弃的数据。
+	/// 以 <see cref="Token{T}"/> 的形式返回 <see cref="StartIndex"/> 到 <see cref="Index"/>
+	/// 之间的数据，并将 <see cref="StartIndex"/> 设置为当前位置。
 	/// 之后的 <see cref="Unget()"/> 操作至多回退到当前位置。
 	/// </summary>
 	/// <typeparam name="T">词法单元标识符的类型，一般是一个枚举类型。</typeparam>
@@ -415,165 +448,41 @@ public abstract class SourceReader : IDisposable
 		return new Token<T>(kind, Accept(), tokenSpan, value);
 	}
 
-	#endregion // 读取字符
-
-	#region 标记
-
 	/// <summary>
-	/// 标记源文件的当前位置。
+	/// 将当前位置之前的数据全部丢弃，会释放相关内存，之后的 <see cref="StartIndex"/> 操作至多回退到当前位置。
 	/// </summary>
-	/// <returns>位置的标记。</returns>
-	/// <remarks>被标记的位置及其之后的字符可以确保能够通过 <c>ReadBlock</c> 方法读取。</remarks>
-	public SourceMark Mark()
+	public void Drop()
 	{
-		SourceMark mark = new(curIndex);
-		marks ??= new List<SourceMark>();
-		int index = marks.BinarySearch(mark);
-		if (index < 0)
-		{
-			index = ~index;
-		}
-		marks.Insert(index, mark);
-		if (markIndex > mark.Index)
-		{
-			markIndex = mark.Index;
-		}
-		return mark;
+		startIndex = curIndex;
 	}
 
 	/// <summary>
-	/// 释放指定的源文件位置标记。
+	/// 释放当前位置之前的数据，之后的 <see cref="StartIndex"/> 操作至多设置到当前位置。
 	/// </summary>
-	/// <param name="mark">要释放的位置标记。</param>
-	public void Release(SourceMark? mark)
+	public void Free()
 	{
-		int index = FindMark(mark);
-		if (index < 0)
+		freedIndex = curIndex;
+		startIndex = curIndex;
+		Free(freedIndex);
+	}
+
+	/// <summary>
+	/// 释放指定位置之前的数据，之后的 <see cref="StartIndex"/> 操作至多设置到 <paramref name="index"/>。
+	/// </summary>
+	/// <param name="index">要释放数据的索引。</param>
+	public void Free(int index)
+	{
+		if (index <= freedIndex)
 		{
 			return;
 		}
-		mark!.Valid = false;
-		marks!.RemoveAt(index);
-		if (index == 0)
+		freedIndex = index;
+		if (startIndex < index)
 		{
-			// 丢弃不再需要的字符。
-			if (marks.Count == 0)
-			{
-				markIndex = int.MaxValue;
-				Free(startIndex);
-			}
-			else if (marks[0].Index < startIndex)
-			{
-				Free(marks[0].Index);
-			}
+			startIndex = index;
 		}
+		Free(freedIndex);
 	}
-
-	/// <summary>
-	/// 找到指定源文件位置标记的索引。
-	/// </summary>
-	/// <param name="mark">要查找的源文件位置标记。</param>
-	/// <returns>指定源文件位置标记的索引，如果未找到则返回 <c>-1</c>。</returns>
-	private int FindMark(SourceMark? mark)
-	{
-		if (marks == null || mark == null || !mark.Valid)
-		{
-			return -1;
-		}
-		int index = marks.BinarySearch(mark);
-		if (index < 0)
-		{
-			return -1;
-		}
-		// index 可能是任何一个匹配项，因此需要在双向查找一下。
-		for (int i = index; i >= 0 && marks[i].Index == mark.Index; i--)
-		{
-			if (marks[i] == mark)
-			{
-				return i;
-			}
-		}
-		for (int i = index + 1; i < marks.Count && marks[i].Index == mark.Index; i++)
-		{
-			if (marks[i] == mark)
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	/// <summary>
-	/// 读取指定范围的文本。
-	/// </summary>
-	/// <param name="index">起始索引。</param>
-	/// <param name="count">要读取的长度。</param>
-	/// <returns>指定范围的文本。</returns>
-	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> 不在已保留的字符缓冲范围内。
-	/// </exception>
-	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> + <paramref name="count"/>
-	/// 超出当前已读取的字符范围。</exception>
-	public StringView ReadBlock(int index, int count)
-	{
-		int minIndex;
-		if (marks == null || marks.Count == 0)
-		{
-			minIndex = 0;
-		}
-		else
-		{
-			minIndex = marks[0].Index;
-		}
-		// 检查 index 和 count 是否在当前范围内。
-		if (index < minIndex)
-		{
-			throw CommonExceptions.ArgumentOutOfRange(index);
-		}
-		if (index + count > curIndex)
-		{
-			throw CommonExceptions.ArgumentOutOfRange(count);
-		}
-		if (count == 0)
-		{
-			return StringView.Empty;
-		}
-		return ReadBlockInternal(index, count);
-	}
-
-	/// <summary>
-	/// 读取指定标记间的文本。
-	/// </summary>
-	/// <param name="start">起始标记（包含）。</param>
-	/// <param name="end">结束标记（不包含）。</param>
-	/// <returns>指定标记间的文本。</returns>
-	/// <exception cref="ArgumentException">传入的标记已被释放。</exception>
-	/// <exception cref="ArgumentOutOfRangeException">起始和结束标记的顺序不正确。</exception>
-	public StringView ReadBlock(SourceMark start, SourceMark end)
-	{
-		if (!start.Valid)
-		{
-			throw new ArgumentException(Resources.InvalidSourceMark, nameof(start));
-		}
-		if (!end.Valid)
-		{
-			throw new ArgumentException(Resources.InvalidSourceMark, nameof(end));
-		}
-		int count = end.Index - start.Index;
-		if (count < 0)
-		{
-			throw CommonExceptions.ArgumentMinMaxValue(nameof(start), nameof(end));
-		}
-		else if (count == 0)
-		{
-			return StringView.Empty;
-		}
-		else
-		{
-			return ReadBlockInternal(start.Index, count);
-		}
-	}
-
-	#endregion // 标记
 
 	#region IDisposable 成员
 
@@ -632,6 +541,6 @@ public abstract class SourceReader : IDisposable
 	/// 释放指定索引之前的字符，释放后的字符无法再被读取。
 	/// </summary>
 	/// <param name="index">要释放的字符起始索引。</param>
-	protected virtual void Free(int index) { }
+	protected virtual void FreeInternal(int index) { }
 
 }

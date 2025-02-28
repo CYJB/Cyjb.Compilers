@@ -12,7 +12,7 @@
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <NeutralLanguage>en</NeutralLanguage>
     <Version>$(VersionPrefix)</Version>
-    <VersionPrefix>1.0.22</VersionPrefix>
+    <VersionPrefix>1.0.23</VersionPrefix>
     <RootNamespace>Cyjb.Compilers</RootNamespace>
     <OutputType>Library</OutputType>
     <DevelopmentDependency>true</DevelopmentDependency>

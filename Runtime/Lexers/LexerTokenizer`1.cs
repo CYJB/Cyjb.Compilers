@@ -86,6 +86,12 @@ public sealed class LexerTokenizer<T> : ITokenizer<T>
 	/// </summary>
 	public ParseStatus Status => status;
 	/// <summary>
+	/// 是否在读入词法单元后自动释放已读取的字符。
+	/// </summary>
+	/// <value>如果为 <c>true</c>，那么在读取词法单元后会自动释放已读取的字符以节约内存占用；
+	/// 如果为 <c>false</c>，那么只会设置 <c>StartIndex</c>。默认为 <c>false</c></value>
+	public bool AutoFree { get; set; } = false;
+	/// <summary>
 	/// 获取或设置共享的上下文对象。
 	/// </summary>
 	/// <remarks>可以与外部（例如语法分析器）共享信息。</remarks>
@@ -143,7 +149,14 @@ public sealed class LexerTokenizer<T> : ITokenizer<T>
 				// 再丢弃不需要的数据。
 				if (!controller.IsMore && !controller.IsReject)
 				{
-					source.Drop();
+					if (AutoFree)
+					{
+						source.Free();
+					}
+					else
+					{
+						source.Drop();
+					}
 				}
 				if (token != null)
 				{
@@ -159,6 +172,10 @@ public sealed class LexerTokenizer<T> : ITokenizer<T>
 					// 如果没有匹配任何字符，强制读入一个字符，可以防止死循环出现。
 					source.Read();
 					text = source.Accept();
+				}
+				if (AutoFree)
+				{
+					source.Free();
 				}
 				controller.Start = start;
 				if (TokenizeError != null)

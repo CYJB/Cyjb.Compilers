@@ -1,4 +1,3 @@
-using System;
 using Cyjb.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
