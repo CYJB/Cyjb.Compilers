@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "CompilerGenerator": {
-      "commandName": "Project",
-      "commandLineArgs": "D:\\Workspace_DotNet\\Cyjb.Compilers\\TestCompilers\\Lexers\\TestCalcLexer.cs"
-    }
-  }
-}

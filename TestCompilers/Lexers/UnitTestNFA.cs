@@ -45,8 +45,8 @@ public class UnitTestNFA
 
 		// 检查字符类。
 		CharClassMap map = dfa.GetCharClassMap();
-		int[] charClasses = new int[128];
-		charClasses.Fill(-1, 0, 128);
+		short[] charClasses = new short[128];
+		charClasses.Fill((short)-1, 0, 128);
 		charClasses['a'] = 0;
 		charClasses['b'] = 1;
 		CollectionAssert.AreEqual(charClasses, map.CharClasses);

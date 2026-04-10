@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Cyjb;
@@ -19,8 +20,8 @@ public class UnitTestCharClassMap
 	public void TestGetCharClass()
 	{
 		uint[] indexes = new uint[] { 0x268027A, 0x280028A, 0x3AA03AD };
-		int[] charClasses = new int[128 + 3 + 0xB];
-		charClasses.Fill(-1, 0, 128);
+		short[] charClasses = new short[128 + 3 + 0xB];
+		charClasses.Fill((short)-1, 0, 128);
 		charClasses['A'] = 0;
 		charClasses['B'] = 1;
 		charClasses['C'] = 2;
@@ -38,7 +39,7 @@ public class UnitTestCharClassMap
 		charClasses[139] = 5;
 		charClasses[140] = 4;
 		charClasses[141] = 7;
-		Dictionary<UnicodeCategory, int> categories = new()
+		Dictionary<UnicodeCategory, short> categories = new()
 		{
 			{ UnicodeCategory.UppercaseLetter, 8 },
 			{ UnicodeCategory.LowercaseLetter, 9 },
@@ -88,5 +89,12 @@ public class UnitTestCharClassMap
 		Assert.AreEqual(-1, map.GetCharClass('\u03AD'));
 		Assert.AreEqual(9, map.GetCharClass('\u03AE'));
 		Assert.AreEqual(-1, map.GetCharClass('\uFFFF'));
+
+		short[] charClassMap = new short[0x10000];
+		map.FillCharClass(charClassMap);
+		for (int i = 0;i < charClassMap.Length;i++)
+		{
+			Assert.AreEqual(map.GetCharClass((char)i), charClassMap[i]);
+		}
 	}
 }

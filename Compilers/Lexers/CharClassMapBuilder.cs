@@ -103,11 +103,11 @@ internal class CharClassMapBuilder
 	/// <summary>
 	/// 字符类。
 	/// </summary>
-	private readonly List<int> charClasses;
+	private readonly List<short> charClasses;
 	/// <summary>
 	/// Unicode 类别对应的字符类。
 	/// </summary>
-	private readonly Dictionary<UnicodeCategory, int> categories = new();
+	private readonly Dictionary<UnicodeCategory, short> categories = new();
 
 	/// <summary>
 	/// 初始化 <see cref="CharClassMapBuilder"/> 类的新实例。
@@ -115,8 +115,8 @@ internal class CharClassMapBuilder
 	public CharClassMapBuilder()
 	{
 		// 前 128 个位置表示 ASCII。
-		charClasses = new List<int>(AsciiLength);
-		charClasses.AddRange(Enumerable.Repeat(-1, AsciiLength));
+		charClasses = new List<short>(AsciiLength);
+		charClasses.AddRange(Enumerable.Repeat((short)-1, AsciiLength));
 	}
 
 	/// <summary>
@@ -129,7 +129,7 @@ internal class CharClassMapBuilder
 		List<CharClassItem> items = FilterNonAsciiItems(charClasses);
 		CheckUnicodeCategory(items);
 		List<CharClassRange> ranges = BuildRanges(items);
-		this.charClasses.AddRange(Enumerable.Repeat(0, ranges.Count));
+		this.charClasses.AddRange(Enumerable.Repeat((short)0, ranges.Count));
 		List<uint> resultRange = new();
 		for (int i = 0; i < ranges.Count; i++)
 		{
@@ -141,11 +141,11 @@ internal class CharClassMapBuilder
 			}
 			else
 			{
-				this.charClasses[AsciiLength + 1] = -this.charClasses.Count;
+				this.charClasses[AsciiLength + 1] = (short)-this.charClasses.Count;
 				this.charClasses.AddRange(range.CharClassList);
 			}
 		}
-		Dictionary<UnicodeCategory, int>? categories = this.categories.Count == 0 ? null : this.categories;
+		Dictionary<UnicodeCategory, short>? categories = this.categories.Count == 0 ? null : this.categories;
 		return new CharClassMap(resultRange.ToArray(), this.charClasses.ToArray(), categories);
 	}
 
@@ -156,9 +156,9 @@ internal class CharClassMapBuilder
 	/// <returns>过滤后的字符类列表。</returns>
 	private List<CharClassItem> FilterNonAsciiItems(IList<CharClass> charClasses)
 	{
-		int cnt = charClasses.Count;
+		short cnt = (short)charClasses.Count;
 		List<CharClassItem> items = new(cnt);
-		for (int i = 0; i < cnt; i++)
+		for (short i = 0; i < cnt; i++)
 		{
 			CharSet set = new(charClasses[i].Chars);
 			foreach (char ch in set)
@@ -252,7 +252,7 @@ internal class CharClassMapBuilder
 					continue;
 				}
 				// 简化字符类。
-				int charClassIndex = items[index].Index;
+				short charClassIndex = items[index].Index;
 				foreach (UnicodeCategory category in info.Categories)
 				{
 					categories[category] = charClassIndex;
@@ -297,7 +297,7 @@ internal class CharClassMapBuilder
 		for (int i = 0; i < cnt; i++)
 		{
 			CharSet set = items[i].Chars;
-			int index = items[i].Index;
+			short index = items[i].Index;
 			foreach (var (start, end) in set.Ranges())
 			{
 				ranges.Add(new CharClassRange(start, end, index));
@@ -344,7 +344,7 @@ internal class CharClassMapBuilder
 		/// <summary>
 		/// 字符类的索引。
 		/// </summary>
-		public int Index;
+		public short Index;
 		/// <summary>
 		/// 字符类包含的字符集合。
 		/// </summary>
@@ -355,7 +355,7 @@ internal class CharClassMapBuilder
 		/// </summary>
 		/// <param name="index">字符类的索引。</param>
 		/// <param name="chars">字符类包含的字符集合。</param>
-		public CharClassItem(int index, CharSet chars)
+		public CharClassItem(short index, CharSet chars)
 		{
 			Index = index;
 			Chars = chars;
@@ -378,11 +378,11 @@ internal class CharClassMapBuilder
 		/// <summary>
 		/// 字符类索引。
 		/// </summary>
-		public int CharClass;
+		public short CharClass;
 		/// <summary>
 		/// 字符类列表。
 		/// </summary>
-		public List<int>? CharClassList;
+		public List<short>? CharClassList;
 		/// <summary>
 		/// 范围的长度。
 		/// </summary>
@@ -394,7 +394,7 @@ internal class CharClassMapBuilder
 		/// <param name="start">起始字符（包含）。</param>
 		/// <param name="end">结束字符（包含）。</param>
 		/// <param name="charClass">字符类索引。</param>
-		public CharClassRange(char start, char end, int charClass)
+		public CharClassRange(char start, char end, short charClass)
 		{
 			Start = start;
 			End = end;

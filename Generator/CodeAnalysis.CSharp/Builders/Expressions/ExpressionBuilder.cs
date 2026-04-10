@@ -324,6 +324,31 @@ internal abstract class ExpressionBuilder
 internal static class ExpressionBuilderUtil
 {
 	/// <summary>
+	/// 返回指定 <see cref="short[]"/> 的字面量数组表达式。
+	/// </summary>
+	/// <param name="value">字面量的值。</param>
+	/// <param name="wrap">换行情况。</param>
+	/// <returns>指定 <see cref="short[]"/> 的字面量数组表达式。</returns>
+	public static ExpressionBuilder AsLiteral(this IEnumerable<short> value, int wrap = 0)
+	{
+		var builder = ExpressionBuilder.CreateArray(typeof(short)).InitializerWrap(wrap);
+		bool isEmpty = true;
+		foreach (int item in value)
+		{
+			builder.Initializer(item);
+			isEmpty = false;
+		}
+		if (isEmpty)
+		{
+			return "Array".AsName().Qualifier("System").AccessMember("Empty<short>").Invoke();
+		}
+		else
+		{
+			return builder;
+		}
+	}
+
+	/// <summary>
 	/// 返回指定 <see cref="int[]"/> 的字面量数组表达式。
 	/// </summary>
 	/// <param name="value">字面量的值。</param>

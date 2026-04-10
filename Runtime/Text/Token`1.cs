@@ -36,6 +36,17 @@ public partial class Token<T> : IEquatable<Token<T>>
 	}
 
 	/// <summary>
+	/// 创建空的词法单元。
+	/// </summary>
+	public Token()
+	{
+		Kind = EndOfFile;
+		Text = StringView.Empty;
+		Span = TextSpan.Empty;
+		Value = null;
+	}
+
+	/// <summary>
 	/// 使用词法单元的相关信息初始化 <see cref="Token{T}"/> 类的新实例。
 	/// </summary>
 	/// <param name="kind">词法单元的类型。</param>

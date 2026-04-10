@@ -24,7 +24,7 @@ internal sealed partial class LexerController
 				.Add(SyntaxBuilder.Type<UnicodeCategory>().AccessMember(pair.Key.ToString()))
 				.Add(pair.Value));
 		}
-		return SyntaxBuilder.DeclareLocal<Dictionary<UnicodeCategory, int>>("categories")
+		return SyntaxBuilder.DeclareLocal<Dictionary<UnicodeCategory, short>>("categories")
 			.Comment("字符类 Unicode 类别")
 			.Value(categories);
 	}

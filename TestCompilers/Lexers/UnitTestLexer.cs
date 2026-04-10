@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -24,6 +25,8 @@ public partial class UnitTestLexer
 		lexer.DefineSymbol(@"^_{3,}$").Kind(TestKind.A);
 		lexer.DefineSymbol(@".", RegexOptions.Singleline).Kind(TestKind.B);
 		var factory = lexer.GetFactory();
+		Console.WriteLine(lexer.GetStateDescription());
+		Console.WriteLine(lexer.GetCharClassDescription());
 
 		var tokenizer = factory.CreateTokenizer();
 		tokenizer.Load("____");

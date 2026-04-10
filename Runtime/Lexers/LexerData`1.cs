@@ -70,7 +70,10 @@ public class LexerData<T>
 	/// <summary>
 	/// 字符类的映射。
 	/// </summary>
-	private readonly int[] charClassMap = new int[0x10000];
+	/// <remarks>
+	/// 用于将每个 char 映射到字符类，<c>-1</c> 表示无对应字符类。
+	/// </remarks>
+	private readonly short[] charClassMap = new short[0x10000];
 
 	/// <summary>
 	/// 使用指定的词法分析器数据初始化 <see cref="LexerData{T}"/> 类的新实例。
@@ -99,7 +102,8 @@ public class LexerData<T>
 		this.rejectable = rejectable;
 		this.controllerType = controllerType;
 		useShortest = terminals.Any(t => t.UseShortest);
-		Array.Fill(charClassMap, -2);
+		// 预填充字符类映射。
+		charClasses.FillCharClass(charClassMap);
 	}
 
 	/// <summary>
@@ -159,11 +163,6 @@ public class LexerData<T>
 	public int NextState(int state, char ch)
 	{
 		int charClass = charClassMap[ch];
-		if (charClass == -2)
-		{
-			charClass = charClasses.GetCharClass(ch);
-			charClassMap[ch] = charClass;
-		}
 		int offset;
 		while (state >= 0)
 		{

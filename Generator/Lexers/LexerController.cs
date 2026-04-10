@@ -164,7 +164,7 @@ internal sealed partial class LexerController : Controller
 				.Comment(lexer.GetCharClassDescription())
 				.Comment("字符类索引")
 				.Value(data.CharClasses.Indexes.AsLiteral(8));
-		var classes = SyntaxBuilder.DeclareLocal<int[]>("classes")
+		var classes = SyntaxBuilder.DeclareLocal<short[]>("classes")
 			.Comment("字符类列表")
 			.Value(data.CharClasses.CharClasses.AsLiteral(24));
 		var categories = DeclareCharClassCategories(data);

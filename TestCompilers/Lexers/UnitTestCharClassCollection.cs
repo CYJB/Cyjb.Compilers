@@ -60,8 +60,8 @@ public class UnitTestCharClassCollection
 
 		CharClassMap map = (CharClassMap)charClassCollection.Invoke("GetCharClassMap")!;
 		uint[] indexes = new uint[] { 0x268027A, 0x280028A, 0x3AA03AD };
-		int[] charClasses = new int[128 + 3 + 0xB];
-		charClasses.Fill(-1, 0, 128);
+		short[] charClasses = new short[128 + 3 + 0xB];
+		charClasses.Fill((short)-1, 0, 128);
 		charClasses['A'] = 0;
 		charClasses['B'] = 1;
 		charClasses['C'] = 2;
