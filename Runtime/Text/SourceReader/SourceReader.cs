@@ -65,7 +65,7 @@ public abstract class SourceReader : IDisposable
 		{
 			throw CommonExceptions.ArgumentNegative(start);
 		}
-		if (start + length < 0 || start + length >= source.Length)
+		if (start + length < 0 || start + length > source.Length)
 		{
 			throw CommonExceptions.ArgumentNegative(length);
 		}

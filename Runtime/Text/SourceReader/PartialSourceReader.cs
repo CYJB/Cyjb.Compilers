@@ -407,6 +407,7 @@ internal sealed class PartialSourceReader : SourceReader
 			first = first.Next;
 			buffer.Prev = buffer;
 			buffer.Next = buffer;
+			buffer.Text = string.Empty;
 			first.Prev = first;
 		}
 	}
